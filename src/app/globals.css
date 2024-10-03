@@ -1,18 +1,68 @@
+/* 
+NOTES: 
+Do not use pixel for font size, width and media querys. 
+- Use rem.
+- It is totally fine to use pixels for things like spacing: margin, padding, gap; as well as border and border-radius.
+- https://www.youtube.com/watch?v=xCSw6bPXZks
+*/
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url('/fonts/OpenSans-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Open Sans Italic';
+  src: url('/fonts/OpenSans-Italic-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Raleway';
+  src: url('/fonts/Raleway-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Raleway Italic';
+  src: url('/fonts/Raleway-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary-color: #0070f3;
+  --secondary-color: #ff4081;
+  --border-color: #eaeaea;
+
+  --font-size-base: 1rem;
+
+  --line-height: 1.6;
+  --spacing: 1rem;
+
+  --font-open-sans: "Open Sans", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --font-raleway: "Raleway", "Montserrat", "Lato", "Ubuntu", Arial, sans-serif;
+}
+html {
+  font-size: 100%; /* Base font size */
+  scroll-behavior: smooth;
+  font-family: var(--font-open-sans);
 }
 
-html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-}
-
-body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-open-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -26,4 +76,40 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+  transition: color 0.2s ease-in-out;
 }
+
+a:hover {
+  color: var(--primary-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-raleway);
+  margin-bottom: var(--spacing);
+  font-weight: bold;
+}
+
+p {
+  margin-bottom: var(--spacing);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: var(--font-size-base);
+  border-radius: 4px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+  background-color: var(--secondary-color);
+}
+
