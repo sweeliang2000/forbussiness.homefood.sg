@@ -1,0 +1,145 @@
+.sidebar {
+    background-color: #FFFFFF;
+    height: 100vh;
+    width: 16rem;
+    padding: 6px 16px;
+    border-right: 4px solid rgb(238, 239, 241);
+    
+    /* This is to make it fix without using position fix */
+    position: sticky;
+    top: 0;
+    align-self: start;
+
+    transition: 300ms ease-in-out;
+    overflow-x: hidden;
+}
+
+.sidebar.close {
+    padding: 5px;
+    width: 60px;
+    text-wrap: nowrap;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar > ul > li:first-child {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.sidebar ul {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.logoLi {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    font-family: 600;
+}
+
+.labelLi {
+    margin-top: 16px;
+}
+
+.labelLi .label {
+    margin-left: 12px;
+    font-size: 12px;
+}
+
+.hiddenLogo {
+    display: none !important;
+    background-color: #e7f2f6;
+}
+
+.minimiseSidebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    border-radius: 4px;
+    transition: rotate 150ms ease;
+}
+
+.rotate {
+    rotate: 180deg;
+    transition: 200ms ease;
+}
+
+.reverseRotate {
+    rotate: 0deg;
+    transition: 200ms ease;
+}
+
+.minimiseSidebar:hover {
+    background-color: antiquewhite;
+}
+
+.sidebar ul li.active a {
+    color: #013445;
+    font-weight: bold;
+    background-color: #F2FBFE;
+}
+
+.sidebar ul li.active .icon {
+    color: #013445;
+}
+
+.sidebar a,
+.sidebar .dropdownBtn,
+.sidebar .logo {
+    border-radius: 12px;
+    padding: 12px;
+    text-decoration: none;
+    color: black;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dropdownBtn {
+    width: 100%;
+    text-align: left;
+    background: none;
+    font: inherit;
+    cursor: pointer;
+    border: 0;
+}
+
+.sidebar .icon {
+    flex-shrink: 0;
+    font-size: 1.5rem;
+    margin-right: 8px;
+}
+
+.sidebar a span,
+.sidebar .dropdownBtn span {
+    flex-grow: 1;
+}
+
+.sidebar a:hover, 
+.sidebar .dropdownBtn:hover {
+    background-color: #e7f2f6;
+}
+
+.sidebar .submenu {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: 300ms ease-in-out;
+}
+
+.sidebar .submenu.show{
+    grid-template-rows: 1fr;
+}
+
+.submenuContainer {
+    overflow: hidden;
+}

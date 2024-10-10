@@ -1,71 +1,170 @@
+'use client';
 import Link from 'next/link';
 import styles from './sidebar.module.css';
-import { IoHomeOutline, IoCreateOutline } from "react-icons/io5";
-import { LuLayoutDashboard } from "react-icons/lu";
-import { FaRegCalendarAlt, FaChevronDown, FaChevronLeft } from "react-icons/fa";
-import { MdOutlinePeopleAlt } from "react-icons/md";
+import { LuClipboardList } from "react-icons/lu";
+import { AiOutlineMessage } from "react-icons/ai";
+import { BsGift } from "react-icons/bs";
+import { FaAnglesLeft } from "react-icons/fa6";
+import { FaMobileAlt } from "react-icons/fa";
+import { RiUserSettingsLine } from "react-icons/ri";
+import { ImCoinDollar } from "react-icons/im";
+import { RxGear } from "react-icons/rx";
+import { HiOutlineSpeakerphone } from "react-icons/hi";
+import { MdOutlineSpaceDashboard, MdOutlineNotificationsNone } from "react-icons/md";
+import { LuStamp } from "react-icons/lu";
+import { Submenu } from './submenu/submenu';
+import { useState } from 'react';
 
 
 export default function Sidebar() {
-    return(
-        <aside>
+    const RELEASES_TAB = 'RELEASES_TAB';
+    const STAMP_TAB = 'STAMP_TAB';
+    const POINTS_TAB = 'POINTS_TAB';
+    const REDEEMABLE_TAB = 'REDEEMABLE_TAB';
+    const CUSTOMERS_TAB = 'CUSTOMERS_TAB';
+
+    const [sidebarMinimised, setSidebarMinimised] = useState(false);
+    const [currentSelection, setCurrentSelection] = useState(undefined);
+
+    const toggleSidebar = () => {
+        setSidebarMinimised(!sidebarMinimised);
+        setCurrentSelection(undefined);
+    };
+
+    const toggleMenus = (type) => {
+        setCurrentSelection(currentSelection == type ? undefined : type);
+        setSidebarMinimised(false);
+    };
+
+    return (
+        <aside className={`${styles.sidebar} ${sidebarMinimised && styles.close}`}>
             <ul>
-                <li>
-                    <span>Collbine For Business</span>
-
-                    <FaChevronLeft />
+                <li className={styles.logoLi}>
+                    <span className={`${styles.logo} ${sidebarMinimised && styles.hiddenLogo}`}>Collbine For Business</span>
+                    <div className={styles.minimiseSidebar} onClick={toggleSidebar}>
+                        <FaAnglesLeft className={sidebarMinimised ? styles.rotate : styles.reverseRotate} />
+                    </div>
                 </li>
+
                 <li className={styles.active}>
-                    <IoHomeOutline/>
                     <Link href='/'>
-                        <span>Home</span>
-                    </Link>
-                </li>
-
-                <li>
-                    <LuLayoutDashboard />
-                    <Link href='/'>
+                        <MdOutlineSpaceDashboard className={styles.icon} />
                         <span>Dashboard</span>
                     </Link>
                 </li>
 
-                <li>
-                    <button className={styles.dropdownBtn}>
-                        <IoCreateOutline />
-                        <span>Create</span>
-                        <FaChevronDown />
-                    </button>
-                    <ul className={styles.submenu}>
-                        <li><Link href='/'>Folder</Link></li>
-                        <li><Link href='/'>Document</Link></li>
-                        <li><Link href='/'>Project</Link></li>
-                    </ul>
-                </li>
+                {
+                    !sidebarMinimised && <li className={styles.labelLi}>
+                        <label className={styles.label}>General</label>
+                    </li>
+                }
 
                 <li>
-                    <FaRegCalendarAlt />
                     <Link href='/'>
-                        <span>Calendar</span>
+                        <LuClipboardList className={styles.icon} />
+                        <span>Business Details</span>
                     </Link>
                 </li>
 
                 <li>
-                    <button className={styles.dropdownBtn}>
-                        <IoCreateOutline />
-                        <span>Todo-Lists</span>
-                        <FaChevronDown />
-                    </button>
-                    <ul className={styles.submenu}>
-                        <li><Link href='/'>Work</Link></li>
-                        <li><Link href='/'>Private</Link></li>
-                        <li><Link href='/'>Coding</Link></li>
-                    </ul>
+                    <Link href='/'>
+                        <MdOutlineNotificationsNone className={styles.icon} />
+                        <span>Notifications</span>
+                    </Link>
+                </li>
+
+                <Submenu
+                    title={'Releases'}
+                    submenus={[
+                        { href: '/', title: 'Release Review' },
+                        { href: '/document', title: 'Release Status' },
+                        { href: '/document', title: 'History' }
+                    ]}
+                    isExpand={currentSelection == RELEASES_TAB}
+                    icon={FaMobileAlt}
+                    onClick={() => { toggleMenus(RELEASES_TAB) }}
+                />
+
+                {
+                    !sidebarMinimised && <li className={styles.labelLi}>
+                        <label className={styles.label}>Products Categories</label>
+                    </li>
+                }
+
+                <Submenu
+                    title={'Stamp System'}
+                    submenus={[
+                        { href: '/', title: 'Stamp Managment' },
+                        { href: '/document', title: 'Membership Tiers' },
+                        { href: '/project', title: 'Redeemable Items' }
+                    ]}
+                    isExpand={currentSelection == STAMP_TAB}
+                    icon={LuStamp}
+                    onClick={() => { toggleMenus(STAMP_TAB) }}
+                />
+
+                <Submenu
+                    title={'Points System'}
+                    submenus={[
+                        { href: '/', title: 'Points Management' },
+                        { href: '/document', title: 'Membership Tiers' },
+                    ]}
+                    isExpand={currentSelection == POINTS_TAB}
+                    icon={ImCoinDollar}
+                    onClick={() => { toggleMenus(POINTS_TAB) }}
+                />
+
+                <Submenu
+                    title={'Redeemable'}
+                    submenus={[
+                        { href: '/', title: 'My Rewards' },
+                    ]}
+                    isExpand={currentSelection == REDEEMABLE_TAB}
+                    icon={BsGift}
+                    onClick={() => { toggleMenus(REDEEMABLE_TAB) }}
+                />
+
+                {
+                    !sidebarMinimised && <li className={styles.labelLi}>
+                        <label className={styles.label}>GROWTH & MARKETING</label>
+                    </li>
+                }
+
+                <Submenu
+                    title={'Customers'}
+                    submenus={[
+                        { href: '/', title: 'Ratings and Reviews' },
+                        { href: '/document', title: 'Direct Message' }
+                    ]}
+                    isExpand={currentSelection == CUSTOMERS_TAB}
+                    icon={AiOutlineMessage}
+                    onClick={() => { toggleMenus(CUSTOMERS_TAB) }}
+                />
+
+                {
+                    !sidebarMinimised && <li className={styles.labelLi}>
+                        <label className={styles.label}>Settings</label>
+                    </li>
+                }
+
+                <li>
+                    <Link href='/'>
+                        <RiUserSettingsLine className={styles.icon} />
+                        <span>Users and permissions</span>
+                    </Link>
                 </li>
 
                 <li>
-                    <MdOutlinePeopleAlt />
                     <Link href='/'>
-                        <span>Profile</span>
+                        <HiOutlineSpeakerphone className={styles.icon} />
+                        <span>Feedbacks</span>
+                    </Link>
+                </li>
+
+                <li>
+                    <Link href='/'>
+                        <RxGear className={styles.icon} />
+                        <span>Account Settings</span>
                     </Link>
                 </li>
             </ul>

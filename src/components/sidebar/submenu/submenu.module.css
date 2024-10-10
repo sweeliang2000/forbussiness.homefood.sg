@@ -1,0 +1,58 @@
+.dropdownBtn{
+    border-radius: 12px;
+    padding: 12px;
+    text-decoration: none;
+    color: black;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+    text-align: left;
+    background: none;
+    font: inherit;
+    cursor: pointer;
+    border: 0;
+}
+
+.dropdownBtn:hover {
+    background-color: #e7f2f6;
+}
+
+.dropdownBtn span {
+    flex-grow: 1;
+}
+
+.icon {
+    color: #013445;
+    flex-shrink: 0;
+    font-size: 1.5rem;
+    margin-right: 8px;
+}
+
+.downicon {
+    font-size: 12px;
+}
+
+.submenu {
+    display: grid !important;
+    grid-template-rows: 0fr;
+    transition: 300ms ease-in-out;
+}
+
+.submenu.show{
+    grid-template-rows: 1fr;
+}
+
+.submenuContainer {
+    overflow: hidden;
+}
+
+.rotate {
+    rotate: 180deg;
+    transition: 200ms ease;
+}
+
+.link {
+    margin-left: 30px;
+}

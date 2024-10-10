@@ -12,7 +12,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={styles.body}>
         <Sidebar/>
-        <main>
+        <main className={styles.main}>
           {children}
         </main>
       </body>
