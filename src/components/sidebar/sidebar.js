@@ -6,7 +6,7 @@ import { AiOutlineMessage } from "react-icons/ai";
 import { BsGift } from "react-icons/bs";
 import { FaAnglesLeft } from "react-icons/fa6";
 import { FaMobileAlt } from "react-icons/fa";
-import { RiUserSettingsLine } from "react-icons/ri";
+import { RiUserSettingsLine, RiNewspaperLine } from "react-icons/ri";
 import { ImCoinDollar } from "react-icons/im";
 import { RxGear } from "react-icons/rx";
 import { HiOutlineSpeakerphone } from "react-icons/hi";
@@ -14,6 +14,7 @@ import { MdOutlineSpaceDashboard, MdOutlineNotificationsNone } from "react-icons
 import { LuStamp } from "react-icons/lu";
 import { Submenu } from './submenu/submenu';
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 
 export default function Sidebar() {
@@ -22,6 +23,11 @@ export default function Sidebar() {
     const POINTS_TAB = 'POINTS_TAB';
     const REDEEMABLE_TAB = 'REDEEMABLE_TAB';
     const CUSTOMERS_TAB = 'CUSTOMERS_TAB';
+
+    const pathSegments = usePathname().split('/');
+    const section = pathSegments[2]
+    const subSection = pathSegments[3];
+    console.log(section)
 
     const [sidebarMinimised, setSidebarMinimised] = useState(false);
     const [currentSelection, setCurrentSelection] = useState(undefined);
@@ -46,8 +52,8 @@ export default function Sidebar() {
                     </div>
                 </li>
 
-                <li className={styles.active}>
-                    <Link href='/'>
+                <li className={section == undefined && styles.active}>
+                    <Link href='/collbine'>
                         <MdOutlineSpaceDashboard className={styles.icon} />
                         <span>Dashboard</span>
                     </Link>
@@ -59,10 +65,17 @@ export default function Sidebar() {
                     </li>
                 }
 
-                <li>
-                    <Link href='/'>
+                <li className={section == 'official-business-details' && styles.active}>
+                    <Link href='/collbine/official-business-details'>
                         <LuClipboardList className={styles.icon} />
-                        <span>Business Details</span>
+                        <span>Official Business Details</span>
+                    </Link>
+                </li>
+
+                <li className={section == 'customer-facing-business-details' && styles.active}>
+                    <Link href='/collbine/customer-facing-business-details'>
+                        <RiNewspaperLine className={styles.icon} />
+                        <span>Customer-Facing Details</span>
                     </Link>
                 </li>
 
