@@ -19,7 +19,7 @@ export const BreadcrumsBar = () => {
                             <p>Dashboard</p>
                         </div>
                     </p>:
-                    <Link className={styles.link} href='/collbine'>
+                    <Link className={styles.link} href='/app'>
                         <div className={styles.dashboard}>
                             <MdDashboard/>
                             <p>Dashboard</p>

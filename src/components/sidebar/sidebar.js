@@ -53,7 +53,7 @@ export default function Sidebar() {
                 </li>
 
                 <li className={section == undefined && styles.active}>
-                    <Link href='/collbine'>
+                    <Link href='/app'>
                         <MdOutlineSpaceDashboard className={styles.icon} />
                         <span>Dashboard</span>
                     </Link>
@@ -66,14 +66,14 @@ export default function Sidebar() {
                 }
 
                 <li className={section == 'official-business-details' && styles.active}>
-                    <Link href='/collbine/official-business-details'>
+                    <Link href='/app/official-business-details'>
                         <LuClipboardList className={styles.icon} />
                         <span>Official Business Details</span>
                     </Link>
                 </li>
 
                 <li className={section == 'customer-facing-business-details' && styles.active}>
-                    <Link href='/collbine/customer-facing-business-details'>
+                    <Link href='/app/customer-facing-business-details'>
                         <RiNewspaperLine className={styles.icon} />
                         <span>Customer-Facing Details</span>
                     </Link>
