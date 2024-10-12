@@ -1,0 +1,26 @@
+.informationCard {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-radius: 0 !important;
+    border-bottom: 2px solid rgb(160, 166, 180);
+}
+
+.titleSection {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.description {
+    font-size: 0.75rem;
+}
+
+.loadingButton {
+    box-shadow: none;
+}

@@ -1,3 +1,4 @@
+import { BreadcrumsBar } from '@/components/breadcrumbsbar/breadcrumsbar';
 import styles from './layout.module.css'
 import Sidebar from "@/components/sidebar/sidebar";
 
@@ -12,8 +13,11 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={styles.body}>
         <Sidebar/>
-        <main className={styles.main}>
-          {children}
+        <main>
+          <BreadcrumsBar/>
+          <div className={styles.main}>
+            {children}
+          </div>
         </main>
       </body>
     </html>

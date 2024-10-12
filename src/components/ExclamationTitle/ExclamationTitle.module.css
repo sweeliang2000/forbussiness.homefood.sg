@@ -1,0 +1,9 @@
+.container {
+    display: flex;
+    gap: 4px;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 600;
+}

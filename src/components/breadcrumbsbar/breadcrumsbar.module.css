@@ -1,0 +1,33 @@
+.nav {
+    display: flex;
+    text-align: center;
+    height: 4rem;
+    background-color: #F1F3F6;
+    padding: 0 var(--side-spacing);
+}
+
+.breadcrumbs {
+    display: flex;
+    text-align: center;
+}
+
+.dashboard {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.rightArrow {
+    color: #A7B4C4;
+    font-size: 0.75rem;
+}
+
+.breadcrumbs .link {
+    color: #A7B4C4;
+}
+
+.breadcrumbs .lastPath {
+    color: #212E3F;
+    font-weight: 600;
+}

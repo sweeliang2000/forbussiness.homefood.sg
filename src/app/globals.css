@@ -51,6 +51,7 @@ Do not use pixel for font size, width and media querys.
   --max-width: 80rem;
   --line-height: 1.2;
   --spacing: 0.5rem;
+  --side-spacing: 24px;
 
   --font-open-sans: "Open Sans", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   --font-raleway: "Raleway", "Montserrat", "Lato", "Ubuntu", Arial, sans-serif;
