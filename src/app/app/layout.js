@@ -1,6 +1,7 @@
 import { BreadcrumsBar } from '@/components/breadcrumbsbar/breadcrumsbar';
 import styles from './layout.module.css'
 import Sidebar from "@/components/sidebar/sidebar";
+import { AppFooter } from '@/components/AppFooter/AppFooter';
 
 export const metadata = {
   title: "Collbine for Business | Customisable Loyalty Systems in Singapore",
@@ -13,12 +14,13 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={styles.body}>
         <Sidebar/>
-        <main>
+        <div>
           <BreadcrumsBar/>
-          <div className={styles.main}>
+          <main className={styles.main}>
             {children}
-          </div>
-        </main>
+          </main>
+          <AppFooter/>
+        </div>
       </body>
     </html>
   );
