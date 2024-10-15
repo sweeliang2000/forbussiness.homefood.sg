@@ -1,0 +1,78 @@
+.backdrop {
+    z-index: 99;
+}
+
+.addLocationSidebar {
+    position: absolute;
+    right: 0;
+    background-color: white;
+    height: 100vh;
+    width: 550px;
+    overflow-y: scroll;
+}
+
+.closeIcon {
+    position: fixed;
+    top: 8px;
+    right: 16px;
+    font-size: 32px;
+    cursor: pointer;
+    border-radius: 50%;
+    padding: 4px;
+    transition: background-color 0.5s;
+    color: rgba(96, 94, 94, 0.631);
+}
+
+.closeIcon:hover {
+    background-color: rgb(236, 237, 246);
+}
+
+.contents {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 40px var(--side-spacing) 100px var(--side-spacing);
+}
+
+.contents .contentSection {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.headerP {
+    font-weight: bold;
+}
+
+.subHeader {
+    font-weight: 600;
+}
+
+.timePickerContainer {
+    display: flex;
+    gap: 24px;
+}
+
+.timePickerContainer .timePickSubContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.subContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.buttonContainer {
+    position: fixed;
+    bottom: 0;
+    width: 550px;
+    padding: 12px 24px; 
+    background-color: white;
+}
+
+.button {
+    text-transform: capitalize;
+}

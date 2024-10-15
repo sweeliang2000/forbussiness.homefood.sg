@@ -1,0 +1,25 @@
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.tableContainer {
+    overflow-x: scroll;
+    background-color: white;
+    border-radius: 12px;
+    max-width: 75rem;
+    margin:  0 auto;
+    width: 100%;
+}
+
+.button {
+    box-shadow: none;
+    text-transform: capitalize;
+    background-color: rgb(36, 36, 39);
+}
+
+.locationHeader {
+    display: flex;
+    justify-content: space-between;
+}
