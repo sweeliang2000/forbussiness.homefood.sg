@@ -27,7 +27,6 @@ export default function Sidebar() {
     const pathSegments = usePathname().split('/');
     const section = pathSegments[2]
     const subSection = pathSegments[3];
-    console.log(section)
 
     const [sidebarMinimised, setSidebarMinimised] = useState(false);
     const [currentSelection, setCurrentSelection] = useState(undefined);
@@ -43,16 +42,16 @@ export default function Sidebar() {
     };
 
     return (
-        <aside className={`${styles.sidebar} ${sidebarMinimised && styles.close}`}>
+        <aside className={`${styles.sidebar} ${sidebarMinimised ? styles.close : ''}`}>
             <ul>
                 <li className={styles.logoLi}>
-                    <span className={`${styles.logo} ${sidebarMinimised && styles.hiddenLogo}`}>Collbine For Business</span>
+                    <span className={`${styles.logo} ${sidebarMinimised ? styles.hiddenLogo : ''}`}>Collbine For Business</span>
                     <div className={styles.minimiseSidebar} onClick={toggleSidebar}>
                         <FaAnglesLeft className={sidebarMinimised ? styles.rotate : styles.reverseRotate} />
                     </div>
                 </li>
 
-                <li className={section == undefined && styles.active}>
+                <li className={section === undefined ? styles.active : ''}>
                     <Link href='/app'>
                         <MdOutlineSpaceDashboard className={styles.icon} />
                         <span>Dashboard</span>
@@ -65,14 +64,14 @@ export default function Sidebar() {
                     </li>
                 }
 
-                <li className={section == 'official-business-details' && styles.active}>
+                <li className={section == 'official-business-details' ? styles.active : ''}>
                     <Link href='/app/official-business-details'>
                         <LuClipboardList className={styles.icon} />
                         <span>Official Business Details</span>
                     </Link>
                 </li>
 
-                <li className={section == 'customer-facing-business-details' && styles.active}>
+                <li className={section == 'customer-facing-business-details' ? styles.active : ''}>
                     <Link href='/app/customer-facing-business-details'>
                         <RiNewspaperLine className={styles.icon} />
                         <span>Customer-Facing Details</span>
