@@ -118,7 +118,7 @@ export default function Sidebar() {
                 <Submenu
                     title={'Points System'}
                     submenus={[
-                        { href: '/', title: 'Points Management' },
+                        { href: '/app/points-management', title: 'Points Management' },
                         { href: '/document', title: 'Membership Tiers' },
                     ]}
                     isExpand={currentSelection == POINTS_TAB}
