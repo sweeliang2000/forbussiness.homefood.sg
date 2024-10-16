@@ -106,7 +106,7 @@ export default function Sidebar() {
                 <Submenu
                     title={'Stamp System'}
                     submenus={[
-                        { href: '/', title: 'Stamp Managment' },
+                        { href: '/app/stamp-management', title: 'Stamp Managment' },
                         { href: '/document', title: 'Membership Tiers' },
                         { href: '/project', title: 'Redeemable Items' }
                     ]}
