@@ -147,7 +147,7 @@ const LocationSection = ({ data }) => {
                     initialState={{ pagination: { paginationModel } }}
                     disableColumnFilter
                     disableColumnMenu
-                    pageSizeOptions={10}
+                    pageSizeOptions={[10]}
                     disableSelectionOnClick
                     getRowHeight={() => 'auto'}
                     style={{ width: '100%' }} 
