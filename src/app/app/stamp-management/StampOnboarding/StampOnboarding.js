@@ -43,6 +43,7 @@ const StampOnBoarding = () => {
                             height='300'
                             alt=''
                             className={styles.image}
+                            priority
                         />
                     </div>
                 </ContentCard>
