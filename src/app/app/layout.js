@@ -11,17 +11,15 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={styles.body}>
-        <Sidebar/>
-        <div>
-          <BreadcrumsBar/>
-          <main className={styles.main}>
-            {children}
-          </main>
-          <AppFooter/>
-        </div>
-      </body>
-    </html>
+    <body className={styles.body}>
+      <Sidebar />
+      <div>
+        <BreadcrumsBar />
+        <main className={styles.main}>
+          {children}
+        </main>
+        <AppFooter />
+      </div>
+    </body>
   );
 }
