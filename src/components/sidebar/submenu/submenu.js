@@ -1,5 +1,6 @@
 import styles from './submenu.module.css';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { FaChevronDown } from "react-icons/fa6";
 
 export const Submenu = ({
@@ -9,6 +10,9 @@ export const Submenu = ({
     onClick,
     icon: Icon,
 }) => {
+
+    const pathSegments = usePathname();
+
     return (
         <li>
             <button className={styles.dropdownBtn} onClick={onClick}>
@@ -19,7 +23,7 @@ export const Submenu = ({
             <ul className={`${styles.submenu} ${isExpand && styles.show}`}>
                 <div className={styles.submenuContainer}>
                     {submenus.map((submenu, index) => (
-                        <li key={index}>
+                        <li key={index} className={pathSegments == submenu.href ? styles.active : ''}>
                             <Link 
                                 href={submenu.href} 
                                 className={styles.link}>

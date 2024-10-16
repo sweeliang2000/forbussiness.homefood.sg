@@ -56,3 +56,13 @@
 .link {
     margin-left: 30px;
 }
+
+.active a {
+    color: #013445;
+    font-weight: bold;
+    background-color: #F2FBFE;
+}
+
+.active .icon {
+    color: #013445;
+}
