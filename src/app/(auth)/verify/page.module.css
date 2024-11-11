@@ -1,0 +1,71 @@
+.content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background-color: white;
+    max-width: 480px;
+    margin: 24px;
+    padding: 36px 32px;
+    border-radius: 8px;
+}
+
+.container h1 {
+    font-weight: bold;
+    text-align: center;
+}
+
+.container p {
+    text-align: center;
+}
+
+.resentConatiner label,
+.container .subtitle {
+    color: gray;
+}
+
+.container .subtitle .emailHighlight {
+    color: black;
+}
+
+.container .textfield {
+    margin: 20px 0;
+}
+
+.resentConatiner {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+.resentConatiner .resentButton {
+    cursor: pointer;
+    color: var(--link-color);
+}
+
+.resentConatiner .resentButton:hover {
+    color: var(--link-hover-color);
+}
+
+.confirmButton {
+    padding: 8px 24px;
+    text-transform: capitalize;
+    background-color: black;
+}
+
+.arrowIcon {
+    margin-right: 8px;
+}
+
+.logoutButton {
+    text-transform: none;
+    padding-right: 26px;
+}
