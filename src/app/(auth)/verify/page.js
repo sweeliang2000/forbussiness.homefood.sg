@@ -47,8 +47,8 @@ export default function Verify() {
                 </p>
 
                 <TextField
-                    id="filled-basic"
-                    label="Filled"
+                    id="verification-code"
+                    label="6 Digits Verification Code"
                     variant="filled"
                     className={styles.textfield}
                 />
