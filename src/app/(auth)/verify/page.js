@@ -1,13 +1,38 @@
 "use client";
 import styles from './page.module.css';
 import { Button, TextField } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { IoMdArrowRoundBack } from "react-icons/io";
+import Cookies from 'js-cookie';
 
 export default function Verify() {
-    const [email, setEmailAddress] = useState('example@gmail.com');
+    const router = useRouter();
+
+    const [email, setEmailAddress] = useState('');
     const [countdown, setCountdown] = useState(60);
     const [isResendButtonDisabled, setIsResendButtonDisabled] = useState(true);
+
+    useEffect(() => {
+        const getCookiesInfo = () => {
+            const authStatusCookie = Cookies.get('authStatus');
+    
+            if (authStatusCookie) {
+                try {
+                    const authStatus = JSON.parse(authStatusCookie);
+                    const email = authStatus.data.email;
+                    setEmailAddress(email);
+                } catch (error) {
+                    // TODO: Handle Error.
+                    console.error('Error parsing authStatus cookie:', error);
+                }
+            } else {
+                router.replace('/login');
+            }
+        };
+
+        getCookiesInfo();
+    }, [router])
 
     useEffect(() => {
         if (countdown > 0) {
@@ -34,6 +59,11 @@ export default function Verify() {
 
     const sendOTPToEmail = () => {
         console.log('Sending email...');
+    };
+
+    const logoutHandler = () => {
+        Cookies.remove('authStatus');
+        router.replace('/login');
     };
 
     return (
@@ -75,6 +105,7 @@ export default function Verify() {
                     type="submit"
                     variant="text"
                     color="primary"
+                    onClick={logoutHandler}
                     className={styles.logoutButton}
                 >
                     <IoMdArrowRoundBack className={styles.arrowIcon} />
