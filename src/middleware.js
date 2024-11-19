@@ -38,7 +38,8 @@ function handleAuthStatus(request) {
 export const config = {
     matcher: [
         '/', 
-        '/login', 
+        '/login',
+        '/verify',
         '/forgot-password',
         '/signup',
         '/app/:path*'
