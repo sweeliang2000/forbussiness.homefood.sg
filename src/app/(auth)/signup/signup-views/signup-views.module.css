@@ -89,12 +89,12 @@
 .form {
     display: flex;
     flex-direction: column;
-    margin-top: 2rem;
+    margin-top: 1rem;
     gap: 1.5rem;
 }
 
 .createButton {
-    margin-top: 2rem;
+    margin-top: 1.25rem;
     padding: 8px 24px;
     text-transform: capitalize;
     background-color: black;

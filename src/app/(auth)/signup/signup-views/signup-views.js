@@ -184,7 +184,7 @@ export default function SignupViews() {
                     </form>
 
 
-                    <div className={styles.orContainer}>
+                    {/* <div className={styles.orContainer}>
                         <span className={styles.lineText}>or</span>
                         <hr className={styles.line} />
                     </div>
@@ -197,7 +197,7 @@ export default function SignupViews() {
                         className={styles.googleButton}
                     >
                         Sign Up with Google
-                    </Button>
+                    </Button> */}
 
                     <div>
                         <p className={styles.haveAccountTag}>Have an account? <Link href='/login' className={styles.link}>Login</Link></p>
