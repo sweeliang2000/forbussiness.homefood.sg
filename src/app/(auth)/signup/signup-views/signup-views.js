@@ -9,6 +9,7 @@ import { useState } from "react";
 import apiClient from "@/utility/api";
 import { BE_API_AUTH_URL } from "../../../../../config/config";
 import { useRouter } from "next/navigation";
+import { LoadingButton } from "@mui/lab";
 
 export default function SignupViews() {
     const router = useRouter();
@@ -17,6 +18,7 @@ export default function SignupViews() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState(null);
+    const [isSubmissionButtonLoading, setIsSubmissionButtonLoading] = useState(false);
 
     const isFormVerified = () => {
         // Regex to validate email format
@@ -64,8 +66,10 @@ export default function SignupViews() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmissionButtonLoading(true);
 
         if (!isFormVerified()) {
+            setIsSubmissionButtonLoading(false);
             return;
         };
 
@@ -81,6 +85,7 @@ export default function SignupViews() {
         } catch (error) {
             const message = error?.response?.data?.message || error.message;
             const code = error?.response?.data?.code || error.code;
+            setIsSubmissionButtonLoading(false);
             setErrorMessage(`${message} (Error code: ${code})`);
         }
     };
@@ -166,15 +171,16 @@ export default function SignupViews() {
                             required
                         />
 
-                        <Button
+                        <LoadingButton
                             type="submit"
                             variant="contained"
                             color="primary"
                             fullWidth
+                            loading={isSubmissionButtonLoading}
                             className={styles.createButton}
                         >
                             Sign up
-                        </Button>
+                        </LoadingButton>
                     </form>
 
 
