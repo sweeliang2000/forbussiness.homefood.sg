@@ -1,0 +1,57 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-height: 100vh;
+}
+
+.header {
+    position: sticky !important;
+    top: 0;
+    z-index: 98;
+    height: 100px;
+}
+
+.informationCard {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.container h2 {
+    font-size: 1.25rem;
+    margin-bottom: 24px;
+}
+
+.container h3 {
+    font-size: 1rem;
+}
+
+.container .description {
+    font-size: 0.75rem;
+    color: #5b6264;
+    margin-top: 4px;
+    margin-bottom: 16px;
+}
+
+.noDescriptionTitle {
+    margin-bottom: 16px;
+}
+
+.container .content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.addressFields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.button {
+    box-shadow: none;
+    text-transform: none;
+}

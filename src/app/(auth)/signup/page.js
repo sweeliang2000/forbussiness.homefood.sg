@@ -1,143 +1,35 @@
-"use client"
-import Image from "next/image";
-import styles from "./page.module.css";
-import { FaLevelDownAlt } from 'react-icons/fa';
-import { FcGoogle } from 'react-icons/fc';
-import Link from "next/link";
-import { Box, Button, TextField } from "@mui/material";
-import { useState } from "react";
+import SignupViews from "./signup-views/signup-views";
 
-
-// export const metadata = {
-//     title: "Sign up and Start your Loyalty Program | Collbine for Business Singapore",
-//     description: "Collbine offers a loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop’s needs.",
-// };
+// Meta Data Explaination:
+// 1. title: Optimized for SEO with action-oriented phrases.
+// 2. description: Clear value proposition and targeting of Singapore merchants.
+// 3. keywords: Helps in ranking for relevant search terms
+// 4. Open Graph (og) Metadata: Enhances sharing previews on platforms like Facebook and LinkedIn.
+// 5. Twitter Metadata: Optimized for Twitter card previews.
+// 6. Image URL: Placeholder added for future branding consistency.
+export const metadata = {
+    title: "Create an Account | Collbine for Business - Loyalty Program in Singapore",
+    description: "Join Collbine for Business today and create your own customizable loyalty program. Enhance customer engagement with tailored rewards and point systems, exclusively designed for Singapore merchants.",
+    keywords: "Collbine, business loyalty program, rewards system Singapore, customer engagement, merchant loyalty tools, point system",
+    author: "Collbine Team",
+    og: {
+        title: "Create an Account | Collbine for Business",
+        description: "Design and launch your business's unique loyalty program with Collbine. Empower your shop with flexible rewards tailored for your customers.",
+        type: "website",
+        url: "https://www.collbine.com/signup",
+        image: "https://www.collbine.com/images/example.png",
+    },
+    twitter: {
+        card: "summary_large_image",
+        site: "@Collbine",
+        title: "Create an Account | Collbine for Business",
+        description: "Join Collbine for Business today and elevate your customer loyalty with a flexible rewards system tailored for Singapore merchants.",
+        image: "https://www.collbine.com/images/example.png",
+    },
+};
 
 export default function Signup() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (password !== confirmPassword) {
-            alert('Passwords do not match');
-        } else {
-            // Handle form submission, like sending data to an API
-            console.log('Account created:', { email, password });
-        }
-    };
-
-    const handleGoogleSignUp = () => {
-        // Add your Google sign-up logic here
-    };
-
     return (
-        <main className={styles.main}>
-            {/* [LEFT] First Section: Introduction */}
-            <section className={styles.introSection}>
-                <div>
-                    <p className={styles.tagline}>
-                        Manage your loyalty program, track customer engagement, and grow your business - all in one place.
-                    </p>
-                </div>
-
-                <div>
-                    <div className={styles.subTagLineContainer}>
-                        <p className={styles.subTagLine}>Trusted by leading brands</p>
-                        <FaLevelDownAlt className={styles.faLevelDown} />
-                    </div>
-
-                    <div className={styles.brands}>
-                        <Image
-                            src='/images/auth/brands/generation-coffee.png'
-                            width='80'
-                            height='80'
-                            alt=''
-                        />
-                        <Image
-                            src='/images/auth/brands/keens-bagelry.png'
-                            width='80'
-                            height='80'
-                            alt=''
-                        />
-                    </div>
-
-                </div>
-            </section>
-
-            {/* [RIGHT] Second Section: Sign-up Form */}
-            <section className={styles.rightSection}>
-                <div className={styles.formSection}>
-                    <div className={styles.formTitlesSection}>
-                        <h2>Collbine For Business</h2>
-                        <h1>Create an account</h1>
-                        <p>Welcome. Please enter your details.</p>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className={styles.form}>
-                        <TextField
-                            variant="standard"
-                            label="Email"
-                            type="email"
-                            fullWidth
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-
-                        <TextField
-                            variant="standard"
-                            label="Password"
-                            type="password"
-                            fullWidth
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-
-                        <TextField
-                            variant="standard"
-                            label="Confirm Password"
-                            type="password"
-                            fullWidth
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                        />
-
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                            className={styles.createButton}
-                        >
-                            Sign up
-                        </Button>
-                    </form>
-
-
-                    <div className={styles.orContainer}>
-                        <span className={styles.lineText}>or</span>
-                        <hr className={styles.line} />
-                    </div>
-
-                    <Button
-                        variant="contained"
-                        startIcon={<FcGoogle />} // Using the Google icon from react-icons
-                        onClick={handleGoogleSignUp}
-                        fullWidth
-                        className={styles.googleButton}
-                    >
-                        Sign Up with Google
-                    </Button>
-
-                    <div>
-                        <p className={styles.haveAccountTag}>Have an account? <Link href='/login' className={styles.link}>Login</Link></p>
-                    </div>
-                </div>
-            </section>
-        </main>
+        <SignupViews/>
     )
 };

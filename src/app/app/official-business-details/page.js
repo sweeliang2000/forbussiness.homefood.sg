@@ -4,7 +4,7 @@ import { HeaderSection } from "@/components/HeaderSection/HeaderSection";
 import { TextField } from '@mui/material';
 import Link from "next/link";
 
-export default function Content() {
+export default function StampSetup() {
   return (
     <div className={styles.container}>
       <HeaderSection
