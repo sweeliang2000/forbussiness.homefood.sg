@@ -36,6 +36,7 @@
 
 .container .textfield {
     margin: 20px 0;
+    width: 100%;
 }
 
 .resentConatiner {
@@ -68,4 +69,32 @@
 .logoutButton {
     text-transform: none;
     padding-right: 26px;
+}
+
+
+.dialogContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 24px 20px;
+    gap: 12px;
+    max-width: 480px;
+    border-radius: 4px;
+}
+
+.dialogContainer .confirmLogo {
+    font-size: 64px;
+    color: #059212;
+}
+
+.dialogContainer p {
+    text-align: center;
+}
+
+.dialogContainer .loginNowButton {
+    margin-top: 12px;
+    padding: 8px 24px;
+    text-transform: capitalize;
+    background-color: black;
 }

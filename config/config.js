@@ -12,5 +12,5 @@ const getEnvVariable = (key, fallback = '') => {
 };
 
 
-export const BE_API_AUTH_URL = getEnvVariable('BE_API_AUTH_URL', 'http://localhost:8080/signup');
+export const BE_API_AUTH_URL = getEnvVariable('BE_API_AUTH_URL', 'http://localhost:8080');
 

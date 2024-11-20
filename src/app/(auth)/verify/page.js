@@ -1,22 +1,30 @@
 "use client";
 import styles from './page.module.css';
-import { Button, TextField } from '@mui/material';
+import { Alert, Button, Dialog, TextField } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { IoMdArrowRoundBack } from "react-icons/io";
 import Cookies from 'js-cookie';
+import apiClient from '@/utility/api';
+import { BE_API_AUTH_URL } from '../../../../config/config';
+import { LoadingButton } from '@mui/lab';
+import { VscVerified } from "react-icons/vsc";
 
 export default function Verify() {
     const router = useRouter();
 
     const [email, setEmailAddress] = useState('');
+    const [otp, setOtp] = useState('');
     const [countdown, setCountdown] = useState(60);
     const [isResendButtonDisabled, setIsResendButtonDisabled] = useState(true);
+    const [errorMessage, setErrorMessage] = useState(null);
+    const [isSubmissionButtonLoading, setIsSubmissionButtonLoading] = useState(false);
+    const [isVerifiedConfirmed, setVerifiedConfirmed] = useState(false);
 
     useEffect(() => {
         const getCookiesInfo = () => {
             const authStatusCookie = Cookies.get('authStatus');
-    
+
             if (authStatusCookie) {
                 try {
                     const authStatus = JSON.parse(authStatusCookie);
@@ -61,57 +69,119 @@ export default function Verify() {
         console.log('Sending email...');
     };
 
-    const logoutHandler = () => {
+    const handleInputChange = (event) => {
+        setOtp(event.target.value);
+    };
+
+    const confirmHandler = async (e) => {
+        e.preventDefault();
+        setErrorMessage(null);
+        setIsSubmissionButtonLoading(true);
+
+        const payload = {
+            username: email,
+            confirmationCode: otp
+        };
+
+        try {
+            await apiClient.post(`${BE_API_AUTH_URL}/confirm`, payload);
+            Cookies.remove('authStatus');
+            setVerifiedConfirmed(true);
+        } catch (error) {
+            const message = error?.response?.data?.message || error.message;
+            const code = error?.response?.data?.code || error.code;
+            setErrorMessage(`${message} (Error code: ${code})`);
+        }
+
+        setIsSubmissionButtonLoading(false);
+    };
+
+    const logoutHandler = (e) => {
+        e.preventDefault();
+
         Cookies.remove('authStatus');
         router.replace('/login');
     };
 
+    const loginNowHandler = (e) => {
+        e.preventDefault();
+        router.replace('/login');
+    };
+
     return (
-        <div className={styles.content}>
-            <div className={styles.container}>
-                <h1>Check your email</h1>
-
-                <p className={styles.subtitle}>
-                    Please enter the six digit verification code we sent
-                    to <span className={styles.emailHighlight}>{email}</span>.
-                </p>
-
-                <TextField
-                    id="verification-code"
-                    label="6 Digits Verification Code"
-                    variant="filled"
-                    className={styles.textfield}
-                />
-
-                <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    className={styles.confirmButton}
-                >
-                    Confirm
-                </Button>
-
-                <div className={styles.resentConatiner}>
-                    <label>Didn&apos;t get an email? </label>
-                    {isResendButtonDisabled ?
-                        <label>Resent in 00:{countdown}.</label> :
-                        <label className={styles.resentButton} onClick={handleResend}>Resent</label>
-                    }
+        <>
+            <Dialog open={isVerifiedConfirmed}>
+                <div className={styles.dialogContainer}>
+                    <VscVerified
+                        className={styles.confirmLogo}
+                    />
+                    <h2>Email verified!</h2>
+                    <p>From now on, you are part of us! <strong>Login now</strong> and start building your loyalty program for you business.</p>
+                    
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        onClick={loginNowHandler}
+                        className={styles.loginNowButton}
+                    >
+                        Login Now!
+                    </Button>
                 </div>
+            </Dialog>
+            <div className={styles.content}>
+                <div className={styles.container}>
+                    <h1>Check your email</h1>
 
-                <Button
-                    type="submit"
-                    variant="text"
-                    color="primary"
-                    onClick={logoutHandler}
-                    className={styles.logoutButton}
-                >
-                    <IoMdArrowRoundBack className={styles.arrowIcon} />
-                    Logout
-                </Button>
+                    <p className={styles.subtitle}>
+                        Please enter the six digit verification code we sent
+                        to <span className={styles.emailHighlight}>{email}</span>.
+                    </p>
+
+                    {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+
+                    <form className={styles.submissionForm} onSubmit={confirmHandler}>
+                        <TextField
+                            id="verification-code"
+                            label="6 Digits Verification Code"
+                            variant="filled"
+                            onChange={handleInputChange}
+                            className={styles.textfield}
+                        />
+
+                        <LoadingButton
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                            loading={isSubmissionButtonLoading}
+                            // onClick={confirmHandler}
+                            className={styles.confirmButton}
+                        >
+                            Confirm
+                        </LoadingButton>
+                    </form>
+
+                    <div className={styles.resentConatiner}>
+                        <label>Didn&apos;t get an email? </label>
+                        {isResendButtonDisabled ?
+                            <label>Resent in 00:{countdown}.</label> :
+                            <label className={styles.resentButton} onClick={handleResend}>Resent</label>
+                        }
+                    </div>
+
+                    <Button
+                        variant="text"
+                        color="primary"
+                        onClick={logoutHandler}
+                        className={styles.logoutButton}
+                    >
+                        <IoMdArrowRoundBack className={styles.arrowIcon} />
+                        Logout
+                    </Button>
+                </div>
             </div>
-        </div>
+        </>
     )
 };

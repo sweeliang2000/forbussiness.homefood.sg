@@ -80,7 +80,7 @@ export default function SignupViews() {
         };
 
         try {
-            await apiClient.post(BE_API_AUTH_URL, payload);
+            await apiClient.post(`${BE_API_AUTH_URL}/signup`, payload);
             router.push('/verify')
         } catch (error) {
             const message = error?.response?.data?.message || error.message;
