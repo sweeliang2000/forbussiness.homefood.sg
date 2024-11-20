@@ -94,14 +94,14 @@
     gap: 1.5rem;
 }
 
-.loginButton {
+.resetPwdButton {
     padding: 8px 32px;
     text-transform: capitalize;
     background-color: black;
     margin-top: 24px;
 }
 
-.loginButton:hover {
+.resetPwdButton:hover {
     background-color: rgb(39, 39, 60);
 }
 

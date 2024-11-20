@@ -96,9 +96,9 @@ export default function Login() {
                             variant="contained"
                             color="primary"
                             fullWidth
-                            className={styles.loginButton}
+                            className={styles.resetPwdButton}
                         >
-                            Login
+                            Reset Password
                         </Button>
                     </form>
 
