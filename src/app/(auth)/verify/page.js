@@ -18,6 +18,7 @@ export default function Verify() {
     const [countdown, setCountdown] = useState(60);
     const [isResendButtonDisabled, setIsResendButtonDisabled] = useState(true);
     const [errorMessage, setErrorMessage] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
     const [isSubmissionButtonLoading, setIsSubmissionButtonLoading] = useState(false);
     const [isVerifiedConfirmed, setVerifiedConfirmed] = useState(false);
 
@@ -54,9 +55,6 @@ export default function Verify() {
     }, [countdown]);
 
     const handleResend = () => {
-        resetCountdown()
-
-        // Your resend email logic here
         sendOTPToEmail();
     };
 
@@ -65,8 +63,23 @@ export default function Verify() {
         setIsResendButtonDisabled(true);
     };
 
-    const sendOTPToEmail = () => {
-        console.log('Sending email...');
+    const sendOTPToEmail = async (e) => {
+        setSuccessMessage(null);
+        setErrorMessage(null);
+
+        const payload = {
+            username: email
+        };
+
+        try {
+            await apiClient.post(`${BE_API_AUTH_URL}/resend-verification-code`, payload);
+            setSuccessMessage('A 6-digit OTP has been resent to you.')
+            resetCountdown()
+        } catch (error) {
+            const message = error?.response?.data?.message || error.message;
+            const code = error?.response?.data?.code || error.code;
+            setErrorMessage(`${message} (Error code: ${code})`);
+        }
     };
 
     const handleInputChange = (event) => {
@@ -140,6 +153,7 @@ export default function Verify() {
                     </p>
 
                     {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+                    {successMessage && <Alert severity="success">{successMessage}</Alert>}
 
                     <form className={styles.submissionForm} onSubmit={confirmHandler}>
                         <TextField
