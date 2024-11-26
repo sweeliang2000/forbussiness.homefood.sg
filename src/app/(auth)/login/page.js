@@ -4,8 +4,12 @@ import styles from "./page.module.css";
 import { FaLevelDownAlt } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import Link from "next/link";
-import { Box, Button, TextField } from "@mui/material";
+import { Alert, Box, Button, TextField } from "@mui/material";
 import { useState } from "react";
+import apiClient from "@/utility/api";
+import { LoadingButton } from "@mui/lab";
+import { BE_API_AUTH_URL } from "../../../../config/config";
+import { useRouter } from "next/navigation";
 
 
 // export const metadata = {
@@ -14,27 +18,51 @@ import { useState } from "react";
 // };
 
 export default function Login() {
+    const router = useRouter();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState(null);
+    const [isSubmissionButtonLoading ,setIsSubmissionButtonLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (password !== confirmPassword) {
-            alert('Passwords do not match');
-        } else {
-            // Handle form submission, like sending data to an API
-            console.log('Account created:', { email, password });
+        setErrorMessage("");
+
+        if (!isFormVerified) {
+            return;
         }
+
+        const payload = {
+            'username': email,
+            'password': password
+        };
+
+        try {
+            await apiClient.post(`${BE_API_AUTH_URL}/signIn`, payload);
+            router.push('/app')
+        } catch (error) {
+            const message = error?.response?.data?.message || error.message;
+            const code = error?.response?.data?.code || error.code;
+            setIsSubmissionButtonLoading(false);
+            setErrorMessage(`${message} (Error code: ${code})`);
+        }
+
+    };
+
+    const isFormVerified = () => {
+        setErrorMessage('');
+
+        if (!email.trim() || !password.trim()) {
+            setErrorMessage('Both email and password are required.');
+            return false;
+        }
+
+        return true
     };
 
     const handleGoogleLogin = () => {
         // Add your Google sign-up logic here
-    };
-
-    const handleForgetPasswordClick = () => {
-        // Add logic for navigating to the forget password page or opening a modal
-        console.log('Redirecting to forget password...');
     };
 
     return (
@@ -81,6 +109,7 @@ export default function Login() {
                     </div>
 
                     <form onSubmit={handleSubmit} className={styles.form}>
+                        { errorMessage && <Alert severity="error" className={styles.alert}>{errorMessage}</Alert> }
                         <TextField
                             variant="standard"
                             label="Email"
@@ -109,15 +138,16 @@ export default function Login() {
                         </Link>
 
 
-                        <Button
+                        <LoadingButton
                             type="submit"
                             variant="contained"
                             color="primary"
                             fullWidth
                             className={styles.loginButton}
+                            isLoading={isSubmissionButtonLoading}
                         >
                             Login
-                        </Button>
+                        </LoadingButton>
                     </form>
 
 

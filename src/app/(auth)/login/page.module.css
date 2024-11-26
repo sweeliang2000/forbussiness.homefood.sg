@@ -153,3 +153,7 @@
     padding: 0 1rem;
     z-index: 2;
 }
+
+.alert {
+    width: 100%;
+}
