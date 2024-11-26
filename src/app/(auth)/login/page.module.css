@@ -107,6 +107,7 @@
 .forgotPasswordBuuton {
     color: var(--link-color);
     text-transform: none;
+    font-size: 12px;
 }
 
 .haveAccountTag {

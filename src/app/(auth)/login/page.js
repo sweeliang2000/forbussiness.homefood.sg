@@ -121,20 +121,20 @@ export default function Login() {
                     </form>
 
 
-                    <div className={styles.orContainer}>
+                    {/* <div className={styles.orContainer}>
                         <span className={styles.lineText}>or</span>
                         <hr className={styles.line} />
                     </div>
 
                     <Button
                         variant="contained"
-                        startIcon={<FcGoogle />} // Using the Google icon from react-icons
+                        startIcon={<FcGoogle />}
                         onClick={handleGoogleLogin}
                         fullWidth
                         className={styles.googleButton}
                     >
                         Login with Google
-                    </Button>
+                    </Button> */}
 
                     <div>
                         <p className={styles.haveAccountTag}>Don’t have an account yet? <Link href='/signup' className={styles.link}>Sign up</Link></p>
