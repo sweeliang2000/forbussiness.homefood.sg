@@ -42,6 +42,14 @@ export default function Login() {
             await apiClient.post(`${BE_API_AUTH_URL}/signIn`, payload);
             router.push('/app')
         } catch (error) {
+            const errorStatus = error?.response?.data?.error;
+            console.log(errorStatus)
+
+            if (errorStatus === 'Email not verified') {
+                router.push('/verify')
+                return;
+            };
+
             const message = error?.response?.data?.message || error.message;
             const code = error?.response?.data?.code || error.code;
             setIsSubmissionButtonLoading(false);
