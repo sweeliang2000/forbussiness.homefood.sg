@@ -10,7 +10,7 @@ import { BE_API_AUTH_URL } from '../../../../config/config';
 import { LoadingButton } from '@mui/lab';
 import { VscVerified } from "react-icons/vsc";
 
-export default function Verify() {
+const Verify = () => {
     const router = useRouter();
 
     const [email, setEmailAddress] = useState('');
@@ -199,3 +199,5 @@ export default function Verify() {
         </>
     )
 };
+
+export default withAuthorization(Verify);

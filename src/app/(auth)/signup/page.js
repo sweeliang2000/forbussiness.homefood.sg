@@ -28,8 +28,10 @@ export const metadata = {
     },
 };
 
-export default function Signup() {
+const Signup = () => {
     return (
         <SignupViews/>
     )
 };
+
+export default Signup

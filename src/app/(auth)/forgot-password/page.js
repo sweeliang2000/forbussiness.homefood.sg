@@ -11,6 +11,7 @@ import apiClient from "@/utility/api";
 import { BE_API_AUTH_URL } from "../../../../config/config";
 import { useRouter } from "next/navigation";
 import { VscVerified } from "react-icons/vsc";
+import withAuthorization from "@/hoc/withAuthorization";
 
 
 // export const metadata = {
@@ -18,7 +19,7 @@ import { VscVerified } from "react-icons/vsc";
 //     description: "Collbine offers a loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop’s needs.",
 // };
 
-export default function Login() {
+const ForgotPassword = () => {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -276,3 +277,5 @@ export default function Login() {
         </main>
     )
 };
+
+export default withAuthorization(ForgotPassword);

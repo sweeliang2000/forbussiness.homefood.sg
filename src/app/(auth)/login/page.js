@@ -10,6 +10,7 @@ import apiClient from "@/utility/api";
 import { LoadingButton } from "@mui/lab";
 import { BE_API_AUTH_URL } from "../../../../config/config";
 import { useRouter } from "next/navigation";
+import withAuthorization from "@/hoc/withAuthorization";
 
 
 // export const metadata = {
@@ -17,7 +18,7 @@ import { useRouter } from "next/navigation";
 //     description: "Collbine offers a loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop’s needs.",
 // };
 
-export default function Login() {
+ const Login = () => {
     const router = useRouter();
 
     const [email, setEmail] = useState('');
@@ -181,3 +182,5 @@ export default function Login() {
         </main>
     )
 };
+
+export default withAuthorization(Login);

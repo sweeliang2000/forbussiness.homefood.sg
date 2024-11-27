@@ -10,8 +10,9 @@ import apiClient from "@/utility/api";
 import { BE_API_AUTH_URL } from "../../../../../config/config";
 import { useRouter } from "next/navigation";
 import { LoadingButton } from "@mui/lab";
+import withAuthorization from "@/hoc/withAuthorization";
 
-export default function SignupViews() {
+const SignupViews = () => {
     const router = useRouter();
 
     const [email, setEmail] = useState('');
@@ -207,3 +208,5 @@ export default function SignupViews() {
         </main>
     )
 };
+
+export default withAuthorization(SignupViews);
