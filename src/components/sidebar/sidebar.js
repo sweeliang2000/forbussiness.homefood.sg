@@ -45,7 +45,9 @@ export default function Sidebar() {
         <aside className={`${styles.sidebar} ${sidebarMinimised ? styles.close : ''}`}>
             <ul>
                 <li className={styles.logoLi}>
-                    <span className={`${styles.logo} ${sidebarMinimised ? styles.hiddenLogo : ''}`}>Collbine For Business</span>
+                    <Link href='/'>
+                        <span className={`${styles.logo} ${sidebarMinimised ? styles.hiddenLogo : ''}`}>Collbine For Business</span>
+                    </Link>
                     <div className={styles.minimiseSidebar} onClick={toggleSidebar}>
                         <FaAnglesLeft className={sidebarMinimised ? styles.rotate : styles.reverseRotate} />
                     </div>

@@ -23,11 +23,12 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState(null);
-    const [isSubmissionButtonLoading ,setIsSubmissionButtonLoading] = useState(false);
+    const [isSubmissionButtonLoading, setIsSubmissionButtonLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMessage("");
+        setIsSubmissionButtonLoading(true);
 
         if (!isFormVerified) {
             return;
@@ -43,7 +44,6 @@ export default function Login() {
             router.push('/app')
         } catch (error) {
             const errorStatus = error?.response?.data?.error;
-            console.log(errorStatus)
 
             if (errorStatus === 'Email not verified') {
                 router.push('/verify')
@@ -52,7 +52,6 @@ export default function Login() {
 
             const message = error?.response?.data?.message || error.message;
             const code = error?.response?.data?.code || error.code;
-            setIsSubmissionButtonLoading(false);
             setErrorMessage(`${message} (Error code: ${code})`);
         }
 
@@ -152,7 +151,7 @@ export default function Login() {
                             color="primary"
                             fullWidth
                             className={styles.loginButton}
-                            isLoading={isSubmissionButtonLoading}
+                            loading={isSubmissionButtonLoading}
                         >
                             Login
                         </LoadingButton>

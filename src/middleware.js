@@ -14,7 +14,7 @@ function handleAuthStatus(request) {
         if (!authStatusCookie) {
             return NextResponse.redirect(new URL('/login', request.url));
         };
-        console.log('Skipping middleware for /verify');
+        
         return NextResponse.next();
     }
 

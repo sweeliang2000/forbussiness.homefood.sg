@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <body className={styles.body}>
+    <div className={styles.body}>
       <Sidebar />
       <div>
         <BreadcrumsBar />
@@ -20,6 +20,6 @@ export default function RootLayout({ children }) {
         </main>
         <AppFooter />
       </div>
-    </body>
+    </div>
   );
 }
