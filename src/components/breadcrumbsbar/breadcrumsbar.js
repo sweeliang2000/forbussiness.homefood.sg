@@ -13,12 +13,12 @@ export const BreadcrumsBar = () => {
         <nav className={styles.nav}>
             <Breadcrumbs className={styles.breadcrumbs} separator={<FaChevronRight className={styles.rightArrow} />}>
                 {pathSegments.length == 0 ? 
-                    <p className={styles.lastPath}>
+                    <div className={styles.lastPath}>
                         <div className={styles.dashboard}>
                             <MdDashboard/> 
                             <p>Dashboard</p>
                         </div>
-                    </p>:
+                    </div>:
                     <Link className={styles.link} href='/app'>
                         <div className={styles.dashboard}>
                             <MdDashboard/>
