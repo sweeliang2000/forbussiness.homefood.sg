@@ -1,6 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-    transpilePackages: ['mui-one-time-password-input'],
-};
+const nextConfig = {};
 
 export default nextConfig;
