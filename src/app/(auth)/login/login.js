@@ -75,7 +75,7 @@ import withAuthorization from "@/hoc/withAuthorization";
         <main className={styles.main}>
             {/* [LEFT] First Section: Introduction */}
             <section className={styles.introSection}>
-                <div>
+                <div className={styles.titleDiv}>
                     <p className={styles.tagline}>
                         Boost Sales with a Powerful Loyalty System – Manage, Engage, and Grow Your Business in One Platform.
                     </p>
@@ -83,6 +83,7 @@ import withAuthorization from "@/hoc/withAuthorization";
 
                 <div>
                     <div className={styles.subTagLineContainer}>
+                        <FaLevelDownAlt className={styles.faLevelDownLeft} />
                         <p className={styles.subTagLine}>Trusted by leading brands</p>
                         <FaLevelDownAlt className={styles.faLevelDown} />
                     </div>
