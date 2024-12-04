@@ -176,7 +176,6 @@ const SignupViews = () => {
                         <LoadingButton
                             type="submit"
                             variant="contained"
-                            color="primary"
                             fullWidth
                             loading={isSubmissionButtonLoading}
                             className={styles.createButton}
