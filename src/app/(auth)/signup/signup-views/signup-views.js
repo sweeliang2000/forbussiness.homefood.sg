@@ -99,7 +99,7 @@ const SignupViews = () => {
         <main className={styles.main}>
             {/* [LEFT] First Section: Introduction */}
             <section className={styles.introSection}>
-                <div>
+                <div className={styles.titleDiv}>
                     <p className={styles.tagline}>
                         Manage your loyalty program, track customer engagement, and grow your business - all in one place.
                     </p>
@@ -107,6 +107,7 @@ const SignupViews = () => {
 
                 <div>
                     <div className={styles.subTagLineContainer}>
+                        <FaLevelDownAlt className={styles.faLevelDownLeft} />
                         <p className={styles.subTagLine}>Trusted by leading brands</p>
                         <FaLevelDownAlt className={styles.faLevelDown} />
                     </div>

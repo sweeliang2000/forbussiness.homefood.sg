@@ -49,6 +49,14 @@
     margin-top: 0.5rem;
 }
 
+.faLevelDownLeft {
+    color: var(--accent-color);
+    font-size: 1.25rem;
+    margin-top: 0.5rem;
+    transform: rotateY(3.142rad);
+    display: none;
+}
+
 .brands {
     display: flex;
     gap: 16px;
@@ -147,4 +155,95 @@
     background-color: white;
     padding: 0 1rem;
     z-index: 2;
+}
+
+@media screen and (max-width: 1150px) {
+    .introSection {
+        flex: 0.75;
+    }
+
+    .tagline {
+        font-size: 40px;
+    }
+}
+
+@media screen and (max-width: 1000px) {
+    .main {
+        gap: 8px
+    }
+
+    .introSection {
+        flex: 0.5;
+    }
+
+    .tagline {
+        font-size: 32px;
+    }
+}
+
+@media screen and (max-width: 1000px) {
+    .main {
+        gap: 8px
+    }
+
+    .introSection {
+        flex: 0.5;
+    }
+
+    .tagline {
+        font-size: 32px;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    .main {
+        flex-direction: column-reverse;
+        align-items: center;
+    }
+
+    .introSection {
+        padding-top: 0px;
+    }
+
+    .introSection .titleDiv {
+        display: none;
+    }
+
+    .formTitlesSection h2,
+    .formTitlesSection h1,
+    .formTitlesSection p {
+        text-align: center;
+    }
+
+    .formTitlesSection h1 {
+        font-size: 40px;
+    }
+    
+    .faLevelDownLeft {
+        display: block;
+    }
+
+    .brands {
+        justify-content: center;
+        align-items: center;
+    }
+
+    .rightSection {
+        width: 100%;
+        padding-bottom: 40px;
+        justify-content: flex-end;
+    }
+
+    .formSection {
+        height: 100%;
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    .rightSection {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
 }
