@@ -1,4 +1,4 @@
-import Verify from "./verify";
+import Verify from "./Verify";
 
 const Page = () => {
     return <Verify/>
