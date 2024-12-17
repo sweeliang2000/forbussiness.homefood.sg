@@ -175,8 +175,8 @@ export default function Sidebar() {
                     </Link>
                 </li>
 
-                <li>
-                    <Link href='/'>
+                <li className={section == '/app/setting' ? styles.active : ''}>
+                    <Link href='/app/setting'>
                         <RxGear className={styles.icon} />
                         <span>Account Settings</span>
                     </Link>
