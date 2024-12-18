@@ -40,7 +40,10 @@ Do not use pixel for font size, width and media querys.
 
   --primary: #ffffff;
   --on-primary: black;
-  --secondary-color: #ff4081;
+
+  --secondary-color: black;
+  --secondary-hover-color: rgb(39, 39, 60);
+
   --accent-color: #0E46A3;
   --border-color: #eaeaea;
   --link-color: #2c15bf;

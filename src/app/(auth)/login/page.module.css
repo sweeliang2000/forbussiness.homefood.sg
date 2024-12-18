@@ -73,7 +73,7 @@
 }
 
 .formSection {
-    background-color: white;
+    background-color: var(--primary);
     width: 100%;
     max-width: 40rem;
     height: auto;
@@ -105,11 +105,11 @@
 .loginButton {
     padding: 8px 24px;
     text-transform: capitalize;
-    background-color: black;
+    background-color: var(--secondary-color);
 }
 
 .loginButton:hover {
-    background-color: rgb(39, 39, 60);
+    background-color: var(--secondary-hover-color);
 }
 
 .forgotPasswordBuuton {
@@ -123,6 +123,10 @@
     margin-top: 2rem;
 }
 
+.alert {
+    width: 100%;
+}
+
 .orContainer {
     position: relative;
     display: flex;
@@ -131,7 +135,7 @@
     margin: 2.25rem 0;
 }
 
-.googleButton {
+/* .googleButton {
     padding: 8px 24px;
     text-transform: capitalize;
     background-color: #fff;
@@ -160,11 +164,7 @@
     background-color: white;
     padding: 0 1rem;
     z-index: 2;
-}
-
-.alert {
-    width: 100%;
-}
+} */
 
 @media screen and (max-width: 1150px) {
     .introSection {
