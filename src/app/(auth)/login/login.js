@@ -52,6 +52,7 @@ import withAuthorization from "@/hoc/withAuthorization";
             const message = error?.response?.data?.message || error.message;
             const code = error?.response?.data?.code || error.code;
             setErrorMessage(`${message} (Error code: ${code})`);
+            setIsSubmissionButtonLoading(false);
         }
 
     };
