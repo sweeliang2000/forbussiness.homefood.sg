@@ -6,10 +6,10 @@ import { useEffect, useState } from 'react';
 import { IoMdArrowRoundBack } from "react-icons/io";
 import Cookies from 'js-cookie';
 import apiClient from '@/utility/api';
-import { BE_API_AUTH_URL } from '../../../../config/config';
 import { LoadingButton } from '@mui/lab';
 import { VscVerified } from "react-icons/vsc";
 import withAuthorization from '@/hoc/withAuthorization';
+import { EMAIL_VERIFICATION, RESEND_VERIFICATION_CODE } from '@/utility/apiPaths';
 
 const Verify = () => {
     const router = useRouter();
@@ -73,7 +73,7 @@ const Verify = () => {
         };
 
         try {
-            await apiClient.post(`${BE_API_AUTH_URL}/resend-verification-code`, payload);
+            await apiClient.post(`${RESEND_VERIFICATION_CODE}`, payload);
             setSuccessMessage('A 6-digit OTP has been resent to you.')
             resetCountdown()
         } catch (error) {
@@ -98,7 +98,7 @@ const Verify = () => {
         };
 
         try {
-            await apiClient.post(`${BE_API_AUTH_URL}/confirm`, payload);
+            await apiClient.post(`${EMAIL_VERIFICATION}`, payload);
             Cookies.remove('authStatus');
             setVerifiedConfirmed(true);
         } catch (error) {

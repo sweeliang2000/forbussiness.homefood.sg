@@ -8,10 +8,10 @@ import { useState } from "react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { LoadingButton } from "@mui/lab";
 import apiClient from "@/utility/api";
-import { BE_API_AUTH_URL } from "../../../../config/config";
 import { useRouter } from "next/navigation";
 import { VscVerified } from "react-icons/vsc";
 import withAuthorization from "@/hoc/withAuthorization";
+import { FORGOT_PASSWORD } from "@/utility/apiPaths";
 
 const ForgotPassword = () => {
     const router = useRouter();
@@ -50,7 +50,7 @@ const ForgotPassword = () => {
         };
 
         try {
-            await apiClient.post(`${BE_API_AUTH_URL}/forget-password`, payload);
+            await apiClient.post(`${FORGOT_PASSWORD}`, payload);
             setIsAtRestPasswordStage(true);
             setSuccessMessage("An OTP values had been sent to your email. Enter your new password and OTP to reset.")
         } catch (error) {
@@ -88,7 +88,7 @@ const ForgotPassword = () => {
         };
 
         try {
-            await apiClient.post(`${BE_API_AUTH_URL}/confirm-forget-password`, payload)
+            await apiClient.post(`${CONFIRM_FORGOT_PASSWORD}`, payload)
             setIsSubmissionButtonLoading(false);
             setIsResetSuccessfully(true)
         } catch (error) {

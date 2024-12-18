@@ -7,10 +7,10 @@ import Link from "next/link";
 import { Alert, Button, TextField } from "@mui/material";
 import { useState } from "react";
 import apiClient from "@/utility/api";
-import { BE_API_AUTH_URL } from "../../../../../config/config";
 import { useRouter } from "next/navigation";
 import { LoadingButton } from "@mui/lab";
 import withAuthorization from "@/hoc/withAuthorization";
+import { SIGN_UP } from "@/utility/apiPaths";
 
 const SignupViews = () => {
     const router = useRouter();
@@ -81,7 +81,7 @@ const SignupViews = () => {
         };
 
         try {
-            await apiClient.post(`${BE_API_AUTH_URL}/signup`, payload);
+            await apiClient.post(`${SIGN_UP}`, payload);
             router.push('/verify')
         } catch (error) {
             const message = error?.response?.data?.message || error.message;

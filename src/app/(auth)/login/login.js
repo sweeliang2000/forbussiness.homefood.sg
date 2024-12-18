@@ -7,9 +7,9 @@ import { Alert, TextField } from "@mui/material";
 import { useState } from "react";
 import apiClient from "@/utility/api";
 import { LoadingButton } from "@mui/lab";
-import { BE_API_AUTH_URL } from "../../../../config/config";
 import { useRouter } from "next/navigation";
 import withAuthorization from "@/hoc/withAuthorization";
+import { SIGN_IN } from "@/utility/apiPaths";
 
 // export const metadata = {
 //     title: "Sign up and Start your Loyalty Program | Collbine for Business Singapore",
@@ -39,7 +39,7 @@ import withAuthorization from "@/hoc/withAuthorization";
         };
 
         try {
-            await apiClient.post(`${BE_API_AUTH_URL}/signIn`, payload);
+            await apiClient.post(`${SIGN_IN}`, payload);
             router.push('/app')
         } catch (error) {
             const errorStatus = error?.response?.data?.error;
