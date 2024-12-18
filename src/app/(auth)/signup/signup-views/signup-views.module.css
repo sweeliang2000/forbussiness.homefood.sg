@@ -73,7 +73,7 @@
 }
 
 .formSection {
-    background-color: white;
+    background-color: var(--background);
     width: 100%;
     max-width: 40rem;
     height: auto;
@@ -105,11 +105,11 @@
     margin-top: 1.25rem;
     padding: 8px 24px;
     text-transform: capitalize;
-    background-color: black !important;
+    background-color: var(--secondary-color) !important;
 }
 
 .createButton:hover {
-    background-color: rgb(39, 39, 60);
+    background-color: var(--secondary-hover-color);
 }
 
 
@@ -118,7 +118,7 @@
     margin-top: 2rem;
 }
 
-.orContainer {
+/* .orContainer {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -155,7 +155,7 @@
     background-color: white;
     padding: 0 1rem;
     z-index: 2;
-}
+} */
 
 @media screen and (max-width: 1150px) {
     .introSection {

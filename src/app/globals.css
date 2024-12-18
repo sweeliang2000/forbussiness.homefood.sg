@@ -38,9 +38,12 @@ Do not use pixel for font size, width and media querys.
   --background: #F5F7F9;
   --onBackground: black;
 
+  /* Mainly for form and cards */
   --primary: #ffffff;
   --on-primary: black;
+  --on-primary-light: gray;
 
+  /* Used for Buttons */
   --secondary-color: black;
   --secondary-hover-color: rgb(39, 39, 60);
 
