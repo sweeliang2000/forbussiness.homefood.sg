@@ -39,16 +39,16 @@ import { SIGN_IN } from "@/utility/apiPaths";
         };
 
         try {
-            await apiClient.post(`${SIGN_IN}`, payload);
-            router.push('/app')
-        } catch (error) {
-            const errorStatus = error?.response?.data?.error;
-
-            if (errorStatus === 'Email not verified') {
+            const response = await apiClient.post(`${SIGN_IN}`, payload);
+            const message = response.data.message
+            
+            if (message === 'Verification code resent successfully') {
                 router.push('/verify')
                 return;
-            };
+            }
 
+            router.push('/app')
+        } catch (error) {
             const message = error?.response?.data?.message || error.message;
             const code = error?.response?.data?.code || error.code;
             setErrorMessage(`${message} (Error code: ${code})`);
