@@ -161,9 +161,10 @@ export default function Sidebar() {
                     </li>
                 }
 
-                <li>
-                    <Link href='/'>
-                        <RiUserSettingsLine className={styles.icon} />
+
+                <li className={section == 'users-and-permissions' ? styles.active : ''}>
+                    <Link href='/app/users-and-permissions'>
+                    <RiUserSettingsLine className={styles.icon} />
                         <span>Users and permissions</span>
                     </Link>
                 </li>
@@ -175,7 +176,7 @@ export default function Sidebar() {
                     </Link>
                 </li>
 
-                <li className={section == '/app/setting' ? styles.active : ''}>
+                <li className={section == 'setting' ? styles.active : ''}>
                     <Link href='/app/setting'>
                         <RxGear className={styles.icon} />
                         <span>Account Settings</span>

@@ -11,7 +11,7 @@ import apiClient from "@/utility/api";
 import { useRouter } from "next/navigation";
 import { VscVerified } from "react-icons/vsc";
 import withAuthorization from "@/hoc/withAuthorization";
-import { FORGOT_PASSWORD } from "@/utility/apiPaths";
+import { CONFIRM_FORGOT_PASSWORD, FORGOT_PASSWORD } from "@/utility/apiPaths";
 
 const ForgotPassword = () => {
     const router = useRouter();

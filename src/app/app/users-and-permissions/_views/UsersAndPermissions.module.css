@@ -1,0 +1,36 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-height: 100vh;
+}
+
+.container .content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.description {
+    margin-top: 12px;
+}
+
+.button {
+    box-shadow: none;
+    text-transform: capitalize;
+    background-color: rgb(36, 36, 39);
+}
+
+.usersHeader {
+    display: flex;
+    justify-content: space-between;
+}
+
+.tableContainer {
+    overflow-x: scroll;
+    background-color: white;
+    border-radius: 12px;
+    max-width: 75rem;
+    margin:  0 auto;
+    width: 100%;
+}
