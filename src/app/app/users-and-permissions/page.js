@@ -1,9 +1,9 @@
-import AccountSetting from "./_views/UsersAndPermissions";
+import UsersAndPermissions from "./_views/UsersAndPermissions";
 
 const PointsManagement = () => {
     return(
-        <AccountSetting/>
+        <UsersAndPermissions/>
     )
 };
 
-export default PointsManagement;
+export default UsersAndPermissions;

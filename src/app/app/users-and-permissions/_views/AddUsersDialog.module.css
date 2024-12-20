@@ -1,0 +1,55 @@
+.container {
+    position: relative;
+    width: 100%;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+
+    padding: 16px 24px;
+    gap: 16px;
+    width: 100%;
+}
+
+.content h2,
+.content h3 {
+    font-family: var(--font-open-sans);
+}
+
+.content h2 {
+    font-size: 20px !important;
+    margin-bottom: 8px;
+}
+
+.content h3 {
+    font-size: 14px !important;
+    color: var(--on-primary-light2);
+}
+
+.content .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.buttonContainer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    background-color: rgb(249, 250, 251);
+    padding: 16px 24px;
+}
+
+.cancelButton {
+    box-shadow: none;
+    text-transform: capitalize;
+    border-color: var(--secondary-color);
+    color: var(--secondary-color);
+}
+
+.addButton {
+    box-shadow: none;
+    text-transform: capitalize;
+    background-color: var(--secondary-color);
+}

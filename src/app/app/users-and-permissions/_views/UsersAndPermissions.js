@@ -6,10 +6,12 @@ import { DataGrid } from '@mui/x-data-grid';
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useState } from 'react';
+import AddUsersDialog from './AddUsersDialog';
 
-const AccountSetting = () => {
+const UsersAndPermissions = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedRowId, setSelectedRowId] = useState(null);
+    const [isAddUserOpen, setIsAddUserOpen] = useState(false);
 
     const handleMenuOpen = (event, rowId) => {
         setAnchorEl(event.currentTarget);
@@ -33,36 +35,36 @@ const AccountSetting = () => {
 
     const data = [
         {
-          id: 1,
-          email: "mokiohub@example.com",
-          location: "All",
-          role: "Owner"
+            id: 1,
+            email: "mokiohub@example.com",
+            location: "All",
+            role: "Owner"
         },
         {
-          id: 2,
-          email: "orchardcentral@example.com",
-          location: "Orchard Central",
-          role: "Manager"
+            id: 2,
+            email: "orchardcentral@example.com",
+            location: "Orchard Central",
+            role: "Manager"
         },
         {
-          id: 3,
-          email: "vivocity@example.com",
-          location: "VivoCity",
-          role: "Viewer"
+            id: 3,
+            email: "vivocity@example.com",
+            location: "VivoCity",
+            role: "Viewer"
         },
         {
-          id: 4,
-          email: "jurongpoint@example.com",
-          location: "Jurong Point",
-          role: "Viewer"
+            id: 4,
+            email: "jurongpoint@example.com",
+            location: "Jurong Point",
+            role: "Viewer"
         },
         {
-          id: 5,
-          email: "changiairportt3@example.com",
-          location: "Changi Airport T3",
-          role: "Viewer"
+            id: 5,
+            email: "changiairportt3@example.com",
+            location: "Changi Airport T3",
+            role: "Viewer"
         }
-      ];
+    ];
 
     const rows = data.map((item, index) => ({
         id: item.id,
@@ -123,36 +125,50 @@ const AccountSetting = () => {
 
     const paginationModel = { page: 0, pageSize: 10 };
 
+    const addUserHandler = () => {
+        setIsAddUserOpen(true);
+    };
+
+    const closeAddUserHandler = () => {
+        setIsAddUserOpen(false);
+    };
+
     return (
-        <div className={styles.container}>
-            <ContentCard className={styles.content}>
-                <div>
-                    <h2>Users Management</h2>
-                    <p className={styles.description}>
-                        Manage user accounts and configure permission settings to control access levels and ensure secure operations.
-                    </p>
-                </div>
-            </ContentCard>
+        <>
+            <AddUsersDialog 
+                isOpen={isAddUserOpen}
+                closeAddUserHandler={closeAddUserHandler}
+            />
 
-            <ContentCard className={styles.content}>
-                <div className={styles.usersHeader}>
-                    <h3 className={styles.noDescriptionTitle}>Users</h3>
+            <div className={styles.container}>
+                <ContentCard className={styles.content}>
+                    <div>
+                        <h2>Users Management</h2>
+                        <p className={styles.description}>
+                            Manage user accounts and configure permission settings to control access levels and ensure secure operations.
+                        </p>
+                    </div>
+                </ContentCard>
 
-                    <LoadingButton
-                        size="small"
-                        // onClick={addLocationHandler}
-                        // loading={true}
-                        // disabled
-                        loadingPosition="start"
-                        variant="contained"
-                        className={styles.button}
-                    >
-                        Invite user
-                    </LoadingButton>
-                </div>
-            </ContentCard>
-            
-            <div className={styles.tableContainer}>
+                <ContentCard className={styles.content}>
+                    <div className={styles.usersHeader}>
+                        <h3 className={styles.noDescriptionTitle}>Users</h3>
+
+                        <LoadingButton
+                            size="small"
+                            onClick={addUserHandler}
+                            // loading={true}
+                            // disabled
+                            loadingPosition="start"
+                            variant="contained"
+                            className={styles.button}
+                        >
+                            Invite user
+                        </LoadingButton>
+                    </div>
+                </ContentCard>
+
+                <div className={styles.tableContainer}>
                     <DataGrid
                         rows={rows}
                         columns={columns}
@@ -166,8 +182,9 @@ const AccountSetting = () => {
                         pagination
                     />
                 </div>
-        </div>
+            </div>
+        </>
     )
 };
 
-export default AccountSetting;
+export default UsersAndPermissions;

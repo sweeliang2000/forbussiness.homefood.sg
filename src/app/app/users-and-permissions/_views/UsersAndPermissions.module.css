@@ -17,8 +17,8 @@
 
 .button {
     box-shadow: none;
-    text-transform: capitalize;
-    background-color: rgb(36, 36, 39);
+    text-transform: capitalize !important;
+    background-color: var(--secondary-color) !important;
 }
 
 .usersHeader {
@@ -28,7 +28,7 @@
 
 .tableContainer {
     overflow-x: scroll;
-    background-color: white;
+    background-color: var(--primary);
     border-radius: 12px;
     max-width: 75rem;
     margin:  0 auto;

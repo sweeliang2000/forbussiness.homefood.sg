@@ -24,8 +24,8 @@
 
 .button {
     background-color: rgb(247, 247, 247) !important;
-    color: #d42020 !important;
-    border: 1px solid #d42020 !important;
+    color: var(--error-color) !important;
+    border: 1px solid var(--error-color) !important;
     box-shadow: none !important;
     text-transform: none !important;
     font-size: 14px;
