@@ -12,9 +12,9 @@
 }
 
 .content.danger {
-    border: 1px solid #d42020;
+    border: 1px solid var(--error-color);
 }
 
 .danger h2 {
-    color: #d42020;
+    color: var(--error-color);
 }

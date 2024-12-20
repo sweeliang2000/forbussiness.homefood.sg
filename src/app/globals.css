@@ -52,6 +52,8 @@ Do not use pixel for font size, width and media querys.
   --link-color: #2c15bf;
   --link-hover-color: #2200ff;
 
+  --error-color: #d42020;
+
   --font-size-base: 1rem;
 
   --max-width: 80rem;
