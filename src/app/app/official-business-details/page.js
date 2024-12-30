@@ -4,16 +4,50 @@ import { ContentCard } from "@/components/ContentCard/ContentCard";
 import { HeaderSection } from "@/components/HeaderSection/HeaderSection";
 import { TextField } from '@mui/material';
 import Link from "next/link";
+import { useState } from 'react';
+
+const BUSINESS_NAME = 'businessName';
+const UEN = 'uen';
+const UNIT_NUMBER = 'unitNumber';
+const BUILDING_NAME = 'buildingName';
+const STREET_ADDRESS = 'streetAddress';
+const POSTAL_CODE = 'postalCode';
+const NAME = 'name';
+const ROLE = 'role';
+const PHONE_NUMBER = 'phoneNumber';
 
 export default function StampSetup() {
+  const [isBtnLoading, setIsBtnLoading] = useState(false);
+  const [enteredValues, setEnteredValues] = useState({
+    [BUSINESS_NAME]: '',
+    [UEN]: '',
+    [UNIT_NUMBER]: '',
+    [BUILDING_NAME]: '',
+    [STREET_ADDRESS]: '',
+    [POSTAL_CODE]: '',
+    [NAME]: '',
+    [ROLE]: '',
+    [PHONE_NUMBER]: '',
+  });
+
+  const inputChangeHandler = (key, value) => {
+    setEnteredValues((prevValues) => ({
+      ...prevValues,
+      [key]: value
+    }))
+  };
+
   const formSubmissionHandler = (event) => {
     event.preventDefault();
   };
-  
+
 
   return (
     <div className={styles.container}>
-      <form onSubmit={formSubmissionHandler}>
+      <form 
+        className={styles.form}
+        onSubmit={formSubmissionHandler}
+      >
         <HeaderSection
           className={styles.header}
           title="Your Business"
@@ -24,7 +58,7 @@ export default function StampSetup() {
             </p>
 
           }
-          loading={true}
+          loading={isBtnLoading}
         />
         <ContentCard className={styles.content}>
           <div>

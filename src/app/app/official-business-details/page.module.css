@@ -5,6 +5,12 @@
     min-height: 100vh;
 }
 
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
 .header {
     position: sticky !important;
     top: 0;
