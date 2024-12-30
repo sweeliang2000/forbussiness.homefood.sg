@@ -1,0 +1,14 @@
+.formTextField h3 {
+    font-size: 16px;
+}
+
+.formTextField .description {
+    font-size: 0.75rem;
+    color: #5b6264;
+    margin-top: 4px;
+    margin-bottom: 16px;
+}
+
+.formTextField .titleBottom {
+    margin-bottom: 16px;
+}

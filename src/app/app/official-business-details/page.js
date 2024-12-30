@@ -1,4 +1,5 @@
 'use client';
+import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import styles from './page.module.css';
 import { ContentCard } from "@/components/ContentCard/ContentCard";
 import { HeaderSection } from "@/components/HeaderSection/HeaderSection";
@@ -44,7 +45,7 @@ export default function StampSetup() {
 
   return (
     <div className={styles.container}>
-      <form 
+      <form
         className={styles.form}
         onSubmit={formSubmissionHandler}
       >
@@ -63,25 +64,19 @@ export default function StampSetup() {
         <ContentCard className={styles.content}>
           <div>
             <h2>Official information</h2>
-            <h3>Business name</h3>
-            <p className={styles.description}>The official business name registered with ACRA. For example, McDonald&apos;s Corporation.</p>
 
-            <TextField
-              variant="outlined"
+            <FormTextField
+              title='Business name'
+              subtitle='The official business name registered with ACRA. For example, McDonald&apos;s Corporation.'
               placeholder="McDonald's Corporation."
-              fullWidth
             />
           </div>
 
           <div>
-            <h3>Unique Entity Number (UEN)</h3>
-            <p className={styles.description}>
-              The Unique Entity Number (UEN) is a 9- or 10-digit number issued by the Accounting and Corporate Regulatory Authority (ACRA) for registered businesses in Singapore.
-            </p>
-            <TextField
-              variant="outlined"
+            <FormTextField
+              title='Unique Entity Number (UEN)'
+              subtitle='The Unique Entity Number (UEN) is a 9- or 10-digit number issued by the Accounting and Corporate Regulatory Authority (ACRA) for registered businesses in Singapore.'
               placeholder="McDonalds"
-              fullWidth
               type="number"
               slotProps={{
                 input: {
@@ -139,40 +134,23 @@ export default function StampSetup() {
         <ContentCard className={styles.content}>
           <div>
             <h2>Representative Contact Details</h2>
-            <h3 className={styles.noDescriptionTitle}>Name</h3>
 
-            <TextField
+            <FormTextField
+              title='Name'
               placeholder='Your name'
-              variant="outlined"
-              fullWidth
             />
           </div>
 
-          <div>
-            <h3 className={styles.noDescriptionTitle}>Role</h3>
+          <FormTextField
+            title='Role'
+            placeholder='Accounts Manager'
+          />
 
-            <TextField
-              variant="outlined"
-              placeholder='Accounts Manager'
-              fullWidth
-            />
-          </div>
-
-          <div>
-            <h3 className={styles.noDescriptionTitle}>Phone Number</h3>
-
-            <TextField
-              variant="outlined"
-              placeholder='+6591234567'
-              fullWidth
-              type="tel"
-              slotProps={{
-                input: {
-                  pattern: "[+]{1}[0-9]{1,3}[0-9]{8}",
-                },
-              }}
-            />
-          </div>
+          <FormTextField
+            title='Phone Number'
+            placeholder='+6591234567'
+            type="tel"
+          />
         </ContentCard>
       </form>
     </div>
