@@ -5,7 +5,8 @@ import { LoadingButton } from '@mui/lab';
 export const HeaderSection = ({
     title,
     description,
-    className
+    className,
+    ...props
 }) => {
     return (
         <ContentCard className={`${className} ${styles.informationCard}`}>
@@ -13,13 +14,12 @@ export const HeaderSection = ({
                 <h1 className={styles.title}>{title}</h1>
 
                 <LoadingButton
+                    type='submit'
                     size="small"
-                    // onClick={handleClick}
-                    // loading={true}
-                    // disabled
                     loadingPosition="start"
                     variant="contained"
                     className={styles.loadingButton}
+                    {...props}
                 >
                     Save
                 </LoadingButton>

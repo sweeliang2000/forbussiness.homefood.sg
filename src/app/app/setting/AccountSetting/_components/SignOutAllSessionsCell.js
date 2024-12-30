@@ -5,6 +5,7 @@ import { Dialog } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { IoMdClose } from "react-icons/io";
 import styles from "./SignOutAllSessionsCell.module.css";
+import { GLOBAL_SIGN_OUT } from "@/utility/apiPaths";
 
 const SignOutAllSessionCell = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -12,6 +13,17 @@ const SignOutAllSessionCell = () => {
 
     const signoutAllSessionHandler = async () => {
         setIsButtonLoading(true)
+
+        try {
+            await apiClient.post(`${GLOBAL_SIGN_OUT}`, payload);
+            setIsAtRestPasswordStage(true);
+            setSuccessMessage("An OTP values had been sent to your email. Enter your new password and OTP to reset.")
+        } catch (error) {
+            const message = error?.response?.data?.message || error.message;
+            const code = error?.response?.data?.code || error.code;
+            setIsSubmissionButtonLoading(false);
+            setErrorMessage(`${message} (Error code: ${code})`);
+        }
     };
 
     return (
