@@ -40,6 +40,7 @@ export default function StampSetup() {
 
   const formSubmissionHandler = (event) => {
     event.preventDefault();
+    console.log(enteredValues);
   };
 
 
@@ -69,6 +70,7 @@ export default function StampSetup() {
               title='Business name'
               subtitle='The official business name registered with ACRA. For example, McDonald&apos;s Corporation.'
               placeholder="McDonald's Corporation."
+              onChange={(event) => { inputChangeHandler(BUSINESS_NAME, event.target.value) }}
             />
           </div>
 
@@ -84,6 +86,7 @@ export default function StampSetup() {
                   maxLength: 10,
                 },
               }}
+              onChange={(event) => { inputChangeHandler(UEN, event.target.value) }}
             />
           </div>
 
@@ -99,6 +102,7 @@ export default function StampSetup() {
                 variant="outlined"
                 placeholder="#05-23"
                 fullWidth
+                onChange={(event) => { inputChangeHandler(UNIT_NUMBER, event.target.value) }}
               />
 
               <TextField
@@ -106,6 +110,7 @@ export default function StampSetup() {
                 variant="outlined"
                 placeholder="International Plaza"
                 fullWidth
+                onChange={(event) => { inputChangeHandler(BUILDING_NAME, event.target.value) }}
               />
 
               <TextField
@@ -113,6 +118,7 @@ export default function StampSetup() {
                 variant="outlined"
                 placeholder="10 Anson Road"
                 fullWidth
+                onChange={(event) => { inputChangeHandler(STREET_ADDRESS, event.target.value) }}
               />
 
               <TextField
@@ -126,6 +132,7 @@ export default function StampSetup() {
                     maxLength: 6,
                   },
                 }}
+                onChange={(event) => { inputChangeHandler(POSTAL_CODE, event.target.value) }}
               />
             </div>
           </div>
@@ -138,18 +145,21 @@ export default function StampSetup() {
             <FormTextField
               title='Name'
               placeholder='Your name'
+              onChange={(event) => { inputChangeHandler(NAME, event.target.value) }}
             />
           </div>
 
           <FormTextField
             title='Role'
             placeholder='Accounts Manager'
+            onChange={(event) => { inputChangeHandler(ROLE, event.target.value) }}
           />
 
           <FormTextField
             title='Phone Number'
             placeholder='+6591234567'
             type="tel"
+            onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
           />
         </ContentCard>
       </form>
