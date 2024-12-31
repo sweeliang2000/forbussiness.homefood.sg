@@ -30,10 +30,48 @@ export default function StampSetup() {
     [ROLE]: '',
     [PHONE_NUMBER]: '',
   });
+  
+  const [textfieldError, setTextfieldError] = useState({
+    [BUSINESS_NAME]: false,
+    [UEN]: false,
+    [UNIT_NUMBER]: false,
+    [BUILDING_NAME]: false,
+    [STREET_ADDRESS]: false,
+    [POSTAL_CODE]: false,
+    [NAME]: false,
+    [ROLE]: false,
+    [PHONE_NUMBER]: false,
+  });
+
+  const [helperText, setHelperText] = useState({
+    [BUSINESS_NAME]: '',
+    [UEN]: '',
+    [UNIT_NUMBER]: '',
+    [BUILDING_NAME]: '',
+    [STREET_ADDRESS]: '',
+    [POSTAL_CODE]: '',
+    [NAME]: '',
+    [ROLE]: '',
+    [PHONE_NUMBER]: '',
+  });
 
   const inputChangeHandler = (key, value) => {
     setEnteredValues((prevValues) => ({
       ...prevValues,
+      [key]: value
+    }))
+  };
+
+  const textfieldErrorHandler = (key, value) => {
+    setTextfieldError((preValues) => ({
+      ...preValues,
+      [key]: value
+    }))
+  };
+
+  const helperTextHandler = (key, value) => {
+    setHelperText((preValues) => ({
+      ...preValues,
       [key]: value
     }))
   };
@@ -67,31 +105,31 @@ export default function StampSetup() {
             <h2>Official information</h2>
 
             <FormTextField
-              title='Business name'
+              title='Business name*'
               subtitle='The official business name registered with ACRA. For example, McDonald&apos;s Corporation.'
               placeholder="McDonald's Corporation."
               id={BUSINESS_NAME}
               name={BUSINESS_NAME}
               required
+              helperText={helperText.buildingName}
+              error={textfieldError.buildingName}
+              value={enteredValues.buildingName}
               onChange={(event) => { inputChangeHandler(BUSINESS_NAME, event.target.value) }}
             />
           </div>
 
           <div>
             <FormTextField
-              title='Unique Entity Number (UEN)'
+              title='Unique Entity Number (UEN)*'
               subtitle='The Unique Entity Number (UEN) is a 9- or 10-digit number issued by the Accounting and Corporate Regulatory Authority (ACRA) for registered businesses in Singapore.'
               placeholder="McDonalds"
               type="number"
-              slotProps={{
-                input: {
-                  min: 0,
-                  maxLength: 10,
-                },
-              }}
               id={UEN}
               name={UEN}
               required
+              helperText={helperText.uen}
+              value={enteredValues.uen}
+              error={textfieldError.uen}
               onChange={(event) => { inputChangeHandler(UEN, event.target.value) }}
             />
           </div>
@@ -111,6 +149,9 @@ export default function StampSetup() {
                 id={UNIT_NUMBER}
                 name={UNIT_NUMBER}
                 required
+                helperText={helperText.unitNumber}
+                value={enteredValues.unitNumber}
+                error={textfieldError.unitNumber}
                 onChange={(event) => { inputChangeHandler(UNIT_NUMBER, event.target.value) }}
               />
 
@@ -121,6 +162,9 @@ export default function StampSetup() {
                 fullWidth
                 id={BUILDING_NAME}
                 name={BUILDING_NAME}
+                helperText={helperText.buildingName}
+                error={textfieldError.buildingName}
+                value={enteredValues.buildingName}
                 onChange={(event) => { inputChangeHandler(BUILDING_NAME, event.target.value) }}
               />
 
@@ -132,6 +176,9 @@ export default function StampSetup() {
                 id={STREET_ADDRESS}
                 name={STREET_ADDRESS}
                 required
+                helperText={helperText.streetAddress}
+                error={textfieldError.streetAddress}
+                value={enteredValues.streetAddress}
                 onChange={(event) => { inputChangeHandler(STREET_ADDRESS, event.target.value) }}
               />
 
@@ -149,6 +196,9 @@ export default function StampSetup() {
                 id={POSTAL_CODE}
                 name={POSTAL_CODE}
                 required
+                helperText={helperText.postalCode}
+                error={textfieldError.postalCode}
+                value={enteredValues.postalCode}
                 onChange={(event) => { inputChangeHandler(POSTAL_CODE, event.target.value) }}
               />
             </div>
@@ -160,30 +210,39 @@ export default function StampSetup() {
             <h2>Representative Contact Details</h2>
 
             <FormTextField
-              title='Name'
+              title='Name*'
               placeholder='Your name'
               id={NAME}
               name={NAME}
               required
+              helperText={helperText.name}
+              error={textfieldError.name}
+              value={enteredValues.name}
               onChange={(event) => { inputChangeHandler(NAME, event.target.value) }}
             />
           </div>
 
           <FormTextField
-            title='Role'
+            title='Role*'
             placeholder='Accounts Manager'
             id={ROLE}
             name={ROLE}
+            helperText={helperText.role}
+            error={textfieldError.role}
+            value={enteredValues.role}
             onChange={(event) => { inputChangeHandler(ROLE, event.target.value) }}
           />
 
           <FormTextField
-            title='Phone Number'
+            title='Phone Number*'
             placeholder='+6591234567'
             id={PHONE_NUMBER}
             name={PHONE_NUMBER}
             type="tel"
             required
+            helperText={helperText.phoneNumber}
+            error={textfieldError.phoneNumber}
+            value={enteredValues.phoneNumber}
             onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
           />
         </ContentCard>
