@@ -70,6 +70,9 @@ export default function StampSetup() {
               title='Business name'
               subtitle='The official business name registered with ACRA. For example, McDonald&apos;s Corporation.'
               placeholder="McDonald's Corporation."
+              id={BUSINESS_NAME}
+              name={BUSINESS_NAME}
+              required
               onChange={(event) => { inputChangeHandler(BUSINESS_NAME, event.target.value) }}
             />
           </div>
@@ -86,6 +89,9 @@ export default function StampSetup() {
                   maxLength: 10,
                 },
               }}
+              id={UEN}
+              name={UEN}
+              required
               onChange={(event) => { inputChangeHandler(UEN, event.target.value) }}
             />
           </div>
@@ -102,6 +108,9 @@ export default function StampSetup() {
                 variant="outlined"
                 placeholder="#05-23"
                 fullWidth
+                id={UNIT_NUMBER}
+                name={UNIT_NUMBER}
+                required
                 onChange={(event) => { inputChangeHandler(UNIT_NUMBER, event.target.value) }}
               />
 
@@ -110,6 +119,8 @@ export default function StampSetup() {
                 variant="outlined"
                 placeholder="International Plaza"
                 fullWidth
+                id={BUILDING_NAME}
+                name={BUILDING_NAME}
                 onChange={(event) => { inputChangeHandler(BUILDING_NAME, event.target.value) }}
               />
 
@@ -118,6 +129,9 @@ export default function StampSetup() {
                 variant="outlined"
                 placeholder="10 Anson Road"
                 fullWidth
+                id={STREET_ADDRESS}
+                name={STREET_ADDRESS}
+                required
                 onChange={(event) => { inputChangeHandler(STREET_ADDRESS, event.target.value) }}
               />
 
@@ -132,6 +146,9 @@ export default function StampSetup() {
                     maxLength: 6,
                   },
                 }}
+                id={POSTAL_CODE}
+                name={POSTAL_CODE}
+                required
                 onChange={(event) => { inputChangeHandler(POSTAL_CODE, event.target.value) }}
               />
             </div>
@@ -145,6 +162,9 @@ export default function StampSetup() {
             <FormTextField
               title='Name'
               placeholder='Your name'
+              id={NAME}
+              name={NAME}
+              required
               onChange={(event) => { inputChangeHandler(NAME, event.target.value) }}
             />
           </div>
@@ -152,13 +172,18 @@ export default function StampSetup() {
           <FormTextField
             title='Role'
             placeholder='Accounts Manager'
+            id={ROLE}
+            name={ROLE}
             onChange={(event) => { inputChangeHandler(ROLE, event.target.value) }}
           />
 
           <FormTextField
             title='Phone Number'
             placeholder='+6591234567'
+            id={PHONE_NUMBER}
+            name={PHONE_NUMBER}
             type="tel"
+            required
             onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
           />
         </ContentCard>
