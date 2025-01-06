@@ -2,7 +2,6 @@
     background-color: #FFFFFF;
     height: 100vh;
     width: 16rem;
-    padding: 6px 16px;
     border-right: 4px solid rgb(238, 239, 241);
     
     /* This is to make it fix without using position fix */
@@ -25,9 +24,19 @@
 }
 
 .sidebar > ul > li:first-child {
+    top: 0;
+    position: sticky;
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    margin-bottom: 16px;
+    padding: 6px 16px; 
+    background-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px); /* For Safari support */
+}
+
+.sidebar ul li:not(:first-child) {
+    padding: 0 16px; 
 }
 
 .sidebar ul {
@@ -36,10 +45,13 @@
     gap: 8px;
 }
 
-.logoLi {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.logoLi .logoLink {
+    margin: 0;
+    padding: 0 8px;
+}
+
+.logoLi .logoLink:hover {
+    background-color: white;
 }
 
 .logo {

@@ -14,7 +14,7 @@ Do not use pixel for font size, width and media querys.
 }
 
 @font-face {
-  font-family: 'Open Sans Italic';
+  font-family: 'Open Sans';
   src: url('/fonts/OpenSans-Italic-VariableFont_wdth,wght.ttf') format('truetype');
   font-weight: 100 900;
   font-style: italic;
@@ -28,10 +28,34 @@ Do not use pixel for font size, width and media querys.
 }
 
 @font-face {
-  font-family: 'Raleway Italic';
+  font-family: 'Raleway';
   src: url('/fonts/Raleway-Italic-VariableFont_wght.ttf') format('truetype');
   font-weight: 100 900;
   font-style: italic;
+}
+
+/* Dongle Light (weight ~300) */
+@font-face {
+  font-family: 'Dongle';
+  src: url('/fonts/Dongle-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+/* Dongle Regular (weight ~400) */
+@font-face {
+  font-family: 'Dongle';
+  src: url('/fonts/Dongle-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Dongle Bold (weight ~700) */
+@font-face {
+  font-family: 'Dongle';
+  src: url('/fonts/Dongle-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
 }
 
 :root {
@@ -64,6 +88,7 @@ Do not use pixel for font size, width and media querys.
 
   --font-open-sans: "Open Sans", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   --font-raleway: "Raleway", "Montserrat", "Lato", "Ubuntu", Arial, sans-serif;
+  --font-dongle: "Dongle",  Arial, sans-serif;
 }
 html {
   font-size: 100%; /* Base font size */

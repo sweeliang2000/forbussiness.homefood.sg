@@ -15,6 +15,7 @@ import { LuStamp } from "react-icons/lu";
 import { Submenu } from './submenu/submenu';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
+import CollbineForBusiness from '../CollbineForBusiness/CollbineForBusiness';
 
 
 export default function Sidebar() {
@@ -45,12 +46,12 @@ export default function Sidebar() {
         <aside className={`${styles.sidebar} ${sidebarMinimised ? styles.close : ''}`}>
             <ul>
                 <li className={styles.logoLi}>
-                    <Link href='/'>
-                        <span className={`${styles.logo} ${sidebarMinimised ? styles.hiddenLogo : ''}`}>Collbine For Business</span>
+                    <Link className={styles.logoLink} href='/'>
+                        <CollbineForBusiness/>
                     </Link>
-                    <div className={styles.minimiseSidebar} onClick={toggleSidebar}>
+                    {/* <div className={styles.minimiseSidebar} onClick={toggleSidebar}>
                         <FaAnglesLeft className={sidebarMinimised ? styles.rotate : styles.reverseRotate} />
-                    </div>
+                    </div> */}
                 </li>
 
                 <li className={section === undefined ? styles.active : ''}>
