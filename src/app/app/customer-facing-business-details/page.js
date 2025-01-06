@@ -5,6 +5,7 @@ import { TextField } from '@mui/material';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
 import LocationSection from './LocationSecion';
+import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 
 export default function CustomerFacingDetails() {
     const sampleData = [
@@ -400,6 +401,7 @@ export default function CustomerFacingDetails() {
                         }}
                     />
                 </div>
+                <DragDropImageUploader/>
             </ContentCard>
 
             <LocationSection data={sampleData}/>
