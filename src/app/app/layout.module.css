@@ -1,8 +1,48 @@
 .body {
     display: grid;
+    grid-template-rows: auto auto;
     grid-template-columns: auto 1fr;
+    grid-template-areas: 
+        "navbar navbar"
+        "sidebar main";
+}
+
+.mobileNavBar {
+    display: none !important;
+    position: sticky;
+    top: 0;
+    grid-area: navbar;
+}
+
+.sidebar {
+    grid-area: sidebar;
+}
+
+.mainContainer {
+    grid-area: main;
 }
 
 .main {
     padding: 12px 24px;
+}
+
+.overlay {
+    display: none;
+}
+
+@media only screen and (max-width: 820px) {
+    .mobileNavBar {
+        display: flex !important;
+    }
+
+    .sidebar {
+        position: fixed !important;
+        z-index: 99;
+        display: none;
+        margin-top: 56px;
+    }
+
+    .sidebar.open {
+        display: block;
+    }
 }

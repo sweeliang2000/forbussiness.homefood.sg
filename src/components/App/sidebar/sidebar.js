@@ -19,7 +19,11 @@ import CollbineForBusiness from '../../CollbineForBusiness/CollbineForBusiness';
 import { Button } from '@mui/material';
 
 
-export default function Sidebar() {
+export default function Sidebar({
+    isClose,
+    onClose,
+    className
+}) {
     const RELEASES_TAB = 'RELEASES_TAB';
     const STAMP_TAB = 'STAMP_TAB';
     const POINTS_TAB = 'POINTS_TAB';
@@ -44,154 +48,157 @@ export default function Sidebar() {
     };
 
     return (
-        <aside className={`${styles.sidebar} ${sidebarMinimised ? styles.close : ''}`}>
-            <ul className={styles.top}>
-                <li className={styles.logoLi}>
-                    <Link className={styles.logoLink} href='/'>
-                        <CollbineForBusiness/>
-                    </Link>
-                    {/* <div className={styles.minimiseSidebar} onClick={toggleSidebar}>
-                        <FaAnglesLeft className={sidebarMinimised ? styles.rotate : styles.reverseRotate} />
-                    </div> */}
-                </li>
-
-                <li className={section === undefined ? styles.active : ''}>
-                    <Link href='/app'>
-                        <MdOutlineSpaceDashboard className={styles.icon} />
-                        <span>Dashboard</span>
-                    </Link>
-                </li>
-
-                {
-                    !sidebarMinimised && <li className={styles.labelLi}>
-                        <label className={styles.label}>General</label>
+        <>
+            <aside className={`${styles.sidebar} ${sidebarMinimised ? styles.close : ''} ${className}`}>
+                <ul className={styles.top}>
+                    <li className={styles.logoLi}>
+                        <Link className={styles.logoLink} href='/'>
+                            <CollbineForBusiness/>
+                        </Link>
+                        {/* <div className={styles.minimiseSidebar} onClick={toggleSidebar}>
+                            <FaAnglesLeft className={sidebarMinimised ? styles.rotate : styles.reverseRotate} />
+                        </div> */}
                     </li>
-                }
 
-                <li className={section == 'official-business-details' ? styles.active : ''}>
-                    <Link href='/app/official-business-details'>
-                        <LuClipboardList className={styles.icon} />
-                        <span>Official Business Details</span>
-                    </Link>
-                </li>
-
-                <li className={section == 'customer-facing-business-details' ? styles.active : ''}>
-                    <Link href='/app/customer-facing-business-details'>
-                        <RiNewspaperLine className={styles.icon} />
-                        <span>Customer-Facing Details</span>
-                    </Link>
-                </li>
-
-                <li>
-                    <Link href='/'>
-                        <MdOutlineNotificationsNone className={styles.icon} />
-                        <span>Notifications</span>
-                    </Link>
-                </li>
-
-                <Submenu
-                    title={'Releases'}
-                    submenus={[
-                        { href: '/', title: 'Release Review' },
-                        { href: '/document', title: 'Release Status' },
-                        { href: '/document', title: 'History' }
-                    ]}
-                    isExpand={currentSelection == RELEASES_TAB}
-                    icon={FaMobileAlt}
-                    onClick={() => { toggleMenus(RELEASES_TAB) }}
-                />
-
-                {
-                    !sidebarMinimised && <li className={styles.labelLi}>
-                        <label className={styles.label}>Products Categories</label>
+                    <li className={section === undefined ? styles.active : ''}>
+                        <Link href='/app'>
+                            <MdOutlineSpaceDashboard className={styles.icon} />
+                            <span>Dashboard</span>
+                        </Link>
                     </li>
-                }
 
-                <Submenu
-                    title={'Stamp System'}
-                    submenus={[
-                        { href: '/app/stamp-management', title: 'Stamp Managment' },
-                        { href: '/document', title: 'Membership Tiers' },
-                        { href: '/project', title: 'Redeemable Items' }
-                    ]}
-                    isExpand={currentSelection == STAMP_TAB}
-                    icon={LuStamp}
-                    onClick={() => { toggleMenus(STAMP_TAB) }}
-                />
+                    {
+                        !sidebarMinimised && <li className={styles.labelLi}>
+                            <label className={styles.label}>General</label>
+                        </li>
+                    }
 
-                <Submenu
-                    title={'Points System'}
-                    submenus={[
-                        { href: '/app/points-management', title: 'Points Management' },
-                        { href: '/document', title: 'Membership Tiers' },
-                    ]}
-                    isExpand={currentSelection == POINTS_TAB}
-                    icon={ImCoinDollar}
-                    onClick={() => { toggleMenus(POINTS_TAB) }}
-                />
-
-                <Submenu
-                    title={'Redeemable'}
-                    submenus={[
-                        { href: '/', title: 'My Rewards' },
-                    ]}
-                    isExpand={currentSelection == REDEEMABLE_TAB}
-                    icon={BsGift}
-                    onClick={() => { toggleMenus(REDEEMABLE_TAB) }}
-                />
-
-                {
-                    !sidebarMinimised && <li className={styles.labelLi}>
-                        <label className={styles.label}>GROWTH & MARKETING</label>
+                    <li className={section == 'official-business-details' ? styles.active : ''}>
+                        <Link href='/app/official-business-details'>
+                            <LuClipboardList className={styles.icon} />
+                            <span>Official Business Details</span>
+                        </Link>
                     </li>
-                }
 
-                <Submenu
-                    title={'Customers'}
-                    submenus={[
-                        { href: '/', title: 'Ratings and Reviews' },
-                        { href: '/document', title: 'Direct Message' }
-                    ]}
-                    isExpand={currentSelection == CUSTOMERS_TAB}
-                    icon={AiOutlineMessage}
-                    onClick={() => { toggleMenus(CUSTOMERS_TAB) }}
-                />
-
-                {
-                    !sidebarMinimised && <li className={styles.labelLi}>
-                        <label className={styles.label}>Settings</label>
+                    <li className={section == 'customer-facing-business-details' ? styles.active : ''}>
+                        <Link href='/app/customer-facing-business-details'>
+                            <RiNewspaperLine className={styles.icon} />
+                            <span>Customer-Facing Details</span>
+                        </Link>
                     </li>
-                }
+
+                    <li>
+                        <Link href='/'>
+                            <MdOutlineNotificationsNone className={styles.icon} />
+                            <span>Notifications</span>
+                        </Link>
+                    </li>
+
+                    <Submenu
+                        title={'Releases'}
+                        submenus={[
+                            { href: '/', title: 'Release Review' },
+                            { href: '/document', title: 'Release Status' },
+                            { href: '/document', title: 'History' }
+                        ]}
+                        isExpand={currentSelection == RELEASES_TAB}
+                        icon={FaMobileAlt}
+                        onClick={() => { toggleMenus(RELEASES_TAB) }}
+                    />
+
+                    {
+                        !sidebarMinimised && <li className={styles.labelLi}>
+                            <label className={styles.label}>Products Categories</label>
+                        </li>
+                    }
+
+                    <Submenu
+                        title={'Stamp System'}
+                        submenus={[
+                            { href: '/app/stamp-management', title: 'Stamp Managment' },
+                            { href: '/document', title: 'Membership Tiers' },
+                            { href: '/project', title: 'Redeemable Items' }
+                        ]}
+                        isExpand={currentSelection == STAMP_TAB}
+                        icon={LuStamp}
+                        onClick={() => { toggleMenus(STAMP_TAB) }}
+                    />
+
+                    <Submenu
+                        title={'Points System'}
+                        submenus={[
+                            { href: '/app/points-management', title: 'Points Management' },
+                            { href: '/document', title: 'Membership Tiers' },
+                        ]}
+                        isExpand={currentSelection == POINTS_TAB}
+                        icon={ImCoinDollar}
+                        onClick={() => { toggleMenus(POINTS_TAB) }}
+                    />
+
+                    <Submenu
+                        title={'Redeemable'}
+                        submenus={[
+                            { href: '/', title: 'My Rewards' },
+                        ]}
+                        isExpand={currentSelection == REDEEMABLE_TAB}
+                        icon={BsGift}
+                        onClick={() => { toggleMenus(REDEEMABLE_TAB) }}
+                    />
+
+                    {
+                        !sidebarMinimised && <li className={styles.labelLi}>
+                            <label className={styles.label}>GROWTH & MARKETING</label>
+                        </li>
+                    }
+
+                    <Submenu
+                        title={'Customers'}
+                        submenus={[
+                            { href: '/', title: 'Ratings and Reviews' },
+                            { href: '/document', title: 'Direct Message' }
+                        ]}
+                        isExpand={currentSelection == CUSTOMERS_TAB}
+                        icon={AiOutlineMessage}
+                        onClick={() => { toggleMenus(CUSTOMERS_TAB) }}
+                    />
+
+                    {
+                        !sidebarMinimised && <li className={styles.labelLi}>
+                            <label className={styles.label}>Settings</label>
+                        </li>
+                    }
 
 
-                <li className={section == 'users-and-permissions' ? styles.active : ''}>
-                    <Link href='/app/users-and-permissions'>
-                    <RiUserSettingsLine className={styles.icon} />
-                        <span>Users and permissions</span>
-                    </Link>
-                </li>
+                    <li className={section == 'users-and-permissions' ? styles.active : ''}>
+                        <Link href='/app/users-and-permissions'>
+                        <RiUserSettingsLine className={styles.icon} />
+                            <span>Users and permissions</span>
+                        </Link>
+                    </li>
 
-                <li>
-                    <Link href='/'>
-                        <HiOutlineSpeakerphone className={styles.icon} />
-                        <span>Feedbacks</span>
-                    </Link>
-                </li>
+                    <li>
+                        <Link href='/'>
+                            <HiOutlineSpeakerphone className={styles.icon} />
+                            <span>Feedbacks</span>
+                        </Link>
+                    </li>
 
-                <li className={section == 'setting' ? styles.active : ''}>
-                    <Link href='/app/setting'>
-                        <RxGear className={styles.icon} />
-                        <span>Account Settings</span>
-                    </Link>
-                </li>
-            </ul>
-            <div className={styles.subscriptionContainer}>
-                <div>
-                    <p className={styles.title}>Free</p>
-                    <p className={styles.cost}>No-Cost ($0/Month)</p>
+                    <li className={section == 'setting' ? styles.active : ''}>
+                        <Link href='/app/setting'>
+                            <RxGear className={styles.icon} />
+                            <span>Account Settings</span>
+                        </Link>
+                    </li>
+                </ul>
+                <div className={styles.subscriptionContainer}>
+                    <div>
+                        <p className={styles.title}>Free</p>
+                        <p className={styles.cost}>No-Cost ($0/Month)</p>
+                    </div>
+                    <Button className={styles.button}variant="text">Upgrade</Button>
                 </div>
-                <Button className={styles.button}variant="text">Upgrade</Button>
-            </div>
-        </aside>
+            </aside>
+            { !isClose && <div className={styles.overlay} onClick={onClose}/>}
+        </>
     )
 }

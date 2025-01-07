@@ -1,7 +1,7 @@
 .logoDiv {
     display: flex;
     font-family: var(--font-dongle);
-    align-items: baseline;
+    align-items: end;
 }
 
 .logoDiv .brand {
