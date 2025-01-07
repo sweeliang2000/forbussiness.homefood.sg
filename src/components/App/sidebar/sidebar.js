@@ -15,7 +15,8 @@ import { LuStamp } from "react-icons/lu";
 import { Submenu } from './submenu/submenu';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import CollbineForBusiness from '../CollbineForBusiness/CollbineForBusiness';
+import CollbineForBusiness from '../../CollbineForBusiness/CollbineForBusiness';
+import { Button } from '@mui/material';
 
 
 export default function Sidebar() {
@@ -44,7 +45,7 @@ export default function Sidebar() {
 
     return (
         <aside className={`${styles.sidebar} ${sidebarMinimised ? styles.close : ''}`}>
-            <ul>
+            <ul className={styles.top}>
                 <li className={styles.logoLi}>
                     <Link className={styles.logoLink} href='/'>
                         <CollbineForBusiness/>
@@ -184,6 +185,13 @@ export default function Sidebar() {
                     </Link>
                 </li>
             </ul>
+            <div className={styles.subscriptionContainer}>
+                <div>
+                    <p className={styles.title}>Free</p>
+                    <p className={styles.cost}>No-Cost ($0/Month)</p>
+                </div>
+                <Button className={styles.button}variant="text">Upgrade</Button>
+            </div>
         </aside>
     )
 }

@@ -1,7 +1,7 @@
 .sidebar {
     background-color: #FFFFFF;
     height: 100vh;
-    width: 16rem;
+    width: 256px;
     border-right: 4px solid rgb(238, 239, 241);
     
     /* This is to make it fix without using position fix */
@@ -21,6 +21,10 @@
 
 .sidebar ul {
     list-style: none;
+}
+
+.sidebar .top {
+    padding-bottom: 94px;
 }
 
 .sidebar > ul > li:first-child {
@@ -154,4 +158,29 @@
 
 .submenuContainer {
     overflow: hidden;
+}
+
+.subscriptionContainer {
+    position: fixed;
+    bottom: 0;
+    gap: 0;
+    width: 236px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px; 
+    border-top: 2px solid rgb(225, 225, 225);
+}
+
+.subscriptionContainer .title {
+    margin-bottom: 4px;
+}
+
+.subscriptionContainer .cost {
+    font-size: 12px;
+}
+
+.subscriptionContainer .button {
+    text-transform: none;
 }

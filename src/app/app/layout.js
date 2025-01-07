@@ -1,6 +1,6 @@
 import { BreadcrumsBar } from '@/components/breadcrumbsbar/breadcrumsbar';
 import styles from './layout.module.css'
-import Sidebar from "@/components/sidebar/sidebar";
+import Sidebar from "@/components/App/sidebar/sidebar";
 import { AppFooter } from '@/components/AppFooter/AppFooter';
 
 export const metadata = {
