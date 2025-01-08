@@ -48,13 +48,18 @@
     overflow: hidden;
 }
 
+.submenuContainer li {
+    padding-left: 12px !important;
+    padding-right: 0px !important;
+}
+
 .rotate {
     rotate: 180deg;
     transition: 200ms ease;
 }
 
 .link {
-    margin-left: 30px;
+    margin-left: 0;
 }
 
 .active a {

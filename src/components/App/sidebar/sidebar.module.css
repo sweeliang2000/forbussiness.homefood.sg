@@ -39,7 +39,7 @@
     -webkit-backdrop-filter: blur(8px); /* For Safari support */
 }
 
-.sidebar ul li:not(:first-child) {
+.sidebar ul li:not(.logoLi) {
     padding: 0 16px; 
 }
 
