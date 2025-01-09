@@ -1,9 +1,16 @@
 'use client';
 import { useRef, useState } from 'react';
 import styles from './DragDropImageUploader.module.css';
+import Image from 'next/image';
+import { FaMinusCircle } from "react-icons/fa";
+import { Button } from '@mui/material';
 
-const DragDropImageUploader = () => {
-    const [images, setImages] = useState([]);
+const DragDropImageUploader = ({
+    images,
+    setImages,
+    isMultiple
+}) => {
+    // const [images, setImages] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
 
@@ -17,19 +24,27 @@ const DragDropImageUploader = () => {
         for (let i = 0; i < files.length; i++) {
             if (files[i].type.split('/')[0] !== 'image') continue;
             if (!images.some((e) => e.name === files[i].name)) {
-                setImages((prevImages) => [
-                    ...prevImages,
-                    {
-                        name: files[i].name,
-                        url: URL.createObjectURL(files[i]),
-                    }
-                ])
+                const newImage = {
+                    name: files[i].name,
+                    url: URL.createObjectURL(files[i]),
+                };
+
+                if (isMultiple) {
+                    setImages((prevImages) => [
+                        ...prevImages,
+                        newImage
+                    ])
+                } else {
+                    setImages([
+                        newImage
+                    ])
+                }
             }
         }
     };
 
     const deleteImage = (index) => {
-        setImages((prevImages) => 
+        setImages((prevImages) =>
             prevImages.filter((_, i) => i !== index)
         );
     };
@@ -71,48 +86,63 @@ const DragDropImageUploader = () => {
 
     return (
         <div className={styles.card}>
-            <div className={styles.top}>
-                <p>Drag & Drop Image uploading</p>
-            </div>
-            <div 
-                className={styles.dragArea}
-                onDragOver={onDragOver}
-                onDragLeave={onDragLeave}
-                onDrop={onDrop}
+            {
+                images.length === 0 ?
+                    <div
+                        className={styles.dragArea}
+                        onDragOver={onDragOver}
+                        onDragLeave={onDragLeave}
+                        onDrop={onDrop}
+                    >
+                        {
+                            isDragging ? (
+                                <span className={styles.select}>Drop image here</span>
+                            ) : (
+                                <>
+                                    Drag & Drop image here or {" "}
+                                    <span className={styles.select} role='button' onClick={selectFiles}>
+                                        Browser
+                                    </span></>
+                            )
+                        }
+                    </div> :
+                    <div className={styles.container}>
+                        {
+                            images.map((images, index) => (
+                                <div className={styles.imageContainer} key={index}>
+                                    <FaMinusCircle className={styles.delete} onClick={() => deleteImage(index)} />
+                                    <Image
+                                        className={styles.image}
+                                        width={500}
+                                        height={500}
+                                        src={images.url}
+                                        alt={images.name} />
+                                </div>
+                            ))
+                        }
+                    </div>
+            }
+
+            <input
+                name='file'
+                type='file'
+                className={styles.file}
+                multiple={isMultiple}
+                ref={fileInputRef}
+                onChange={onFileSelect}
+            />
+
+            <div className={styles.bottomFooter}>
+                <p>1 of 1 Image</p>
+                <p>|</p>
+                <Button
+                    className={styles.button}
+                    onClick={selectFiles}
+                    variant="text"
                 >
-                {
-                    isDragging ? (
-                        <span className={styles.select}>Drop image here</span>
-                    ) : (
-                        <>
-                            Drag & Drop image here or {" "}
-                            <span className={styles.select} role='button' onClick={selectFiles}>
-                                Browser
-                            </span></>
-                    )
-                }
-                <input
-                    name='file'
-                    type='file'
-                    className={styles.file}
-                    multiple
-                    ref={fileInputRef}
-                    onChange={onFileSelect}
-                />
+                    {images.length !== 0 & !isMultiple ? 'Replace' : 'Choose File'}
+                </Button>
             </div>
-            <div className={styles.container}>
-                {
-                    images.map((images, index) => (
-                        <div className={styles.image} key={index}>
-                            <span className={styles.delete} onClick={() => deleteImage(index)}>&times;</span>
-                            <img src={images.url} alt={images.name} />
-                        </div>
-                    ))
-                }
-            </div>
-            <button type='button' onClick={uploadImage}>
-                upload
-            </button>
         </div>
     )
 };
