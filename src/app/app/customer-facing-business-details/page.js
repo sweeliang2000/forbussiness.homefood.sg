@@ -388,24 +388,6 @@ export default function CustomerFacingDetails() {
             options={[{ value: 'Yes', title: 'Yes' }, { value: 'No', title: 'No' }, { value: 'Not Applicable', title: 'Not Applicable' }]}
           />
         </div>
-
-        <div>
-          <h3 className={styles.noDescriptionTitle}>Keywords</h3>
-
-          <p className={styles.description}>Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.</p>
-
-          <TextField
-            variant="outlined"
-            placeholder="McDonalds,Burgers"
-            fullWidth
-            slotProps={{
-              input: {
-                min: 0,
-                maxLength: 10,
-              },
-            }}
-          />
-        </div>
         
         <div>
           <h3 className={styles.noDescriptionTitle}>Thumbnail / Featured Image</h3>
@@ -430,6 +412,24 @@ export default function CustomerFacingDetails() {
             width={792}
             height={198}
             imageClassName={styles.dragdropBannerImage}
+          />
+        </div>
+
+        <div>
+          <h3 className={styles.noDescriptionTitle}>Keywords</h3>
+
+          <p className={styles.description}>Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.</p>
+
+          <TextField
+            variant="outlined"
+            placeholder="McDonalds,Burgers"
+            fullWidth
+            slotProps={{
+              input: {
+                min: 0,
+                maxLength: 10,
+              },
+            }}
           />
         </div>
       </ContentCard>
