@@ -26,3 +26,13 @@
     color: #5b6264;
     margin-bottom: 12px;
 }
+
+.dragdropImage {
+    width: 180px;
+    height: 180px;
+}
+
+.dragdropBannerImage {
+    width: 792px;
+    height: 198px;
+}

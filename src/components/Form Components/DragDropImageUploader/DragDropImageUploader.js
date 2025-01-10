@@ -8,7 +8,10 @@ import { Button } from '@mui/material';
 const DragDropImageUploader = ({
     images,
     setImages,
-    isMultiple
+    isMultiple,
+    width,
+    height,
+    imageClassName
 }) => {
     // const [images, setImages] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
@@ -22,11 +25,14 @@ const DragDropImageUploader = ({
         const files = event.target.files;
         if (files.length === 0) return;
         for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+
             if (files[i].type.split('/')[0] !== 'image') continue;
             if (!images.some((e) => e.name === files[i].name)) {
                 const newImage = {
-                    name: files[i].name,
-                    url: URL.createObjectURL(files[i]),
+                    name: file.name,
+                    file: file,
+                    url: URL.createObjectURL(file),
                 };
 
                 if (isMultiple) {
@@ -67,13 +73,16 @@ const DragDropImageUploader = ({
 
         if (files.length === 0) return;
         for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+
             if (files[i].type.split('/')[0] !== 'image') continue;
             if (!images.some((e) => e.name === files[i].name)) {
                 setImages((prevImages) => [
                     ...prevImages,
                     {
-                        name: files[i].name,
-                        url: URL.createObjectURL(files[i]),
+                        name: file.name,
+                        file: file,
+                        url: URL.createObjectURL(file[i]),
                     }
                 ])
             }
@@ -112,9 +121,9 @@ const DragDropImageUploader = ({
                                 <div className={styles.imageContainer} key={index}>
                                     <FaMinusCircle className={styles.delete} onClick={() => deleteImage(index)} />
                                     <Image
-                                        className={styles.image}
-                                        width={500}
-                                        height={500}
+                                        className={`${styles.image} ${imageClassName}`}
+                                        width={width}
+                                        height={height}
                                         src={images.url}
                                         alt={images.name} />
                                 </div>

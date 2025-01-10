@@ -10,7 +10,8 @@ import LocationSection from './LocationSecion';
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 
 export default function CustomerFacingDetails() {
-  const [images, setImages] = useState([]);
+  const [thumbnailImages, setThumbnailImages] = useState([]);
+  const [bannerImages, setBannerImages] = useState([]);
 
   const sampleData = [
     {
@@ -405,13 +406,17 @@ export default function CustomerFacingDetails() {
             }}
           />
         </div>
+        
         <div>
           <h3 className={styles.noDescriptionTitle}>Thumbnail / Featured Image</h3>
           <p className={styles.description}>Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.</p>
 
           <DragDropImageUploader 
-            images={images}
-            setImages={setImages}
+            images={thumbnailImages}
+            setImages={setThumbnailImages}
+            width={180}
+            height={180}
+            imageClassName={styles.dragdropImage}
           />
         </div>
 
@@ -419,7 +424,13 @@ export default function CustomerFacingDetails() {
           <h3 className={styles.noDescriptionTitle}>Banner Image</h3>
           <p className={styles.description}>Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.</p>
 
-          {/* <DragDropImageUploader /> */}
+          <DragDropImageUploader 
+            images={bannerImages}
+            setImages={setBannerImages}
+            width={792}
+            height={198}
+            imageClassName={styles.dragdropBannerImage}
+          />
         </div>
       </ContentCard>
 

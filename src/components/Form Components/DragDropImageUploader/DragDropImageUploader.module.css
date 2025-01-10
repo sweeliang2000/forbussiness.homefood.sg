@@ -59,8 +59,6 @@
 }
 
 .card .container .imageContainer .image {
-    width: 200px;
-    height: 200px;
     border-radius: 12px;
     object-fit: cover;
 }
