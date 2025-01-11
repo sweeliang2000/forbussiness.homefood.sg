@@ -1,13 +1,13 @@
-"use client";
+'use client';
 import styles from './page.module.css';
 import { Alert, Button, Dialog, TextField } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { IoMdArrowRoundBack } from "react-icons/io";
+import { IoMdArrowRoundBack } from 'react-icons/io';
 import Cookies from 'js-cookie';
 import apiClient from '@/utility/api';
 import { LoadingButton } from '@mui/lab';
-import { VscVerified } from "react-icons/vsc";
+import { VscVerified } from 'react-icons/vsc';
 import withAuthorization from '@/hoc/withAuthorization';
 import { EMAIL_VERIFICATION, RESEND_VERIFICATION_CODE } from '@/utility/apiPaths';
 
@@ -133,9 +133,9 @@ const Verify = () => {
                     <p>From now on, you are part of us! <strong>Login now</strong> and start building your loyalty program for you business.</p>
                     
                     <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
+                        type='submit'
+                        variant='contained'
+                        color='primary'
                         fullWidth
                         onClick={loginNowHandler}
                         className={styles.loginNowButton}
@@ -153,22 +153,22 @@ const Verify = () => {
                         to <span className={styles.emailHighlight}>{email}</span>.
                     </p>
 
-                    {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
-                    {successMessage && <Alert severity="success">{successMessage}</Alert>}
+                    {errorMessage && <Alert severity='error'>{errorMessage}</Alert>}
+                    {successMessage && <Alert severity='success'>{successMessage}</Alert>}
 
                     <form className={styles.submissionForm} onSubmit={confirmHandler}>
                         <TextField
-                            id="verification-code"
-                            label="6 Digits Verification Code"
-                            variant="filled"
+                            id='verification-code'
+                            label='6 Digits Verification Code'
+                            variant='filled'
                             onChange={handleInputChange}
                             className={styles.textfield}
                         />
 
                         <LoadingButton
-                            type="submit"
-                            variant="contained"
-                            color="primary"
+                            type='submit'
+                            variant='contained'
+                            color='primary'
                             fullWidth
                             loading={isSubmissionButtonLoading}
                             // onClick={confirmHandler}
@@ -187,8 +187,8 @@ const Verify = () => {
                     </div>
 
                     <Button
-                        variant="text"
-                        color="primary"
+                        variant='text'
+                        color='primary'
                         onClick={logoutHandler}
                         className={styles.logoutButton}
                     >

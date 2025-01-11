@@ -2,7 +2,7 @@
 import { useRef, useState } from 'react';
 import styles from './DragDropImageUploader.module.css';
 import Image from 'next/image';
-import { FaMinusCircle } from "react-icons/fa";
+import { FaMinusCircle } from 'react-icons/fa';
 import { Button } from '@mui/material';
 
 const DragDropImageUploader = ({
@@ -58,7 +58,7 @@ const DragDropImageUploader = ({
     const onDragOver = (event) => {
         event.preventDefault();
         setIsDragging(true);
-        event.dataTransfer.dropEffect = "copy";
+        event.dataTransfer.dropEffect = 'copy';
     }
 
     const onDragLeave = (event) => {
@@ -108,7 +108,7 @@ const DragDropImageUploader = ({
                                 <span className={styles.select}>Drop image here</span>
                             ) : (
                                 <>
-                                    Drag & Drop image here or {" "}
+                                    Drag & Drop image here or {' '}
                                     <span className={styles.select} role='button' onClick={selectFiles}>
                                         Browser
                                     </span></>
@@ -147,7 +147,7 @@ const DragDropImageUploader = ({
                 <Button
                     className={styles.button}
                     onClick={selectFiles}
-                    variant="text"
+                    variant='text'
                 >
                     {images.length !== 0 & !isMultiple ? 'Replace' : 'Choose File'}
                 </Button>

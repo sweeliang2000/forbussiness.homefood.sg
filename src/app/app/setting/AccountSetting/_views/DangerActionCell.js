@@ -16,7 +16,7 @@ const DangerActionCell = ({
 
         <div>
             <Button
-                variant="contained"
+                variant='contained'
                 className={styles.button}
                 onClick={onClick}
             >

@@ -1,16 +1,16 @@
-"use client";
-import Image from "next/image";
-import styles from "./signup-views.module.css";
+'use client';
+import Image from 'next/image';
+import styles from './signup-views.module.css';
 import { FaLevelDownAlt } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
-import Link from "next/link";
-import { Alert, Button, TextField } from "@mui/material";
-import { useState } from "react";
-import apiClient from "@/utility/api";
-import { useRouter } from "next/navigation";
-import { LoadingButton } from "@mui/lab";
-import withAuthorization from "@/hoc/withAuthorization";
-import { SIGN_UP } from "@/utility/apiPaths";
+import Link from 'next/link';
+import { Alert, Button, TextField } from '@mui/material';
+import { useState } from 'react';
+import apiClient from '@/utility/api';
+import { useRouter } from 'next/navigation';
+import { LoadingButton } from '@mui/lab';
+import withAuthorization from '@/hoc/withAuthorization';
+import { SIGN_UP } from '@/utility/apiPaths';
 
 const SignupViews = () => {
     const router = useRouter();
@@ -142,11 +142,11 @@ const SignupViews = () => {
                     </div>
 
                     <form onSubmit={handleSubmit} className={styles.form}>
-                        {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+                        {errorMessage && <Alert severity='error'>{errorMessage}</Alert>}
                         <TextField
-                            variant="standard"
-                            label="Email"
-                            type="email"
+                            variant='standard'
+                            label='Email'
+                            type='email'
                             fullWidth
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -154,9 +154,9 @@ const SignupViews = () => {
                         />
 
                         <TextField
-                            variant="standard"
-                            label="Password"
-                            type="password"
+                            variant='standard'
+                            label='Password'
+                            type='password'
                             fullWidth
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -164,9 +164,9 @@ const SignupViews = () => {
                         />
 
                         <TextField
-                            variant="standard"
-                            label="Confirm Password"
-                            type="password"
+                            variant='standard'
+                            label='Confirm Password'
+                            type='password'
                             fullWidth
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -174,8 +174,8 @@ const SignupViews = () => {
                         />
 
                         <LoadingButton
-                            type="submit"
-                            variant="contained"
+                            type='submit'
+                            variant='contained'
                             fullWidth
                             loading={isSubmissionButtonLoading}
                             className={styles.createButton}
@@ -191,7 +191,7 @@ const SignupViews = () => {
                     </div>
 
                     <Button
-                        variant="contained"
+                        variant='contained'
                         startIcon={<FcGoogle />} // Using the Google icon from react-icons
                         onClick={handleGoogleSignUp}
                         fullWidth

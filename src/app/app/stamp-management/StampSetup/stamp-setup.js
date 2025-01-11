@@ -1,15 +1,15 @@
 import styles from './stamp-setup.module.css';
-import { ContentCard } from "@/components/ContentCard/ContentCard";
-import { HeaderSection } from "@/components/HeaderSection/HeaderSection";
+import { ContentCard } from '@/components/ContentCard/ContentCard';
+import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { Button, TextField } from '@mui/material';
-import Link from "next/link";
+import Link from 'next/link';
 
 export default function StampSetup() {
   return (
     <div className={styles.container}>
       <HeaderSection
         className={styles.header}
-        title="Stamp Management"
+        title='Stamp Management'
         description={
           <p>
             Create and design your stamp card and the rewards to be given when
@@ -28,8 +28,8 @@ export default function StampSetup() {
           </p>
 
           <TextField
-            variant="outlined"
-            placeholder=""
+            variant='outlined'
+            placeholder=''
             fullWidth
           />
         </div>
@@ -40,9 +40,9 @@ export default function StampSetup() {
             A short description of your program. Displays on the front of your the card to customers like BUY 6 COFFEES AND GET ONE FREE!
           </p>
           <TextField
-            label=""
-            variant="outlined"
-            placeholder=""
+            label=''
+            variant='outlined'
+            placeholder=''
             fullWidth
           />
         </div>
@@ -55,10 +55,10 @@ export default function StampSetup() {
 
           <div className={styles.addressFields}>
             <TextField
-              variant="outlined"
-              placeholder="6"
+              variant='outlined'
+              placeholder='6'
               fullWidth
-              type="number"
+              type='number'
               inputProps={{
                 min: 0,
                 max: 16,
@@ -80,7 +80,7 @@ export default function StampSetup() {
 
           <TextField
             placeholder='Your name'
-            variant="outlined"
+            variant='outlined'
             fullWidth
           />
         </div>
@@ -89,7 +89,7 @@ export default function StampSetup() {
           <h3 className={styles.noDescriptionTitle}>Stamp Expiry Period (Days)</h3>
 
           <TextField
-            variant="outlined"
+            variant='outlined'
             placeholder='Accounts Manager'
             fullWidth
           />
@@ -103,7 +103,7 @@ export default function StampSetup() {
             Create the rewards that your customers will love. This will make to always come back!
           </p>
           <Button 
-            variant="contained"
+            variant='contained'
             className={styles.button}
           >
             Add reward

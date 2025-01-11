@@ -1,10 +1,10 @@
 'use client'
 import styles from './breadcrumsbar.module.css';
-import { Breadcrumbs, Typography } from "@mui/material";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { FaChevronRight } from "react-icons/fa";
-import { MdDashboard } from "react-icons/md";
+import { Breadcrumbs, Typography } from '@mui/material';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { FaChevronRight } from 'react-icons/fa';
+import { MdDashboard } from 'react-icons/md';
 
 export const BreadcrumsBar = () => {
     const pathSegments = usePathname().split('/').slice(2);

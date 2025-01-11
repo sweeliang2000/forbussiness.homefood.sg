@@ -1,17 +1,17 @@
-"use client";
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+import Image from 'next/image';
+import styles from './page.module.css';
 import { FaLevelDownAlt } from 'react-icons/fa';
-import Link from "next/link";
-import { Alert, Button, Dialog, TextField } from "@mui/material";
-import { useState } from "react";
-import { IoMdArrowRoundBack } from "react-icons/io";
-import { LoadingButton } from "@mui/lab";
-import apiClient from "@/utility/api";
-import { useRouter } from "next/navigation";
-import { VscVerified } from "react-icons/vsc";
-import withAuthorization from "@/hoc/withAuthorization";
-import { CONFIRM_FORGOT_PASSWORD, FORGOT_PASSWORD } from "@/utility/apiPaths";
+import Link from 'next/link';
+import { Alert, Button, Dialog, TextField } from '@mui/material';
+import { useState } from 'react';
+import { IoMdArrowRoundBack } from 'react-icons/io';
+import { LoadingButton } from '@mui/lab';
+import apiClient from '@/utility/api';
+import { useRouter } from 'next/navigation';
+import { VscVerified } from 'react-icons/vsc';
+import withAuthorization from '@/hoc/withAuthorization';
+import { CONFIRM_FORGOT_PASSWORD, FORGOT_PASSWORD } from '@/utility/apiPaths';
 
 const ForgotPassword = () => {
     const router = useRouter();
@@ -46,13 +46,13 @@ const ForgotPassword = () => {
         };
 
         const payload = {
-            "username": email
+            'username': email
         };
 
         try {
             await apiClient.post(`${FORGOT_PASSWORD}`, payload);
             setIsAtRestPasswordStage(true);
-            setSuccessMessage("An OTP values had been sent to your email. Enter your new password and OTP to reset.")
+            setSuccessMessage('An OTP values had been sent to your email. Enter your new password and OTP to reset.')
         } catch (error) {
             const message = error?.response?.data?.message || error.message;
             const code = error?.response?.data?.code || error.code;
@@ -82,9 +82,9 @@ const ForgotPassword = () => {
         }
 
         const payload = {
-            "username": email,
-            "newPassword": password,
-            "confirmationCode": verificationCode
+            'username': email,
+            'newPassword': password,
+            'confirmationCode': verificationCode
         };
 
         try {
@@ -146,9 +146,9 @@ const ForgotPassword = () => {
                     <p>You can now login with the new password you had set.</p>
 
                     <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
+                        type='submit'
+                        variant='contained'
+                        color='primary'
                         fullWidth
                         onClick={loginNowHandler}
                         className={styles.loginNowButton}
@@ -200,14 +200,14 @@ const ForgotPassword = () => {
                     </div>
 
                     <form onSubmit={handleForgetPasswordClick} className={styles.form}>
-                        {successMessage && <Alert severity="success">{successMessage}</Alert>}
-                        {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+                        {successMessage && <Alert severity='success'>{successMessage}</Alert>}
+                        {errorMessage && <Alert severity='error'>{errorMessage}</Alert>}
 
                         <TextField
                             disabled={isAtRestPasswordStage}
-                            variant="standard"
-                            label="Email"
-                            type="email"
+                            variant='standard'
+                            label='Email'
+                            type='email'
                             fullWidth
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -215,9 +215,9 @@ const ForgotPassword = () => {
                         />
 
                         {isAtRestPasswordStage && <TextField
-                            variant="standard"
-                            label="Password"
-                            type="password"
+                            variant='standard'
+                            label='Password'
+                            type='password'
                             fullWidth
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -225,9 +225,9 @@ const ForgotPassword = () => {
                         />}
 
                         {isAtRestPasswordStage && <TextField
-                            variant="standard"
-                            label="Confirm Password"
-                            type="password"
+                            variant='standard'
+                            label='Confirm Password'
+                            type='password'
                             fullWidth
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -235,9 +235,9 @@ const ForgotPassword = () => {
                         />}
 
                         {isAtRestPasswordStage && <TextField
-                            variant="standard"
-                            label="Verification Code"
-                            type="number"
+                            variant='standard'
+                            label='Verification Code'
+                            type='number'
                             fullWidth
                             value={verificationCode}
                             onChange={(e) => setVerificationCode(e.target.value)}
@@ -245,9 +245,9 @@ const ForgotPassword = () => {
                         />}
 
                         <LoadingButton
-                            type="submit"
-                            variant="contained"
-                            color="primary"
+                            type='submit'
+                            variant='contained'
+                            color='primary'
                             fullWidth
                             loading={isSubmissionButtonLoading}
                             className={styles.resetPwdButton}
@@ -259,7 +259,7 @@ const ForgotPassword = () => {
 
 
                     <Link
-                        href="/login"
+                        href='/login'
                         className={styles.backToLogin}
                     >
                         <IoMdArrowRoundBack />

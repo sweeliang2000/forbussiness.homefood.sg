@@ -1,8 +1,8 @@
 'use client';
-import styles from "./AppNav.module.css";
-import MobileNavbar from "@/components/App/MobileNavbar/MobileNavbar";
-import Sidebar from "@/components/App/sidebar/sidebar";
-import { useState } from "react";
+import styles from './AppNav.module.css';
+import MobileNavbar from '@/components/App/MobileNavbar/MobileNavbar';
+import Sidebar from '@/components/App/sidebar/sidebar';
+import { useState } from 'react';
 
 const AppNav = () => {
     const [isMenuOpen, setIsMenuOpened] = useState(false);

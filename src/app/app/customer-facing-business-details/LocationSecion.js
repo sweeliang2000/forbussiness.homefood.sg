@@ -1,12 +1,12 @@
 'use client'
 import styles from './LocationSection.module.css';
-import { ContentCard } from "@/components/ContentCard/ContentCard";
+import { ContentCard } from '@/components/ContentCard/ContentCard';
 import {
     IconButton,
     Menu,
     MenuItem
 } from '@mui/material';
-import { useState } from "react";
+import { useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { LoadingButton } from '@mui/lab';
@@ -68,13 +68,13 @@ const LocationSection = ({ data }) => {
 
                 return (
                     <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                        <p>Monday: {hours.Monday.start ? `${hours.Monday.start} - ${hours.Monday.end}` : "Not Applicable"}</p>
-                        <p>Tuesday: {hours.Tuesday.start ? `${hours.Tuesday.start} - ${hours.Tuesday.end}` : "Not Applicable"}</p>
-                        <p>Wednesday: {hours.Wednesday.start ? `${hours.Wednesday.start} - ${hours.Wednesday.end}` : "Not Applicable"}</p>
-                        <p>Thursday: {hours.Thursday.start ? `${hours.Thursday.start} - ${hours.Thursday.end}` : "Not Applicable"}</p>
-                        <p>Friday: {hours.Friday.start ? `${hours.Friday.start} - ${hours.Friday.end}` : "Not Applicable"}</p>
-                        <p>Saturday: {hours.Saturday.start ? `${hours.Saturday.start} - ${hours.Saturday.end}` : "Not Applicable"}</p>
-                        <p>Sunday: {hours.Sunday.start ? `${hours.Sunday.start} - ${hours.Sunday.end}` : "Not Applicable"}</p>
+                        <p>Monday: {hours.Monday.start ? `${hours.Monday.start} - ${hours.Monday.end}` : 'Not Applicable'}</p>
+                        <p>Tuesday: {hours.Tuesday.start ? `${hours.Tuesday.start} - ${hours.Tuesday.end}` : 'Not Applicable'}</p>
+                        <p>Wednesday: {hours.Wednesday.start ? `${hours.Wednesday.start} - ${hours.Wednesday.end}` : 'Not Applicable'}</p>
+                        <p>Thursday: {hours.Thursday.start ? `${hours.Thursday.start} - ${hours.Thursday.end}` : 'Not Applicable'}</p>
+                        <p>Friday: {hours.Friday.start ? `${hours.Friday.start} - ${hours.Friday.end}` : 'Not Applicable'}</p>
+                        <p>Saturday: {hours.Saturday.start ? `${hours.Saturday.start} - ${hours.Saturday.end}` : 'Not Applicable'}</p>
+                        <p>Sunday: {hours.Sunday.start ? `${hours.Sunday.start} - ${hours.Sunday.end}` : 'Not Applicable'}</p>
                     </div>
                 );
             }
@@ -127,12 +127,12 @@ const LocationSection = ({ data }) => {
                     <h3 className={styles.noDescriptionTitle}>Locations</h3>
 
                     <LoadingButton
-                        size="small"
+                        size='small'
                         onClick={addLocationHandler}
                         // loading={true}
                         // disabled
-                        loadingPosition="start"
-                        variant="contained"
+                        loadingPosition='start'
+                        variant='contained'
                         className={styles.button}
                     >
                         Add Location

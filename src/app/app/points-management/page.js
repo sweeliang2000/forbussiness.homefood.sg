@@ -1,4 +1,4 @@
-import PointsOnboarding from "./PointsOnboarding/PointsOnboarding";
+import PointsOnboarding from './PointsOnboarding/PointsOnboarding';
 
 const PointsManagement = () => {
     return(

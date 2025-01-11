@@ -1,4 +1,4 @@
-import AccountSetting from "./AccountSetting/AccountSetting";
+import AccountSetting from './AccountSetting/AccountSetting';
 
 const PointsManagement = () => {
     return(

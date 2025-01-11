@@ -12,12 +12,12 @@ const ExclamationButton = ({
     <Tooltip
       title={
         <Box>
-          <p className={styles.text}>{description} <a href={url} target="_blank" rel="noopener noreferrer">Find out more.</a></p>
+          <p className={styles.text}>{description} <a href={url} target='_blank' rel='noopener noreferrer'>Find out more.</a></p>
         </Box>
       }
       arrow
     >
-      <IconButton aria-label="more-info">
+      <IconButton aria-label='more-info'>
         <InfoOutlinedIcon style={{ color: 'blue' }} />
       </IconButton>
     </Tooltip>

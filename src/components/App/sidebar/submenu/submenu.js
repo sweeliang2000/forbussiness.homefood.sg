@@ -1,7 +1,7 @@
 import styles from './submenu.module.css';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaChevronDown } from "react-icons/fa6";
+import { FaChevronDown } from 'react-icons/fa6';
 
 export const Submenu = ({
     title,

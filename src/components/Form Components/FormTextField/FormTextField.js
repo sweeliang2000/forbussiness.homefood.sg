@@ -12,7 +12,7 @@ const FormTextField = ({
             { subtitle && <p className={styles.description}>{subtitle}</p> }
 
             <TextField
-                variant="outlined"
+                variant='outlined'
                 fullWidth
                 {...props}
             />

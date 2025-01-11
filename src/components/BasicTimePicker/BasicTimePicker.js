@@ -19,7 +19,7 @@ export default function CustomTimePicker() {
         onChange={handleTimeChange}
         ampm={true} // Enable AM/PM selection
         views={['hours', 'minutes']}
-        format="hh:mm A" // Display in 12-hour format
+        format='hh:mm A' // Display in 12-hour format
         fullWidth
       />
     </LocalizationProvider>

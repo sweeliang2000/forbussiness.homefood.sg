@@ -1,7 +1,7 @@
 'use client';
 import { LoadingButton } from '@mui/lab';
 import styles from './UsersAndPermissions.module.css';
-import { ContentCard } from "@/components/ContentCard/ContentCard";
+import { ContentCard } from '@/components/ContentCard/ContentCard';
 import { DataGrid } from '@mui/x-data-grid';
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -36,33 +36,33 @@ const UsersAndPermissions = () => {
     const data = [
         {
             id: 1,
-            email: "mokiohub@example.com",
-            location: "All",
-            role: "Owner"
+            email: 'mokiohub@example.com',
+            location: 'All',
+            role: 'Owner'
         },
         {
             id: 2,
-            email: "orchardcentral@example.com",
-            location: "Orchard Central",
-            role: "Manager"
+            email: 'orchardcentral@example.com',
+            location: 'Orchard Central',
+            role: 'Manager'
         },
         {
             id: 3,
-            email: "vivocity@example.com",
-            location: "VivoCity",
-            role: "Viewer"
+            email: 'vivocity@example.com',
+            location: 'VivoCity',
+            role: 'Viewer'
         },
         {
             id: 4,
-            email: "jurongpoint@example.com",
-            location: "Jurong Point",
-            role: "Viewer"
+            email: 'jurongpoint@example.com',
+            location: 'Jurong Point',
+            role: 'Viewer'
         },
         {
             id: 5,
-            email: "changiairportt3@example.com",
-            location: "Changi Airport T3",
-            role: "Viewer"
+            email: 'changiairportt3@example.com',
+            location: 'Changi Airport T3',
+            role: 'Viewer'
         }
     ];
 
@@ -155,12 +155,12 @@ const UsersAndPermissions = () => {
                         <h3 className={styles.noDescriptionTitle}>Users</h3>
 
                         <LoadingButton
-                            size="small"
+                            size='small'
                             onClick={addUserHandler}
                             // loading={true}
                             // disabled
-                            loadingPosition="start"
-                            variant="contained"
+                            loadingPosition='start'
+                            variant='contained'
                             className={styles.button}
                         >
                             Invite user

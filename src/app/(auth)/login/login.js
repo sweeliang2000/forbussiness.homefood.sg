@@ -1,19 +1,19 @@
-"use client";
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+import Image from 'next/image';
+import styles from './page.module.css';
 import { FaLevelDownAlt } from 'react-icons/fa';
-import Link from "next/link";
-import { Alert, TextField } from "@mui/material";
-import { useState } from "react";
-import apiClient from "@/utility/api";
-import { LoadingButton } from "@mui/lab";
-import { useRouter } from "next/navigation";
-import withAuthorization from "@/hoc/withAuthorization";
-import { SIGN_IN } from "@/utility/apiPaths";
+import Link from 'next/link';
+import { Alert, TextField } from '@mui/material';
+import { useState } from 'react';
+import apiClient from '@/utility/api';
+import { LoadingButton } from '@mui/lab';
+import { useRouter } from 'next/navigation';
+import withAuthorization from '@/hoc/withAuthorization';
+import { SIGN_IN } from '@/utility/apiPaths';
 
 // export const metadata = {
-//     title: "Sign up and Start your Loyalty Program | Collbine for Business Singapore",
-//     description: "Collbine offers a loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop’s needs.",
+//     title: 'Sign up and Start your Loyalty Program | Collbine for Business Singapore',
+//     description: 'Collbine offers a loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop’s needs.',
 // };
 
  const Login = () => {
@@ -26,7 +26,7 @@ import { SIGN_IN } from "@/utility/apiPaths";
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setErrorMessage("");
+        setErrorMessage('');
         setIsSubmissionButtonLoading(true);
 
         if (!isFormVerified) {
@@ -117,11 +117,11 @@ import { SIGN_IN } from "@/utility/apiPaths";
                     </div>
 
                     <form onSubmit={handleSubmit} className={styles.form}>
-                        { errorMessage && <Alert severity="error" className={styles.alert}>{errorMessage}</Alert> }
+                        { errorMessage && <Alert severity='error' className={styles.alert}>{errorMessage}</Alert> }
                         <TextField
-                            variant="standard"
-                            label="Email"
-                            type="email"
+                            variant='standard'
+                            label='Email'
+                            type='email'
                             fullWidth
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -129,9 +129,9 @@ import { SIGN_IN } from "@/utility/apiPaths";
                         />
 
                         <TextField
-                            variant="standard"
-                            label="Password"
-                            type="password"
+                            variant='standard'
+                            label='Password'
+                            type='password'
                             fullWidth
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -139,7 +139,7 @@ import { SIGN_IN } from "@/utility/apiPaths";
                         />
 
                         <Link
-                            href="/forgot-password"
+                            href='/forgot-password'
                             className={styles.forgotPasswordBuuton}
                         >
                             Forget Password?
@@ -147,9 +147,9 @@ import { SIGN_IN } from "@/utility/apiPaths";
 
 
                         <LoadingButton
-                            type="submit"
-                            variant="contained"
-                            color="primary"
+                            type='submit'
+                            variant='contained'
+                            color='primary'
                             fullWidth
                             className={styles.loginButton}
                             loading={isSubmissionButtonLoading}
@@ -165,7 +165,7 @@ import { SIGN_IN } from "@/utility/apiPaths";
                     </div>
 
                     <Button
-                        variant="contained"
+                        variant='contained'
                         startIcon={<FcGoogle />}
                         onClick={handleGoogleLogin}
                         fullWidth

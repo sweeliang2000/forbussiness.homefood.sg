@@ -1,13 +1,13 @@
 // https://console.stampme.com/stamp-cards/editcard
 import { LoadingButton } from '@mui/lab';
 import styles from './StampOnboarding.module.css';
-import { ContentCard } from "@/components/ContentCard/ContentCard";
+import { ContentCard } from '@/components/ContentCard/ContentCard';
 import Image from 'next/image';
 import { Link } from '@mui/material';
-import { FaRegLightbulb } from "react-icons/fa6";
-import { PiGear } from "react-icons/pi";
-import { BsGraphUpArrow } from "react-icons/bs";
-import { FaRegHand } from "react-icons/fa6";
+import { FaRegLightbulb } from 'react-icons/fa6';
+import { PiGear } from 'react-icons/pi';
+import { BsGraphUpArrow } from 'react-icons/bs';
+import { FaRegHand } from 'react-icons/fa6';
 
 const StampOnBoarding = () => {
     return (
@@ -22,15 +22,15 @@ const StampOnBoarding = () => {
                                 free upsize at 5 stamps, free drink at 10) and you card expiry rules.
                             </p>
                             <div>
-                                <Link href="/"><FaRegLightbulb /> Learn more</Link>
+                                <Link href='/'><FaRegLightbulb /> Learn more</Link>
                             </div>
                         </div>
                         <LoadingButton
                             // onClick={addLocationHandler}
                             // loading={true}
                             // disabled
-                            loadingPosition="start"
-                            variant="contained"
+                            loadingPosition='start'
+                            variant='contained'
                             className={styles.button}
                         >
                             Get Started
@@ -91,9 +91,9 @@ const StampOnBoarding = () => {
 
                     <iframe
                         className={styles.iframe}
-                        src="https://www.youtube.com/embed/6muziL6I_kQ?si=QOswW8SadP5E5eTS"
-                        title="YouTube video player"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        src='https://www.youtube.com/embed/6muziL6I_kQ?si=QOswW8SadP5E5eTS'
+                        title='YouTube video player'
+                        allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
                     ></iframe>
 
                 </ContentCard>

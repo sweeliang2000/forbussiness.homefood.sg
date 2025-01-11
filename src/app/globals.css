@@ -86,9 +86,9 @@ Do not use pixel for font size, width and media querys.
   --spacing: 0.5rem;
   --side-spacing: 24px;
 
-  --font-open-sans: "Open Sans", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  --font-raleway: "Raleway", "Montserrat", "Lato", "Ubuntu", Arial, sans-serif;
-  --font-dongle: "Dongle",  Arial, sans-serif;
+  --font-open-sans: 'Open Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-raleway: 'Raleway', 'Montserrat', 'Lato', 'Ubuntu', Arial, sans-serif;
+  --font-dongle: 'Dongle',  Arial, sans-serif;
 }
 html {
   font-size: 100%; /* Base font size */

@@ -1,17 +1,17 @@
 'use client';
 import Link from 'next/link';
 import styles from './sidebar.module.css';
-import { LuClipboardList } from "react-icons/lu";
-import { AiOutlineMessage } from "react-icons/ai";
-import { BsGift } from "react-icons/bs";
-import { FaAnglesLeft } from "react-icons/fa6";
-import { FaMobileAlt } from "react-icons/fa";
-import { RiUserSettingsLine, RiNewspaperLine } from "react-icons/ri";
-import { ImCoinDollar } from "react-icons/im";
-import { RxGear } from "react-icons/rx";
-import { HiOutlineSpeakerphone } from "react-icons/hi";
-import { MdOutlineSpaceDashboard, MdOutlineNotificationsNone } from "react-icons/md";
-import { LuStamp } from "react-icons/lu";
+import { LuClipboardList } from 'react-icons/lu';
+import { AiOutlineMessage } from 'react-icons/ai';
+import { BsGift } from 'react-icons/bs';
+import { FaAnglesLeft } from 'react-icons/fa6';
+import { FaMobileAlt } from 'react-icons/fa';
+import { RiUserSettingsLine, RiNewspaperLine } from 'react-icons/ri';
+import { ImCoinDollar } from 'react-icons/im';
+import { RxGear } from 'react-icons/rx';
+import { HiOutlineSpeakerphone } from 'react-icons/hi';
+import { MdOutlineSpaceDashboard, MdOutlineNotificationsNone } from 'react-icons/md';
+import { LuStamp } from 'react-icons/lu';
 import { Submenu } from './submenu/submenu';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
@@ -195,7 +195,7 @@ export default function Sidebar({
                         <p className={styles.title}>Free</p>
                         <p className={styles.cost}>No-Cost ($0/Month)</p>
                     </div>
-                    <Button className={styles.button}variant="text">Upgrade</Button>
+                    <Button className={styles.button}variant='text'>Upgrade</Button>
                 </div>
             </aside>
             { !isClose && <div className={styles.overlay} onClick={onClose}/>}

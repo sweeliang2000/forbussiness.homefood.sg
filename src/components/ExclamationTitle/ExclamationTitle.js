@@ -1,5 +1,5 @@
 import styles from './ExclamationTitle.module.css';
-import ExclamationButton from "../ExclamationButton/ExclamationButton";
+import ExclamationButton from '../ExclamationButton/ExclamationButton';
 
 export const ExclamationTitle = ({
     title,

@@ -1,7 +1,7 @@
 // https://console.stampme.com/stamp-cards/editcard
 import { LoadingButton } from '@mui/lab';
 import styles from './AccountSetting.module.css';
-import { ContentCard } from "@/components/ContentCard/ContentCard";
+import { ContentCard } from '@/components/ContentCard/ContentCard';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import Link from 'next/link';
 import ActionCell from './_views/DangerActionCell';

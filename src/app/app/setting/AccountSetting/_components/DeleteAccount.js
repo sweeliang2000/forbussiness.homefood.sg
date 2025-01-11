@@ -6,9 +6,9 @@ const DeleteAccount = () => {
     return(
         <>
             <DangerActionCell
-                title="Delete Account"
-                description="Permanently remove your account and all associated data. This action cannot be undone."
-                buttonTitle={"Delete Account"}
+                title='Delete Account'
+                description='Permanently remove your account and all associated data. This action cannot be undone.'
+                buttonTitle={'Delete Account'}
                 onClick={() => {
                     // setIsDialogOpen(true)
                 }}

@@ -1,7 +1,7 @@
-"use client"
-import { useState } from "react";
-import StampOnBoarding from "./StampOnboarding/StampOnboarding";
-import StampSetup from "./StampSetup/stamp-setup";
+'use client'
+import { useState } from 'react';
+import StampOnBoarding from './StampOnboarding/StampOnboarding';
+import StampSetup from './StampSetup/stamp-setup';
 
 const StampManagement = () => {
     const [isOnboardingShown, SetIsOnBoardingShown] = useState(true);

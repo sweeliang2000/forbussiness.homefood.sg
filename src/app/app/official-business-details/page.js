@@ -1,10 +1,10 @@
 'use client';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import styles from './page.module.css';
-import { ContentCard } from "@/components/ContentCard/ContentCard";
-import { HeaderSection } from "@/components/HeaderSection/HeaderSection";
+import { ContentCard } from '@/components/ContentCard/ContentCard';
+import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { TextField } from '@mui/material';
-import Link from "next/link";
+import Link from 'next/link';
 import { useState } from 'react';
 
 const BUSINESS_NAME = 'businessName';
@@ -90,7 +90,7 @@ export default function StampSetup() {
       >
         <HeaderSection
           className={styles.header}
-          title="Your Business"
+          title='Your Business'
           description={
             <p>
               This information is used to verify your business.
@@ -107,7 +107,7 @@ export default function StampSetup() {
             <FormTextField
               title='Business name*'
               subtitle='The official business name registered with ACRA. For example, McDonald&apos;s Corporation.'
-              placeholder="McDonald's Corporation."
+              placeholder='McDonald&apos;s Corporation.'
               id={BUSINESS_NAME}
               name={BUSINESS_NAME}
               required
@@ -122,8 +122,8 @@ export default function StampSetup() {
             <FormTextField
               title='Unique Entity Number (UEN)*'
               subtitle='The Unique Entity Number (UEN) is a 9- or 10-digit number issued by the Accounting and Corporate Regulatory Authority (ACRA) for registered businesses in Singapore.'
-              placeholder="McDonalds"
-              type="number"
+              placeholder='McDonalds'
+              type='number'
               id={UEN}
               name={UEN}
               required
@@ -142,9 +142,9 @@ export default function StampSetup() {
 
             <div className={styles.addressFields}>
               <TextField
-                label="Unit Number"
-                variant="outlined"
-                placeholder="#05-23"
+                label='Unit Number'
+                variant='outlined'
+                placeholder='#05-23'
                 fullWidth
                 id={UNIT_NUMBER}
                 name={UNIT_NUMBER}
@@ -156,9 +156,9 @@ export default function StampSetup() {
               />
 
               <TextField
-                label="Building Name"
-                variant="outlined"
-                placeholder="International Plaza"
+                label='Building Name'
+                variant='outlined'
+                placeholder='International Plaza'
                 fullWidth
                 id={BUILDING_NAME}
                 name={BUILDING_NAME}
@@ -169,9 +169,9 @@ export default function StampSetup() {
               />
 
               <TextField
-                label="Street Address"
-                variant="outlined"
-                placeholder="10 Anson Road"
+                label='Street Address'
+                variant='outlined'
+                placeholder='10 Anson Road'
                 fullWidth
                 id={STREET_ADDRESS}
                 name={STREET_ADDRESS}
@@ -183,11 +183,11 @@ export default function StampSetup() {
               />
 
               <TextField
-                label="Postal Code"
-                variant="outlined"
-                placeholder="079903"
+                label='Postal Code'
+                variant='outlined'
+                placeholder='079903'
                 fullWidth
-                type="number"
+                type='number'
                 slotProps={{
                   input: {
                     maxLength: 6,
@@ -238,7 +238,7 @@ export default function StampSetup() {
             placeholder='+6591234567'
             id={PHONE_NUMBER}
             name={PHONE_NUMBER}
-            type="tel"
+            type='tel'
             required
             helperText={helperText.phoneNumber}
             error={textfieldError.phoneNumber}

@@ -1,7 +1,7 @@
 import CollbineForBusiness from '@/components/CollbineForBusiness/CollbineForBusiness';
 import styles from './MobileNavbar.module.css';
-import { RiMenu2Fill } from "react-icons/ri";
-import { IoCloseSharp } from "react-icons/io5";
+import { RiMenu2Fill } from 'react-icons/ri';
+import { IoCloseSharp } from 'react-icons/io5';
 
 const MobileNavbar = ({
     isMenuOpen,

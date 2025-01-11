@@ -12,8 +12,8 @@ const FullWidthDropdown = ({ options }) => {
   return (
     <FormControl fullWidth>
       <Select
-        labelId="dropdown-label"
-        id="full-width-dropdown"
+        labelId='dropdown-label'
+        id='full-width-dropdown'
         value={value}
         onChange={handleChange}
         fullWidth

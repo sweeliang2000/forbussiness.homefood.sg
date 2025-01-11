@@ -26,8 +26,8 @@ const AddUsersDialog = ({
                     <h3>Email</h3>
 
                     <TextField
-                        variant="outlined"
-                        placeholder=""
+                        variant='outlined'
+                        placeholder=''
                         fullWidth
                     />
                 </div>
@@ -59,8 +59,8 @@ const AddUsersDialog = ({
             <div className={styles.buttonContainer}>
                 <Button
                     onClick={closeAddUserHandler}
-                    loadingPosition="start"
-                    variant="outlined"
+                    loadingPosition='start'
+                    variant='outlined'
                     className={styles.cancelButton}
                 >
                     Cancel
@@ -70,8 +70,8 @@ const AddUsersDialog = ({
                     // onClick={addLocationHandler}
                     // loading={true}
                     // disabled
-                    loadingPosition="start"
-                    variant="contained"
+                    loadingPosition='start'
+                    variant='contained'
                     className={styles.addButton}
                 >
                     Add user

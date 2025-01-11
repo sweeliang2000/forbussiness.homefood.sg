@@ -1,5 +1,5 @@
 import styles from './HeaderSection.module.css';
-import { ContentCard } from "../ContentCard/ContentCard";
+import { ContentCard } from '../ContentCard/ContentCard';
 import { LoadingButton } from '@mui/lab';
 
 export const HeaderSection = ({
@@ -15,9 +15,9 @@ export const HeaderSection = ({
 
                 <LoadingButton
                     type='submit'
-                    size="small"
-                    loadingPosition="start"
-                    variant="contained"
+                    size='small'
+                    loadingPosition='start'
+                    variant='contained'
                     className={styles.loadingButton}
                     {...props}
                 >

@@ -1,7 +1,7 @@
 import BasicTimePicker from '@/components/BasicTimePicker/BasicTimePicker';
 import styles from './AddLocationSection.module.css';
-import { Backdrop, TextField } from "@mui/material";
-import { IoCloseSharp } from "react-icons/io5";
+import { Backdrop, TextField } from '@mui/material';
+import { IoCloseSharp } from 'react-icons/io5';
 import { LoadingButton } from '@mui/lab';
 
 const AddLocationSection = ({
@@ -28,8 +28,8 @@ const AddLocationSection = ({
                         <p className={styles.headerP}>Location Name</p>
 
                         <TextField
-                            variant="outlined"
-                            placeholder="Ang Mo Kio Hub"
+                            variant='outlined'
+                            placeholder='Ang Mo Kio Hub'
                             fullWidth
                         />
                     </div>
@@ -38,8 +38,8 @@ const AddLocationSection = ({
                         <p className={styles.headerP}>Address</p>
 
                         <TextField
-                            variant="outlined"
-                            placeholder="53 Ang Mo Kio Ave 3, #01-09/10"
+                            variant='outlined'
+                            placeholder='53 Ang Mo Kio Ave 3, #01-09/10'
                             fullWidth
                         />
                     </div>
@@ -48,9 +48,9 @@ const AddLocationSection = ({
                         <p className={styles.headerP}>Postal Code</p>
 
                         <TextField
-                            variant="outlined"
-                            placeholder="569933"
-                            type="number"
+                            variant='outlined'
+                            placeholder='569933'
+                            type='number'
                             fullWidth
                         />
                     </div>
@@ -170,8 +170,8 @@ const AddLocationSection = ({
                         // onClick={handleClick}
                         // loading={true}
                         // disabled
-                        loadingPosition="start"
-                        variant="contained"
+                        loadingPosition='start'
+                        variant='contained'
                         className={styles.button}
                         fullWidth
                     >
