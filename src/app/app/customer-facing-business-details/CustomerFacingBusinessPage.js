@@ -2,11 +2,11 @@
 import styles from './CustomerFacingBusinessPage.module.css';
 import { useState } from 'react';
 import Link from 'next/link';
-import { ContentCard } from "@/components/ContentCard/ContentCard";
-import DragDropImageUploader from "@/components/Form Components/DragDropImageUploader/DragDropImageUploader";
-import FullWidthDropdown from "@/components/FullWidthDropdown/FullWidthDropdown";
-import { TextField } from "@mui/material";
-import LocationSection from "./LocationSecion";
+import { ContentCard } from '@/components/ContentCard/ContentCard';
+import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
+import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
+import { TextField } from '@mui/material';
+import LocationSection from './LocationSecion';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 
 const CustomerFacingBusinessPage = () => {
