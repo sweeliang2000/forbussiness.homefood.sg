@@ -8,6 +8,7 @@ import { Button } from '@mui/material';
 const DragDropImageUploader = ({
     images,
     setImages,
+    noOfImages,
     isMultiple,
     width,
     height,
@@ -35,7 +36,11 @@ const DragDropImageUploader = ({
                     url: URL.createObjectURL(file),
                 };
 
-                if (isMultiple) {
+                if (images.length === noOfImages & noOfImages !== 1) {
+                    return;
+                }
+
+                if (noOfImages > 1) {
                     setImages((prevImages) => [
                         ...prevImages,
                         newImage
@@ -136,20 +141,20 @@ const DragDropImageUploader = ({
                 name='file'
                 type='file'
                 className={styles.file}
-                multiple={isMultiple}
+                multiple={noOfImages > 1}
                 ref={fileInputRef}
                 onChange={onFileSelect}
             />
 
             <div className={styles.bottomFooter}>
-                <p>1 of 1 Image</p>
+                <p>{images.length} of {noOfImages} Image</p>
                 <p>|</p>
                 <Button
                     className={styles.button}
                     onClick={selectFiles}
                     variant='text'
                 >
-                    {images.length !== 0 & !isMultiple ? 'Replace' : 'Choose File'}
+                    {images.length !== 0 & noOfImages === 1 ? 'Replace' : 'Choose File'}
                 </Button>
             </div>
         </div>

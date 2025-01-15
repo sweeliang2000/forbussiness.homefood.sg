@@ -395,6 +395,7 @@ const CustomerFacingBusinessPage = () => {
                     <DragDropImageUploader
                         images={thumbnailImages}
                         setImages={setThumbnailImages}
+                        noOfImages={1}
                         width={180}
                         height={180}
                         imageClassName={styles.dragdropImage}
@@ -408,6 +409,7 @@ const CustomerFacingBusinessPage = () => {
                     <DragDropImageUploader
                         images={bannerImages}
                         setImages={setBannerImages}
+                        noOfImages={1}
                         width={792}
                         height={198}
                         imageClassName={styles.dragdropBannerImage}
