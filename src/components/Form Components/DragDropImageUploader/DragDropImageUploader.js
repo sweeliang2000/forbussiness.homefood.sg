@@ -82,7 +82,7 @@ const DragDropImageUploader = ({
                     {
                         name: file.name,
                         file: file,
-                        url: URL.createObjectURL(file[i]),
+                        url: URL.createObjectURL(file),
                     }
                 ])
             }
