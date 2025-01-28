@@ -7,6 +7,7 @@ import Link from 'next/link';
 import ActionCell from './_views/DangerActionCell';
 import SignOutAllSessionCell from './_components/SignOutAllSessionsCell';
 import DeleteAccount from './_components/DeleteAccount';
+import SignoutSection from './_components/SignoutSection';
 
 const AccountSetting = () => {
     return (
@@ -18,7 +19,6 @@ const AccountSetting = () => {
                         <p>you@example.com</p>
                         <p>Account Type: Free</p>
                         <p>Change Password</p>
-                        <p>Button to sign out</p>
                     </div>
                 </ContentCard>
 
@@ -32,6 +32,8 @@ const AccountSetting = () => {
                         </div>
                     </div>
                 </ContentCard>
+
+                <SignoutSection/>
             </div>
         </>
     )

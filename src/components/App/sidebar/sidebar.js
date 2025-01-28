@@ -116,7 +116,7 @@ export default function Sidebar({
                         title={'Stamp System'}
                         submenus={[
                             { href: '/app/stamp-management', title: 'Stamp Managment' },
-                            { href: '/document', title: 'Membership Tiers' },
+                            { href: '/app/card-preview', title: 'Card Preview' },
                             { href: '/project', title: 'Redeemable Items' }
                         ]}
                         isExpand={currentSelection == STAMP_TAB}
