@@ -1,10 +1,16 @@
+'use client';
+import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 import styles from './stamp-setup.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { Button, TextField } from '@mui/material';
 import Link from 'next/link';
+import { useState } from 'react';
 
 export default function StampSetup() {
+  const [defaultStampedIcon, setDefaultStampedIcon] = useState([]);
+  const [defaultUnStampedIcon, setDefaultUnStampedIcon] = useState([]);
+
   return (
     <div className={styles.container}>
       <HeaderSection
@@ -100,31 +106,35 @@ export default function StampSetup() {
         <div>
           <h2>Default Design</h2>
 
-          <h3 className={styles.noDescriptionTitle}>Reward Icons (Stamped)</h3>
+          <h3 className={styles.noDescriptionTitle}>Stamped Icons</h3>
           <p className={styles.description}>
-            The user has collected this stamp, and it directly contributes to achieving the reward. This indicates completed actions that are essential for earning the reward.
+          This icon indicates a collected stamp on the loyalty card. It must always be displayed once the stamp is earned. We recommend using a distinct design or color to clearly show that it is stamped.
           </p>
+
+          <DragDropImageUploader
+            images={defaultStampedIcon}
+            setImages={setDefaultStampedIcon}
+            noOfImages={1}
+            width={100}
+            height={100}
+            imageClassName={styles.dragdropBannerImage}
+          />
         </div>
 
         <div>
-          <h3 className={styles.noDescriptionTitle}>Reward Icons (Unstamped)</h3>
+          <h3 className={styles.noDescriptionTitle}>Unstamped Icons</h3>
           <p className={styles.description}>
-            This stamp is part of the reward criteria but hasn&apos;t been collected yet. It represents the progress the user needs to make to earn the reward.
+            (Optional) This icon is primarily for design, indicating that no stamp is present. It’s recommended to use a lighter color to distinguish it from a stamped icon. If no icon is specified, the area remains empty.
           </p>
-        </div>
 
-        <div>
-          <h3 className={styles.noDescriptionTitle}>Non-Reward Icons (Stamped)</h3>
-          <p className={styles.description}>
-            The user has collected this stamp, but it does not contribute to the current reward. These stamps may be part of bonus achievements or additional incentives.
-          </p>
-        </div>
-
-        <div>
-          <h3 className={styles.noDescriptionTitle}>Non-Reward Icons (Unstamped)</h3>
-          <p className={styles.description}>
-            This stamp is not related to the current reward and hasn&apos;t been collected yet. It may represent optional actions or future rewards that the user can pursue.
-          </p>
+          <DragDropImageUploader
+            images={defaultUnStampedIcon}
+            setImages={setDefaultUnStampedIcon}
+            noOfImages={1}
+            width={100}
+            height={100}
+            imageClassName={styles.dragdropBannerImage}
+          />
         </div>
       </ContentCard>
 
