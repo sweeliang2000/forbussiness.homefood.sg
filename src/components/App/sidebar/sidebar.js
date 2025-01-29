@@ -124,7 +124,7 @@ export default function Sidebar({
                         onClick={() => { toggleMenus(STAMP_TAB) }}
                     />
 
-                    <Submenu
+                    {/* <Submenu
                         title={'Points System'}
                         submenus={[
                             { href: '/app/points-management', title: 'Points Management' },
@@ -133,7 +133,7 @@ export default function Sidebar({
                         isExpand={currentSelection == POINTS_TAB}
                         icon={ImCoinDollar}
                         onClick={() => { toggleMenus(POINTS_TAB) }}
-                    />
+                    /> */}
 
                     <Submenu
                         title={'Redeemable'}
