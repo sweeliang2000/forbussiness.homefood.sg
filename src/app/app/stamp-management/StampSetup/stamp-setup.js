@@ -149,7 +149,7 @@ export default function StampSetup() {
 
         <ContentCard className={styles.content}>
           <div>
-            <h2>My rewards</h2>
+            <h2>Card Steps Setup</h2>
             <p className={styles.description}>
               Create the rewards that your customers will love. This will make to always come back!
             </p>
