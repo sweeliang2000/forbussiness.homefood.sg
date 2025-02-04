@@ -8,6 +8,7 @@ import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown'
 import { TextField } from '@mui/material';
 import LocationSection from './LocationSecion';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
+import FieldHeader from '@/components/FieldHeader/FieldHeader';
 
 const CustomerFacingBusinessPage = () => {
     const [thumbnailImages, setThumbnailImages] = useState([]);
@@ -330,8 +331,11 @@ const CustomerFacingBusinessPage = () => {
             />
 
             <ContentCard className={styles.content}>
-                <div>
-                    <h3 className={styles.noDescriptionTitle}>Display name</h3>
+                <div className={styles.fieldContainer}>
+                    <FieldHeader
+                        title='Display name'
+                        type='h3'
+                    />
 
                     <TextField
                         variant='outlined'
@@ -340,8 +344,11 @@ const CustomerFacingBusinessPage = () => {
                     />
                 </div>
 
-                <div>
-                    <h3 className={styles.noDescriptionTitle}>Description</h3>
+                <div className={styles.fieldContainer}>
+                    <FieldHeader
+                        title='Description'
+                        type='h3'
+                    />
 
                     <TextField
                         variant='outlined'
@@ -357,8 +364,11 @@ const CustomerFacingBusinessPage = () => {
                     />
                 </div>
 
-                <div>
-                    <h3 className={styles.noDescriptionTitle}>Website</h3>
+                <div className={styles.fieldContainer}>
+                    <FieldHeader
+                        title='Website'
+                        type='h3'
+                    />
 
                     <TextField
                         variant='outlined'
@@ -374,23 +384,34 @@ const CustomerFacingBusinessPage = () => {
                     />
                 </div>
 
-                <div>
-                    <h3 className={styles.noDescriptionTitle}>Category</h3>
+                <div className={styles.fieldContainer}>
+                    <FieldHeader
+                        title='Category'
+                        type='h3'
+                    />
+
                     <FullWidthDropdown
                         options={[{ value: 'Food Store', title: 'Food Store' }, { value: 'Retailers', title: 'Retailers' }]}
                     />
                 </div>
 
-                <div>
-                    <h3 className={styles.noDescriptionTitle}>Halal Certified</h3>
+                <div className={styles.fieldContainer}>
+                    <FieldHeader
+                        title='Halal Certified'
+                        type='h3'
+                    />
+
                     <FullWidthDropdown
                         options={[{ value: 'Yes', title: 'Yes' }, { value: 'No', title: 'No' }, { value: 'Not Applicable', title: 'Not Applicable' }]}
                     />
                 </div>
 
-                <div>
-                    <h3 className={styles.noDescriptionTitle}>Thumbnail / Featured Image</h3>
-                    <p className={styles.description}>Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.</p>
+                <div className={styles.fieldContainer}>
+                    <FieldHeader
+                        title='Thumbnail / Featured Image'
+                        description='Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                        type='h3'
+                    />
 
                     <DragDropImageUploader
                         images={thumbnailImages}
@@ -402,9 +423,12 @@ const CustomerFacingBusinessPage = () => {
                     />
                 </div>
 
-                <div>
-                    <h3 className={styles.noDescriptionTitle}>Banner Image</h3>
-                    <p className={styles.description}>Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.</p>
+                <div className={styles.fieldContainer}>
+                    <FieldHeader
+                        title='Banner Image'
+                        description='Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                        type='h3'
+                    />
 
                     <DragDropImageUploader
                         images={bannerImages}
@@ -416,10 +440,12 @@ const CustomerFacingBusinessPage = () => {
                     />
                 </div>
 
-                <div>
-                    <h3 className={styles.noDescriptionTitle}>Keywords</h3>
-
-                    <p className={styles.description}>Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.</p>
+                <div className={styles.fieldContainer}>
+                    <FieldHeader
+                        title='Keywords'
+                        description='Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                        type='h3'
+                    />
 
                     <TextField
                         variant='outlined'

@@ -6,6 +6,8 @@ import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { Button, TextField } from '@mui/material';
 import Link from 'next/link';
 import { useState } from 'react';
+import FieldHeader from '@/components/FieldHeader/FieldHeader';
+import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 
 export default function StampSetup() {
   const [defaultStampedIcon, setDefaultStampedIcon] = useState([]);
@@ -34,120 +36,139 @@ export default function StampSetup() {
           }
         />
 
-        <ContentCard className={styles.content}>
-          <div>
-            <h2>Card Setup</h2>
-            <h3>Card title (Optional)</h3>
-            <p className={styles.description}>
-              A name for your stamp card. For example, BUY 6 COFFEES AND GET ONE FREE!
-            </p>
+        <ContentCard>
+          <FieldHeader
+            title='Card Setup'
+          />
 
-            <TextField
-              variant='outlined'
+          <div className={styles.fieldsContainer}>
+            <FormTextField
+              title='Card title (Optional)'
+              subtitle='A name for your stamp card. For example, BUY 6 COFFEES AND GET ONE FREE!'
               placeholder=''
-              fullWidth
+              id='Card Title'
+              name='Card Title'
+              required
+              helperText={''}
+              error={false}
+              value={''}
+              onChange={(event) => {  }}
+            />
+
+            <FormTextField
+              title='Card description (Optional)'
+              subtitle='A short description of your program. Displays on the front of your the card to customers like BUY 6 COFFEES AND GET ONE FREE!'
+              placeholder=''
+              id='Card Title'
+              name='Card Title'
+              required
+              helperText={''}
+              error={false}
+              value={''}
+              onChange={(event) => {  }}
+            />
+
+            <FormTextField
+              title='Number of stamps'
+              subtitle='Total amount of stamps your stamp card should have. (Maximum of 16)'
+              placeholder='6'
+              type='number'
+              id='Card Title'
+              name='Card Title'
+              inputProps={{
+                min: 0,
+                max: 16,
+              }}
+              helperText={''}
+              error={false}
+              value={''}
+              onChange={(event) => {  }}
             />
           </div>
+        </ContentCard>
 
-          <div>
-            <h3>Card description (Optional)</h3>
-            <p className={styles.description}>
-              A short description of your program. Displays on the front of your the card to customers like BUY 6 COFFEES AND GET ONE FREE!
-            </p>
-            <TextField
-              label=''
-              variant='outlined'
-              placeholder=''
-              fullWidth
+        <ContentCard>
+            <FieldHeader
+              title='Expiration Settings'
+            />
+
+          <div className={styles.fieldsContainer}>
+            <FormTextField
+              title='Expiration Type'
+              subtitle='Once the expiration type are released, any changes require a minimum of 1 month&apos;s notice to ensure customers are informed in advance.'
+              placeholder='Your name'
+              type='number'
+              id='Card Title'
+              name='Card Title'
+              required
+              helperText={''}
+              error={false}
+              value={''}
+              onChange={(event) => {  }}
+            />
+
+            <FormTextField
+              title='Stamp Expiry Period (Days)'
+              placeholder='30'
+              type='number'
+              id='Card Title'
+              name='Card Title'
+              required
+              helperText={''}
+              error={false}
+              value={''}
+              onChange={(event) => {  }}
             />
           </div>
+        </ContentCard>
 
-          <div>
-            <h3>Number of stamps</h3>
-            <p className={styles.description}>
-              Total amount of stamps your stamp card should have. (Maximum of 16)
-            </p>
+        <ContentCard>
 
-            <div className={styles.addressFields}>
-              <TextField
-                variant='outlined'
-                placeholder='6'
-                fullWidth
-                type='number'
-                inputProps={{
-                  min: 0,
-                  max: 16,
-                }}
+          <div className={styles.fieldsContainer}>
+            <div>
+              <FieldHeader
+                title='Default Design'
+                type='h2'
+              />
+
+              <FieldHeader
+                title='Stamped Icons'
+                description='This icon indicates a collected stamp on the loyalty card. It must always be displayed once the stamp is earned. We recommend using a distinct design or color to clearly show that it is stamped.'
+                type='h3'
+                className={styles.headerBtnMargin}
+              />
+
+              <DragDropImageUploader
+                images={defaultStampedIcon}
+                setImages={setDefaultStampedIcon}
+                noOfImages={1}
+                width={100}
+                height={100}
+                imageClassName={styles.dragdropBannerImage}
+              />
+            </div>
+
+            <div>
+              <FieldHeader
+                title='Unstamped Icons'
+                description='(Optional) This icon is primarily for design, indicating that no stamp is present. It’s recommended to use a lighter color to distinguish it from a stamped icon. If no icon is specified, the area remains empty.'
+                type='h3'
+                className={styles.headerBtnMargin}
+              />
+
+              <DragDropImageUploader
+                images={defaultUnStampedIcon}
+                setImages={setDefaultUnStampedIcon}
+                noOfImages={1}
+                width={100}
+                height={100}
+                imageClassName={styles.dragdropBannerImage}
               />
             </div>
           </div>
         </ContentCard>
 
-        <ContentCard className={styles.content}>
-          <div>
-            <h2>Expiration Settings</h2>
-
-            <h3 className={styles.noDescriptionTitle}>Expiration Type</h3>
-            <p className={styles.description}>
-              Once the expiration type are released, any changes require a minimum of 1 month&apos;s
-              notice to ensure customers are informed in advance.
-            </p>
-
-            <TextField
-              placeholder='Your name'
-              variant='outlined'
-              fullWidth
-            />
-          </div>
-
-          <div>
-            <h3 className={styles.noDescriptionTitle}>Stamp Expiry Period (Days)</h3>
-
-            <TextField
-              variant='outlined'
-              placeholder='Accounts Manager'
-              fullWidth
-            />
-          </div>
-        </ContentCard>
-
-        <ContentCard className={styles.content}>
-          <div>
-            <h2>Default Design</h2>
-
-            <h3 className={styles.noDescriptionTitle}>Stamped Icons</h3>
-            <p className={styles.description}>
-            This icon indicates a collected stamp on the loyalty card. It must always be displayed once the stamp is earned. We recommend using a distinct design or color to clearly show that it is stamped.
-            </p>
-
-            <DragDropImageUploader
-              images={defaultStampedIcon}
-              setImages={setDefaultStampedIcon}
-              noOfImages={1}
-              width={100}
-              height={100}
-              imageClassName={styles.dragdropBannerImage}
-            />
-          </div>
-
-          <div>
-            <h3 className={styles.noDescriptionTitle}>Unstamped Icons</h3>
-            <p className={styles.description}>
-              (Optional) This icon is primarily for design, indicating that no stamp is present. It’s recommended to use a lighter color to distinguish it from a stamped icon. If no icon is specified, the area remains empty.
-            </p>
-
-            <DragDropImageUploader
-              images={defaultUnStampedIcon}
-              setImages={setDefaultUnStampedIcon}
-              noOfImages={1}
-              width={100}
-              height={100}
-              imageClassName={styles.dragdropBannerImage}
-            />
-          </div>
-        </ContentCard>
-
-        <ContentCard className={styles.content}>
+        <ContentCard>
           <div>
             <h2>Card Steps Setup</h2>
             <p className={styles.description}>

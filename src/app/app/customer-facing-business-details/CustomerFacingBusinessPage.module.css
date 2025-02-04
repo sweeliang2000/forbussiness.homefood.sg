@@ -4,15 +4,17 @@
     gap: 32px;
 }
 
+.content .fieldContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
 .header {
     position: -webkit-sticky;
     position: sticky;
     top: 0;
     z-index: 90;
-}
-
-.noDescriptionTitle {
-    margin-bottom: 16px;
 }
 
 .description {

@@ -11,6 +11,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { LoadingButton } from '@mui/lab';
 import AddLocationSection from './AddLocationSection';
+import FieldHeader from '@/components/FieldHeader/FieldHeader';
 
 const LocationSection = ({ data }) => {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -124,7 +125,10 @@ const LocationSection = ({ data }) => {
         <>
             <ContentCard className={styles.content}>
                 <div className={styles.locationHeader}>
-                    <h3 className={styles.noDescriptionTitle}>Locations</h3>
+                    <FieldHeader
+                        title='Locations'
+                        type='h3'
+                    />
 
                     <LoadingButton
                         size='small'

@@ -6,6 +6,7 @@ import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { TextField } from '@mui/material';
 import Link from 'next/link';
 import { useState } from 'react';
+import FieldHeader from '@/components/FieldHeader/FieldHeader';
 
 const BUSINESS_NAME = 'businessName';
 const UEN = 'uen';
@@ -101,7 +102,9 @@ export default function StampSetup() {
       />
       <ContentCard className={styles.content}>
         <div>
-          <h2>Official information</h2>
+          <FieldHeader
+            title='Official information'
+          />
 
           <FormTextField
             title='Business name*'
@@ -134,10 +137,11 @@ export default function StampSetup() {
         </div>
 
         <div>
-          <h3>Registered Business Address</h3>
-          <p className={styles.description}>
-            This is the name that customers will see in the app for example, McDonalds.
-          </p>
+          <FieldHeader
+            title='Registered Business Address'
+            description='This is the name that customers will see in the app for example, McDonalds.'
+            type='h3'
+          />
 
           <div className={styles.addressFields}>
             <TextField
@@ -206,7 +210,9 @@ export default function StampSetup() {
 
       <ContentCard className={styles.content}>
         <div>
-          <h2>Representative Contact Details</h2>
+          <FieldHeader
+            title='Representative Contact Details'
+          />
 
           <FormTextField
             title='Name*'
