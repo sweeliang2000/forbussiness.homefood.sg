@@ -2,30 +2,34 @@
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { useState } from 'react';
 
-const FullWidthDropdown = ({ options }) => {
-  const [value, setValue] = useState('');
 
-  const handleChange = (event) => {
-    setValue(event.target.value);
-  };
+{/* 
+  Example Usages:
 
-  return (
-    <FormControl fullWidth>
-      <Select
-        labelId='dropdown-label'
-        id='full-width-dropdown'
-        value={value}
-        onChange={handleChange}
-        fullWidth
-      >
-        {options.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
-            {option.title}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-  );
-};
+  <FullWidthDropdown
+  options={EXPIRATION_TYPE_OPTIONS}
+  labelId='expiration_type'
+  id='expiration_type'
+  value='validForDays'
+  onChange={() => { }}
+/> 
+*/}
+const FullWidthDropdown = ({
+  options,
+  ...rest
+}) => (
+  <FormControl fullWidth>
+    <Select
+      fullWidth
+      {...rest}
+    >
+      {options.map((option) => (
+        <MenuItem key={option.value} value={option.value}>
+          {option.title}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+);;
 
 export default FullWidthDropdown;

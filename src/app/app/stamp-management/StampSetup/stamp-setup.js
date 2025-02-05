@@ -7,10 +7,23 @@ import Link from 'next/link';
 import { useState } from 'react';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
+import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
+
+const NO_EXPIRATION = { value: 'noExpiration', title: 'No Expiration' };
+const END_OF_MONTH_EXPIRATION = { value: 'endOfMonth', title: 'End of Month' };
+const END_OF_YEAR_EXPIRATION = { value: 'endOfYear', title: 'End of Year' };
+const VALID_FOR_DAYS_EXPIRATION = { value: 'validForDays', title: 'Valid for X Days' };
+const EXPIRATION_TYPE_OPTIONS = [
+  NO_EXPIRATION,
+  END_OF_MONTH_EXPIRATION,
+  END_OF_YEAR_EXPIRATION,
+  VALID_FOR_DAYS_EXPIRATION
+];
 
 export default function StampSetup() {
   const [defaultStampedIcon, setDefaultStampedIcon] = useState([]);
   const [defaultUnStampedIcon, setDefaultUnStampedIcon] = useState([]);
+  const [expirationType, setExpirationType] = useState(VALID_FOR_DAYS_EXPIRATION.value);
 
   const formSubmissionHandler = (event) => {
     event.preventDefault();
@@ -88,26 +101,27 @@ export default function StampSetup() {
 
       <ContentCard>
         <FieldHeader
-          title='Expiration Settings'
+          title='Card&apos;s Expiration Settings'
         />
 
         <div className={styles.fieldsContainer}>
-          <FormTextField
+          <FieldHeader
             title='Expiration Type'
-            subtitle='Once the expiration type are released, any changes require a minimum of 1 month&apos;s notice to ensure customers are informed in advance.'
-            placeholder='Your name'
-            type='number'
-            id='Card Title'
-            name='Card Title'
-            required
-            helperText={''}
-            error={false}
-            value={''}
-            onChange={(event) => { }}
+            description='Once the expiration type are released, any changes require a minimum of 1 month&apos;s notice to ensure customers are informed in advance.'
+            type='h3'
           />
 
-          <FormTextField
-            title='Stamp Expiry Period (Days)'
+          <FullWidthDropdown
+            options={EXPIRATION_TYPE_OPTIONS}
+            labelId='expiration_type'
+            id='expiration_type'
+            value={expirationType}
+            onChange={(event) => { setExpirationType(event.target.value) }}
+          />
+
+
+          { expirationType === VALID_FOR_DAYS_EXPIRATION.value && <FormTextField
+            title='Number of Days to Expire'
             placeholder='30'
             type='number'
             id='Card Title'
@@ -117,7 +131,7 @@ export default function StampSetup() {
             error={false}
             value={''}
             onChange={(event) => { }}
-          />
+          />}
         </div>
       </ContentCard>
 
