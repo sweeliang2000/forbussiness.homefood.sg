@@ -32,11 +32,14 @@ const DEFAULT_STAMP_STEP = {
 }
 
 export default function StampSetup() {
-  const [numberOfStamps, setNumberOfStamps] = useState(1);
+  const [numberOfStamps, setNumberOfStamps] = useState(6);
   const [defaultStampedIcon, setDefaultStampedIcon] = useState([]);
   const [defaultUnStampedIcon, setDefaultUnStampedIcon] = useState([]);
   const [expirationType, setExpirationType] = useState(VALID_FOR_DAYS_EXPIRATION.value);
-  const [cardSteps, setCardSteps] = useState([DEFAULT_STAMP_STEP])
+  const [cardSteps, setCardSteps] = useState(Array.from({ length: 6 }, (_, index) => ({
+    ...DEFAULT_STAMP_STEP,
+    id: index + 1
+  })))
 
   const formSubmissionHandler = (event) => {
     event.preventDefault();
