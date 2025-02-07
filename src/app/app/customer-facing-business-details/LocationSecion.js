@@ -154,7 +154,7 @@ const LocationSection = ({ data }) => {
                     pageSizeOptions={[10]}
                     disableSelectionOnClick
                     getRowHeight={() => 'auto'}
-                    style={{ width: '100%' }} 
+                    style={{ width: '100%', borderRadius: 12 }} 
                     pagination
                 />
             </div>
