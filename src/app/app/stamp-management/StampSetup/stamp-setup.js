@@ -8,6 +8,10 @@ import { useState } from 'react';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
+import { DataGrid } from '@mui/x-data-grid';
+import { IconButton, Menu, MenuItem } from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { clamp } from '@/utility/numbers';
 
 const NO_EXPIRATION = { value: 'noExpiration', title: 'No Expiration' };
 const END_OF_MONTH_EXPIRATION = { value: 'endOfMonth', title: 'End of Month' };
@@ -20,15 +24,118 @@ const EXPIRATION_TYPE_OPTIONS = [
   VALID_FOR_DAYS_EXPIRATION
 ];
 
+const DEFAULT_STAMP_STEP = {
+  id: 1,
+  stampedIcon: 'Default',
+  unstampedIcon: 'Nil',
+  reward: 'No Reward'
+}
+
 export default function StampSetup() {
+  const [numberOfStamps, setNumberOfStamps] = useState(1);
   const [defaultStampedIcon, setDefaultStampedIcon] = useState([]);
   const [defaultUnStampedIcon, setDefaultUnStampedIcon] = useState([]);
   const [expirationType, setExpirationType] = useState(VALID_FOR_DAYS_EXPIRATION.value);
+  const [cardSteps, setCardSteps] = useState([DEFAULT_STAMP_STEP])
 
   const formSubmissionHandler = (event) => {
     event.preventDefault();
     console.log("Stamp Setup saved called");
   };
+
+  const numberOfStampsHandler = (event) => {
+    const preValue = numberOfStamps;
+    const value = clamp(Number(event.target.value), 1, 16);
+    
+    setCardSteps((preStep) => {
+      if (value == 0) {
+        return []
+      } else if (value > preValue) {
+        const arrayOfCopies = Array.from({ length: (value - preValue) }, (_, index) => ({
+          ...DEFAULT_STAMP_STEP,
+          id: index + 1 + preValue
+        }))
+
+        return [...preStep, ...arrayOfCopies ]
+      } else {
+        return preStep.slice(0,value)
+      } 
+    });
+
+    setNumberOfStamps(value);
+
+  }
+
+  // ==== Table Related ====
+  const paginationModel = { page: 0, pageSize: 20 };
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedRowId, setSelectedRowId] = useState(null);
+
+  const handleMenuOpen = (event, rowId) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedRowId(rowId);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedRowId(null);
+  };
+
+  const handleEdit = () => {
+    console.log('Edit location with id:', selectedRowId);
+    handleMenuClose();
+  };
+
+  const handleDelete = () => {
+    console.log('Delete location with id:', selectedRowId);
+    handleMenuClose();
+  };
+
+  const columns = [
+    {
+      field: 'id',
+      headerName: 'Step',
+      width: 60,
+    },
+    {
+      field: 'stampedIcon',
+      headerName: 'Stamped Icon',
+      flex: 1,
+    },
+    {
+      field: 'unstampedIcon',
+      headerName: 'Unstamped Icon',
+      flex: 1,
+    },
+    {
+      field: 'reward',
+      headerName: 'Reward',
+      flex: 2
+    },
+    {
+      field: 'actions',
+      headerName: '',
+      width: 50,
+      sortable: false,
+      align: 'right',
+      renderCell: (params) => (
+        <div>
+          <IconButton onClick={(event) => handleMenuOpen(event, params.row.id)}>
+            <MoreVertIcon />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl) && selectedRowId === params.row.id}
+            onClose={handleMenuClose}
+          >
+            <MenuItem onClick={handleEdit}>Edit</MenuItem>
+            <MenuItem onClick={handleDelete}>Delete</MenuItem>
+          </Menu>
+        </div>
+      ),
+    },
+  ];
+  // ==== End of Table Related ====
 
   return (
 
@@ -87,14 +194,11 @@ export default function StampSetup() {
             type='number'
             id='Card Title'
             name='Card Title'
-            inputProps={{
-              min: 0,
-              max: 16,
-            }}
+            InputProps={{ inputProps: { min: 1, max: 16 } }}
             helperText={''}
             error={false}
-            value={''}
-            onChange={(event) => { }}
+            value={numberOfStamps}
+            onChange={(event) => { numberOfStampsHandler(event) }}
           />
         </div>
       </ContentCard>
@@ -120,7 +224,7 @@ export default function StampSetup() {
           />
 
 
-          { expirationType === VALID_FOR_DAYS_EXPIRATION.value && <FormTextField
+          {expirationType === VALID_FOR_DAYS_EXPIRATION.value && <FormTextField
             title='Number of Days to Expire'
             placeholder='30'
             type='number'
@@ -130,7 +234,7 @@ export default function StampSetup() {
             helperText={''}
             error={false}
             value={''}
-            onChange={(event) => { }}
+            onChange={(event) => { numberOfStampsHandler(event) }}
           />}
         </div>
       </ContentCard>
@@ -182,16 +286,27 @@ export default function StampSetup() {
       </ContentCard>
 
       <ContentCard>
-        <div>
-          <h2>Card Steps Setup</h2>
-          <p className={styles.description}>
-            Create the rewards that your customers will love. This will make to always come back!
-          </p>
-
-
-
-        </div>
+          <FieldHeader
+            title='Card Steps Setup'
+            description='Create the rewards that your customers will love. This will make to always come back!'
+            type='h3'
+          />
       </ContentCard>
+
+      <div className={styles.tableContainer}>
+        <DataGrid
+          rows={cardSteps}
+          columns={columns}
+          initialState={{ pagination: { paginationModel } }}
+          disableColumnFilter
+          disableColumnMenu
+          pageSizeOptions={[20]}
+          disableSelectionOnClick
+          getRowHeight={() => 'auto'}
+          style={{ width: '100%', borderRadius: 12 }}
+          pagination
+        />
+      </div>
     </form>
   );
 }
