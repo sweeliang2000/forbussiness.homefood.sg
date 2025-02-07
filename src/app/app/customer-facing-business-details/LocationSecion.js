@@ -105,13 +105,7 @@ const LocationSection = ({ data }) => {
     ];
 
     // Map the data array to a structure that DataGrid can use
-    const rows = data.map((item, index) => ({
-        id: item.id,
-        locationName: item.locationName,
-        address: item.address,
-        postalCode: item.postalCode,
-        operatingHours: item.operatingHours
-    }));
+    const rows = data;
 
     const addLocationHandler = () => {
         setIsAddLocationOpen(true)
