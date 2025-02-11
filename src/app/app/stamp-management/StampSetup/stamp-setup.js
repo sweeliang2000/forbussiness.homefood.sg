@@ -134,7 +134,6 @@ export default function StampSetup() {
     handleMenuClose();
     
     const currentStepDetail = cardSteps[selectedRowId];
-    console.log(currentStepDetail)
     setCurrentStepStampedIcon(currentStepDetail.stampedIcon);
     setCurrentStepUnstampIcon(currentStepDetail.unStampedIcon);
 
