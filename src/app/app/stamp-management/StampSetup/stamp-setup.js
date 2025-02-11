@@ -4,7 +4,7 @@ import styles from './stamp-setup.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
@@ -12,6 +12,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { clamp } from '@/utility/numbers';
+import EditStampStep from './_views/EditStampStep';
 
 const NO_EXPIRATION = { value: 'noExpiration', title: 'No Expiration' };
 const END_OF_MONTH_EXPIRATION = { value: 'endOfMonth', title: 'End of Month' };
@@ -26,8 +27,18 @@ const EXPIRATION_TYPE_OPTIONS = [
 
 const DEFAULT_STAMP_STEP = {
   id: 1,
-  stampedIcon: 'Default',
-  unstampedIcon: 'Nil',
+  stampedIcon: null,
+  // stampedIcon: [{
+  //   name: '',
+  //   file: '',
+  //   url: '',
+  // }],
+  unStampedIcon: null,
+  // stampedIcon: [{
+  //   name: '',
+  //   file: '',
+  //   url: '',
+  // }],
   reward: 'No Reward'
 }
 
@@ -49,7 +60,7 @@ export default function StampSetup() {
   const numberOfStampsHandler = (event) => {
     const preValue = numberOfStamps;
     const value = clamp(Number(event.target.value), 1, 16);
-    
+
     setCardSteps((preStep) => {
       if (value == 0) {
         return []
@@ -59,17 +70,50 @@ export default function StampSetup() {
           id: index + 1 + preValue
         }))
 
-        return [...preStep, ...arrayOfCopies ]
+        return [...preStep, ...arrayOfCopies]
       } else {
-        return preStep.slice(0,value)
-      } 
+        return preStep.slice(0, value)
+      }
     });
 
     setNumberOfStamps(value);
-
   }
 
+  useEffect(() => {
+    setCardSteps(prevValue => {
+      const data = prevValue.map((value) => {
+        if (value.stampedIcon === null || value.stampedIcon.length === 0) {
+          return { ...value, stampedIcon: defaultStampedIcon}
+        }
+
+        return { ...value };
+      })
+
+      return data
+    })
+  }, [defaultStampedIcon])
+
+  useEffect(() => {
+    setCardSteps(prevValue => {
+      const data = prevValue.map((value) => {
+        if (value.unStampedIcon === null || value.unStampedIcon.length === 0) {
+          return { ...value, unStampedIcon: defaultUnStampedIcon}
+        }
+
+        return { ...value };
+      })
+
+      return data
+    })
+  }, [defaultUnStampedIcon])
+
+  // ==== Modify Selection ===
+  const [currentStepStampedIcon, setCurrentStepStampedIcon] = useState([]);
+  const [currentStepUnstampIcon, setCurrentStepUnstampIcon] = useState([]);
+  // ==== End ===
+
   // ==== Table Related ====
+  const [isEditStampOpen, setIsEditStampOpen] = useState(false);
   const paginationModel = { page: 0, pageSize: 20 };
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedRowId, setSelectedRowId] = useState(null);
@@ -86,7 +130,14 @@ export default function StampSetup() {
 
   const handleEdit = () => {
     console.log('Edit location with id:', selectedRowId);
+    setIsEditStampOpen(true);
     handleMenuClose();
+    
+    const currentStepDetail = cardSteps[selectedRowId];
+    console.log(currentStepDetail)
+    setCurrentStepStampedIcon(currentStepDetail.stampedIcon);
+    setCurrentStepUnstampIcon(currentStepDetail.unStampedIcon);
+
   };
 
   const handleDelete = () => {
@@ -142,174 +193,186 @@ export default function StampSetup() {
 
   return (
 
-    <form
-      className={styles.form}
-      onSubmit={formSubmissionHandler}
-    >
-      <HeaderSection
-        className={styles.header}
-        title='Stamp Management'
-        description={
-          <p>
-            Create and design your stamp card and the rewards to be given when
-            customers hit a certain goal. <Link href='/'>Find out more.</Link>
-          </p>
+    <>
+      <form
+        className={styles.form}
+        onSubmit={formSubmissionHandler}
+      >
+        <HeaderSection
+          className={styles.header}
+          title='Stamp Management'
+          description={
+            <p>
+              Create and design your stamp card and the rewards to be given when
+              customers hit a certain goal. <Link href='/'>Find out more.</Link>
+            </p>
 
-        }
-      />
-
-      <ContentCard>
-        <FieldHeader
-          title='Card Setup'
+          }
         />
 
-        <div className={styles.fieldsContainer}>
-          <FormTextField
-            title='Card title (Optional)'
-            subtitle='A name for your stamp card. For example, BUY 6 COFFEES AND GET ONE FREE!'
-            placeholder=''
-            id='Card Title'
-            name='Card Title'
-            required
-            helperText={''}
-            error={false}
-            value={''}
-            onChange={(event) => { }}
-          />
-
-          <FormTextField
-            title='Card description (Optional)'
-            subtitle='A short description of your program. Displays on the front of your the card to customers like BUY 6 COFFEES AND GET ONE FREE!'
-            placeholder=''
-            id='Card Title'
-            name='Card Title'
-            required
-            helperText={''}
-            error={false}
-            value={''}
-            onChange={(event) => { }}
-          />
-
-          <FormTextField
-            title='Number of stamps'
-            subtitle='Total amount of stamps your stamp card should have. (Maximum of 16)'
-            placeholder='6'
-            type='number'
-            id='Card Title'
-            name='Card Title'
-            InputProps={{ inputProps: { min: 1, max: 16 } }}
-            helperText={''}
-            error={false}
-            value={numberOfStamps}
-            onChange={(event) => { numberOfStampsHandler(event) }}
-          />
-        </div>
-      </ContentCard>
-
-      <ContentCard>
-        <FieldHeader
-          title='Card&apos;s Expiration Settings'
-        />
-
-        <div className={styles.fieldsContainer}>
+        <ContentCard>
           <FieldHeader
-            title='Expiration Type'
-            description='Once the expiration type are released, any changes require a minimum of 1 month&apos;s notice to ensure customers are informed in advance.'
-            type='h3'
+            title='Card Setup'
           />
 
-          <FullWidthDropdown
-            options={EXPIRATION_TYPE_OPTIONS}
-            labelId='expiration_type'
-            id='expiration_type'
-            value={expirationType}
-            onChange={(event) => { setExpirationType(event.target.value) }}
+          <div className={styles.fieldsContainer}>
+            <FormTextField
+              title='Card title (Optional)'
+              subtitle='A name for your stamp card. For example, BUY 6 COFFEES AND GET ONE FREE!'
+              placeholder=''
+              id='Card Title'
+              name='Card Title'
+              required
+              helperText={''}
+              error={false}
+              value={''}
+              onChange={(event) => { }}
+            />
+
+            <FormTextField
+              title='Card description (Optional)'
+              subtitle='A short description of your program. Displays on the front of your the card to customers like BUY 6 COFFEES AND GET ONE FREE!'
+              placeholder=''
+              id='Card Title'
+              name='Card Title'
+              required
+              helperText={''}
+              error={false}
+              value={''}
+              onChange={(event) => { }}
+            />
+
+            <FormTextField
+              title='Number of stamps'
+              subtitle='Total amount of stamps your stamp card should have. (Maximum of 16)'
+              placeholder='6'
+              type='number'
+              id='Card Title'
+              name='Card Title'
+              InputProps={{ inputProps: { min: 1, max: 16 } }}
+              helperText={''}
+              error={false}
+              value={numberOfStamps}
+              onChange={(event) => { numberOfStampsHandler(event) }}
+            />
+          </div>
+        </ContentCard>
+
+        <ContentCard>
+          <FieldHeader
+            title='Card&apos;s Expiration Settings'
           />
 
-
-          {expirationType === VALID_FOR_DAYS_EXPIRATION.value && <FormTextField
-            title='Number of Days to Expire'
-            placeholder='30'
-            type='number'
-            id='Card Title'
-            name='Card Title'
-            required
-            helperText={''}
-            error={false}
-            value={''}
-            onChange={(event) => { numberOfStampsHandler(event) }}
-          />}
-        </div>
-      </ContentCard>
-
-      <ContentCard>
-
-        <div className={styles.fieldsContainer}>
-          <div>
+          <div className={styles.fieldsContainer}>
             <FieldHeader
-              title='Default Design'
-              type='h2'
-            />
-
-            <FieldHeader
-              title='Stamped Icons'
-              description='This icon indicates a collected stamp on the loyalty card. It must always be displayed once the stamp is earned. We recommend using a distinct design or color to clearly show that it is stamped.'
+              title='Expiration Type'
+              description='Once the expiration type are released, any changes require a minimum of 1 month&apos;s notice to ensure customers are informed in advance.'
               type='h3'
-              className={styles.headerBtnMargin}
             />
 
-            <DragDropImageUploader
-              images={defaultStampedIcon}
-              setImages={setDefaultStampedIcon}
-              noOfImages={1}
-              width={100}
-              height={100}
-              imageClassName={styles.dragdropBannerImage}
+            <FullWidthDropdown
+              options={EXPIRATION_TYPE_OPTIONS}
+              labelId='expiration_type'
+              id='expiration_type'
+              value={expirationType}
+              onChange={(event) => { setExpirationType(event.target.value) }}
             />
+
+
+            {expirationType === VALID_FOR_DAYS_EXPIRATION.value && <FormTextField
+              title='Number of Days to Expire'
+              placeholder='30'
+              type='number'
+              id='Card Title'
+              name='Card Title'
+              required
+              helperText={''}
+              error={false}
+              value={''}
+              onChange={(event) => { numberOfStampsHandler(event) }}
+            />}
           </div>
+        </ContentCard>
 
-          <div>
-            <FieldHeader
-              title='Unstamped Icons'
-              description='(Optional) This icon is primarily for design, indicating that no stamp is present. It’s recommended to use a lighter color to distinguish it from a stamped icon. If no icon is specified, the area remains empty.'
-              type='h3'
-              className={styles.headerBtnMargin}
-            />
+        <ContentCard>
 
-            <DragDropImageUploader
-              images={defaultUnStampedIcon}
-              setImages={setDefaultUnStampedIcon}
-              noOfImages={1}
-              width={100}
-              height={100}
-              imageClassName={styles.dragdropBannerImage}
-            />
+          <div className={styles.fieldsContainer}>
+            <div>
+              <FieldHeader
+                title='Default Design'
+                type='h2'
+              />
+
+              <FieldHeader
+                title='Stamped Icons'
+                description='This icon indicates a collected stamp on the loyalty card. It must always be displayed once the stamp is earned. We recommend using a distinct design or color to clearly show that it is stamped.'
+                type='h3'
+                className={styles.headerBtnMargin}
+              />
+
+              <DragDropImageUploader
+                images={defaultStampedIcon}
+                setImages={setDefaultStampedIcon}
+                noOfImages={1}
+                width={100}
+                height={100}
+                imageClassName={styles.dragdropBannerImage}
+              />
+            </div>
+
+            <div>
+              <FieldHeader
+                title='Unstamped Icons'
+                description='(Optional) This icon is primarily for design, indicating that no stamp is present. It’s recommended to use a lighter color to distinguish it from a stamped icon. If no icon is specified, the area remains empty.'
+                type='h3'
+                className={styles.headerBtnMargin}
+              />
+
+              <DragDropImageUploader
+                images={defaultUnStampedIcon}
+                setImages={setDefaultUnStampedIcon}
+                noOfImages={1}
+                width={100}
+                height={100}
+                imageClassName={styles.dragdropBannerImage}
+              />
+            </div>
           </div>
-        </div>
-      </ContentCard>
+        </ContentCard>
 
-      <ContentCard>
+        <ContentCard>
           <FieldHeader
             title='Card Steps Setup'
             description='Create the rewards that your customers will love. This will make to always come back!'
             type='h3'
           />
-      </ContentCard>
+        </ContentCard>
 
-      <div className={styles.tableContainer}>
-        <DataGrid
-          rows={cardSteps}
-          columns={columns}
-          initialState={{ pagination: { paginationModel } }}
-          disableColumnFilter
-          disableColumnMenu
-          pageSizeOptions={[20]}
-          disableSelectionOnClick
-          getRowHeight={() => 'auto'}
-          style={{ width: '100%', borderRadius: 12 }}
-          pagination
-        />
-      </div>
-    </form>
+        <div className={styles.tableContainer}>
+          <DataGrid
+            rows={cardSteps}
+            columns={columns}
+            initialState={{ pagination: { paginationModel } }}
+            disableColumnFilter
+            disableColumnMenu
+            disableRowSelectionOnClick
+            pageSizeOptions={[20]}
+            disableSelectionOnClick
+            getRowHeight={() => 'auto'}
+            style={{ width: '100%', borderRadius: 12 }}
+            pagination
+          />
+        </div>
+      </form>
+
+      <EditStampStep 
+        isOpen={isEditStampOpen}
+        setIsOpen={setIsEditStampOpen}
+        stampedIcon={currentStepStampedIcon}
+        setStampedIcon={setCurrentStepStampedIcon}
+        unstampIcon={currentStepUnstampIcon}
+        setUnstampedIcon={setCurrentStepUnstampIcon}
+      />
+    </>
   );
 }

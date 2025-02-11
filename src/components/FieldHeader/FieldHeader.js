@@ -14,17 +14,18 @@ const FieldHeader = ({
     title,
     description,
     type,
-    className
+    className,
+    hClassName
 }) => {
 
-    let header = <h2>{title}</h2>
+    let header = <h2 className={hClassName}>{title}</h2>
 
     if (type === 'h1') {
-        header = <h1>{title}</h1>
+        header = <h1 className={hClassName}>{title}</h1>
     } else if (type === 'h3') {
-        header = <h3>{title}</h3>
+        header = <h3 className={hClassName}>{title}</h3>
     } else if (type === 'h4') {
-        header = <h2>{title}</h2>
+        header = <h2 className={hClassName}>{title}</h2>
     }
 
     return (
