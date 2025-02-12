@@ -13,6 +13,7 @@ import { IconButton, Menu, MenuItem } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { clamp } from '@/utility/numbers';
 import EditStampStep from './_views/EditStampStep';
+import Image from 'next/image';
 
 const NO_EXPIRATION = { value: 'noExpiration', title: 'No Expiration' };
 const END_OF_MONTH_EXPIRATION = { value: 'endOfMonth', title: 'End of Month' };
@@ -179,9 +180,36 @@ export default function StampSetup() {
       field: 'stampedIcon',
       headerName: 'Stamped Icon',
       flex: 1,
+      renderCell: (params) => {
+        const isDefaultAndNotEmpty = cardSteps[params.row.id - 1].stampedIcon === 'default' && defaultStampedIcon[0] !== undefined;
+        const isNotDefault = cardSteps[params.row.id - 1].stampedIcon !== 'default';
+
+        if (isDefaultAndNotEmpty) {
+          return (
+              <Image
+                src={defaultStampedIcon[0].url}
+                width={50}
+                height={50}
+                alt='Stamp icon'
+              />
+          )
+        } else if (isNotDefault) {
+          console.log(cardSteps[params.row.id - 1].stampedIcon)
+          return (
+            <Image
+              src={cardSteps[params.row.id - 1].stampedIcon[0].url}
+              width={50}
+              height={50}
+              alt='Stamp icon'
+            />
+          )
+        } else {
+          return <p>Empty</p>
+        }
+      }
     },
     {
-      field: 'unstampedIcon',
+      field: 'unStampedIcon',
       headerName: 'Unstamped Icon',
       flex: 1,
     },
