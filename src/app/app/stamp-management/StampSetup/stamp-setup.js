@@ -83,7 +83,7 @@ export default function StampSetup() {
     setCardSteps(prevValue => {
       const data = prevValue.map((value) => {
         if (value.stampedIcon === null || value.stampedIcon.length === 0) {
-          return { ...value, stampedIcon: defaultStampedIcon}
+          return { ...value, stampedIcon: 'default'}
         }
 
         return { ...value };
@@ -97,7 +97,7 @@ export default function StampSetup() {
     setCardSteps(prevValue => {
       const data = prevValue.map((value) => {
         if (value.unStampedIcon === null || value.unStampedIcon.length === 0) {
-          return { ...value, unStampedIcon: defaultUnStampedIcon}
+          return { ...value, unStampedIcon: 'default'}
         }
 
         return { ...value };
@@ -134,8 +134,18 @@ export default function StampSetup() {
     handleMenuClose();
     
     const currentStepDetail = cardSteps[selectedRowId];
-    setCurrentStepStampedIcon(currentStepDetail.stampedIcon);
-    setCurrentStepUnstampIcon(currentStepDetail.unStampedIcon);
+
+    if (currentStepDetail.stampedIcon === 'default') {
+      setCurrentStepStampedIcon(defaultStampedIcon);
+    } else {
+      setCurrentStepStampedIcon(currentStepDetail.stampedIcon);
+    }
+
+    if (currentStepDetail.unStampedIcon === 'default') {
+      setCurrentStepUnstampIcon(defaultUnStampedIcon);
+    } else {
+      setCurrentStepUnstampIcon(currentStepDetail.unStampedIcon);
+    }
 
   };
 
