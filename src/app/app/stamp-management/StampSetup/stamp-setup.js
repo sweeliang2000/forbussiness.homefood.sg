@@ -172,7 +172,7 @@ export default function StampSetup() {
   const columns = [
     {
       field: 'id',
-      headerName: 'Step',
+      headerName: 'Stamp',
       width: 60,
     },
     {
