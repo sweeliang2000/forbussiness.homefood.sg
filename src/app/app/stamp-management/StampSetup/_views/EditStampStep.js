@@ -10,11 +10,13 @@ const EditStampStep = ({
     stampedIcon,
     setStampedIcon,
     unstampIcon,
-    setUnstampedIcon
+    setUnstampedIcon,
+    onSave
 }) => {
     const closeHandler = () => {
         setIsOpen(false)
     }
+    
     return (
         <Dialog
             open={isOpen}
@@ -81,7 +83,7 @@ const EditStampStep = ({
                 <Button
                     variant='contained'
                     className={styles.button}
-                // onClick={onClick}
+                    onClick={onSave}
                 >
                     Save
                 </Button>

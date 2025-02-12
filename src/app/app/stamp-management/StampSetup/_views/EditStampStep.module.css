@@ -70,3 +70,8 @@
     background-color: rgb(246, 246, 246);
     border: 0.5px solid rgb(137, 137, 137);
 }
+
+.dragdropBannerImage {
+    width: 80px;
+    height: 80px;
+}

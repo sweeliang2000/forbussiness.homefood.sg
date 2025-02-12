@@ -27,13 +27,13 @@ const EXPIRATION_TYPE_OPTIONS = [
 
 const DEFAULT_STAMP_STEP = {
   id: 1,
-  stampedIcon: null,
+  stampedIcon: 'default',
   // stampedIcon: [{
   //   name: '',
   //   file: '',
   //   url: '',
   // }],
-  unStampedIcon: null,
+  unStampedIcon: 'default',
   // stampedIcon: [{
   //   name: '',
   //   file: '',
@@ -80,9 +80,10 @@ export default function StampSetup() {
   }
 
   useEffect(() => {
+    console.log("DEFAULT STAMPED MODIFIED", defaultStampedIcon)
     setCardSteps(prevValue => {
       const data = prevValue.map((value) => {
-        if (value.stampedIcon === null || value.stampedIcon.length === 0) {
+        if (value.stampedIcon === 'default' || value.stampedIcon === null || value.stampedIcon.length === 0) {
           return { ...value, stampedIcon: 'default'}
         }
 
@@ -96,7 +97,7 @@ export default function StampSetup() {
   useEffect(() => {
     setCardSteps(prevValue => {
       const data = prevValue.map((value) => {
-        if (value.unStampedIcon === null || value.unStampedIcon.length === 0) {
+        if (value.unStampedIcon === null || value.unStampedIcon === 'default' || value.unStampedIcon.length === 0) {
           return { ...value, unStampedIcon: 'default'}
         }
 
@@ -110,6 +111,19 @@ export default function StampSetup() {
   // ==== Modify Selection ===
   const [currentStepStampedIcon, setCurrentStepStampedIcon] = useState([]);
   const [currentStepUnstampIcon, setCurrentStepUnstampIcon] = useState([]);
+
+  const modifyStampSaveHandler = () => {
+    console.log('Current Modified Row:', selectedRowId);
+
+    setCardSteps(preValue => {
+      console.log(preValue)
+      preValue[selectedRowId - 1].stampedIcon = currentStepStampedIcon === defaultStampedIcon || currentStepStampedIcon.length === 0 ? 'default' : currentStepStampedIcon;
+      preValue[selectedRowId - 1].unStampedIcon = currentStepUnstampIcon === defaultUnStampedIcon || currentStepStampedIcon.length === 0 ? 'default' : currentStepUnstampIcon;
+      return preValue
+    });
+
+    handleMenuClose();
+  }
   // ==== End ===
 
   // ==== Table Related ====
@@ -126,18 +140,19 @@ export default function StampSetup() {
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedRowId(null);
+    setIsEditStampOpen(false);
   };
 
   const handleEdit = () => {
     console.log('Edit location with id:', selectedRowId);
     setIsEditStampOpen(true);
-    handleMenuClose();
     
-    const currentStepDetail = cardSteps[selectedRowId];
+    const currentStepDetail = cardSteps[selectedRowId - 1];
 
     if (currentStepDetail.stampedIcon === 'default') {
       setCurrentStepStampedIcon(defaultStampedIcon);
     } else {
+      console.log("SHDSD")
       setCurrentStepStampedIcon(currentStepDetail.stampedIcon);
     }
 
@@ -381,6 +396,7 @@ export default function StampSetup() {
         setStampedIcon={setCurrentStepStampedIcon}
         unstampIcon={currentStepUnstampIcon}
         setUnstampedIcon={setCurrentStepUnstampIcon}
+        onSave={modifyStampSaveHandler}
       />
     </>
   );
