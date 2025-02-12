@@ -212,6 +212,33 @@ export default function StampSetup() {
       field: 'unStampedIcon',
       headerName: 'Unstamped Icon',
       flex: 1,
+      renderCell: (params) => {
+        const isDefaultAndNotEmpty = cardSteps[params.row.id - 1].unStampedIcon === 'default' && defaultUnStampedIcon[0] !== undefined;
+        const isNotDefault = cardSteps[params.row.id - 1].unStampedIcon !== 'default';
+
+        if (isDefaultAndNotEmpty) {
+          return (
+              <Image
+                src={defaultUnStampedIcon[0].url}
+                width={50}
+                height={50}
+                alt='Stamp icon'
+              />
+          )
+        } else if (isNotDefault) {
+          console.log(cardSteps[params.row.id - 1].unStampedIcon)
+          return (
+            <Image
+              src={cardSteps[params.row.id - 1].unStampedIcon[0].url}
+              width={50}
+              height={50}
+              alt='Stamp icon'
+            />
+          )
+        } else {
+          return <p>Empty</p>
+        }
+      }
     },
     {
       field: 'reward',
