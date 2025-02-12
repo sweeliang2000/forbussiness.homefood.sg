@@ -174,7 +174,7 @@ export default function StampSetup() {
     {
       field: 'id',
       headerName: 'Stamp',
-      width: 60,
+      width: 80,
     },
     {
       field: 'stampedIcon',
