@@ -16,7 +16,10 @@ const REWARD_TYPES = [
     NEW_JOIN
 ];
 
-const CreateRewardPopup = () => {
+const CreateRewardPopup = ({
+    isOpen,
+    setIsOpen
+}) => {
     const [isRewardImageOpen, setIsRewardImageOpen] = useState(false);
     const [isExpiryOpen, setIsExpiryOpen] = useState(false);
     const [isRewardIdOpen, setRewardIdOpen] = useState(false);
@@ -28,7 +31,8 @@ const CreateRewardPopup = () => {
         <DialogPopup
             title='Create New Reward'
             actionTitle='Create'
-            isOpen={true}
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
         >
             <div className={styles.content}>
                 <section>
@@ -182,8 +186,6 @@ const CreateRewardPopup = () => {
 
                     {
                         isRewardTagsOpen && <FormTextField
-                            title='Reward Tags'
-                            subtitle='(Optional) This tag is used for grouping and useful for your reporting and analytics. It doesn&#39;t need to be unique. Separate each tag by commas.'
                             id='reward_name'
                             name='reward_name'
                             helperText={''}
