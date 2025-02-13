@@ -37,7 +37,7 @@ export const BreadcrumsBar = () => {
                             {formattedStr}
                         </p>
                     ) : (
-                        <Link key={segment} href={href}>
+                        <Link key={segment} href={href} className={styles.link}>
                             {formattedStr}
                         </Link>
                     );
