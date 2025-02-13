@@ -1,11 +1,12 @@
-import styles from './page.module.css';
+import Rewards from "./rewards";
 
-const Rewards = () => {
+
+const Page = () => {
     return (
-        <div>
-
-        </div>
+        <>
+            <Rewards/>
+        </>
     )
 };
 
-export default Rewards;
+export default Page;
