@@ -116,8 +116,7 @@ export default function Sidebar({
                         title={'Stamp System'}
                         submenus={[
                             { href: '/app/stamp-management', title: 'Stamp Managment' },
-                            { href: '/app/card-preview', title: 'Card Preview' },
-                            { href: '/project', title: 'Redeemable Items' }
+                            { href: '/app/card-preview', title: 'Card Preview' }
                         ]}
                         isExpand={currentSelection == STAMP_TAB}
                         icon={LuStamp}
@@ -138,7 +137,7 @@ export default function Sidebar({
                     <Submenu
                         title={'Redeemable'}
                         submenus={[
-                            { href: '/', title: 'My Rewards' },
+                            { href: '/app/redeemable/rewards', title: 'Rewards' },
                         ]}
                         isExpand={currentSelection == REDEEMABLE_TAB}
                         icon={BsGift}
