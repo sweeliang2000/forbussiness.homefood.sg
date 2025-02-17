@@ -232,13 +232,13 @@ const CreateRewardPopup = ({
 
                         {
                             isRewardTagsOpen && <FormTextField
-                                id='reward_name'
-                                name='reward_name'
+                                id={REWARD_TAGS_KEY}
+                                name={REWARD_TAGS_KEY}
                                 helperText={''}
                                 error={false}
                                 className={styles.field}
-                            //   value={numberOfStamps}
-                            //   onChange={(event) => { numberOfStampsHandler(event) }}
+                                value={rewardData[REWARD_TAGS_KEY]}
+                                onChange={(event) => { updateValue(REWARD_TAGS_KEY, event.target.value) }}
                             />
                         }
                     </div>
