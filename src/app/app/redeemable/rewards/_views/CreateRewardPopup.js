@@ -41,9 +41,9 @@ const CreateRewardPopup = ({
         [REWARD_NAME_KEY]: '',
         [REWARD_DESCRIPTION_KEY]: '',
         [REWARD_IMAGE_KEY]: '',
-        [REWARD_EXPIRY_KEY]: null,
-        [REWARD_CUSTOM_ID_KEY]: null,
-        [REWARD_TAGS_KEY]: null,
+        [REWARD_EXPIRY_KEY]: '',
+        [REWARD_CUSTOM_ID_KEY]: '',
+        [REWARD_TAGS_KEY]: '',
         [REWARD_IS_ACTIVATE]: false
     });
 
