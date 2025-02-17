@@ -9,7 +9,8 @@ const DialogPopup = ({
     setIsOpen,
     actionTitle,
     onAction,
-    children
+    children,
+    ...props
 }) => {
     const closeHandler = () => {
         setIsOpen(false)
@@ -20,6 +21,7 @@ const DialogPopup = ({
             open={isOpen}
             onClose={closeHandler}
             fullWidth
+            {...props}
         >
             <div className={styles.header}>
                 <h1>{title}</h1>
