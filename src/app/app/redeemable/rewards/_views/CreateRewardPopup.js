@@ -51,8 +51,6 @@ const CreateRewardPopup = ({
         setRewardData((prevValue) => ({ ...prevValue, [key]: value}))
     };
 
-    const [isActivate, setIsActivate] = useState(false);
-
     const onSubmit = (event) => {
         event.preventDefault();
         console.log('Submit Form. Data:')
