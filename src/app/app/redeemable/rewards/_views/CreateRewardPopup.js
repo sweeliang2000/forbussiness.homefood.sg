@@ -6,7 +6,7 @@ import DragDropImageUploader from '@/components/Form Components/DragDropImageUpl
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
 import { InputAdornment } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Switch from '@mui/material/Switch';
 
 const NEW_JOIN = { value: 'newJoin', title: 'New Join' }
@@ -34,13 +34,13 @@ const CreateRewardPopup = ({
     const [isExpiryOpen, setIsExpiryOpen] = useState(false);
     const [isRewardIdOpen, setRewardIdOpen] = useState(false);
     const [isRewardTagsOpen, setIsRewardTagOpen] = useState(false);
+    const [rewardImage, setRewardImage] = useState([]);
 
     const [rewardData, setRewardData] = useState({
         [REWARD_ID_KEY]: '',
         [REWARD_TYPE_KEY]: '',
         [REWARD_NAME_KEY]: '',
         [REWARD_DESCRIPTION_KEY]: '',
-        [REWARD_IMAGE_KEY]: '',
         [REWARD_EXPIRY_KEY]: '',
         [REWARD_CUSTOM_ID_KEY]: '',
         [REWARD_TAGS_KEY]: '',
@@ -129,8 +129,8 @@ const CreateRewardPopup = ({
 
                     {
                         isRewardImageOpen && <DragDropImageUploader
-                            images={[]}
-                            // setImages={setDefaultStampedIcon}
+                            images={rewardImage}
+                            setImages={setRewardImage}
                             noOfImages={1}
                             width={100}
                             height={100}
