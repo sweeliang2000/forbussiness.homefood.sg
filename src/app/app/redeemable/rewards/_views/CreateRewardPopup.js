@@ -16,6 +16,16 @@ const REWARD_TYPES = [
     NEW_JOIN
 ];
 
+const REWARD_ID_KEY = 'id';
+const REWARD_TYPE_KEY = 'type';
+const REWARD_NAME_KEY = 'name';
+const REWARD_DESCRIPTION_KEY = 'description';
+const REWARD_IMAGE_KEY = 'image';
+const REWARD_EXPIRY_KEY = 'expiry';
+const REWARD_CUSTOM_ID_KEY = 'custom_id';
+const REWARD_TAGS_KEY = 'tags'
+const REWARD_IS_ACTIVATE = 'is_activate'
+
 const CreateRewardPopup = ({
     isOpen,
     setIsOpen
@@ -25,8 +35,29 @@ const CreateRewardPopup = ({
     const [isRewardIdOpen, setRewardIdOpen] = useState(false);
     const [isRewardTagsOpen, setIsRewardTagOpen] = useState(false);
 
-    const [rewardType, setRewardType] = useState('');
+    const [rewardData, setRewardData] = useState({
+        [REWARD_ID_KEY]: '',
+        [REWARD_TYPE_KEY]: '',
+        [REWARD_NAME_KEY]: '',
+        [REWARD_DESCRIPTION_KEY]: '',
+        [REWARD_IMAGE_KEY]: '',
+        [REWARD_EXPIRY_KEY]: null,
+        [REWARD_CUSTOM_ID_KEY]: null,
+        [REWARD_TAGS_KEY]: null,
+        [REWARD_IS_ACTIVATE]: false
+    });
+
+    const updateValue = (key, value) => {
+        setRewardData((prevValue) => ({ ...prevValue, [key]: value}))
+    };
+
     const [isActivate, setIsActivate] = useState(false);
+
+    const onSubmit = (event) => {
+        event.preventDefault();
+        console.log('Submit Form. Data:')
+        console.log(rewardData)
+    }
 
     return (
         <DialogPopup
@@ -36,10 +67,11 @@ const CreateRewardPopup = ({
             setIsOpen={setIsOpen}
             PaperProps={{
                 sx: {
-                  minHeight: '70vh',
-                  maxHeight: '70vh',
+                    minHeight: '70vh',
+                    maxHeight: '70vh',
                 },
-              }}
+            }}
+            onSubmit={onSubmit}
         >
             <div className={styles.content}>
                 <section>
@@ -54,8 +86,8 @@ const CreateRewardPopup = ({
                         options={REWARD_TYPES}
                         labelId='reward_type'
                         id='reward_type'
-                        value={rewardType}
-                        onChange={(event) => { setRewardType(event.target.value) }}
+                        value={rewardData[REWARD_TYPE_KEY]}
+                        onChange={(event) => { updateValue(REWARD_TYPE_KEY, event.target.value) }}
                     />
                 </section>
 
@@ -67,8 +99,8 @@ const CreateRewardPopup = ({
                     helperText={''}
                     error={false}
                     hClassName={styles.h2}
-                //   value={numberOfStamps}
-                //   onChange={(event) => { numberOfStampsHandler(event) }}
+                    value={rewardData[REWARD_NAME_KEY]}
+                    onChange={(event) => { updateValue(REWARD_NAME_KEY, event.target.value) }}
                 />
 
                 <FormTextField
@@ -79,8 +111,8 @@ const CreateRewardPopup = ({
                     helperText={''}
                     error={false}
                     hClassName={styles.h2}
-                //   value={numberOfStamps}
-                //   onChange={(event) => { numberOfStampsHandler(event) }}
+                    value={rewardData[REWARD_DESCRIPTION_KEY]}
+                    onChange={(event) => { updateValue(REWARD_DESCRIPTION_KEY, event.target.value) }}
                 />
 
                 <section>
@@ -135,8 +167,8 @@ const CreateRewardPopup = ({
 
                         {
                             isExpiryOpen && <FormTextField
-                                id='reward_name'
-                                name='reward_name'
+                                id={REWARD_EXPIRY_KEY}
+                                name={REWARD_EXPIRY_KEY}
                                 helperText={''}
                                 error={false}
                                 type='number'
@@ -146,8 +178,8 @@ const CreateRewardPopup = ({
                                     },
                                 }}
                                 className={styles.field}
-                            //   value={numberOfStamps}
-                            //   onChange={(event) => { numberOfStampsHandler(event) }}
+                                value={rewardData[REWARD_EXPIRY_KEY]}
+                                onChange={(event) => { updateValue(REWARD_EXPIRY_KEY, event.target.value) }}
                             />
                         }
                     </div>
@@ -170,13 +202,13 @@ const CreateRewardPopup = ({
 
                         {
                             isRewardIdOpen && <FormTextField
-                                id='reward_name'
-                                name='reward_name'
+                                id={REWARD_CUSTOM_ID_KEY}
+                                name={REWARD_CUSTOM_ID_KEY}
                                 helperText={''}
                                 error={false}
                                 className={styles.field}
-                            //   value={numberOfStamps}
-                            //   onChange={(event) => { numberOfStampsHandler(event) }}
+                                value={rewardData[REWARD_CUSTOM_ID_KEY]}
+                                onChange={(event) => { updateValue(REWARD_CUSTOM_ID_KEY, event.target.value) }}
                             />
                         }
 
@@ -211,20 +243,22 @@ const CreateRewardPopup = ({
                         }
                     </div>
 
-                    { rewardType === NEW_JOIN &&  <div className={`${styles.withToggleContainer} ${styles.settingContainer}`}>
-                        <FieldHeader
-                            title='Activate*'
-                            description='For event trigger rewards like new join or birthday, you need to activate it. Once it is activated and published, user are able to get rewarded.'
-                            type='h2'
-                            hClassName={styles.h2}
-                        />
+                    { 
+                        rewardData[REWARD_TYPE_KEY] === NEW_JOIN.value && <div className={`${styles.withToggleContainer} ${styles.settingContainer}`}>
+                            <FieldHeader
+                                title='Activate*'
+                                description='For event trigger rewards like new join or birthday, you need to activate it. Once it is activated and published, user are able to get rewarded.'
+                                type='h2'
+                                hClassName={styles.h2}
+                            />
 
-                        <Switch
-                            size='small'
-                            checked={isActivate}
-                            onChange={() => { setIsActivate((prev) => !prev) }}
-                        />
-                    </div>}
+                            <Switch
+                                size='small'
+                                checked={rewardData[REWARD_IS_ACTIVATE]}
+                                onChange={(_, checked) => { updateValue(REWARD_IS_ACTIVATE, checked) }}
+                            />
+                        </div> 
+                    }
                 </section>
             </div>
         </DialogPopup>

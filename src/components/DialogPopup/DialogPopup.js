@@ -10,6 +10,7 @@ const DialogPopup = ({
     actionTitle,
     onAction,
     children,
+    onSubmit,
     ...props
 }) => {
     const closeHandler = () => {
@@ -28,24 +29,26 @@ const DialogPopup = ({
                 <IoCloseSharp className={styles.closeIcon} onClick={closeHandler} />
             </div>
 
-            {children}
+            <form onSubmit={onSubmit}>
+                {children}
 
-            <div className={styles.footer}>
-                <Button
-                    variant='contained'
-                    className={`${styles.button} ${styles.cancel}`}
-                    onClick={closeHandler}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    variant='contained'
-                    className={styles.button}
-                    onClick={onAction}
-                >
-                    {actionTitle === undefined ? 'Save' : actionTitle}
-                </Button>
-            </div>
+                <div className={styles.footer}>
+                    <Button
+                        variant='contained'
+                        className={`${styles.button} ${styles.cancel}`}
+                        onClick={closeHandler}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        type='submit'
+                        variant='contained'
+                        className={styles.button}
+                    >
+                        {actionTitle === undefined ? 'Save' : actionTitle}
+                    </Button>
+                </div>
+            </form>
         </Dialog>
     )
 };
