@@ -48,7 +48,7 @@ const CreateRewardPopup = ({
     });
 
     const updateValue = (key, value) => {
-        setRewardData((prevValue) => ({ ...prevValue, [key]: value}))
+        setRewardData((prevValue) => ({ ...prevValue, [key]: value }))
     };
 
     const onSubmit = (event) => {
@@ -239,7 +239,7 @@ const CreateRewardPopup = ({
                         }
                     </div>
 
-                    { 
+                    {
                         rewardData[REWARD_TYPE_KEY] === NEW_JOIN.value && <div className={`${styles.withToggleContainer} ${styles.settingContainer}`}>
                             <FieldHeader
                                 title='Activate*'
@@ -253,7 +253,7 @@ const CreateRewardPopup = ({
                                 checked={rewardData[REWARD_IS_ACTIVATE]}
                                 onChange={(_, checked) => { updateValue(REWARD_IS_ACTIVATE, checked) }}
                             />
-                        </div> 
+                        </div>
                     }
                 </section>
             </div>
