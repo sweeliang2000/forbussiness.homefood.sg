@@ -98,7 +98,6 @@ const CreateRewardPopup = ({
                     name='reward_name'
                     helperText={''}
                     error={false}
-                    hClassName={styles.h2}
                     value={rewardData[REWARD_NAME_KEY]}
                     onChange={(event) => { updateValue(REWARD_NAME_KEY, event.target.value) }}
                 />
@@ -110,7 +109,6 @@ const CreateRewardPopup = ({
                     name='description'
                     helperText={''}
                     error={false}
-                    hClassName={styles.h2}
                     value={rewardData[REWARD_DESCRIPTION_KEY]}
                     onChange={(event) => { updateValue(REWARD_DESCRIPTION_KEY, event.target.value) }}
                 />
