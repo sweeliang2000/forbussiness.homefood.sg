@@ -28,7 +28,9 @@ const REWARD_IS_ACTIVATE = 'is_activate'
 
 const CreateRewardPopup = ({
     isOpen,
-    setIsOpen
+    setIsOpen,
+    onClose,
+    selectedReward
 }) => {
     const [isRewardImageOpen, setIsRewardImageOpen] = useState(false);
     const [isExpiryOpen, setIsExpiryOpen] = useState(false);
@@ -53,14 +55,62 @@ const CreateRewardPopup = ({
 
     const onSubmit = (event) => {
         event.preventDefault();
-        console.log('Submit Form. Data:')
+        
+        if (selectedReward !== null) {
+            console.log('Saved Form. Data:')
+        } else {
+            console.log('Submitted. Data:')
+        }
         console.log(rewardData)
     }
 
+    useEffect(() => {
+        if (selectedReward !== null){
+            setRewardData(prev => ({
+                ...prev,
+                [REWARD_TYPE_KEY]: selectedReward.type,
+                [REWARD_NAME_KEY]: selectedReward.name,
+                [REWARD_DESCRIPTION_KEY]: selectedReward.description,
+                [REWARD_EXPIRY_KEY]: selectedReward.expiry === undefined ? '' : selectedReward.expiry,
+                [REWARD_CUSTOM_ID_KEY]: selectedReward.custom_id === undefined ? '' : selectedReward.custom_id,
+                [REWARD_TAGS_KEY]: selectedReward.tags === undefined ? '' : selectedReward.tags,
+                [REWARD_IS_ACTIVATE]: selectedReward.is_activate === undefined ? false : selectedReward.is_activate
+              }));
+            
+              setRewardImage(
+                selectedReward.image === undefined ? 
+                [] : 
+                [{url: selectedReward.image.url,name: selectedReward.name}]
+            )
+
+            setIsExpiryOpen(selectedReward.expiry !== undefined)
+            setRewardIdOpen(selectedReward.custom_id !== undefined)
+            setIsRewardTagOpen(selectedReward.tags !== undefined)
+            setIsRewardImageOpen(true)
+        } else {
+            setRewardData({
+                [REWARD_ID_KEY]: '',
+                [REWARD_TYPE_KEY]: '',
+                [REWARD_NAME_KEY]: '',
+                [REWARD_DESCRIPTION_KEY]: '',
+                [REWARD_EXPIRY_KEY]: '',
+                [REWARD_CUSTOM_ID_KEY]: '',
+                [REWARD_TAGS_KEY]: '',
+                [REWARD_IS_ACTIVATE]: false
+            })
+            setRewardImage([])
+            setIsExpiryOpen(false)
+            setRewardIdOpen(false)
+            setIsRewardTagOpen(false)
+            setIsRewardImageOpen(false)
+        }
+      }, [selectedReward]);
+      
+
     return (
         <DialogPopup
-            title='Create New Reward'
-            actionTitle='Create'
+            title={ selectedReward !== null ? 'Modify Reward' : 'Create New Reward' }
+            actionTitle={ selectedReward !== null ? 'Save' : 'Create' }
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             PaperProps={{
@@ -132,8 +182,8 @@ const CreateRewardPopup = ({
                             images={rewardImage}
                             setImages={setRewardImage}
                             noOfImages={1}
-                            width={100}
-                            height={100}
+                            width={200}
+                            height={200}
                             imageClassName={styles.dragdropBannerImage}
                         />
                     }

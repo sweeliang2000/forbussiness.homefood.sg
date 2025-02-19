@@ -4,13 +4,7 @@ export const REWARDS_SAMPLE = [
         'type': 'stampReward',
         'name': '$10 Discount Vounchers',
         'description': 'Spend $40 per transaction on store to get $10 discount.',
-        'image': {
-            url: 'https://plus.unsplash.com/premium_photo-1670509045675-af9f249b1bbe?q=80&w=3107&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-        },
-        'expiry': '60',
-        'custom_id': 'redeem_1',
-        'tags': 'free,burger',
-        'is_activate': true
+        'in_used': true
     },
     {
         'id': '2',
@@ -23,7 +17,7 @@ export const REWARDS_SAMPLE = [
         'expiry': '60',
         'custom_id': 'redeem_2',
         'tags': 'free,burger',
-        'is_activate': true
+        'in_used': true
     },
     {
         'id': '3',
@@ -36,10 +30,23 @@ export const REWARDS_SAMPLE = [
         'expiry': '60',
         'custom_id': 'redeem_3',
         'tags': 'free,burger',
-        'is_activate': false
+        'in_used': false
     },
     {
         'id': '4',
+        'type': 'newJoin',
+        'name': 'Free Drink',
+        'description': 'Free a drink for your first redeem.',
+        'image': {
+            url: 'https://images.unsplash.com/photo-1499638673689-79a0b5115d87?q=80&w=3464&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+        },
+        'expiry': '60',
+        'custom_id': 'redeem_4',
+        'tags': 'free,burger',
+        'is_activate': true
+    },
+    {
+        'id': '5',
         'type': 'newJoin',
         'name': 'Free Drink',
         'description': 'Free a drink for your first redeem.',

@@ -5,24 +5,34 @@ import { LoadingButton } from '@mui/lab';
 import { Button } from '@mui/material';
 import RewardsHeader from './_views/RewardsHeader';
 import CreateRewardPopup from './_views/CreateRewardPopup';
-import { useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import RewardsLists from './_views/RewardsLists';
 
 const Rewards = () => {
     const [isCreateNewRewardOpen, setIsCreateNewRewardOpen] = useState(false);
-    
+    const [selectedReward, setSelectedReward] = useState(null);
+
+    const onCardSelected = (reward) => {
+        setSelectedReward(reward)
+        setIsCreateNewRewardOpen(true)
+    };
+
     return (
         <div>
             <RewardsHeader
-                onCreate={() => { setIsCreateNewRewardOpen(true) }}
+                onCreate={() => { 
+                    setSelectedReward(null)
+                    setIsCreateNewRewardOpen(true) 
+                }}
             />
 
             <CreateRewardPopup
                 isOpen={isCreateNewRewardOpen}
                 setIsOpen={setIsCreateNewRewardOpen}
+                selectedReward={selectedReward}
             />
 
-            <RewardsLists/>
+            <RewardsLists onCardSelected={onCardSelected}/>
         </div>
     )
 };

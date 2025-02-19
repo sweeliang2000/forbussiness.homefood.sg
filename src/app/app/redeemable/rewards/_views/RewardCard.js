@@ -2,11 +2,12 @@ import styles from './RewardCard.module.css';
 import Image from "next/image";
 
 const RewardCard = ({
-    reward
+    reward,
+    onClick
 }) => (
-    <div key={reward.id} className={styles.card}>
+    <div key={reward.id} className={styles.card} onClick={onClick}>
         <Image
-            src={reward.image.url}
+            src={reward.image !== undefined ? reward.image.url : '/images/placeholder/reward_placeholder.png'}
             width={200}
             height={200}
             alt={reward.name}

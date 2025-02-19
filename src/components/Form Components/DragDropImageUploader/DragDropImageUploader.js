@@ -122,7 +122,9 @@ const DragDropImageUploader = ({
                     </div> :
                     <div className={styles.container}>
                         {
-                            images.map((images, index) => (
+                            images.map((images, index) => {
+                                console.log(images)
+                                return (
                                 <div className={styles.imageContainer} key={index}>
                                     <FaMinusCircle className={styles.delete} onClick={() => deleteImage(index)} />
                                     <Image
@@ -132,7 +134,7 @@ const DragDropImageUploader = ({
                                         src={images.url}
                                         alt={images.name} />
                                 </div>
-                            ))
+                            )})
                         }
                     </div>
             }

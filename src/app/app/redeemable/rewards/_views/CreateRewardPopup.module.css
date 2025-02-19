@@ -23,6 +23,11 @@
     gap: 8px;
 }
 
+.dragdropBannerImage {
+    width: 200px;
+    height: 200px;
+}
+
 
 .settingSection {
     margin-top: 24px;
