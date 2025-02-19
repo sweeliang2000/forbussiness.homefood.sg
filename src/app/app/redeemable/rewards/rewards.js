@@ -6,6 +6,7 @@ import { Button } from '@mui/material';
 import RewardsHeader from './_views/RewardsHeader';
 import CreateRewardPopup from './_views/CreateRewardPopup';
 import { useState } from 'react';
+import RewardsLists from './_views/RewardsLists';
 
 const Rewards = () => {
     const [isCreateNewRewardOpen, setIsCreateNewRewardOpen] = useState(false);
@@ -20,6 +21,8 @@ const Rewards = () => {
                 isOpen={isCreateNewRewardOpen}
                 setIsOpen={setIsCreateNewRewardOpen}
             />
+
+            <RewardsLists/>
         </div>
     )
 };

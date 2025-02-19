@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+    images: {
+        // Update it when sample data is not used.
+        domains: ["plus.unsplash.com", "images.unsplash.com"],
+      },
+};
 
 export default nextConfig;

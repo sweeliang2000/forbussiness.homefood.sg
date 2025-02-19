@@ -1,0 +1,38 @@
+.card {
+    cursor: pointer;
+    background-color: white;
+    border-radius: 5%;
+    overflow: hidden;
+    box-shadow: 0 0px 8px rgb(227, 227, 227);
+  }
+
+  .card:hover {
+    box-shadow: 0 2px 8px rgb(207, 207, 207);
+  }
+
+  .card .content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 12px;
+    padding: 0 12px;
+    padding-bottom: 8px;
+  }
+  
+  .card .content h3 {
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .card .content p {
+    font-size: 12px;
+    color: gray;
+  }
+  
+  .card .image {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    object-position: center;
+    display: block; 
+  }
