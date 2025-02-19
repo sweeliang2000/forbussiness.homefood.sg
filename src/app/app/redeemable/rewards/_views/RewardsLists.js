@@ -12,10 +12,10 @@ const RewardsLists = ({
     return (
         <ContentCard className={styles.container}>
             {
-                rewards.map((reward) => <RewardCard 
-                    key={reward.id} 
-                    reward={reward} 
-                    onClick={() => { onCardSelected(reward) }}/>)
+                rewards.map((reward) => <RewardCard
+                    key={reward.id}
+                    reward={reward}
+                    onClick={() => { onCardSelected(reward) }} />)
             }
         </ContentCard>
     )
