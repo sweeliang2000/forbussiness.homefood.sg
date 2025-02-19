@@ -20,9 +20,9 @@ const Rewards = () => {
     return (
         <div>
             <RewardsHeader
-                onCreate={() => { 
+                onCreate={() => {
                     setSelectedReward(null)
-                    setIsCreateNewRewardOpen(true) 
+                    setIsCreateNewRewardOpen(true)
                 }}
             />
 
@@ -32,7 +32,7 @@ const Rewards = () => {
                 selectedReward={selectedReward}
             />
 
-            <RewardsLists onCardSelected={onCardSelected}/>
+            <RewardsLists onCardSelected={onCardSelected} />
         </div>
     )
 };
