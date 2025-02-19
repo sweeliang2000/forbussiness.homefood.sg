@@ -4,7 +4,7 @@ import Rewards from "./rewards";
 const Page = () => {
     return (
         <>
-            <Rewards/>
+            <Rewards />
         </>
     )
 };
