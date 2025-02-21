@@ -40,6 +40,15 @@
     margin-bottom: 24px;
 }
 
+.content .field.start{
+    align-items: flex-start;
+}
+
+.addBtn {
+    display: flex;
+    gap: 8px;
+    text-transform: none;
+}
 
 .footer {
     position: sticky;

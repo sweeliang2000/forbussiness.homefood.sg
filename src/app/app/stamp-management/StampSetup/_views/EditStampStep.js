@@ -2,6 +2,7 @@ import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import styles from './EditStampStep.module.css';
 import { Button, Dialog } from '@mui/material';
 import { IoCloseSharp } from 'react-icons/io5';
+import { IoMdAdd } from "react-icons/io";
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 
 const EditStampStep = ({
@@ -63,12 +64,16 @@ const EditStampStep = ({
                     />
                 </div>
 
-                <div className={styles.field}>
+                <div className={`${styles.field} ${styles.start}`}>
                     <FieldHeader
                         title='Reward'
                         type='h2'
                         hClassName={styles.title}
                     />
+
+                    <Button variant="outlined" className={styles.addBtn}>
+                        <IoMdAdd/> New Reward
+                    </Button>
                 </div>
             </div>
 
