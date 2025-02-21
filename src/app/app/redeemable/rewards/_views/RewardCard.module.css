@@ -1,4 +1,5 @@
 .card {
+  position: relative;
   cursor: pointer;
   background-color: white;
   border-radius: 5%;
@@ -35,4 +36,36 @@
   object-fit: cover;
   object-position: center;
   display: block; 
+}
+
+.card .check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  background-color: rgb(208, 208, 208);
+  opacity: 0.4;
+  border-radius: 50px;
+  width: 24px;
+  height: 24px;
+  top: 8px;
+  right: 8px;
+  border: 1px solid rgb(148, 148, 148);
+}
+
+.card .check.selected {
+  opacity: 1 !important;
+  background-color: rgb(74,124,246);
+  border: 0px;
+}
+
+.card .tick {
+  color: white;
+  font-size: 12px;
+}
+
+.card.selected {
+  border: 2px solid rgb(74,124,246);
+  background-color: rgb(244,249,254);
+  box-shadow: none;
 }

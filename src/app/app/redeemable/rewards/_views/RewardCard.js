@@ -1,11 +1,24 @@
 import styles from './RewardCard.module.css';
 import Image from "next/image";
+import { FaCheck } from "react-icons/fa6";
 
 const RewardCard = ({
     reward,
-    onClick
+    onClick,
+    isSelectable,
+    isCheck
 }) => (
-    <div key={reward.id} className={styles.card} onClick={onClick}>
+    <div 
+        key={reward.id} 
+        className={`${styles.card} ${isCheck && styles.selected}`}
+        onClick={onClick}>
+        {
+            isSelectable && 
+            <div className={`${styles.check} ${isCheck && styles.selected}`}>
+                { isCheck && <FaCheck className={styles.tick}/> }
+            </div>
+        }
+
         <Image
             src={reward.image !== undefined ? reward.image.url : '/images/placeholder/reward_placeholder.png'}
             width={200}
