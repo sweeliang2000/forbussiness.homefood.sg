@@ -84,3 +84,7 @@
     width: 80px;
     height: 80px;
 }
+
+.rewardDiv {
+    max-width: 200px;
+}

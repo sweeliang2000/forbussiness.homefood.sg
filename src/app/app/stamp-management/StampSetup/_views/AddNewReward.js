@@ -14,8 +14,10 @@ const AddNewReward = ({
     const rewards = REWARDS_SAMPLE;
 
 
-    const saveHandler = () => {
-        onSave(selected)
+    const saveHandler = (event) => {
+        event.preventDefault();
+        onSave(selected);
+        setIsOpen(false);
     }
 
     return(

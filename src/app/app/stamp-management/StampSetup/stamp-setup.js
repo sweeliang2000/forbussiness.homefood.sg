@@ -40,13 +40,14 @@ const DEFAULT_STAMP_STEP = {
   //   file: '',
   //   url: '',
   // }],
-  reward: 'No Reward'
+  // reward: 'No Reward'
 }
 
 export default function StampSetup() {
   const [numberOfStamps, setNumberOfStamps] = useState(6);
   const [defaultStampedIcon, setDefaultStampedIcon] = useState([]);
   const [defaultUnStampedIcon, setDefaultUnStampedIcon] = useState([]);
+  const [currentReward, setCurrentReward] = useState(null)
   const [expirationType, setExpirationType] = useState(VALID_FOR_DAYS_EXPIRATION.value);
   const [cardSteps, setCardSteps] = useState(Array.from({ length: 6 }, (_, index) => ({
     ...DEFAULT_STAMP_STEP,
@@ -120,8 +121,11 @@ export default function StampSetup() {
       console.log(preValue)
       preValue[selectedRowId - 1].stampedIcon = currentStepStampedIcon === defaultStampedIcon || currentStepStampedIcon.length === 0 ? 'default' : currentStepStampedIcon;
       preValue[selectedRowId - 1].unStampedIcon = currentStepUnstampIcon === defaultUnStampedIcon || currentStepStampedIcon.length === 0 ? 'default' : currentStepUnstampIcon;
+      preValue[selectedRowId - 1].reward = currentReward;
       return preValue
     });
+
+    setCurrentReward(null)
 
     handleMenuClose();
   }
@@ -163,6 +167,7 @@ export default function StampSetup() {
       setCurrentStepUnstampIcon(currentStepDetail.unStampedIcon);
     }
 
+    setCurrentReward(currentStepDetail.reward === undefined ? null : currentStepDetail.reward)
   };
 
   const handleDelete = () => {
@@ -243,7 +248,16 @@ export default function StampSetup() {
     {
       field: 'reward',
       headerName: 'Reward',
-      flex: 2
+      flex: 2,
+      renderCell: (params) => {
+        const reward = cardSteps[params.row.id - 1].reward;
+
+        if (reward === undefined) {
+          return <p>No Reward</p>
+        }
+
+        return (<p>{reward.name}</p>)
+      }
     },
     {
       field: 'actions',
@@ -451,6 +465,8 @@ export default function StampSetup() {
         setStampedIcon={setCurrentStepStampedIcon}
         unstampIcon={currentStepUnstampIcon}
         setUnstampedIcon={setCurrentStepUnstampIcon}
+        reward={currentReward}
+        setReward={setCurrentReward}
         onSave={modifyStampSaveHandler}
       />
     </>

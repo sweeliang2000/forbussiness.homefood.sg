@@ -6,6 +6,7 @@ import { IoMdAdd } from "react-icons/io";
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 import AddNewReward from './AddNewReward';
 import { useState } from 'react';
+import RewardCard from '@/app/app/redeemable/rewards/_views/RewardCard';
 
 const EditStampStep = ({
     isOpen,
@@ -14,6 +15,8 @@ const EditStampStep = ({
     setStampedIcon,
     unstampIcon,
     setUnstampedIcon,
+    reward,
+    setReward,
     onSave
 }) => {
     const [isAddNewRewardOpen, setIsAddNewRewardOpen] = useState(false);
@@ -24,6 +27,10 @@ const EditStampStep = ({
 
     const onAddNewReward = () => {
         setIsAddNewRewardOpen(true)
+    }
+
+    const onNewRewardSaved = (reward) => {
+        setReward(reward)
     }
 
     return (
@@ -81,8 +88,10 @@ const EditStampStep = ({
                         />
 
                         <Button variant="outlined" className={styles.addBtn} onClick={onAddNewReward}>
-                            <IoMdAdd /> New Reward
+                            {reward === null ? <><IoMdAdd /> New Reward </>: 'Modify'}
                         </Button>
+
+                        { reward && <div className={styles.rewardDiv}> <RewardCard reward={reward} onClick={onAddNewReward}/> </div> }
                     </div>
                 </div>
 
@@ -107,6 +116,7 @@ const EditStampStep = ({
             <AddNewReward
                 isOpen={isAddNewRewardOpen}
                 setIsOpen={setIsAddNewRewardOpen}
+                onSave={onNewRewardSaved}
             />
         </>
     )
