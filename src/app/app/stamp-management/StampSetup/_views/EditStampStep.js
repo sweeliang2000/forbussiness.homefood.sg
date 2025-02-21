@@ -4,6 +4,8 @@ import { Button, Dialog } from '@mui/material';
 import { IoCloseSharp } from 'react-icons/io5';
 import { IoMdAdd } from "react-icons/io";
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
+import AddNewReward from './AddNewReward';
+import { useState } from 'react';
 
 const EditStampStep = ({
     isOpen,
@@ -14,86 +16,99 @@ const EditStampStep = ({
     setUnstampedIcon,
     onSave
 }) => {
+    const [isAddNewRewardOpen, setIsAddNewRewardOpen] = useState(false);
+
     const closeHandler = () => {
         setIsOpen(false)
     }
-    
+
+    const onAddNewReward = () => {
+        setIsAddNewRewardOpen(true)
+    }
+
     return (
-        <Dialog
-            open={isOpen}
-            onClose={closeHandler}
-            fullWidth
-        >
-            <div className={styles.header}>
-                <h1>Modify stamp step 1</h1>
-                <IoCloseSharp className={styles.closeIcon} onClick={closeHandler} />
-            </div>
-
-            <div className={styles.content}>
-                <div className={styles.field}>
-                    <FieldHeader
-                        title='Stamped Icons'
-                        type='h2'
-                        hClassName={styles.title}
-                    />
-
-                    <DragDropImageUploader
-                        images={stampedIcon}
-                        setImages={setStampedIcon}
-                        noOfImages={1}
-                        width={80}
-                        height={80}
-                        imageClassName={styles.dragdropBannerImage}
-                    />
+        <>
+            <Dialog
+                open={isOpen}
+                onClose={closeHandler}
+                fullWidth
+            >
+                <div className={styles.header}>
+                    <h1>Modify stamp step 1</h1>
+                    <IoCloseSharp className={styles.closeIcon} onClick={closeHandler} />
                 </div>
 
-                <div className={styles.field}>
-                    <FieldHeader
-                        title='Unstamped Icons'
-                        type='h2'
-                        hClassName={styles.title}
-                    />
+                <div className={styles.content}>
+                    <div className={styles.field}>
+                        <FieldHeader
+                            title='Stamped Icons'
+                            type='h2'
+                            hClassName={styles.title}
+                        />
 
-                    <DragDropImageUploader
-                        images={unstampIcon}
-                        setImages={setUnstampedIcon}
-                        noOfImages={1}
-                        width={80}
-                        height={80}
-                        imageClassName={styles.dragdropBannerImage}
-                    />
+                        <DragDropImageUploader
+                            images={stampedIcon}
+                            setImages={setStampedIcon}
+                            noOfImages={1}
+                            width={80}
+                            height={80}
+                            imageClassName={styles.dragdropBannerImage}
+                        />
+                    </div>
+
+                    <div className={styles.field}>
+                        <FieldHeader
+                            title='Unstamped Icons'
+                            type='h2'
+                            hClassName={styles.title}
+                        />
+
+                        <DragDropImageUploader
+                            images={unstampIcon}
+                            setImages={setUnstampedIcon}
+                            noOfImages={1}
+                            width={80}
+                            height={80}
+                            imageClassName={styles.dragdropBannerImage}
+                        />
+                    </div>
+
+                    <div className={`${styles.field} ${styles.start}`}>
+                        <FieldHeader
+                            title='Reward'
+                            type='h2'
+                            hClassName={styles.title}
+                        />
+
+                        <Button variant="outlined" className={styles.addBtn} onClick={onAddNewReward}>
+                            <IoMdAdd /> New Reward
+                        </Button>
+                    </div>
                 </div>
 
-                <div className={`${styles.field} ${styles.start}`}>
-                    <FieldHeader
-                        title='Reward'
-                        type='h2'
-                        hClassName={styles.title}
-                    />
-
-                    <Button variant="outlined" className={styles.addBtn}>
-                        <IoMdAdd/> New Reward
+                <div className={styles.footer}>
+                    <Button
+                        variant='contained'
+                        className={`${styles.button} ${styles.cancel}`}
+                        onClick={closeHandler}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant='contained'
+                        className={styles.button}
+                        onClick={onSave}
+                    >
+                        Save
                     </Button>
                 </div>
-            </div>
+            </Dialog>
 
-            <div className={styles.footer}>
-                <Button
-                    variant='contained'
-                    className={`${styles.button} ${styles.cancel}`}
-                    onClick={closeHandler}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    variant='contained'
-                    className={styles.button}
-                    onClick={onSave}
-                >
-                    Save
-                </Button>
-            </div>
-        </Dialog>
+            <AddNewReward
+                isOpen={isAddNewRewardOpen}
+                setIsOpen={setIsAddNewRewardOpen}
+            />
+        </>
     )
 };
 

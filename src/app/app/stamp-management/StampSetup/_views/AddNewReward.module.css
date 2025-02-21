@@ -1,0 +1,10 @@
+/* RewardsLists.module.css */
+.container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 1rem;
+    width: 100%;
+    background-color: var(--background);
+    padding: 24px 16px;
+  }
+    
