@@ -1,8 +1,8 @@
-import CardPreview from "./CardPreview";
+import CardDesign from "./CardDesign";
 
 const Page = () => {
     return(
-        <CardPreview/>
+        <CardDesign/>
     )
 };
 

@@ -116,7 +116,7 @@ export default function Sidebar({
                         title={'Stamp System'}
                         submenus={[
                             { href: '/app/stamp-management', title: 'Stamp Managment' },
-                            { href: '/app/card-preview', title: 'Card Preview' }
+                            { href: '/app/card-design', title: 'Card Design' }
                         ]}
                         isExpand={currentSelection == STAMP_TAB}
                         icon={LuStamp}

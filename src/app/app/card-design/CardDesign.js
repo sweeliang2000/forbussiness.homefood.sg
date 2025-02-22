@@ -1,5 +1,5 @@
 'use client';
-import styles from './CardPreview.module.css';
+import styles from './CardDesign.module.css';
 import { ContentCard } from "@/components/ContentCard/ContentCard";
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import { HeaderSection } from "@/components/HeaderSection/HeaderSection";
@@ -7,7 +7,7 @@ import Link from "next/link";
 import { MuiColorInput } from 'mui-color-input'
 import { useState } from 'react';
 
-const CardPreview = () => {
+const CardDesign = () => {
     const [cardBackground, setCardBackgroundColor] = useState('#ffffff')
     const [cardTitleColor, setCardTitleColor] = useState('#000000')
     const [cardFooterColor, setCardFooterColor] = useState('#a8a8a8')
@@ -133,4 +133,4 @@ const CardPreview = () => {
     )
 };
 
-export default CardPreview;
+export default CardDesign;
