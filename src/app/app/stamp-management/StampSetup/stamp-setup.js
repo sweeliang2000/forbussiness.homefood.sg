@@ -44,7 +44,7 @@ const DEFAULT_STAMP_STEP = {
 }
 
 export default function StampSetup() {
-  const [numberOfStamps, setNumberOfStamps] = useState(6);
+  const [numberOfStamps, setNumberOfStamps] = useState(10);
   const [defaultStampedIcon, setDefaultStampedIcon] = useState([]);
   const [defaultUnStampedIcon, setDefaultUnStampedIcon] = useState([]);
   const [currentReward, setCurrentReward] = useState(null)
@@ -338,7 +338,7 @@ export default function StampSetup() {
             <FormTextField
               title='Number of stamps'
               subtitle='Total amount of stamps your stamp card should have. (Maximum of 16)'
-              placeholder='6'
+              placeholder='10'
               type='number'
               id='Card Title'
               name='Card Title'
