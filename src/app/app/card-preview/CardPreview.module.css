@@ -1,0 +1,87 @@
+.contentContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    margin-top: 24px;
+}
+
+.header {
+    position: sticky !important;
+    top: 0;
+    z-index: 97;
+    height: 100px;
+}
+
+.cardContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--background) !important;
+    padding: 0 !important;
+    gap: 24px;
+}
+
+.cardContainer .title {
+    margin: 16px 0 18px 0;
+    text-align: center;
+    color: rgb(20, 20, 20);
+    font-weight: bold;
+    opacity: 0.9;
+}
+
+.cardContainer .card {
+    width: 400px;
+    padding: 4px 24px;
+    border-radius: 8px;
+}
+
+.stampContainer {
+    display: grid;
+    /* grid-template-columns: repeat(5, 1fr); */
+    column-gap: 12px;
+    row-gap: 8px;
+}
+  
+.stamp {
+    background-color: rgb(232, 232, 232);
+    width: 100%;
+    aspect-ratio: 1 / 1; 
+    border-radius: 100%;
+    border: 1px black solid;
+}
+
+.footer {
+    margin: 12px 0;
+    text-align: center;
+    font-size: 12px;
+}
+
+.cardConfigContainer {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 24px;
+    row-gap: 24px;
+    margin-top: 16px;
+}
+
+.cardConfigContainer .field {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: calc(50% - 12px);
+}
+
+.cardConfigContainer .colorInput {
+    width: 100%;
+}
+
+.cardDescription {
+    color: rgb(100, 100, 100) !important;
+    font-size: 14px;
+    opacity: 0.5;
+}
+
+.cardDescription a:hover {
+    text-decoration: underline;
+}

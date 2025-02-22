@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  transpilePackages: ['mui-color-input'],
     images: {
         // Update it when sample data is not used.
         domains: ["plus.unsplash.com", "images.unsplash.com"],
