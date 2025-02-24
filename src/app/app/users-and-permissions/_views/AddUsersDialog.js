@@ -37,9 +37,7 @@ const AddUsersDialog = ({
 
                     <FullWidthDropdown
                         options={[
-                            { value: 'Ang mo kio', title: 'Ang mo kio' },
-                            { value: 'Ang mo kio', title: 'Ang mo kio' },
-                            { value: 'Ang mo kio', title: 'Ang mo kio' },
+                            { value: 'all', title: 'All Locations' }
                         ]}
                     />
                 </div>
@@ -49,8 +47,9 @@ const AddUsersDialog = ({
 
                     <FullWidthDropdown
                         options={[
-                            { value: 'Owner', title: 'Owener' },
+                            { value: 'Owner', title: 'Owner' },
                             { value: 'Manager', title: 'Manager' },
+                            { value: 'Operator', title: 'Operator' },
                             { value: 'Viewer', title: 'Viewer' },
                         ]}
                     />
