@@ -5,10 +5,10 @@ import { ContentCard } from '@/components/ContentCard/ContentCard';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { TextField } from '@mui/material';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import apiClient from '@/utility/api';
-import { OFFICIAL_BUSINESS_INFORMATION_awaiting } from '@/utility/apiPaths';
+import { OFFICIAL_BUSINESS_INFORMATION_awaiting, OFFICIAL_BUSINESS_INFORMATION_retrieve } from '@/utility/apiPaths';
 
 const BUSINESS_NAME = 'businessName';
 const UEN = 'uen';
@@ -112,9 +112,24 @@ export default function StampSetup() {
       console.log(`${message} (Error code: ${code})`);
       setIsBtnLoading(false);
     }
-
-
   };
+
+  useEffect(() => {
+    const retrieveInformation = async (event) => {
+      try {
+        const response = await apiClient.get(`${OFFICIAL_BUSINESS_INFORMATION_retrieve}`)
+        console.log(response.data)
+      } catch (error) {
+        const message = error?.response?.data?.message || error.message;
+        const code = error?.response?.data?.code || error.code;
+        console.log(`${message} (Error code: ${code})`);
+        setIsBtnLoading(false);
+      }
+    };
+
+    retrieveInformation();
+  
+  }, [])
 
 
   return (

@@ -9,3 +9,4 @@ export const GLOBAL_SIGN_OUT = '/api/auth/globalSignOut';
 export const SIGN_OUT = '/api/auth/signoutuser';
 
 export const OFFICIAL_BUSINESS_INFORMATION_awaiting = '/api/data/official-business-information/awaiting';
+export const OFFICIAL_BUSINESS_INFORMATION_retrieve = '/api/data/official-bussiness-information/retrieve';
