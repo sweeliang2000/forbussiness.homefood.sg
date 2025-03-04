@@ -7,6 +7,8 @@ import { TextField } from '@mui/material';
 import Link from 'next/link';
 import { useState } from 'react';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
+import apiClient from '@/utility/api';
+import { OFFICIAL_BUSINESS_INFORMATION_awaiting } from '@/utility/apiPaths';
 
 const BUSINESS_NAME = 'businessName';
 const UEN = 'uen';
@@ -16,7 +18,7 @@ const STREET_ADDRESS = 'streetAddress';
 const POSTAL_CODE = 'postalCode';
 const NAME = 'name';
 const ROLE = 'role';
-const PHONE_NUMBER = 'phoneNumber';
+const PHONE_NUMBER = 'number';
 
 export default function StampSetup() {
   const [isBtnLoading, setIsBtnLoading] = useState(false);
@@ -77,9 +79,41 @@ export default function StampSetup() {
     }))
   };
 
-  const formSubmissionHandler = (event) => {
+  const formSubmissionHandler = async (event) => {
     event.preventDefault();
-    console.log("Official Business Details")
+    setIsBtnLoading(true);
+
+    const payload = {
+      [BUSINESS_NAME]: enteredValues[BUSINESS_NAME],
+      [UEN]: enteredValues[UEN],
+      "address": {
+        [UNIT_NUMBER]: enteredValues[UNIT_NUMBER],
+        [BUILDING_NAME]: enteredValues[BUILDING_NAME],
+        [STREET_ADDRESS]: enteredValues[STREET_ADDRESS],
+        [POSTAL_CODE]: enteredValues[POSTAL_CODE]
+      },
+      "contactDetails": {
+        [NAME]: enteredValues[NAME],
+        [ROLE]: enteredValues[ROLE],
+        [PHONE_NUMBER]: enteredValues[PHONE_NUMBER]
+      },
+      "isBusinessDetailsApproved": "False"
+    };
+
+    try {
+      await apiClient.post(`${OFFICIAL_BUSINESS_INFORMATION_awaiting}`, payload);
+      // TODO: - Create UI to show successfully saved
+      console.log("SUCCESS")
+      setIsBtnLoading(false);
+    } catch (error) {
+      // TODO: - Create UI to show error if happened.
+      const message = error?.response?.data?.message || error.message;
+      const code = error?.response?.data?.code || error.code;
+      console.log(`${message} (Error code: ${code})`);
+      setIsBtnLoading(false);
+    }
+
+
   };
 
 
@@ -112,10 +146,10 @@ export default function StampSetup() {
             placeholder='McDonald&apos;s Corporation.'
             id={BUSINESS_NAME}
             name={BUSINESS_NAME}
-            required
-            helperText={helperText.buildingName}
-            error={textfieldError.buildingName}
-            value={enteredValues.buildingName}
+            helperText={helperText.BUSINESS_NAME}
+            error={textfieldError.BUSINESS_NAME}
+            value={enteredValues.BUSINESS_NAME}
+            disabled={isBtnLoading}
             onChange={(event) => { inputChangeHandler(BUSINESS_NAME, event.target.value) }}
           />
         </div>
@@ -128,10 +162,10 @@ export default function StampSetup() {
             type='number'
             id={UEN}
             name={UEN}
-            required
             helperText={helperText.uen}
             value={enteredValues.uen}
             error={textfieldError.uen}
+            disabled={isBtnLoading}
             onChange={(event) => { inputChangeHandler(UEN, event.target.value) }}
           />
         </div>
@@ -151,10 +185,10 @@ export default function StampSetup() {
               fullWidth
               id={UNIT_NUMBER}
               name={UNIT_NUMBER}
-              required
               helperText={helperText.unitNumber}
               value={enteredValues.unitNumber}
               error={textfieldError.unitNumber}
+              disabled={isBtnLoading}
               onChange={(event) => { inputChangeHandler(UNIT_NUMBER, event.target.value) }}
             />
 
@@ -168,6 +202,7 @@ export default function StampSetup() {
               helperText={helperText.buildingName}
               error={textfieldError.buildingName}
               value={enteredValues.buildingName}
+              disabled={isBtnLoading}
               onChange={(event) => { inputChangeHandler(BUILDING_NAME, event.target.value) }}
             />
 
@@ -178,10 +213,10 @@ export default function StampSetup() {
               fullWidth
               id={STREET_ADDRESS}
               name={STREET_ADDRESS}
-              required
               helperText={helperText.streetAddress}
               error={textfieldError.streetAddress}
               value={enteredValues.streetAddress}
+              disabled={isBtnLoading}
               onChange={(event) => { inputChangeHandler(STREET_ADDRESS, event.target.value) }}
             />
 
@@ -198,10 +233,10 @@ export default function StampSetup() {
               }}
               id={POSTAL_CODE}
               name={POSTAL_CODE}
-              required
               helperText={helperText.postalCode}
               error={textfieldError.postalCode}
               value={enteredValues.postalCode}
+              disabled={isBtnLoading}
               onChange={(event) => { inputChangeHandler(POSTAL_CODE, event.target.value) }}
             />
           </div>
@@ -219,10 +254,10 @@ export default function StampSetup() {
             placeholder='Your name'
             id={NAME}
             name={NAME}
-            required
             helperText={helperText.name}
             error={textfieldError.name}
             value={enteredValues.name}
+            disabled={isBtnLoading}
             onChange={(event) => { inputChangeHandler(NAME, event.target.value) }}
           />
         </div>
@@ -235,6 +270,7 @@ export default function StampSetup() {
           helperText={helperText.role}
           error={textfieldError.role}
           value={enteredValues.role}
+          disabled={isBtnLoading}
           onChange={(event) => { inputChangeHandler(ROLE, event.target.value) }}
         />
 
@@ -244,10 +280,10 @@ export default function StampSetup() {
           id={PHONE_NUMBER}
           name={PHONE_NUMBER}
           type='tel'
-          required
           helperText={helperText.phoneNumber}
           error={textfieldError.phoneNumber}
           value={enteredValues.phoneNumber}
+          disabled={isBtnLoading}
           onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
         />
       </ContentCard>
