@@ -6,3 +6,4 @@ export const FORGOT_PASSWORD = '/api/auth/forgotPassword';
 export const CONFIRM_FORGOT_PASSWORD = '/api/auth/confirmForgotPassword';
 export const VERIFY_TOKEN = '/api/auth/verifytoken';
 export const GLOBAL_SIGN_OUT = '/api/auth/globalSignOut';
+export const SIGN_OUT = '/api/auth/signoutuser';
