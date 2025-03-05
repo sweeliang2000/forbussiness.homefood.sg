@@ -21,7 +21,12 @@ const ROLE = 'role';
 const PHONE_NUMBER = 'number';
 
 export default function StampSetup() {
+  const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [isBtnLoading, setIsBtnLoading] = useState(false);
+  const [isBtnDisabled, setIsBtnDisabled] = useState(true);
+
   const [enteredValues, setEnteredValues] = useState({
     [BUSINESS_NAME]: '',
     [UEN]: '',
@@ -59,6 +64,8 @@ export default function StampSetup() {
   });
 
   const inputChangeHandler = (key, value) => {
+    setIsSubmissionSuccess(false);
+    setIsBtnDisabled(false);
     setEnteredValues((prevValues) => ({
       ...prevValues,
       [key]: value
@@ -77,6 +84,11 @@ export default function StampSetup() {
       ...preValues,
       [key]: value
     }))
+  };
+
+  const showError = (message) => {
+    setIsError(true);
+    setErrorMessage(message)
   };
 
   const formSubmissionHandler = async (event) => {
@@ -103,13 +115,13 @@ export default function StampSetup() {
     try {
       await apiClient.post(`${OFFICIAL_BUSINESS_INFORMATION_awaiting}`, payload);
       // TODO: - Create UI to show successfully saved
-      console.log("SUCCESS")
+      setIsSubmissionSuccess(true);
       setIsBtnLoading(false);
     } catch (error) {
       // TODO: - Create UI to show error if happened.
       const message = error?.response?.data?.message || error.message;
       const code = error?.response?.data?.code || error.code;
-      console.log(`${message} (Error code: ${code})`);
+      showError(`An error had occurred. ${message} (Error code: ${code})`);
       setIsBtnLoading(false);
     }
   };
@@ -145,9 +157,13 @@ export default function StampSetup() {
             This information is used to verify your business.
             The details will not be visible to your customers. <Link href='/'>Find out more.</Link>
           </p>
-
         }
         loading={isBtnLoading}
+        isSuccess={isSubmissionSuccess}
+        setShowError={setIsError}
+        isError={isError}
+        isDisabled={isBtnDisabled}
+        errorMessage={errorMessage}
       />
       <ContentCard className={styles.content}>
         <div>
