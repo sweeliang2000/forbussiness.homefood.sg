@@ -24,4 +24,19 @@
 
 .loadingButton {
     box-shadow: none;
+    text-transform: none;
+}
+
+.alert {
+    margin-top: 8px;
+}
+
+.checked {
+    margin-right: 8px;
+}
+.successfull {
+    border: 1px solid black;
+    background-color: transparent !important;
+    color: rgb(112, 112, 112) !important;
+    font-weight: bold;
 }
