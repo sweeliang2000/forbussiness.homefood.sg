@@ -97,9 +97,9 @@ export default function Sidebar({
                     <Submenu
                         title={'Releases'}
                         submenus={[
-                            { href: '/', title: 'Release Review' },
-                            { href: '/document', title: 'Release Status' },
-                            { href: '/document', title: 'History' }
+                            { href: '/release/submission', title: 'Release Submission' },
+                            { href: '/release/status', title: 'Release Status' },
+                            { href: '/release/history', title: 'History' }
                         ]}
                         isExpand={currentSelection == RELEASES_TAB}
                         icon={FaMobileAlt}
