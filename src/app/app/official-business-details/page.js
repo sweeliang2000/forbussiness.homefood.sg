@@ -130,7 +130,30 @@ export default function StampSetup() {
     const retrieveInformation = async (event) => {
       try {
         const response = await apiClient.get(`${OFFICIAL_BUSINESS_INFORMATION_retrieve}`)
-        console.log(response.data)
+        const data = response.data;
+        const addressBuildingName = data.data.addressBuildingName;
+        const addressPostalCode = data.data.addressPostalCode;
+        const addressStreetAddress = data.data.addressStreetAddress;
+        const addressUnitNumber = data.data.addressStreetAddress
+        const businessName = data.data.businessName;
+        const isBusinessDetailApproved = data.data.isBusinessDetailApproved;
+        const uen = data.data.uen;
+
+        console.log(businessName)
+
+        setEnteredValues({
+          [BUSINESS_NAME]: businessName,
+          [UEN]: uen,
+          [UNIT_NUMBER]: addressUnitNumber,
+          [BUILDING_NAME]: addressBuildingName,
+          [STREET_ADDRESS]: addressStreetAddress,
+          [POSTAL_CODE]: addressPostalCode,
+          [NAME]: '',
+          [ROLE]: '',
+          [PHONE_NUMBER]: '',
+        })
+
+        console.log(data)
       } catch (error) {
         const message = error?.response?.data?.message || error.message;
         const code = error?.response?.data?.code || error.code;
@@ -177,9 +200,9 @@ export default function StampSetup() {
             placeholder='McDonald&apos;s Corporation.'
             id={BUSINESS_NAME}
             name={BUSINESS_NAME}
-            helperText={helperText.BUSINESS_NAME}
-            error={textfieldError.BUSINESS_NAME}
-            value={enteredValues.BUSINESS_NAME}
+            helperText={helperText.businessName}
+            error={textfieldError.businessName}
+            value={enteredValues.businessName}
             disabled={isBtnLoading}
             onChange={(event) => { inputChangeHandler(BUSINESS_NAME, event.target.value) }}
           />
