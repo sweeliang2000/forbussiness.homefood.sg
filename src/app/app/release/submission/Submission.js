@@ -8,35 +8,51 @@ import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown'
 import { useState } from 'react';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import Checklists from './_views/Checklist';
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
 
+
+
+const PUBLISHING_TYPE = 'publishingType';
 const NAME = 'name';
 const ROLE = 'role';
 const PHONE_NUMBER = 'number';
 
+dayjs.extend(localizedFormat);
+const tomorrowStart = dayjs().add(1, "day").startOf("day");
+
 const SubmissionView = () => {
     const [isBtnLoading, setIsBtnLoading] = useState(false);
+    const [value, setValue] = useState(tomorrowStart);
 
     const [enteredValues, setEnteredValues] = useState({
+        [PUBLISHING_TYPE]: 'auto',
         [NAME]: '',
         [ROLE]: '',
         [PHONE_NUMBER]: '',
     });
 
     const [textfieldError, setTextfieldError] = useState({
+
+        [PUBLISHING_TYPE]: false,
         [NAME]: false,
         [ROLE]: false,
         [PHONE_NUMBER]: false,
     });
 
     const [helperText, setHelperText] = useState({
+        [PUBLISHING_TYPE]: '',
         [NAME]: '',
         [ROLE]: '',
         [PHONE_NUMBER]: '',
     });
 
     const inputChangeHandler = (key, value) => {
-        setIsSubmissionSuccess(false);
-        setIsBtnDisabled(false);
+        // setIsSubmissionSuccess(false);
+        // setIsBtnDisabled(false);
         setEnteredValues((prevValues) => ({
             ...prevValues,
             [key]: value
@@ -80,7 +96,7 @@ const SubmissionView = () => {
                     description='Ensure that all required tasks have been completed before submitting for review. Please fix any issues.'
                 />
 
-                <Checklists/>
+                <Checklists />
             </ContentCard>
 
             <ContentCard className={styles.content}>
@@ -96,9 +112,23 @@ const SubmissionView = () => {
                     ]}
                     labelId='manage_publishing'
                     id='manage_publishing'
-                    value={'manually'}
-                    onChange={(event) => { }}
+                    value={enteredValues.publishingType}
+                    onChange={(event) => { inputChangeHandler(PUBLISHING_TYPE, event.target.value) }}
                 />
+                {
+                    enteredValues.publishingType === 'manually' &&
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DateTimePicker
+                            label="Select Date & Time"
+                            value={value}
+                            onChange={(newValue) => setValue(newValue)}
+                            format="DD/MM/YYYY hh:mm A"
+                            minDate={tomorrowStart}
+                            className={styles.datetimePicker}
+                        />
+                    </LocalizationProvider>
+
+                }
 
             </ContentCard>
 
