@@ -1,0 +1,1 @@
+export const EMAIL_CONTACT_ADDRESS = 'test@collbine.com'

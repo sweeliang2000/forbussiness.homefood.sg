@@ -1,0 +1,40 @@
+@keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  
+  .headerShimmer {
+    display: inline-block;
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(
+      90deg, /* Left to Right */
+      #f8fafb 15%,
+      #e7eaec 50%,
+      #f8fafb 80%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2.5s infinite linear;
+    border-radius: 8px;
+  }
+
+  .bodyShimmer {
+    display: inline-block;
+    width: 100%;
+    min-height: 200px;
+    height: calc(100vh - 600px);
+    background: linear-gradient(
+      90deg, /* Left to Right */
+      #f8fafb 15%,
+      #e7eaec 50%,
+      #f8fafb 80%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2.5s infinite linear;
+    border-radius: 8px;
+  }
+  

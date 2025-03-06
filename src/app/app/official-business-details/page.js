@@ -9,6 +9,8 @@ import { useEffect, useState } from 'react';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import apiClient from '@/utility/api';
 import { OFFICIAL_BUSINESS_INFORMATION_awaiting, OFFICIAL_BUSINESS_INFORMATION_retrieve } from '@/utility/apiPaths';
+import LoadingPage from '@/components/LoadingPage/LoadingPage';
+import ErrorPage from '@/components/ErrorPage/ErrorPage';
 
 const BUSINESS_NAME = 'businessName';
 const UEN = 'uen';
@@ -21,6 +23,9 @@ const ROLE = 'role';
 const PHONE_NUMBER = 'number';
 
 export default function StampSetup() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
+
   const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -123,10 +128,13 @@ export default function StampSetup() {
       const code = error?.response?.data?.code || error.code;
       showError(`An error had occurred. ${message} (Error code: ${code})`);
       setIsBtnLoading(false);
+      setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
     }
   };
 
   useEffect(() => {
+    setIsLoading(true);
+
     const retrieveInformation = async (event) => {
       try {
         const response = await apiClient.get(`${OFFICIAL_BUSINESS_INFORMATION_retrieve}`)
@@ -154,6 +162,8 @@ export default function StampSetup() {
         })
 
         console.log(data)
+        
+        setIsLoading(false);
       } catch (error) {
         const message = error?.response?.data?.message || error.message;
         const code = error?.response?.data?.code || error.code;
@@ -165,7 +175,6 @@ export default function StampSetup() {
     retrieveInformation();
   
   }, [])
-
 
   return (
     <form
@@ -188,159 +197,168 @@ export default function StampSetup() {
         isDisabled={isBtnDisabled}
         errorMessage={errorMessage}
       />
-      <ContentCard className={styles.content}>
-        <div>
-          <FieldHeader
-            title='Official information'
-          />
 
-          <FormTextField
-            title='Business name*'
-            subtitle='The official business name registered with ACRA. For example, McDonald&apos;s Corporation.'
-            placeholder='McDonald&apos;s Corporation.'
-            id={BUSINESS_NAME}
-            name={BUSINESS_NAME}
-            helperText={helperText.businessName}
-            error={textfieldError.businessName}
-            value={enteredValues.businessName}
-            disabled={isBtnLoading}
-            onChange={(event) => { inputChangeHandler(BUSINESS_NAME, event.target.value) }}
-          />
-        </div>
+      {
+        isLoading ? 
+        <LoadingPage/> :
+        isLoadingErrorMessage !== null ? 
+        <ErrorPage/> :
+        <>
+          <ContentCard className={styles.content}>
+            <div>
+              <FieldHeader
+                title='Official information'
+              />
 
-        <div>
-          <FormTextField
-            title='Unique Entity Number (UEN)*'
-            subtitle='The Unique Entity Number (UEN) is a 9- or 10-digit number issued by the Accounting and Corporate Regulatory Authority (ACRA) for registered businesses in Singapore.'
-            placeholder='McDonalds'
-            type='number'
-            id={UEN}
-            name={UEN}
-            helperText={helperText.uen}
-            value={enteredValues.uen}
-            error={textfieldError.uen}
-            disabled={isBtnLoading}
-            onChange={(event) => { inputChangeHandler(UEN, event.target.value) }}
-          />
-        </div>
+              <FormTextField
+                title='Business name*'
+                subtitle='The official business name registered with ACRA. For example, McDonald&apos;s Corporation.'
+                placeholder='McDonald&apos;s Corporation.'
+                id={BUSINESS_NAME}
+                name={BUSINESS_NAME}
+                helperText={helperText.businessName}
+                error={textfieldError.businessName}
+                value={enteredValues.businessName}
+                disabled={isBtnLoading}
+                onChange={(event) => { inputChangeHandler(BUSINESS_NAME, event.target.value) }}
+              />
+            </div>
 
-        <div>
-          <FieldHeader
-            title='Registered Business Address'
-            description='This is the name that customers will see in the app for example, McDonalds.'
-            type='h3'
-          />
+            <div>
+              <FormTextField
+                title='Unique Entity Number (UEN)*'
+                subtitle='The Unique Entity Number (UEN) is a 9- or 10-digit number issued by the Accounting and Corporate Regulatory Authority (ACRA) for registered businesses in Singapore.'
+                placeholder='McDonalds'
+                type='number'
+                id={UEN}
+                name={UEN}
+                helperText={helperText.uen}
+                value={enteredValues.uen}
+                error={textfieldError.uen}
+                disabled={isBtnLoading}
+                onChange={(event) => { inputChangeHandler(UEN, event.target.value) }}
+              />
+            </div>
 
-          <div className={styles.addressFields}>
-            <TextField
-              label='Unit Number'
-              variant='outlined'
-              placeholder='#05-23'
-              fullWidth
-              id={UNIT_NUMBER}
-              name={UNIT_NUMBER}
-              helperText={helperText.unitNumber}
-              value={enteredValues.unitNumber}
-              error={textfieldError.unitNumber}
+            <div>
+              <FieldHeader
+                title='Registered Business Address'
+                description='This is the name that customers will see in the app for example, McDonalds.'
+                type='h3'
+              />
+
+              <div className={styles.addressFields}>
+                <TextField
+                  label='Unit Number'
+                  variant='outlined'
+                  placeholder='#05-23'
+                  fullWidth
+                  id={UNIT_NUMBER}
+                  name={UNIT_NUMBER}
+                  helperText={helperText.unitNumber}
+                  value={enteredValues.unitNumber}
+                  error={textfieldError.unitNumber}
+                  disabled={isBtnLoading}
+                  onChange={(event) => { inputChangeHandler(UNIT_NUMBER, event.target.value) }}
+                />
+
+                <TextField
+                  label='Building Name'
+                  variant='outlined'
+                  placeholder='International Plaza'
+                  fullWidth
+                  id={BUILDING_NAME}
+                  name={BUILDING_NAME}
+                  helperText={helperText.buildingName}
+                  error={textfieldError.buildingName}
+                  value={enteredValues.buildingName}
+                  disabled={isBtnLoading}
+                  onChange={(event) => { inputChangeHandler(BUILDING_NAME, event.target.value) }}
+                />
+
+                <TextField
+                  label='Street Address'
+                  variant='outlined'
+                  placeholder='10 Anson Road'
+                  fullWidth
+                  id={STREET_ADDRESS}
+                  name={STREET_ADDRESS}
+                  helperText={helperText.streetAddress}
+                  error={textfieldError.streetAddress}
+                  value={enteredValues.streetAddress}
+                  disabled={isBtnLoading}
+                  onChange={(event) => { inputChangeHandler(STREET_ADDRESS, event.target.value) }}
+                />
+
+                <TextField
+                  label='Postal Code'
+                  variant='outlined'
+                  placeholder='079903'
+                  fullWidth
+                  type='number'
+                  slotProps={{
+                    input: {
+                      maxLength: 6,
+                    },
+                  }}
+                  id={POSTAL_CODE}
+                  name={POSTAL_CODE}
+                  helperText={helperText.postalCode}
+                  error={textfieldError.postalCode}
+                  value={enteredValues.postalCode}
+                  disabled={isBtnLoading}
+                  onChange={(event) => { inputChangeHandler(POSTAL_CODE, event.target.value) }}
+                />
+              </div>
+            </div>
+          </ContentCard>
+
+          <ContentCard className={styles.content}>
+            <div>
+              <FieldHeader
+                title='Representative Contact Details'
+              />
+
+              <FormTextField
+                title='Name*'
+                placeholder='Your name'
+                id={NAME}
+                name={NAME}
+                helperText={helperText.name}
+                error={textfieldError.name}
+                value={enteredValues.name}
+                disabled={isBtnLoading}
+                onChange={(event) => { inputChangeHandler(NAME, event.target.value) }}
+              />
+            </div>
+
+            <FormTextField
+              title='Role*'
+              placeholder='Accounts Manager'
+              id={ROLE}
+              name={ROLE}
+              helperText={helperText.role}
+              error={textfieldError.role}
+              value={enteredValues.role}
               disabled={isBtnLoading}
-              onChange={(event) => { inputChangeHandler(UNIT_NUMBER, event.target.value) }}
+              onChange={(event) => { inputChangeHandler(ROLE, event.target.value) }}
             />
 
-            <TextField
-              label='Building Name'
-              variant='outlined'
-              placeholder='International Plaza'
-              fullWidth
-              id={BUILDING_NAME}
-              name={BUILDING_NAME}
-              helperText={helperText.buildingName}
-              error={textfieldError.buildingName}
-              value={enteredValues.buildingName}
+            <FormTextField
+              title='Phone Number*'
+              placeholder='+6591234567'
+              id={PHONE_NUMBER}
+              name={PHONE_NUMBER}
+              type='tel'
+              helperText={helperText.phoneNumber}
+              error={textfieldError.phoneNumber}
+              value={enteredValues.phoneNumber}
               disabled={isBtnLoading}
-              onChange={(event) => { inputChangeHandler(BUILDING_NAME, event.target.value) }}
+              onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
             />
-
-            <TextField
-              label='Street Address'
-              variant='outlined'
-              placeholder='10 Anson Road'
-              fullWidth
-              id={STREET_ADDRESS}
-              name={STREET_ADDRESS}
-              helperText={helperText.streetAddress}
-              error={textfieldError.streetAddress}
-              value={enteredValues.streetAddress}
-              disabled={isBtnLoading}
-              onChange={(event) => { inputChangeHandler(STREET_ADDRESS, event.target.value) }}
-            />
-
-            <TextField
-              label='Postal Code'
-              variant='outlined'
-              placeholder='079903'
-              fullWidth
-              type='number'
-              slotProps={{
-                input: {
-                  maxLength: 6,
-                },
-              }}
-              id={POSTAL_CODE}
-              name={POSTAL_CODE}
-              helperText={helperText.postalCode}
-              error={textfieldError.postalCode}
-              value={enteredValues.postalCode}
-              disabled={isBtnLoading}
-              onChange={(event) => { inputChangeHandler(POSTAL_CODE, event.target.value) }}
-            />
-          </div>
-        </div>
-      </ContentCard>
-
-      <ContentCard className={styles.content}>
-        <div>
-          <FieldHeader
-            title='Representative Contact Details'
-          />
-
-          <FormTextField
-            title='Name*'
-            placeholder='Your name'
-            id={NAME}
-            name={NAME}
-            helperText={helperText.name}
-            error={textfieldError.name}
-            value={enteredValues.name}
-            disabled={isBtnLoading}
-            onChange={(event) => { inputChangeHandler(NAME, event.target.value) }}
-          />
-        </div>
-
-        <FormTextField
-          title='Role*'
-          placeholder='Accounts Manager'
-          id={ROLE}
-          name={ROLE}
-          helperText={helperText.role}
-          error={textfieldError.role}
-          value={enteredValues.role}
-          disabled={isBtnLoading}
-          onChange={(event) => { inputChangeHandler(ROLE, event.target.value) }}
-        />
-
-        <FormTextField
-          title='Phone Number*'
-          placeholder='+6591234567'
-          id={PHONE_NUMBER}
-          name={PHONE_NUMBER}
-          type='tel'
-          helperText={helperText.phoneNumber}
-          error={textfieldError.phoneNumber}
-          value={enteredValues.phoneNumber}
-          disabled={isBtnLoading}
-          onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
-        />
-      </ContentCard>
+          </ContentCard>
+        </>
+      }
     </form>
   );
 }
