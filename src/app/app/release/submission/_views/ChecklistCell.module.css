@@ -1,0 +1,79 @@
+.checklistItem {
+    display: flex;
+    gap: 16px;
+    border-bottom: 1px solid rgb(217, 217, 217);
+    padding-bottom: 24px;
+}
+
+.checkedContainer {
+    background-color: rgb(40, 160, 74);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 80px;
+    flex-shrink: 0;
+}
+
+.checkedContainer .checked {
+    margin-left: -2px;
+    color: white;
+}
+
+.crossContainer {
+    background-color: #D84040;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 80px;
+    flex-shrink: 0;
+}
+
+.crossContainer .cross {
+    color: white;
+}
+
+.rightContainer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.checklistItemContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.checklistItemContent h2 {
+    margin: -1px;
+    font-weight: 800;
+    font-size: 16px;
+}
+
+.checklistItemContent p {
+    color: rgb(88, 88, 88);
+    font-size: 14px;
+}
+
+.correct {
+    color: rgb(40, 160, 74);
+}
+
+.error {
+    color: #D84040;
+}
+
+.editButton {
+    padding: 4px 8px !important;
+    text-transform: none !important;
+    border-radius: 100px !important;
+    box-shadow: none !important;
+    background-color: #D84040 !important;
+}

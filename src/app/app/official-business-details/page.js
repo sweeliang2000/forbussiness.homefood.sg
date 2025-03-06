@@ -18,9 +18,6 @@ const UNIT_NUMBER = 'unitNumber';
 const BUILDING_NAME = 'buildingName';
 const STREET_ADDRESS = 'streetAddress';
 const POSTAL_CODE = 'postalCode';
-const NAME = 'name';
-const ROLE = 'role';
-const PHONE_NUMBER = 'number';
 
 export default function StampSetup() {
   const [isLoading, setIsLoading] = useState(true);
@@ -39,9 +36,6 @@ export default function StampSetup() {
     [BUILDING_NAME]: '',
     [STREET_ADDRESS]: '',
     [POSTAL_CODE]: '',
-    [NAME]: '',
-    [ROLE]: '',
-    [PHONE_NUMBER]: '',
   });
 
   const [textfieldError, setTextfieldError] = useState({
@@ -51,9 +45,6 @@ export default function StampSetup() {
     [BUILDING_NAME]: false,
     [STREET_ADDRESS]: false,
     [POSTAL_CODE]: false,
-    [NAME]: false,
-    [ROLE]: false,
-    [PHONE_NUMBER]: false,
   });
 
   const [helperText, setHelperText] = useState({
@@ -63,9 +54,6 @@ export default function StampSetup() {
     [BUILDING_NAME]: '',
     [STREET_ADDRESS]: '',
     [POSTAL_CODE]: '',
-    [NAME]: '',
-    [ROLE]: '',
-    [PHONE_NUMBER]: '',
   });
 
   const inputChangeHandler = (key, value) => {
@@ -109,11 +97,6 @@ export default function StampSetup() {
         [STREET_ADDRESS]: enteredValues[STREET_ADDRESS],
         [POSTAL_CODE]: enteredValues[POSTAL_CODE]
       },
-      "contactDetails": {
-        [NAME]: enteredValues[NAME],
-        [ROLE]: enteredValues[ROLE],
-        [PHONE_NUMBER]: enteredValues[PHONE_NUMBER]
-      },
       "isBusinessDetailsApproved": "False"
     };
 
@@ -156,9 +139,6 @@ export default function StampSetup() {
           [BUILDING_NAME]: addressBuildingName,
           [STREET_ADDRESS]: addressStreetAddress,
           [POSTAL_CODE]: addressPostalCode,
-          [NAME]: '',
-          [ROLE]: '',
-          [PHONE_NUMBER]: '',
         })
 
         console.log(data)
@@ -311,51 +291,6 @@ export default function StampSetup() {
                 />
               </div>
             </div>
-          </ContentCard>
-
-          <ContentCard className={styles.content}>
-            <div>
-              <FieldHeader
-                title='Representative Contact Details'
-              />
-
-              <FormTextField
-                title='Name*'
-                placeholder='Your name'
-                id={NAME}
-                name={NAME}
-                helperText={helperText.name}
-                error={textfieldError.name}
-                value={enteredValues.name}
-                disabled={isBtnLoading}
-                onChange={(event) => { inputChangeHandler(NAME, event.target.value) }}
-              />
-            </div>
-
-            <FormTextField
-              title='Role*'
-              placeholder='Accounts Manager'
-              id={ROLE}
-              name={ROLE}
-              helperText={helperText.role}
-              error={textfieldError.role}
-              value={enteredValues.role}
-              disabled={isBtnLoading}
-              onChange={(event) => { inputChangeHandler(ROLE, event.target.value) }}
-            />
-
-            <FormTextField
-              title='Phone Number*'
-              placeholder='+6591234567'
-              id={PHONE_NUMBER}
-              name={PHONE_NUMBER}
-              type='tel'
-              helperText={helperText.phoneNumber}
-              error={textfieldError.phoneNumber}
-              value={enteredValues.phoneNumber}
-              disabled={isBtnLoading}
-              onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
-            />
           </ContentCard>
         </>
       }
