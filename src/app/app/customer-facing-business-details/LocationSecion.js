@@ -4,16 +4,19 @@ import { ContentCard } from '@/components/ContentCard/ContentCard';
 import {
     IconButton,
     Menu,
-    MenuItem
+    MenuItem,
+    Button
 } from '@mui/material';
 import { useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { LoadingButton } from '@mui/lab';
 import AddLocationSection from './AddLocationSection';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 
-const LocationSection = ({ data }) => {
+const LocationSection = ({ 
+    locations,
+    setLocations
+ }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedRowId, setSelectedRowId] = useState(null);
     const [isAddLocationOpen, setIsAddLocationOpen] = useState(false);
@@ -69,13 +72,13 @@ const LocationSection = ({ data }) => {
 
                 return (
                     <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                        <p>Monday: {hours.Monday.start ? `${hours.Monday.start} - ${hours.Monday.end}` : 'Not Applicable'}</p>
-                        <p>Tuesday: {hours.Tuesday.start ? `${hours.Tuesday.start} - ${hours.Tuesday.end}` : 'Not Applicable'}</p>
-                        <p>Wednesday: {hours.Wednesday.start ? `${hours.Wednesday.start} - ${hours.Wednesday.end}` : 'Not Applicable'}</p>
-                        <p>Thursday: {hours.Thursday.start ? `${hours.Thursday.start} - ${hours.Thursday.end}` : 'Not Applicable'}</p>
-                        <p>Friday: {hours.Friday.start ? `${hours.Friday.start} - ${hours.Friday.end}` : 'Not Applicable'}</p>
-                        <p>Saturday: {hours.Saturday.start ? `${hours.Saturday.start} - ${hours.Saturday.end}` : 'Not Applicable'}</p>
-                        <p>Sunday: {hours.Sunday.start ? `${hours.Sunday.start} - ${hours.Sunday.end}` : 'Not Applicable'}</p>
+                        <p>Monday: {hours.monday.isOpen ? `${hours.monday.start} - ${hours.monday.end}` : 'Closed'}</p>
+                        <p>Tuesday: {hours.tuesday.isOpen ? `${hours.tuesday.start} - ${hours.tuesday.end}` : 'Closed'}</p>
+                        <p>Wednesday: {hours.wednesday.isOpen ? `${hours.wednesday.start} - ${hours.wednesday.end}` : 'Closed'}</p>
+                        <p>Thursday: {hours.thursday.isOpen ? `${hours.thursday.start} - ${hours.thursday.end}` : 'Closed'}</p>
+                        <p>Friday: {hours.friday.isOpen ? `${hours.friday.start} - ${hours.friday.end}` : 'Closed'}</p>
+                        <p>Saturday: {hours.saturday.isOpen ? `${hours.saturday.start} - ${hours.saturday.end}` : 'Closed'}</p>
+                        <p>Sunday: {hours.sunday.isOpen ? `${hours.sunday.start} - ${hours.sunday.end}` : 'Closed'}</p>
                     </div>
                 );
             }
@@ -104,9 +107,6 @@ const LocationSection = ({ data }) => {
         },
     ];
 
-    // Map the data array to a structure that DataGrid can use
-    const rows = data;
-
     const addLocationHandler = () => {
         setIsAddLocationOpen(true)
     };
@@ -124,7 +124,7 @@ const LocationSection = ({ data }) => {
                         type='h3'
                     />
 
-                    <LoadingButton
+                    <Button
                         size='small'
                         onClick={addLocationHandler}
                         // loading={true}
@@ -134,13 +134,13 @@ const LocationSection = ({ data }) => {
                         className={styles.button}
                     >
                         Add Location
-                    </LoadingButton>
+                    </Button>
                 </div>
             </ContentCard>
 
             <div className={styles.tableContainer}>
                 <DataGrid
-                    rows={rows}
+                    rows={locations}
                     columns={columns}
                     initialState={{ pagination: { paginationModel } }}
                     disableColumnFilter
@@ -154,6 +154,8 @@ const LocationSection = ({ data }) => {
             </div>
 
             <AddLocationSection
+                locations={locations}
+                setLocations={setLocations}
                 closeAddLocationHandler={closeAddLocationHandler}
                 isAddLocationOpen={isAddLocationOpen}
             />

@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import apiClient from '@/utility/api';
-import { OFFICIAL_BUSINESS_INFORMATION_awaiting, OFFICIAL_BUSINESS_INFORMATION_retrieve } from '@/utility/apiPaths';
+import { OFFICIAL_BUSINESS_INFORMATION } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 
@@ -101,7 +101,7 @@ export default function StampSetup() {
     };
 
     try {
-      await apiClient.post(`${OFFICIAL_BUSINESS_INFORMATION_awaiting}`, payload);
+      await apiClient.post(`${OFFICIAL_BUSINESS_INFORMATION}`, payload);
       // TODO: - Create UI to show successfully saved
       setIsSubmissionSuccess(true);
       setIsBtnLoading(false);
@@ -120,7 +120,7 @@ export default function StampSetup() {
 
     const retrieveInformation = async (event) => {
       try {
-        const response = await apiClient.get(`${OFFICIAL_BUSINESS_INFORMATION_retrieve}`)
+        const response = await apiClient.get(`${OFFICIAL_BUSINESS_INFORMATION}`)
         const data = response.data;
         const addressBuildingName = data.data.addressBuildingName;
         const addressPostalCode = data.data.addressPostalCode;

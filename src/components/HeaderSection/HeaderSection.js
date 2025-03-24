@@ -1,6 +1,6 @@
 import styles from './HeaderSection.module.css';
 import { ContentCard } from '../ContentCard/ContentCard';
-import { LoadingButton } from '@mui/lab';
+import { Button } from '@mui/material'
 import Alert from '@mui/material/Alert';
 import { FaCheck } from "react-icons/fa";
 import CloseIcon from '@mui/icons-material/Close';
@@ -22,7 +22,7 @@ export const HeaderSection = ({
             <div className={styles.titleSection}>
                 <h1 className={styles.title}>{title}</h1>
 
-                <LoadingButton
+                <Button
                     type='submit'
                     size='small'
                     loadingPosition='start'
@@ -33,7 +33,7 @@ export const HeaderSection = ({
                 >
                     {isSuccess ? <FaCheck className={styles.checked} /> : null}
                     {isSuccess ? 'Saved' : 'Save'}
-                </LoadingButton>
+                </Button>
 
             </div>
             <div className={styles.description}>{description}</div>

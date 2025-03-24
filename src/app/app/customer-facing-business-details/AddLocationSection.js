@@ -1,22 +1,184 @@
 import BasicTimePicker from '@/components/BasicTimePicker/BasicTimePicker';
 import styles from './AddLocationSection.module.css';
-import { Backdrop, TextField } from '@mui/material';
+import { Backdrop, FormControlLabel, Switch, TextField } from '@mui/material';
 import { IoCloseSharp } from 'react-icons/io5';
-import { LoadingButton } from '@mui/lab';
+import { Button } from '@mui/material'
+import { useState } from 'react';
+import OpeningHoursInput from './views/OpeningHoursInput';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const LOCATION_NAME = 'locationName';
+const ADDRESS = 'address';
+const POSTAL_CODE = 'postalCode';
+const MONDAY_IS_OPEN = 'mondayIsOpen';
+const MONDAY_START = 'mondayStart';
+const MONDAY_END = 'mondayEnd';
+const TUESDAY_IS_OPEN = 'tuesdayIsOpen';
+const TUESDAY_START = 'tuesdayStart';
+const TUESDAY_END = 'tuesdayEnd';
+const WEDNESDAY_IS_OPEN = 'wednesdayIsOpen';
+const WEDNESDAY_START = 'wednesdayStart';
+const WEDNESDAY_END = 'wednesdayEnd';
+const THURSDAY_IS_OPEN = 'thursdayIsOpen';
+const THURSDAY_START = 'thursdayStart';
+const THURSDAY_END = 'thursdayEnd';
+const FRIDAY_IS_OPEN = 'fridayIsOpen';
+const FRIDAY_START = 'fridayStart';
+const FRIDAY_END = 'fridayEnd';
+const SATURDAY_IS_OPEN = 'saturdayIsOpen';
+const SATURDAY_START = 'saturdayStart';
+const SATURDAY_END = 'saturdayEnd';
+const SUNDAY_IS_OPEN = 'sundayIsOpen';
+const SUNDAY_START = 'sundayStart';
+const SUNDAY_END = 'sundayEnd';
+
 
 const AddLocationSection = ({
+    locations,
+    setLocations,
     closeAddLocationHandler,
     isAddLocationOpen
 }) => {
+
+    const sgtTime = (timeStr) => dayjs.tz(`2024-01-01T${timeStr}`, 'Asia/Singapore');
+
+    const [enteredValues, setEnteredValues] = useState({
+        [LOCATION_NAME]: '',
+        [ADDRESS]: '',
+        [POSTAL_CODE]: '',
+        [MONDAY_IS_OPEN]: true,
+        [MONDAY_START]: sgtTime('08:00'),
+        [MONDAY_END]: sgtTime('22:00'),
+        [TUESDAY_IS_OPEN]: true,
+        [TUESDAY_START]: sgtTime('08:00'),
+        [TUESDAY_END]: sgtTime('22:00'),
+        [WEDNESDAY_IS_OPEN]: true,
+        [WEDNESDAY_START]: sgtTime('08:00'),
+        [WEDNESDAY_END]: sgtTime('22:00'),
+        [THURSDAY_IS_OPEN]: true,
+        [THURSDAY_START]: sgtTime('08:00'),
+        [THURSDAY_END]: sgtTime('22:00'),
+        [FRIDAY_IS_OPEN]: true,
+        [FRIDAY_START]: sgtTime('08:00'),
+        [FRIDAY_END]: sgtTime('22:00'),
+        [SATURDAY_IS_OPEN]: true,
+        [SATURDAY_START]: sgtTime('08:00'),
+        [SATURDAY_END]: sgtTime('22:00'),
+        [SUNDAY_IS_OPEN]: true,
+        [SUNDAY_START]: sgtTime('08:00'),
+        [SUNDAY_END]: sgtTime('22:00'),
+    });
+    
+
+    const [textfieldError, setTextfieldError] = useState({
+        [LOCATION_NAME]: false,
+        [ADDRESS]: false,
+        [POSTAL_CODE]: false,
+        [MONDAY_IS_OPEN]: false,
+        [TUESDAY_IS_OPEN]: false,
+        [WEDNESDAY_IS_OPEN]: false,
+        [THURSDAY_IS_OPEN]: false,
+        [FRIDAY_IS_OPEN]: false,
+        [SATURDAY_IS_OPEN]: false,
+        [SUNDAY_IS_OPEN]: false,
+    });
+
+    const [helperText, setHelperText] = useState({
+        [LOCATION_NAME]: '',
+        [ADDRESS]: '',
+        [POSTAL_CODE]: '',
+        [MONDAY_IS_OPEN]: '',
+        [TUESDAY_IS_OPEN]: '',
+        [WEDNESDAY_IS_OPEN]: '',
+        [THURSDAY_IS_OPEN]: '',
+        [FRIDAY_IS_OPEN]: '',
+        [SATURDAY_IS_OPEN]: '',
+        [SUNDAY_IS_OPEN]: '',
+    });
+
+    const inputChangeHandler = (key, value) => {
+        // setIsSubmissionSuccess(false);
+        // setIsBtnDisabled(false);
+        setEnteredValues((prevValues) => ({
+            ...prevValues,
+            [key]: value
+        }))
+    };
+
+    const formSubmissionHandler = async (event) => {
+        event.preventDefault();
+        const transformedData = transformValues(enteredValues);
+        
+        setLocations((preValue) => [...preValue, transformedData]);
+        closeAddLocationHandler();
+    }
+
+    const formatSGT = (time) => time.tz('Asia/Singapore').format('hh:mm A');
+
+    const transformValues = (values) => {
+        // TODO: - Append Shop ID into the ID
+        const result = {
+            id: locations.length + 1,
+            locationName: values.locationName,
+            address: values.address,
+            postalCode: values.postalCode,
+            operatingHours: {
+                monday: {
+                    isOpen: values.mondayIsOpen,
+                    start: values.mondayIsOpen ? formatSGT(values.mondayStart) : null,
+                    end: values.mondayIsOpen ? formatSGT(values.mondayEnd) : null,
+                },
+                tuesday: {
+                    isOpen: values.tuesdayIsOpen,
+                    start: values.tuesdayIsOpen ? formatSGT(values.tuesdayStart) : null,
+                    end: values.tuesdayIsOpen ? formatSGT(values.tuesdayEnd) : null,
+                },
+                wednesday: {
+                    isOpen: values.wednesdayIsOpen,
+                    start: values.wednesdayIsOpen ? formatSGT(values.wednesdayStart) : null,
+                    end: values.wednesdayIsOpen ? formatSGT(values.wednesdayEnd) : null,
+                },
+                thursday: {
+                    isOpen: values.thursdayIsOpen,
+                    start: values.thursdayIsOpen ? formatSGT(values.thursdayStart) : null,
+                    end: values.thursdayIsOpen ? formatSGT(values.thursdayEnd) : null,
+                },
+                friday: {
+                    isOpen: values.fridayIsOpen,
+                    start: values.fridayIsOpen ? formatSGT(values.fridayStart) : null,
+                    end: values.fridayIsOpen ? formatSGT(values.fridayEnd) : null,
+                },
+                saturday: {
+                    isOpen: values.saturdayIsOpen,
+                    start: values.saturdayIsOpen ? formatSGT(values.saturdayStart) : null,
+                    end: values.saturdayIsOpen ? formatSGT(values.saturdayEnd) : null,
+                },
+                sunday: {
+                    isOpen: values.sundayIsOpen,
+                    start: values.sundayIsOpen ? formatSGT(values.sundayStart) : null,
+                    end: values.sundayIsOpen ? formatSGT(values.sundayEnd) : null,
+                },
+            }
+        };
+    
+        return result;
+    };
+    
     return (
         <Backdrop
             onClick={closeAddLocationHandler}
             open={isAddLocationOpen}
             className={styles.backdrop}
         >
-            <div
+            <form
                 className={styles.addLocationSidebar}
                 onClick={(event) => event.stopPropagation()}
+                onSubmit={formSubmissionHandler}
             >
                 <IoCloseSharp
                     className={styles.closeIcon}
@@ -31,6 +193,10 @@ const AddLocationSection = ({
                             variant='outlined'
                             placeholder='Ang Mo Kio Hub'
                             fullWidth
+                            helperText={helperText.locationName}
+                            value={enteredValues.locationName}
+                            error={textfieldError.locationName}
+                            onChange={(event) => { inputChangeHandler(LOCATION_NAME, event.target.value) }}
                         />
                     </div>
 
@@ -41,6 +207,10 @@ const AddLocationSection = ({
                             variant='outlined'
                             placeholder='53 Ang Mo Kio Ave 3, #01-09/10'
                             fullWidth
+                            helperText={helperText.address}
+                            value={enteredValues.address}
+                            error={textfieldError.address}
+                            onChange={(event) => { inputChangeHandler(ADDRESS, event.target.value) }}
                         />
                     </div>
 
@@ -52,133 +222,116 @@ const AddLocationSection = ({
                             placeholder='569933'
                             type='number'
                             fullWidth
+                            helperText={helperText.postalCode}
+                            value={enteredValues.postalCode}
+                            error={textfieldError.postalCode}
+                            onChange={(event) => { inputChangeHandler(POSTAL_CODE, event.target.value) }}
                         />
                     </div>
 
                     <div className={styles.contentSection}>
                         <p className={styles.headerP}>Opening Hours</p>
 
-                        <div className={styles.subContainer}>
-                            <p className={styles.subHeader}>Monday</p>
+                        <OpeningHoursInput
+                            dayLabel='Monday'
+                            isOpen={enteredValues.mondayIsOpen}
+                            onToggleOpen={(event) => {
+                                inputChangeHandler(MONDAY_IS_OPEN, event.target.checked)
+                            }}
+                            openTime={enteredValues.mondayStart}
+                            closeTime={enteredValues.mondayEnd}
+                            onOpenTimeChange={(time) => { inputChangeHandler(MONDAY_START, time) }}
+                            onCloseTimeChange={(time) => { inputChangeHandler(MONDAY_END, time) }}
+                        />
 
-                            <div className={styles.timePickerContainer}>
-                                <div className={styles.timePickSubContainer}>
-                                    <p>Opened at</p>
-                                    <BasicTimePicker />
-                                </div>
-                                <div className={styles.timePickSubContainer}>
-                                    <p>Closed at</p>
-                                    <BasicTimePicker />
-                                </div>
-                            </div>
-                        </div>
+                        <OpeningHoursInput
+                            dayLabel='Tuesday'
+                            isOpen={enteredValues.tuesdayIsOpen}
+                            onToggleOpen={(event) => {
+                                inputChangeHandler(TUESDAY_IS_OPEN, event.target.checked)
+                            }}
+                            openTime={enteredValues.tuesdayStart}
+                            closeTime={enteredValues.tuesdayEnd}
+                            onOpenTimeChange={(time) => { inputChangeHandler(TUESDAY_START, time) }}
+                            onCloseTimeChange={(time) => { inputChangeHandler(TUESDAY_END, time) }}
+                        />
 
-                        <div className={styles.subContainer}>
-                            <p className={styles.subHeader}>Tuesday</p>
+                        <OpeningHoursInput
+                            dayLabel='Wednesday'
+                            isOpen={enteredValues.wednesdayIsOpen}
+                            onToggleOpen={(event) => {
+                                inputChangeHandler(WEDNESDAY_IS_OPEN, event.target.checked)
+                            }}
+                            openTime={enteredValues.wednesdayStart}
+                            closeTime={enteredValues.wednesdayEnd}
+                            onOpenTimeChange={(time) => { inputChangeHandler(WEDNESDAY_START, time) }}
+                            onCloseTimeChange={(time) => { inputChangeHandler(WEDNESDAY_END, time) }}
+                        />
 
-                            <div className={styles.timePickerContainer}>
-                                <div className={styles.timePickSubContainer}>
-                                    <p>Opened at</p>
-                                    <BasicTimePicker />
-                                </div>
-                                <div className={styles.timePickSubContainer}>
-                                    <p>Closed at</p>
-                                    <BasicTimePicker />
-                                </div>
-                            </div>
-                        </div>
+                        <OpeningHoursInput
+                            dayLabel='Thursday'
+                            isOpen={enteredValues.thursdayIsOpen}
+                            onToggleOpen={(event) => {
+                                inputChangeHandler(THURSDAY_IS_OPEN, event.target.checked)
+                            }}
+                            openTime={enteredValues.thursdayStart}
+                            closeTime={enteredValues.thursdayEnd}
+                            onOpenTimeChange={(time) => { inputChangeHandler(THURSDAY_START, time) }}
+                            onCloseTimeChange={(time) => { inputChangeHandler(THURSDAY_END, time) }}
+                        />
 
-                        <div className={styles.subContainer}>
-                            <p className={styles.subHeader}>Wednesday</p>
+                        <OpeningHoursInput
+                            dayLabel='Friday'
+                            isOpen={enteredValues.fridayIsOpen}
+                            onToggleOpen={(event) => {
+                                inputChangeHandler(FRIDAY_IS_OPEN, event.target.checked)
+                            }}
+                            openTime={enteredValues.fridayStart}
+                            closeTime={enteredValues.fridayEnd}
+                            onOpenTimeChange={(time) => { inputChangeHandler(FRIDAY_START, time) }}
+                            onCloseTimeChange={(time) => { inputChangeHandler(FRIDAY_END, time) }}
+                        />
 
-                            <div className={styles.timePickerContainer}>
-                                <div className={styles.timePickSubContainer}>
-                                    <p>Opened at</p>
-                                    <BasicTimePicker />
-                                </div>
-                                <div className={styles.timePickSubContainer}>
-                                    <p>Closed at</p>
-                                    <BasicTimePicker />
-                                </div>
-                            </div>
-                        </div>
+                        <OpeningHoursInput
+                            dayLabel='Saturday'
+                            isOpen={enteredValues.saturdayIsOpen}
+                            onToggleOpen={(event) => {
+                                inputChangeHandler(SATURDAY_IS_OPEN, event.target.checked)
+                            }}
+                            openTime={enteredValues.saturdayStart}
+                            closeTime={enteredValues.saturdayEnd}
+                            onOpenTimeChange={(time) => { inputChangeHandler(SATURDAY_START, time) }}
+                            onCloseTimeChange={(time) => { inputChangeHandler(SATURDAY_END, time) }}
+                        />
 
-                        <div className={styles.subContainer}>
-                            <p className={styles.subHeader}>Thursday</p>
-
-                            <div className={styles.timePickerContainer}>
-                                <div className={styles.timePickSubContainer}>
-                                    <p>Opened at</p>
-                                    <BasicTimePicker />
-                                </div>
-                                <div className={styles.timePickSubContainer}>
-                                    <p>Closed at</p>
-                                    <BasicTimePicker />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className={styles.subContainer}>
-                            <p className={styles.subHeader}>Friday</p>
-
-                            <div className={styles.timePickerContainer}>
-                                <div className={styles.timePickSubContainer}>
-                                    <p>Opened at</p>
-                                    <BasicTimePicker />
-                                </div>
-                                <div className={styles.timePickSubContainer}>
-                                    <p>Closed at</p>
-                                    <BasicTimePicker />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className={styles.subContainer}>
-                            <p className={styles.subHeader}>Saturday</p>
-
-                            <div className={styles.timePickerContainer}>
-                                <div className={styles.timePickSubContainer}>
-                                    <p>Opened at</p>
-                                    <BasicTimePicker />
-                                </div>
-                                <div className={styles.timePickSubContainer}>
-                                    <p>Closed at</p>
-                                    <BasicTimePicker />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className={styles.subContainer}>
-                            <p className={styles.subHeader}>Sunday</p>
-
-                            <div className={styles.timePickerContainer}>
-                                <div className={styles.timePickSubContainer}>
-                                    <p>Opened at</p>
-                                    <BasicTimePicker />
-                                </div>
-                                <div className={styles.timePickSubContainer}>
-                                    <p>Closed at</p>
-                                    <BasicTimePicker />
-                                </div>
-                            </div>
-                        </div>
+                        <OpeningHoursInput
+                            dayLabel='Sunday'
+                            isOpen={enteredValues.sundayIsOpen}
+                            onToggleOpen={(event) => {
+                                inputChangeHandler(SUNDAY_IS_OPEN, event.target.checked)
+                            }}
+                            openTime={enteredValues.sundayStart}
+                            closeTime={enteredValues.sundayEnd}
+                            onOpenTimeChange={(time) => { inputChangeHandler(SUNDAY_START, time) }}
+                            onCloseTimeChange={(time) => { inputChangeHandler(SUNDAY_END, time) }}
+                        />
                     </div>
                 </div>
 
                 <div className={styles.buttonContainer}>
-                    <LoadingButton
-                        // onClick={handleClick}
+                    <Button
                         // loading={true}
                         // disabled
                         loadingPosition='start'
                         variant='contained'
                         className={styles.button}
                         fullWidth
+                        type='submit'
                     >
                         Add Location
-                    </LoadingButton>
+                    </Button>
                 </div>
-            </div>
+            </form>
         </Backdrop>
     )
 };

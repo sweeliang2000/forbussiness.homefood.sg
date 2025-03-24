@@ -44,27 +44,6 @@
     font-weight: bold;
 }
 
-.subHeader {
-    font-weight: 600;
-}
-
-.timePickerContainer {
-    display: flex;
-    gap: 24px;
-}
-
-.timePickerContainer .timePickSubContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.subContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
 .buttonContainer {
     position: fixed;
     bottom: 0;

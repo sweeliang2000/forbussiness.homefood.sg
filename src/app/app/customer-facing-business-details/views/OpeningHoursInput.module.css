@@ -1,0 +1,27 @@
+.subContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.headerContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.subHeader {
+    font-weight: 600;
+}
+
+.timePickerContainer {
+    display: flex;
+    gap: 24px;
+}
+
+.timePickerContainer .timePickSubContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
