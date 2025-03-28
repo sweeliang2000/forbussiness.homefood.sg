@@ -3,7 +3,7 @@ import styles from './AddLocationSection.module.css';
 import { Backdrop, FormControlLabel, Switch, TextField } from '@mui/material';
 import { IoCloseSharp } from 'react-icons/io5';
 import { Button } from '@mui/material'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import OpeningHoursInput from './views/OpeningHoursInput';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -39,10 +39,12 @@ const SUNDAY_END = 'sundayEnd';
 
 
 const AddLocationSection = ({
+    selectedLocation,
     locations,
     setLocations,
     closeAddLocationHandler,
-    isAddLocationOpen
+    isAddLocationOpen,
+    resetSaving
 }) => {
 
     const sgtTime = (timeStr) => dayjs.tz(`2024-01-01T${timeStr}`, 'Asia/Singapore');
@@ -101,6 +103,12 @@ const AddLocationSection = ({
         [SUNDAY_IS_OPEN]: '',
     });
 
+    useEffect(() => {
+        if (selectedLocation) {
+
+        };
+    }, [])
+
     const inputChangeHandler = (key, value) => {
         // setIsSubmissionSuccess(false);
         // setIsBtnDisabled(false);
@@ -115,15 +123,16 @@ const AddLocationSection = ({
         const transformedData = transformValues(enteredValues);
         
         setLocations((preValue) => [...preValue, transformedData]);
+        resetSaving();
         closeAddLocationHandler();
     }
 
     const formatSGT = (time) => time.tz('Asia/Singapore').format('hh:mm A');
 
     const transformValues = (values) => {
-        // TODO: - Append Shop ID into the ID
+        const uniqueId = crypto.randomUUID()
         const result = {
-            id: locations.length + 1,
+            id: `${uniqueId}`,
             locationName: values.locationName,
             address: values.address,
             postalCode: values.postalCode,
@@ -190,6 +199,7 @@ const AddLocationSection = ({
                         <p className={styles.headerP}>Location Name</p>
 
                         <TextField
+                            name="ahop-location-name"
                             variant='outlined'
                             placeholder='Ang Mo Kio Hub'
                             fullWidth
@@ -204,9 +214,12 @@ const AddLocationSection = ({
                         <p className={styles.headerP}>Address</p>
 
                         <TextField
+                            name="street-address"
+                            autoComplete="street-address"
                             variant='outlined'
                             placeholder='53 Ang Mo Kio Ave 3, #01-09/10'
                             fullWidth
+                            type="text"
                             helperText={helperText.address}
                             value={enteredValues.address}
                             error={textfieldError.address}
@@ -218,6 +231,8 @@ const AddLocationSection = ({
                         <p className={styles.headerP}>Postal Code</p>
 
                         <TextField
+                            name="postal-code"
+                            autoComplete="postal-code"
                             variant='outlined'
                             placeholder='569933'
                             type='number'
@@ -328,7 +343,7 @@ const AddLocationSection = ({
                         fullWidth
                         type='submit'
                     >
-                        Add Location
+                        { selectedLocation ?  'Modify Location' : 'Add Location'}
                     </Button>
                 </div>
             </form>

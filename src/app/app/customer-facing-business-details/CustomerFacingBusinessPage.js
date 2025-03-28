@@ -1,6 +1,6 @@
 'use client';
 import styles from './CustomerFacingBusinessPage.module.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
@@ -12,6 +12,8 @@ import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import apiClient from '@/utility/api';
 import { CUSTOMER_FACING_INFORMATION } from '@/utility/apiPaths';
+import LoadingPage from '@/components/LoadingPage/LoadingPage';
+import ErrorPage from '@/components/ErrorPage/ErrorPage';
 
 const DISPLAY_NAME = 'displayName';
 const SHOP_DESCRIPTION = 'description';
@@ -38,10 +40,20 @@ const LOCATION_TEMPLATE = {
 
 
 const CustomerFacingBusinessPage = () => {
+    // For initial Loading Status
+    const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
+
+    // For Header Status
+    const [isError, setIsError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [isBtnLoading, setIsBtnLoading] = useState(false);
+    const [isBtnDisabled, setIsBtnDisabled] = useState(true);
+    const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
+
+
     const [thumbnailImages, setThumbnailImages] = useState([]);
     const [bannerImages, setBannerImages] = useState([]);
-
-    const [isBtnLoading, setIsBtnLoading] = useState(false);
     const [locations, setLocations] = useState([])
 
     const [enteredValues, setEnteredValues] = useState({
@@ -71,19 +83,28 @@ const CustomerFacingBusinessPage = () => {
         [KEYWORDS]: ''
     });
 
+    const resetSaving= () => {
+        setIsSubmissionSuccess(false);
+        setIsBtnDisabled(false);
+    };
+
     const inputChangeHandler = (key, value) => {
-        // setIsSubmissionSuccess(false);
-        // setIsBtnDisabled(false);
+        resetSaving();
         setEnteredValues((prevValues) => ({
             ...prevValues,
             [key]: value
         }))
     };
 
+    const showError = (message) => {
+        setIsError(true);
+        setErrorMessage(message)
+    };
+
     const formSubmissionHandler = async (event) => {
         event.preventDefault();
         setIsBtnLoading(true);
-    
+
         try {
             const formData = new FormData();
 
@@ -93,24 +114,22 @@ const CustomerFacingBusinessPage = () => {
             formData.append('category', enteredValues[CATEGORY]);
             formData.append('halalcertified', enteredValues[HALAL_CERTIFIED]);
 
-            if (thumbnailImages.length > 0) {
+            if (thumbnailImages.length > 0 && thumbnailImages[0] !== null) {
                 formData.append('thumbnail', thumbnailImages[0].file);
             }
-    
-            if (bannerImages.length > 0) {
+
+            if (bannerImages.length > 0 && bannerImages[0] !== null) {
                 formData.append('banner', bannerImages[0].file);
             }
-
             formData.append('keywords', enteredValues[KEYWORDS]);
             formData.append('locations', JSON.stringify(locations));
-    
+
             // Debugging: log each form data entry
             // Uncomment this to look at the form data
-            // for (let [key, value] of formData.entries()) {
-            //     console.log(`${key}:`, value);
-            //     console.log('');
-            // }
-    
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}:`, value);
+            }
+
             await apiClient.post(CUSTOMER_FACING_INFORMATION, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -118,13 +137,52 @@ const CustomerFacingBusinessPage = () => {
             });
 
             console.log('Form submitted successfully');
+            setIsSubmissionSuccess(true);
+            setIsBtnLoading(false);
         } catch (error) {
             console.error('Form submission error:', error);
         } finally {
             setIsBtnLoading(false);
         }
     };
+
+    useEffect(() => {
+        const getFormData = async () => {
+            setIsBtnLoading(true);
     
+            try {
+                const response = await apiClient.get(`${CUSTOMER_FACING_INFORMATION}`);
+                const data = response.data.data;
+    
+                setEnteredValues({
+                    [DISPLAY_NAME]: data.displayName,
+                    [SHOP_DESCRIPTION]: data.description,
+                    [WEBSITE]: data.website,
+                    [CATEGORY]: data.category,
+                    [HALAL_CERTIFIED]: data.halalcertified,
+                    [KEYWORDS]: data.keywords
+                })
+                if (data.thumbnail_signedUrl !== "") {
+                    setThumbnailImages([{ name: data.thumbnail_signedUrl, file: null, url: data.thumbnail_signedUrl }])
+                }
+                if (data.banner_signedUrl !== "") {
+                    setBannerImages([{ name: data.banner_signedUrl, file: null, url: data.banner_signedUrl }])
+                }
+                setLocations(data.locations);
+    
+                setIsLoading(false);
+                setIsBtnLoading(false);
+            } catch (error) {
+                const message = error?.response?.data?.message || error.message;
+                const code = error?.response?.data?.code || error.code;
+                setIsLoading(false);
+                setIsBtnLoading(false);
+                setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
+            }
+        };
+
+        getFormData();
+    }, [])
 
     return (
         <>
@@ -141,145 +199,164 @@ const CustomerFacingBusinessPage = () => {
                         </p>
 
                     }
+                    loading={isBtnLoading}
+                    isSuccess={isSubmissionSuccess}
+                    isError={isError}
+                    isDisabled={isBtnDisabled}
+                    errorMessage={errorMessage}
                 />
 
-                <ContentCard className={styles.content}>
-                    <FormTextField
-                        title='Display name*'
-                        subtitle='Display name will be shown on the home screen when user discover your shop. It is better to be something that user used to identify you.'
-                        placeholder="Keen's Bagelry"
-                        id={DISPLAY_NAME}
-                        name={DISPLAY_NAME}
-                        helperText={helperText.displayName}
-                        error={textfieldError.displayName}
-                        value={enteredValues.displayName}
-                        disabled={isBtnLoading}
-                        onChange={(event) => { inputChangeHandler(DISPLAY_NAME, event.target.value) }}
-                    />
+                {
+                    isLoading ?
+                        <LoadingPage /> :
+                        isLoadingErrorMessage !== null ?
+                            <ErrorPage /> :
+                            <ContentCard className={styles.content}>
+                                <FormTextField
+                                    title='Display name*'
+                                    subtitle='Display name will be shown on the home screen when user discover your shop. It is better to be something that user used to identify you.'
+                                    placeholder="Keen's Bagelry"
+                                    id={DISPLAY_NAME}
+                                    name={DISPLAY_NAME}
+                                    helperText={helperText.displayName}
+                                    error={textfieldError.displayName}
+                                    value={enteredValues.displayName}
+                                    disabled={isBtnLoading}
+                                    onChange={(event) => { inputChangeHandler(DISPLAY_NAME, event.target.value) }}
+                                />
 
-                    <FormTextField
-                        title="Shop's Description*"
-                        subtitle='Information about your shop.'
-                        placeholder="Keen's Bagelry"
-                        id={SHOP_DESCRIPTION}
-                        name={SHOP_DESCRIPTION}
-                        helperText={helperText.description}
-                        error={textfieldError.description}
-                        value={enteredValues.description}
-                        disabled={isBtnLoading}
-                        onChange={(event) => { inputChangeHandler(SHOP_DESCRIPTION, event.target.value) }}
-                        multiline
-                        slotProps={{
-                            input: {
-                                min: 0,
-                                maxLength: 10,
-                            },
-                        }}
-                    />
+                                <FormTextField
+                                    title="Shop's Description*"
+                                    subtitle='Information about your shop.'
+                                    placeholder="Keen's Bagelry"
+                                    id={SHOP_DESCRIPTION}
+                                    name={SHOP_DESCRIPTION}
+                                    helperText={helperText.description}
+                                    error={textfieldError.description}
+                                    value={enteredValues.description}
+                                    disabled={isBtnLoading}
+                                    onChange={(event) => { inputChangeHandler(SHOP_DESCRIPTION, event.target.value) }}
+                                    multiline
+                                    slotProps={{
+                                        input: {
+                                            min: 0,
+                                            maxLength: 10,
+                                        },
+                                    }}
+                                />
 
-                    <FormTextField
-                        title="Website*"
-                        id={WEBSITE}
-                        name={WEBSITE}
-                        helperText={helperText.website}
-                        error={textfieldError.website}
-                        value={enteredValues.website}
-                        disabled={isBtnLoading}
-                        onChange={(event) => { inputChangeHandler(WEBSITE, event.target.value) }}
-                    />
+                                <FormTextField
+                                    title="Website*"
+                                    id={WEBSITE}
+                                    name={WEBSITE}
+                                    helperText={helperText.website}
+                                    error={textfieldError.website}
+                                    value={enteredValues.website}
+                                    disabled={isBtnLoading}
+                                    onChange={(event) => { inputChangeHandler(WEBSITE, event.target.value) }}
+                                />
 
-                    <div className={styles.fieldContainer}>
-                        <FieldHeader
-                            title='Category'
-                            type='h3'
-                        />
+                                <div className={styles.fieldContainer}>
+                                    <FieldHeader
+                                        title='Category'
+                                        type='h3'
+                                    />
 
-                        <FullWidthDropdown
-                            value={enteredValues.category}
-                            onChange={(event) => { inputChangeHandler(CATEGORY, event.target.value) }}
-                            options={[
-                                { value: 'food_and_beverage', title: 'Food and Beverage' },
-                                { value: 'retailers', title: 'Retailers' },
-                                { value: 'service', title: 'Service' }
-                            ]}
-                        />
-                    </div>
-                    {
-                        enteredValues.category === 'food_and_beverage' &&
-                        <div className={styles.fieldContainer}>
-                            <FieldHeader
-                                title='Halal Certified'
-                                type='h3'
-                            />
+                                    <FullWidthDropdown
+                                        value={enteredValues.category}
+                                        onChange={(event) => { inputChangeHandler(CATEGORY, event.target.value) }}
+                                        options={[
+                                            { value: 'food_and_beverage', title: 'Food and Beverage' },
+                                            { value: 'retailers', title: 'Retailers' },
+                                            { value: 'service', title: 'Service' }
+                                        ]}
+                                    />
+                                </div>
+                                {
+                                    enteredValues.category === 'food_and_beverage' &&
+                                    <div className={styles.fieldContainer}>
+                                        <FieldHeader
+                                            title='Halal Certified'
+                                            type='h3'
+                                        />
 
-                            <FullWidthDropdown
-                                options={[
-                                    { value: 'Yes', title: 'Yes' },
-                                    { value: 'No', title: 'No' },
-                                    { value: 'Not Applicable', title: 'Not Applicable' }
-                                ]}
-                            />
-                        </div>
-                    }
+                                        <FullWidthDropdown
+                                            value={enteredValues.halalCertified}
+                                            onChange={(event) => { inputChangeHandler(HALAL_CERTIFIED, event.target.value) }}
+                                            options={[
+                                                { value: 'Yes', title: 'Yes' },
+                                                { value: 'No', title: 'No' },
+                                                { value: 'Not Applicable', title: 'Not Applicable' }
+                                            ]}
+                                        />
+                                    </div>
+                                }
 
-                    <div className={styles.fieldContainer}>
-                        <FieldHeader
-                            title='Thumbnail / Featured Image'
-                            description='Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
-                            type='h3'
-                        />
+                                <div className={styles.fieldContainer}>
+                                    <FieldHeader
+                                        title='Thumbnail / Featured Image'
+                                        description='Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                                        type='h3'
+                                    />
 
-                        <DragDropImageUploader
-                            images={thumbnailImages}
-                            setImages={setThumbnailImages}
-                            noOfImages={1}
-                            width={180}
-                            height={180}
-                            imageClassName={styles.dragdropImage}
-                        />
-                    </div>
+                                    <DragDropImageUploader
+                                        images={thumbnailImages}
+                                        setImages={setThumbnailImages}
+                                        resetSaving={resetSaving}
+                                        noOfImages={1}
+                                        width={180}
+                                        height={180}
+                                        imageClassName={styles.dragdropImage}
+                                    />
+                                </div>
 
-                    <div className={styles.fieldContainer}>
-                        <FieldHeader
-                            title='Banner Image'
-                            description='Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
-                            type='h3'
-                        />
+                                <div className={styles.fieldContainer}>
+                                    <FieldHeader
+                                        title='Banner Image'
+                                        description='Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                                        type='h3'
+                                    />
 
-                        <DragDropImageUploader
-                            images={bannerImages}
-                            setImages={setBannerImages}
-                            noOfImages={1}
-                            width={792}
-                            height={198}
-                            imageClassName={styles.dragdropBannerImage}
-                        />
-                    </div>
+                                    <DragDropImageUploader
+                                        images={bannerImages}
+                                        setImages={setBannerImages}
+                                        noOfImages={1}
+                                        resetSaving={resetSaving}
+                                        width={792}
+                                        height={198}
+                                        imageClassName={styles.dragdropBannerImage}
+                                    />
+                                </div>
 
-                    <FormTextField
-                        title="Keywords*"
-                        subtitle='Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
-                        id={KEYWORDS}
-                        name={KEYWORDS}
-                        helperText={helperText.keywords}
-                        error={textfieldError.keywords}
-                        value={enteredValues.keywords}
-                        disabled={isBtnLoading}
-                        onChange={(event) => { inputChangeHandler(KEYWORDS, event.target.value) }}
-                        slotProps={{
-                            input: {
-                                min: 0,
-                                maxLength: 10,
-                            },
-                        }}
-                    />
-                </ContentCard>
+                                <FormTextField
+                                    title="Keywords*"
+                                    subtitle='Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                                    id={KEYWORDS}
+                                    name={KEYWORDS}
+                                    helperText={helperText.keywords}
+                                    error={textfieldError.keywords}
+                                    value={enteredValues.keywords}
+                                    disabled={isBtnLoading}
+                                    onChange={(event) => { inputChangeHandler(KEYWORDS, event.target.value) }}
+                                    slotProps={{
+                                        input: {
+                                            min: 0,
+                                            maxLength: 10,
+                                        },
+                                    }}
+                                />
+                            </ContentCard>
+                }
             </form>
 
-            <LocationSection 
-                locations={locations}
-                setLocations={setLocations}
-            />
+            {
+                (!isLoading && isLoadingErrorMessage === null) &&
+                <LocationSection
+                    locations={locations}
+                    setLocations={setLocations}
+                    resetSaving={resetSaving}
+                />
+            }
         </>
     )
 };

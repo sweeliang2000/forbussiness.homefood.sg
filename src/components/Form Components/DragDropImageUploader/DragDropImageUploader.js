@@ -10,6 +10,7 @@ const DragDropImageUploader = ({
     setImages,
     noOfImages,
     isMultiple,
+    resetSaving,
     width,
     height,
     imageClassName
@@ -50,6 +51,7 @@ const DragDropImageUploader = ({
                         newImage
                     ])
                 }
+                resetSaving();
             }
         }
     };

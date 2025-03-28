@@ -15,13 +15,15 @@ import FieldHeader from '@/components/FieldHeader/FieldHeader';
 
 const LocationSection = ({ 
     locations,
-    setLocations
+    setLocations,
+    resetSaving
  }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedRowId, setSelectedRowId] = useState(null);
     const [isAddLocationOpen, setIsAddLocationOpen] = useState(false);
-
     const paginationModel = { page: 0, pageSize: 10 };
+
+    const [selectedLocation, setSelectedLocation] = useState(null);
 
     const handleMenuOpen = (event, rowId) => {
         setAnchorEl(event.currentTarget);
@@ -35,6 +37,15 @@ const LocationSection = ({
 
     const handleEdit = () => {
         console.log('Edit location with id:', selectedRowId);
+        const selectedLocation = locations.filter((location) => location.id === selectedRowId)[0];
+
+        if (selectedLocation) {
+            setSelectedLocation(selectedLocation);
+            setIsAddLocationOpen(true);
+        } else {
+            console.log('ERROR: No location is found.')
+        }
+    
         handleMenuClose();
     };
 
@@ -154,10 +165,12 @@ const LocationSection = ({
             </div>
 
             <AddLocationSection
+                selectedLocation={selectedLocation}
                 locations={locations}
                 setLocations={setLocations}
                 closeAddLocationHandler={closeAddLocationHandler}
                 isAddLocationOpen={isAddLocationOpen}
+                resetSaving={resetSaving}
             />
         </>
 

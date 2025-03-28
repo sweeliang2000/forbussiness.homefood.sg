@@ -109,9 +109,8 @@ export default function StampSetup() {
       // TODO: - Create UI to show error if happened.
       const message = error?.response?.data?.message || error.message;
       const code = error?.response?.data?.code || error.code;
-      showError(`An error had occurred. ${message} (Error code: ${code})`);
+      showError(`An error had occurred. ${message} (Error code: ${code}). Please try to save it again.`);
       setIsBtnLoading(false);
-      setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
     }
   };
 
@@ -141,14 +140,14 @@ export default function StampSetup() {
           [POSTAL_CODE]: addressPostalCode,
         })
 
-        console.log(data)
-        
         setIsLoading(false);
+        setIsBtnLoading(false);
       } catch (error) {
         const message = error?.response?.data?.message || error.message;
         const code = error?.response?.data?.code || error.code;
-        console.log(`${message} (Error code: ${code})`);
+        setIsLoading(false);
         setIsBtnLoading(false);
+        setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
       }
     };
 
