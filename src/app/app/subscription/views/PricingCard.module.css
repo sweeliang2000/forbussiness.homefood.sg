@@ -1,0 +1,241 @@
+.pricingCard {
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  border: 1px solid #E5E7EB;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transform-origin: center;
+  transform: scale(1);
+}
+
+.pricingCard.popular {
+  background-color: #1F2937;
+  color: white;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
+  z-index: 1;
+}
+
+.pricingCard:hover {
+  transform: translateY(-4px);
+}
+
+.popularBadge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background-color: #60A5FA;
+  color: white;
+  padding: 0.25rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  z-index: 2;
+}
+
+.planTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: inherit;
+}
+
+.price {
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.amount {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+.period {
+  color: #6B7280;
+}
+
+.popular .period {
+  color: #D1D5DB;
+}
+
+.description {
+  color: #6B7280;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.popular .description {
+  color: #D1D5DB;
+}
+
+.features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  color: #4B5563;
+}
+
+.feature:last-child {
+  margin-bottom: 2rem;
+}
+
+.feature.disabled {
+  opacity: 0.75;
+}
+
+.popular .feature {
+  color: #D1D5DB;
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.checkIcon {
+  color: #2563EB;
+}
+
+.crossIcon {
+  color: #DC2626;
+}
+
+.popular .checkIcon {
+  color: #60A5FA;
+}
+
+.popular .crossIcon {
+  color: #EF4444;
+}
+
+.crossedText {
+  text-decoration: line-through;
+  text-decoration-color: #DC2626;
+  text-decoration-thickness: 1px;
+}
+
+.popular .crossedText {
+  text-decoration-color: #EF4444;
+}
+
+.selectButton {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background-color: white;
+  color: #2563EB;
+  border: 1px solid #2563EB;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.875rem;
+  margin-top: auto;
+}
+
+.selectButton:hover:not(:disabled) {
+  background-color: #2563EB;
+  color: white;
+}
+
+.selectButton:disabled {
+  cursor: default;
+}
+
+.popularButton {
+  background-color: #60A5FA;
+  color: white;
+  border: none;
+}
+
+.popularButton:hover:not(:disabled) {
+  background-color: #3B82F6;
+}
+
+.currentPlanButton {
+  background-color: #E5E7EB;
+  color: #4B5563;
+  border-color: #D1D5DB;
+  cursor: default;
+}
+
+.popular .currentPlanButton {
+  background-color: #374151;
+  color: #D1D5DB;
+  border: 1px solid #4B5563;
+}
+
+.currentPlanButton:hover {
+  background-color: #E5E7EB;
+  color: #4B5563;
+}
+
+.popular .currentPlanButton:hover {
+  background-color: #374151;
+  color: #D1D5DB;
+}
+
+.planTypeSelect {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  background-color: white;
+  color: #4B5563;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+.planTypeSelect:focus {
+  outline: none;
+  border-color: #2563EB;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.popular .planTypeSelect {
+  background-color: #374151;
+  border-color: #4B5563;
+  color: white;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23D1D5DB' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+
+.popular .planTypeSelect:focus {
+  border-color: #60A5FA;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.1);
+}
+
+@media (max-width: 768px) {
+  .pricingCard.popular {
+    transform: none;
+  }
+  
+  .popularBadge {
+    top: 1rem;
+    right: 1rem;
+  }
+} 
