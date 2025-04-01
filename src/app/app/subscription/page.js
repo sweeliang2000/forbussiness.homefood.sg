@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import styles from './page.module.css';
 import PricingCard from './views/PricingCard';
+import { ONE_OUTLET_MONTHLY, ONE_OUTLET_YEARLY } from './keys/SubscriptionKeys';
 
 const professionalPlanTypes = [
   { value: '2-3', label: '2 - 3 Outlets' },
@@ -92,7 +93,8 @@ export default function SubscriptionPage() {
     },
     {
       title: 'Lite Plan',
-      price: billingCycle === 'annually' ? 7 : 9,
+      price: billingCycle === 'annually' ? 80 : 100,
+      lookupKey: billingCycle === 'annually' ? ONE_OUTLET_YEARLY : ONE_OUTLET_MONTHLY,
       isPopular: true,
       description: 'For the mockup enthusiasts and template lovers.',
       features: [
