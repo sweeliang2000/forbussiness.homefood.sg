@@ -183,6 +183,9 @@
 
 .subscriptionContainer .button {
     text-transform: none;
+    font-size: 14px;
+    padding: 8px;
+    color: blue;
 }
 
 .overlay {

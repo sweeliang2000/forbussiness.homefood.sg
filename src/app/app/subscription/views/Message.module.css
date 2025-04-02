@@ -1,0 +1,73 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 1rem;
+}
+
+.messageSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.messageBox {
+  background-color: white;
+  border-radius: 1rem;
+  padding: 2.5rem;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.messageTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+  letter-spacing: 0.05em;
+}
+
+.messageText {
+  color: #6B7280;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 2.5rem;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.buttonContainer :global(.MuiButton-root) {
+  text-transform: none;
+  min-width: 160px;
+}
+
+@media (max-width: 768px) {
+  .messageBox {
+    padding: 2rem;
+    margin: 1rem;
+  }
+
+  .messageTitle {
+    font-size: 1.25rem;
+  }
+
+  .messageText {
+    font-size: 0.875rem;
+  }
+
+  .buttonContainer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .buttonContainer :global(.MuiButton-root) {
+    width: 100%;
+  }
+} 

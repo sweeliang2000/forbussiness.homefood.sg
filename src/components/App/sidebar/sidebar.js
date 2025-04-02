@@ -16,7 +16,6 @@ import { Submenu } from './submenu/submenu';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import CollbineForBusiness from '../../CollbineForBusiness/CollbineForBusiness';
-import { Button } from '@mui/material';
 
 
 export default function Sidebar({
@@ -195,7 +194,9 @@ export default function Sidebar({
                         <p className={styles.title}>Free</p>
                         <p className={styles.cost}>No-Cost ($0/Month)</p>
                     </div>
-                    <Button className={styles.button}variant='text'>Upgrade</Button>
+                    <Link href="/app/subscription" className={styles.button}>
+                        Upgrade
+                    </Link>
                 </div>
             </aside>
             { !isClose && <div className={styles.overlay} onClick={onClose}/>}
