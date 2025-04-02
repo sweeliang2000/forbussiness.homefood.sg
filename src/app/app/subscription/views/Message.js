@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import styles from './Message.module.css';
-import Button from '@mui/material/Button';
+import { Button } from '@mui/material';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 
