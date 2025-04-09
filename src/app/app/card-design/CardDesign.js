@@ -6,17 +6,27 @@ import { HeaderSection } from "@/components/HeaderSection/HeaderSection";
 import Link from "next/link";
 import { MuiColorInput } from 'mui-color-input'
 import { useState } from 'react';
+import StampCard from '@/components/StampCard/StampCard';
+import { Slider } from '@mui/material';
 
 const CardDesign = () => {
     const [cardBackground, setCardBackgroundColor] = useState('#ffffff')
     const [cardTitleColor, setCardTitleColor] = useState('#000000')
-    const [cardFooterColor, setCardFooterColor] = useState('#a8a8a8')
-    const [cardStampBorderColor, setCardStampBorderColor] = useState('#000000')
-    const [cardStampBackground, setCardStampBackground] = useState('#ededed')
-    const [numberOfColumn, setNumberOfColumn] = useState(5);
+    const [cardFooterColor, setCardFooterColor] = useState('#797979')
+    const [cardStampBorderColor, setCardStampBorderColor] = useState('#ddd')
+    const [cardStampBackground, setCardStampBackground] = useState('#ffffff')
+    const [cardStampCollectedColor, setCardStampCollectedColor] = useState('#E8F9FF')
+    const [cardStampCollectedBorderColor, setCardStampCollectedBorderColor] = useState('#E8F9FF')
+    const [checkmarkColor, setCheckmarkColor] = useState('#6698aa')
+    const [numberOfStamp, setNumberOfStamp] = useState(18);
+    const [collectedStamps, setCollectedStamps] = useState(10);
+    const [spendAmount, setSpendAmount] = useState(10);
+    const [expiryDate, setExpiryDate] = useState('31 Dec 2023');
+    const [prizeSteps, setPrizeSteps] = useState([5, 10, 18]);
 
-    const [numberOfStamp, setNumberOfStamp] = useState(10);
-
+    const handleCollectedStampsChange = (event, newValue) => {
+        setCollectedStamps(newValue);
+    };
 
     return (
         <form>
@@ -34,21 +44,110 @@ const CardDesign = () => {
 
             <div className={styles.contentContainer}>
                 <ContentCard className={styles.cardContainer}>
-                    <div className={styles.card} style={{ backgroundColor: cardBackground }}>
-                        <p className={styles.title} style={{ color: cardTitleColor }}>BUY 10 AND GET 1 FOR FREE</p>
-
-                        <div className={styles.stampContainer} style={{ gridTemplateColumns: `repeat(${numberOfColumn}, 1fr)` }}>
-                            {
-                                Array(numberOfStamp).fill(0).map((_, index) => (
-                                    <div key={index} className={styles.stamp} style={{ borderColor: cardStampBorderColor, background: cardStampBackground }}/>
-                                ))
-                            }
-                        </div>
-
-                        <p className={styles.footer} style={{ color: cardFooterColor}}>No Expiry</p>
-                    </div>
+                    <StampCard 
+                        title="Get Free Spiacy Black Whole Leg"
+                        description={`Earn a stamp when you spend SGD $10.00`}
+                        totalStamps={numberOfStamp}
+                        collectedStamps={collectedStamps}
+                        expiryDate={expiryDate}
+                        spendAmount={spendAmount}
+                        cardBackground={cardBackground}
+                        cardTitleColor={cardTitleColor}
+                        cardFooterColor={cardFooterColor}
+                        cardStampBorderColor={cardStampBorderColor}
+                        cardStampBackground={cardStampBackground}
+                        cardStampCollectedColor={cardStampCollectedColor}
+                        cardStampCollectedBorderColor={cardStampCollectedBorderColor}
+                        checkmarkColor={checkmarkColor}
+                        prizeSteps={prizeSteps}
+                    />
 
                     <p className={styles.cardDescription}><Link href='/app/stamp-management'>Modify</Link> number of stamp and stamp icon is at <Link href='/app/stamp-management'>Stamp Management</Link>.</p>
+                </ContentCard>
+
+                <ContentCard>
+                    <div>
+                        <FieldHeader
+                            title='Preview Configuration'
+                            type='h2'
+                        />
+
+                        <div className={styles.cardConfigContainer}>
+                            <div className={`${styles.field} ${styles.prizeField}`}>
+                                <FieldHeader
+                                    title='Collected Stamps'
+                                    type='h3'
+                                />
+                                <div className={styles.sliderContainer}>
+                                    <Slider
+                                        value={collectedStamps}
+                                        onChange={handleCollectedStampsChange}
+                                        aria-labelledby="collected-stamps-slider"
+                                        valueLabelDisplay="auto"
+                                        step={1}
+                                        marks
+                                        min={0}
+                                        max={numberOfStamp}
+                                        className={styles.slider}
+                                    />
+                                    <div className={styles.sliderValue}>
+                                        {collectedStamps} / {numberOfStamp}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ContentCard>
+
+                <ContentCard>
+                    <div>
+                        <FieldHeader
+                            title='Stamp Configuration'
+                            type='h2'
+                        />
+
+                        <div className={styles.cardConfigContainer}>
+                            <div className={styles.field}>
+                                <FieldHeader
+                                    title='No Stamp Border Color'
+                                    type='h3'
+                                />
+                                <MuiColorInput className={styles.colorInput} format="hex" value={cardStampBorderColor} onChange={(color) => { setCardStampBorderColor(color) }} />
+                            </div>
+
+                            <div className={styles.field}>
+                                <FieldHeader
+                                    title='No Stamp Background Color'
+                                    type='h3'
+                                />
+                                <MuiColorInput className={styles.colorInput} format="hex" value={cardStampBackground} onChange={(color) => { setCardStampBackground(color) }} />
+                            </div>
+
+                            <div className={styles.field}>
+                                <FieldHeader
+                                    title='Stamp Border Color'
+                                    type='h3'
+                                />
+                                <MuiColorInput className={styles.colorInput} format="hex" value={cardStampCollectedBorderColor} onChange={(color) => { setCardStampCollectedBorderColor(color) }} />
+                            </div>
+
+                            <div className={styles.field}>
+                                <FieldHeader
+                                    title='Stamp Background Color'
+                                    type='h3'
+                                />
+                                <MuiColorInput className={styles.colorInput} format="hex" value={cardStampCollectedColor} onChange={(color) => { setCardStampCollectedColor(color) }} />
+                            </div>
+
+                            <div className={styles.field}>
+                                <FieldHeader
+                                    title='Checkmark Color'
+                                    type='h3'
+                                />
+                                <MuiColorInput className={styles.colorInput} format="hex" value={checkmarkColor} onChange={(color) => { setCheckmarkColor(color) }} />
+                            </div>
+                        </div>
+                    </div>
                 </ContentCard>
 
                 <ContentCard>
@@ -96,33 +195,6 @@ const CardDesign = () => {
                                     value={cardFooterColor} 
                                     isAlphaHidden
                                     onChange={(color) => { setCardFooterColor(color) }} />
-                            </div>
-                        </div>
-                    </div>
-                </ContentCard>
-
-                <ContentCard>
-                    <div>
-                        <FieldHeader
-                            title='Stamp Configuration'
-                            type='h2'
-                        />
-
-                        <div className={styles.cardConfigContainer}>
-                            <div className={styles.field}>
-                                <FieldHeader
-                                    title='Border Color'
-                                    type='h3'
-                                />
-                                <MuiColorInput className={styles.colorInput} format="hex" value={cardStampBorderColor} onChange={(color) => { setCardStampBorderColor(color) }} />
-                            </div>
-
-                            <div className={styles.field}>
-                                <FieldHeader
-                                    title='Background Color'
-                                    type='h3'
-                                />
-                                <MuiColorInput className={styles.colorInput} format="hex" value={cardStampBackground} onChange={(color) => { setCardStampBackground(color) }} />
                             </div>
                         </div>
                     </div>

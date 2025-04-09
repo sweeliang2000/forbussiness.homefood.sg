@@ -15,7 +15,7 @@ const AccountSetting = () => {
             <div className={styles.container}>
                 <ContentCard className={styles.content}>
                     <div>
-                        <h2>Account and Subscription</h2>
+                        <h2>Basic Account Information</h2>
                         <p>you@example.com</p>
                         <p>Account Type: Free</p>
                         <p>Change Password</p>
