@@ -9,6 +9,7 @@ import { useState } from 'react';
 import RewardCard from '@/app/app/redeemable/rewards/_views/RewardCard';
 
 const EditStampStep = ({
+    selectedRowId,
     isOpen,
     setIsOpen,
     stampedIcon,
@@ -41,12 +42,12 @@ const EditStampStep = ({
                 fullWidth
             >
                 <div className={styles.header}>
-                    <h1>Modify stamp step 1</h1>
+                    <h1>Modify stamp step {selectedRowId}</h1>
                     <IoCloseSharp className={styles.closeIcon} onClick={closeHandler} />
                 </div>
 
                 <div className={styles.content}>
-                    <div className={styles.field}>
+                    {/* <div className={styles.field}>
                         <FieldHeader
                             title='Stamped Icons'
                             type='h2'
@@ -78,7 +79,7 @@ const EditStampStep = ({
                             height={80}
                             imageClassName={styles.dragdropBannerImage}
                         />
-                    </div>
+                    </div> */}
 
                     <div className={`${styles.field} ${styles.start}`}>
                         <FieldHeader

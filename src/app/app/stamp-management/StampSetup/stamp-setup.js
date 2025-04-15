@@ -44,7 +44,7 @@ const DEFAULT_STAMP_STEP = {
 }
 
 export default function StampSetup() {
-  const [numberOfStamps, setNumberOfStamps] = useState(10);
+  const [numberOfStamps, setNumberOfStamps] = useState(6);
   const [defaultStampedIcon, setDefaultStampedIcon] = useState([]);
   const [defaultUnStampedIcon, setDefaultUnStampedIcon] = useState([]);
   const [currentReward, setCurrentReward] = useState(null)
@@ -181,70 +181,70 @@ export default function StampSetup() {
       headerName: 'Stamp',
       width: 80,
     },
-    {
-      field: 'stampedIcon',
-      headerName: 'Stamped Icon',
-      flex: 1,
-      renderCell: (params) => {
-        const isDefaultAndNotEmpty = cardSteps[params.row.id - 1].stampedIcon === 'default' && defaultStampedIcon[0] !== undefined;
-        const isNotDefault = cardSteps[params.row.id - 1].stampedIcon !== 'default';
+    // {
+    //   field: 'stampedIcon',
+    //   headerName: 'Stamped Icon',
+    //   flex: 1,
+    //   renderCell: (params) => {
+    //     const isDefaultAndNotEmpty = cardSteps[params.row.id - 1].stampedIcon === 'default' && defaultStampedIcon[0] !== undefined;
+    //     const isNotDefault = cardSteps[params.row.id - 1].stampedIcon !== 'default';
 
-        if (isDefaultAndNotEmpty) {
-          return (
-              <Image
-                src={defaultStampedIcon[0].url}
-                width={50}
-                height={50}
-                alt='Stamp icon'
-              />
-          )
-        } else if (isNotDefault) {
-          console.log(cardSteps[params.row.id - 1].stampedIcon)
-          return (
-            <Image
-              src={cardSteps[params.row.id - 1].stampedIcon[0].url}
-              width={50}
-              height={50}
-              alt='Stamp icon'
-            />
-          )
-        } else {
-          return <p>Empty</p>
-        }
-      }
-    },
-    {
-      field: 'unStampedIcon',
-      headerName: 'Unstamped Icon',
-      flex: 1,
-      renderCell: (params) => {
-        const isDefaultAndNotEmpty = cardSteps[params.row.id - 1].unStampedIcon === 'default' && defaultUnStampedIcon[0] !== undefined;
-        const isNotDefault = cardSteps[params.row.id - 1].unStampedIcon !== 'default';
+    //     if (isDefaultAndNotEmpty) {
+    //       return (
+    //           <Image
+    //             src={defaultStampedIcon[0].url}
+    //             width={50}
+    //             height={50}
+    //             alt='Stamp icon'
+    //           />
+    //       )
+    //     } else if (isNotDefault) {
+    //       console.log(cardSteps[params.row.id - 1].stampedIcon)
+    //       return (
+    //         <Image
+    //           src={cardSteps[params.row.id - 1].stampedIcon[0].url}
+    //           width={50}
+    //           height={50}
+    //           alt='Stamp icon'
+    //         />
+    //       )
+    //     } else {
+    //       return <p>Empty</p>
+    //     }
+    //   }
+    // },
+    // {
+    //   field: 'unStampedIcon',
+    //   headerName: 'Unstamped Icon',
+    //   flex: 1,
+    //   renderCell: (params) => {
+    //     const isDefaultAndNotEmpty = cardSteps[params.row.id - 1].unStampedIcon === 'default' && defaultUnStampedIcon[0] !== undefined;
+    //     const isNotDefault = cardSteps[params.row.id - 1].unStampedIcon !== 'default';
 
-        if (isDefaultAndNotEmpty) {
-          return (
-              <Image
-                src={defaultUnStampedIcon[0].url}
-                width={50}
-                height={50}
-                alt='Stamp icon'
-              />
-          )
-        } else if (isNotDefault) {
-          console.log(cardSteps[params.row.id - 1].unStampedIcon)
-          return (
-            <Image
-              src={cardSteps[params.row.id - 1].unStampedIcon[0].url}
-              width={50}
-              height={50}
-              alt='Stamp icon'
-            />
-          )
-        } else {
-          return <p>Empty</p>
-        }
-      }
-    },
+    //     if (isDefaultAndNotEmpty) {
+    //       return (
+    //           <Image
+    //             src={defaultUnStampedIcon[0].url}
+    //             width={50}
+    //             height={50}
+    //             alt='Stamp icon'
+    //           />
+    //       )
+    //     } else if (isNotDefault) {
+    //       console.log(cardSteps[params.row.id - 1].unStampedIcon)
+    //       return (
+    //         <Image
+    //           src={cardSteps[params.row.id - 1].unStampedIcon[0].url}
+    //           width={50}
+    //           height={50}
+    //           alt='Stamp icon'
+    //         />
+    //       )
+    //     } else {
+    //       return <p>Empty</p>
+    //     }
+    //   }
+    // },
     {
       field: 'reward',
       headerName: 'Reward',
@@ -276,7 +276,7 @@ export default function StampSetup() {
             onClose={handleMenuClose}
           >
             <MenuItem onClick={handleEdit}>Edit</MenuItem>
-            <MenuItem onClick={handleDelete}>Delete</MenuItem>
+            {/* <MenuItem onClick={handleDelete} className={styles.deleteBtn}>Delete</MenuItem> */}
           </Menu>
         </div>
       ),
@@ -392,13 +392,13 @@ export default function StampSetup() {
           <div className={styles.fieldsContainer}>
             <div>
               <FieldHeader
-                title='Default Design'
+                title='Default Reward Stamp Design'
                 type='h2'
               />
 
               <FieldHeader
-                title='Stamped Icons'
-                description='This icon indicates a collected stamp on the loyalty card. It must always be displayed once the stamp is earned. We recommend using a distinct design or color to clearly show that it is stamped.'
+                title='Reward Stamp Icons'
+                description='(Optional) This icon indicates a collected stamp on the loyalty card. It must always be displayed once the stamp is earned. We recommend using a distinct design or color to clearly show that it is stamped.'
                 type='h3'
                 className={styles.headerBtnMargin}
               />
@@ -415,7 +415,7 @@ export default function StampSetup() {
 
             <div>
               <FieldHeader
-                title='Unstamped Icons'
+                title='Reward Unstamped Icons'
                 description='(Optional) This icon is primarily for design, indicating that no stamp is present. It’s recommended to use a lighter color to distinguish it from a stamped icon. If no icon is specified, the area remains empty.'
                 type='h3'
                 className={styles.headerBtnMargin}
@@ -459,6 +459,7 @@ export default function StampSetup() {
       </form>
 
       <EditStampStep 
+        selectedRowId={selectedRowId}
         isOpen={isEditStampOpen}
         setIsOpen={setIsEditStampOpen}
         stampedIcon={currentStepStampedIcon}
