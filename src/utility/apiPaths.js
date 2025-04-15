@@ -10,3 +10,4 @@ export const SIGN_OUT = '/api/auth/signoutuser';
 
 export const OFFICIAL_BUSINESS_INFORMATION = '/api/data/official-bussiness-information';
 export const CUSTOMER_FACING_INFORMATION = '/api/data/customerDetails';
+export const STAMP_MANAGEMENT = '/api/data/stampManagement';

@@ -14,6 +14,8 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { clamp } from '@/utility/numbers';
 import EditStampStep from './_views/EditStampStep';
 import Image from 'next/image';
+import apiClient from '@/utility/api';
+import { STAMP_MANAGEMENT } from '@/utility/apiPaths';
 
 const NO_EXPIRATION = { value: 'noExpiration', title: 'No Expiration' };
 const END_OF_MONTH_EXPIRATION = { value: 'endOfMonth', title: 'End of Month' };
@@ -44,19 +46,76 @@ const DEFAULT_STAMP_STEP = {
 }
 
 export default function StampSetup() {
+  // For Header Status
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isBtnLoading, setIsBtnLoading] = useState(false);
+  const [isBtnDisabled, setIsBtnDisabled] = useState(true);
+  const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
+
+  // For Form Data
+  const [cardTitle, setCardTitle] = useState('');
+  const [cardDescription, setCardDescription] = useState('');
   const [numberOfStamps, setNumberOfStamps] = useState(6);
-  const [defaultStampedIcon, setDefaultStampedIcon] = useState([]);
-  const [defaultUnStampedIcon, setDefaultUnStampedIcon] = useState([]);
+  const [rewardStampIcon, setRewardStampIcon] = useState([]);
+  const [rewardUnstampedIcon, setRewardUnstampedIcon] = useState([]);
   const [currentReward, setCurrentReward] = useState(null)
   const [expirationType, setExpirationType] = useState(VALID_FOR_DAYS_EXPIRATION.value);
+  const [numberOfDaysToExpire, setNumberOfDaysToExpire] = useState(30);
   const [cardSteps, setCardSteps] = useState(Array.from({ length: 6 }, (_, index) => ({
     ...DEFAULT_STAMP_STEP,
     id: index + 1
   })))
 
-  const formSubmissionHandler = (event) => {
+  const formSubmissionHandler = async(event) => {
     event.preventDefault();
-    console.log("Stamp Setup saved called");
+    setIsBtnLoading(true);
+
+    try {
+      const formData = new FormData();
+
+      formData.append('cardTitle', cardTitle);
+      formData.append('cardDescription', cardDescription);
+      formData.append('numberOfStamps', numberOfStamps);
+      formData.append('expirationType', expirationType);
+      formData.append('numberOfDaysToExpire', numberOfDaysToExpire);
+      formData.append('cardStepDetails', JSON.stringify(cardSteps));
+
+      if (rewardStampIcon.length > 0 && rewardStampIcon[0] !== null) {
+        // TODO: Change defaultStampedIcon to rewardStampIcon
+        formData.append('defaultStampedIcon', rewardStampIcon[0].file);
+      };
+
+      if (rewardUnstampedIcon.length > 0 && rewardUnstampedIcon[0] !== null) {
+        formData.append('defaultUnStampedIcon', rewardUnstampedIcon[0].file);
+      };
+
+      // Log FormData contents properly
+      console.log("FormData contents:");
+      for (const pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+
+      await apiClient.post(STAMP_MANAGEMENT, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('Form submitted successfully');
+      setIsSubmissionSuccess(true);
+      setIsBtnLoading(false);
+    } catch (error) {
+      console.error('Form submission error:', error);
+    } finally {
+      setIsBtnLoading(false);
+    }
+    
+  };
+
+  const resetSaving= () => {
+    setIsSubmissionSuccess(false);
+    setIsBtnDisabled(false);
   };
 
   const numberOfStampsHandler = (event) => {
@@ -82,7 +141,7 @@ export default function StampSetup() {
   }
 
   useEffect(() => {
-    console.log("DEFAULT STAMPED MODIFIED", defaultStampedIcon)
+    console.log("DEFAULT STAMPED MODIFIED", rewardStampIcon)
     setCardSteps(prevValue => {
       const data = prevValue.map((value) => {
         if (value.stampedIcon === 'default' || value.stampedIcon === null || value.stampedIcon.length === 0) {
@@ -94,7 +153,7 @@ export default function StampSetup() {
 
       return data
     })
-  }, [defaultStampedIcon])
+  }, [rewardStampIcon])
 
   useEffect(() => {
     setCardSteps(prevValue => {
@@ -108,7 +167,7 @@ export default function StampSetup() {
 
       return data
     })
-  }, [defaultUnStampedIcon])
+  }, [rewardUnstampedIcon])
 
   // ==== Modify Selection ===
   const [currentStepStampedIcon, setCurrentStepStampedIcon] = useState([]);
@@ -119,13 +178,14 @@ export default function StampSetup() {
 
     setCardSteps(preValue => {
       console.log(preValue)
-      preValue[selectedRowId - 1].stampedIcon = currentStepStampedIcon === defaultStampedIcon || currentStepStampedIcon.length === 0 ? 'default' : currentStepStampedIcon;
-      preValue[selectedRowId - 1].unStampedIcon = currentStepUnstampIcon === defaultUnStampedIcon || currentStepStampedIcon.length === 0 ? 'default' : currentStepUnstampIcon;
+      preValue[selectedRowId - 1].stampedIcon = currentStepStampedIcon === rewardStampIcon || currentStepStampedIcon.length === 0 ? 'default' : currentStepStampedIcon;
+      preValue[selectedRowId - 1].unStampedIcon = currentStepUnstampIcon === rewardUnstampedIcon || currentStepStampedIcon.length === 0 ? 'default' : currentStepUnstampIcon;
       preValue[selectedRowId - 1].reward = currentReward;
       return preValue
     });
 
-    setCurrentReward(null)
+    setCurrentReward(null);
+    resetSaving();
 
     handleMenuClose();
   }
@@ -155,14 +215,14 @@ export default function StampSetup() {
     const currentStepDetail = cardSteps[selectedRowId - 1];
 
     if (currentStepDetail.stampedIcon === 'default') {
-      setCurrentStepStampedIcon(defaultStampedIcon);
+      setCurrentStepStampedIcon(rewardStampIcon);
     } else {
       console.log("SHDSD")
       setCurrentStepStampedIcon(currentStepDetail.stampedIcon);
     }
 
     if (currentStepDetail.unStampedIcon === 'default') {
-      setCurrentStepUnstampIcon(defaultUnStampedIcon);
+      setCurrentStepUnstampIcon(rewardUnstampedIcon);
     } else {
       setCurrentStepUnstampIcon(currentStepDetail.unStampedIcon);
     }
@@ -186,13 +246,13 @@ export default function StampSetup() {
     //   headerName: 'Stamped Icon',
     //   flex: 1,
     //   renderCell: (params) => {
-    //     const isDefaultAndNotEmpty = cardSteps[params.row.id - 1].stampedIcon === 'default' && defaultStampedIcon[0] !== undefined;
+    //     const isDefaultAndNotEmpty = cardSteps[params.row.id - 1].stampedIcon === 'default' && rewardStampIcon[0] !== undefined;
     //     const isNotDefault = cardSteps[params.row.id - 1].stampedIcon !== 'default';
 
     //     if (isDefaultAndNotEmpty) {
     //       return (
     //           <Image
-    //             src={defaultStampedIcon[0].url}
+    //             src={rewardStampIcon[0].url}
     //             width={50}
     //             height={50}
     //             alt='Stamp icon'
@@ -299,8 +359,12 @@ export default function StampSetup() {
               Create and design your stamp card and the rewards to be given when
               customers hit a certain goal. <Link href='/'>Find out more.</Link>
             </p>
-
           }
+          loading={isBtnLoading}
+          isSuccess={isSubmissionSuccess}
+          isError={isError}
+          isDisabled={isBtnDisabled}
+          errorMessage={errorMessage}
         />
 
         <ContentCard>
@@ -315,24 +379,28 @@ export default function StampSetup() {
               placeholder=''
               id='Card Title'
               name='Card Title'
-              required
               helperText={''}
               error={false}
-              value={''}
-              onChange={(event) => { }}
+              value={cardTitle}
+              onChange={(event) => { 
+                resetSaving();
+                setCardTitle(event.target.value) 
+              }}
             />
 
             <FormTextField
               title='Card description (Optional)'
               subtitle='A short description of your program. Displays on the front of your the card to customers like BUY 6 COFFEES AND GET ONE FREE!'
               placeholder=''
-              id='Card Title'
-              name='Card Title'
-              required
+              id='Card Description'
+              name='Card Description'
               helperText={''}
               error={false}
-              value={''}
-              onChange={(event) => { }}
+              value={cardDescription}
+              onChange={(event) => { 
+                resetSaving();
+                setCardDescription(event.target.value) 
+              }}
             />
 
             <FormTextField
@@ -346,7 +414,10 @@ export default function StampSetup() {
               helperText={''}
               error={false}
               value={numberOfStamps}
-              onChange={(event) => { numberOfStampsHandler(event) }}
+              onChange={(event) => { 
+                resetSaving();
+                numberOfStampsHandler(event);
+              }}
             />
           </div>
         </ContentCard>
@@ -368,7 +439,10 @@ export default function StampSetup() {
               labelId='expiration_type'
               id='expiration_type'
               value={expirationType}
-              onChange={(event) => { setExpirationType(event.target.value) }}
+              onChange={(event) => { 
+                resetSaving();
+                setExpirationType(event.target.value);
+               }}
             />
 
 
@@ -378,11 +452,13 @@ export default function StampSetup() {
               type='number'
               id='Card Title'
               name='Card Title'
-              required
               helperText={''}
               error={false}
-              value={''}
-              onChange={(event) => { numberOfStampsHandler(event) }}
+              value={numberOfDaysToExpire}
+              onChange={(event) => { 
+                resetSaving();
+                setNumberOfDaysToExpire(event.target.value);
+              }}
             />}
           </div>
         </ContentCard>
@@ -404,9 +480,10 @@ export default function StampSetup() {
               />
 
               <DragDropImageUploader
-                images={defaultStampedIcon}
-                setImages={setDefaultStampedIcon}
+                images={rewardStampIcon}
+                setImages={setRewardStampIcon}
                 noOfImages={1}
+                resetSaving={resetSaving}
                 width={100}
                 height={100}
                 imageClassName={styles.dragdropBannerImage}
@@ -416,14 +493,15 @@ export default function StampSetup() {
             <div>
               <FieldHeader
                 title='Reward Unstamped Icons'
-                description='(Optional) This icon is primarily for design, indicating that no stamp is present. It’s recommended to use a lighter color to distinguish it from a stamped icon. If no icon is specified, the area remains empty.'
+                description='(Optional) This icon is primarily for design, indicating that no stamp is present. It&apos;s recommended to use a lighter color to distinguish it from a stamped icon. If no icon is specified, the area remains empty.'
                 type='h3'
                 className={styles.headerBtnMargin}
               />
 
               <DragDropImageUploader
-                images={defaultUnStampedIcon}
-                setImages={setDefaultUnStampedIcon}
+                images={rewardUnstampedIcon}
+                setImages={setRewardUnstampedIcon}
+                resetSaving={resetSaving}
                 noOfImages={1}
                 width={100}
                 height={100}
