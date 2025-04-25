@@ -5,18 +5,18 @@
     gap: 24px;
 }
 
-.header {
-    position: sticky !important;
-    top: 0;
-    z-index: 97;
-    height: 100px;
-}
-
 .form .description {
     font-size: 0.75rem;
     color: #5b6264;
     margin-top: 4px;
     margin-bottom: 16px;
+}
+
+.header {
+    position: -webkit-sticky;
+    position: sticky !important;
+    top: 0;
+    z-index: 97;
 }
 
 .fieldsContainer {

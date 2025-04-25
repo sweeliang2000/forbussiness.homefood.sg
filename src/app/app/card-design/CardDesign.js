@@ -13,9 +13,9 @@ const CardDesign = () => {
     const [cardBackground, setCardBackgroundColor] = useState('#ffffff')
     const [cardTitleColor, setCardTitleColor] = useState('#000000')
     const [cardFooterColor, setCardFooterColor] = useState('#797979')
-    const [cardStampBorderColor, setCardStampBorderColor] = useState('#ddd')
-    const [cardStampBackground, setCardStampBackground] = useState('#ffffff')
-    const [cardStampCollectedColor, setCardStampCollectedColor] = useState('#E8F9FF')
+    const [cardNoStampBorderColor, setCardNoStampBorderColor] = useState('#ddd')
+    const [cardStampBackground, setCardStampBackground] = useState('#E8F9FF')
+    const [cardNoStampBackgroundColor, setCardNoStampBackgroundColor] = useState('#ffffff')
     const [cardStampCollectedBorderColor, setCardStampCollectedBorderColor] = useState('#E8F9FF')
     const [checkmarkColor, setCheckmarkColor] = useState('#6698aa')
     const [numberOfStamp, setNumberOfStamp] = useState(18);
@@ -28,8 +28,27 @@ const CardDesign = () => {
         setCollectedStamps(newValue);
     };
 
+    const formSubmissionHandler = async (event) => {
+        event.preventDefault();
+        console.log('form submitted');
+
+        const payload = {
+            "backgroundColor": cardBackground,
+            "titleColor": cardTitleColor,
+            "footerTextColor": cardFooterColor,
+            "noStampBorderColor": cardNoStampBorderColor,
+            "noStampBackgroundColor": cardNoStampBackgroundColor,
+            "stampBorderColor": cardStampCollectedBorderColor,
+            "stampBackgroundColor": cardStampBackground,
+            "checkmarkColor": checkmarkColor,
+        }
+    }
+
     return (
-        <form>
+        <form
+            className={styles.form}
+            onSubmit={formSubmissionHandler}
+        >
             <HeaderSection
                 className={styles.header}
                 title='Card Preview'
@@ -54,9 +73,9 @@ const CardDesign = () => {
                         cardBackground={cardBackground}
                         cardTitleColor={cardTitleColor}
                         cardFooterColor={cardFooterColor}
-                        cardStampBorderColor={cardStampBorderColor}
+                        cardNoStampBorderColor={cardNoStampBorderColor}
                         cardStampBackground={cardStampBackground}
-                        cardStampCollectedColor={cardStampCollectedColor}
+                        cardNoStampBackgroundColor={cardNoStampBackgroundColor}
                         cardStampCollectedBorderColor={cardStampCollectedBorderColor}
                         checkmarkColor={checkmarkColor}
                         prizeSteps={prizeSteps}
@@ -112,7 +131,7 @@ const CardDesign = () => {
                                     title='No Stamp Border Color'
                                     type='h3'
                                 />
-                                <MuiColorInput className={styles.colorInput} format="hex" value={cardStampBorderColor} onChange={(color) => { setCardStampBorderColor(color) }} />
+                                <MuiColorInput className={styles.colorInput} format="hex" value={cardNoStampBorderColor} onChange={(color) => { setCardNoStampBorderColor(color) }} />
                             </div>
 
                             <div className={styles.field}>
@@ -120,7 +139,7 @@ const CardDesign = () => {
                                     title='No Stamp Background Color'
                                     type='h3'
                                 />
-                                <MuiColorInput className={styles.colorInput} format="hex" value={cardStampBackground} onChange={(color) => { setCardStampBackground(color) }} />
+                                <MuiColorInput className={styles.colorInput} format="hex" value={cardNoStampBackgroundColor} onChange={(color) => { setCardNoStampBackgroundColor(color) }} />
                             </div>
 
                             <div className={styles.field}>
@@ -136,7 +155,7 @@ const CardDesign = () => {
                                     title='Stamp Background Color'
                                     type='h3'
                                 />
-                                <MuiColorInput className={styles.colorInput} format="hex" value={cardStampCollectedColor} onChange={(color) => { setCardStampCollectedColor(color) }} />
+                                <MuiColorInput className={styles.colorInput} format="hex" value={cardStampBackground} onChange={(color) => { setCardStampBackground(color) }} />
                             </div>
 
                             <div className={styles.field}>

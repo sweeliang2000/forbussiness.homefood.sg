@@ -14,9 +14,9 @@ const StampCard = ({
   cardBackground,
   cardTitleColor,
   cardFooterColor,
-  cardStampBorderColor,
+  cardNoStampBorderColor,
   cardStampBackground,
-  cardStampCollectedColor,
+  cardNoStampBackgroundColor,
   cardStampCollectedBorderColor,
   checkmarkColor,
   prizeSteps = []
@@ -71,8 +71,8 @@ const StampCard = ({
               key={i} 
               className={`${styles.stamp} ${isCollected ? styles.stampCollected : ''} ${isPrize ? styles.stampPrize : ''}`}
               style={{
-                borderColor: isCollected ? (cardStampCollectedBorderColor || cardStampCollectedColor) : cardStampBorderColor,
-                backgroundColor: isCollected ? cardStampCollectedColor : cardStampBackground
+                borderColor: isCollected ? (cardStampCollectedBorderColor || cardStampBackground) : cardNoStampBorderColor,
+                backgroundColor: isCollected ? cardStampBackground : cardNoStampBackgroundColor
               }}
             >
               {isPrize ? (
