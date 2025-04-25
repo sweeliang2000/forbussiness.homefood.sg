@@ -8,15 +8,23 @@ import { MuiColorInput } from 'mui-color-input'
 import { useState } from 'react';
 import StampCard from '@/components/StampCard/StampCard';
 import { Slider } from '@mui/material';
+import { CARD_DESIGN_SETTING } from '@/utility/apiPaths';
+import apiClient from '@/utility/api';
 
 const CardDesign = () => {
+    const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
+    const [isError, setIsError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [isBtnLoading, setIsBtnLoading] = useState(false);
+    const [isBtnDisabled, setIsBtnDisabled] = useState(true);
+
     const [cardBackground, setCardBackgroundColor] = useState('#ffffff')
     const [cardTitleColor, setCardTitleColor] = useState('#000000')
     const [cardFooterColor, setCardFooterColor] = useState('#797979')
-    const [cardNoStampBorderColor, setCardNoStampBorderColor] = useState('#ddd')
-    const [cardStampBackground, setCardStampBackground] = useState('#E8F9FF')
+    const [cardNoStampBorderColor, setCardNoStampBorderColor] = useState('#dddddd')
+    const [cardStampBackground, setCardStampBackground] = useState('#e8f9ff')
     const [cardNoStampBackgroundColor, setCardNoStampBackgroundColor] = useState('#ffffff')
-    const [cardStampCollectedBorderColor, setCardStampCollectedBorderColor] = useState('#E8F9FF')
+    const [cardStampCollectedBorderColor, setCardStampCollectedBorderColor] = useState('#e8f9ff')
     const [checkmarkColor, setCheckmarkColor] = useState('#6698aa')
     const [numberOfStamp, setNumberOfStamp] = useState(18);
     const [collectedStamps, setCollectedStamps] = useState(10);
@@ -28,9 +36,19 @@ const CardDesign = () => {
         setCollectedStamps(newValue);
     };
 
+    const enableSaveBtn = () => {
+        setIsSubmissionSuccess(false);
+        setIsBtnDisabled(false);
+    };
+
+    const showError = (message) => {
+        setIsError(true);
+        setErrorMessage(message)
+    };
+
     const formSubmissionHandler = async (event) => {
         event.preventDefault();
-        console.log('form submitted');
+        setIsBtnLoading(true);
 
         const payload = {
             "backgroundColor": cardBackground,
@@ -41,6 +59,17 @@ const CardDesign = () => {
             "stampBorderColor": cardStampCollectedBorderColor,
             "stampBackgroundColor": cardStampBackground,
             "checkmarkColor": checkmarkColor,
+        }
+
+        try {
+            await apiClient.post(`${CARD_DESIGN_SETTING}`, payload);
+            setIsSubmissionSuccess(true);
+            setIsBtnLoading(false);
+        } catch (error) {
+            const message = error?.response?.data?.message || error.message;
+            const code = error?.response?.data?.code || error.code;
+            showError(`An error had occurred. ${message} (Error code: ${code}). Please try to save it again.`);
+            setIsBtnLoading(false);
         }
     }
 
@@ -59,6 +88,12 @@ const CardDesign = () => {
                     </p>
 
                 }
+                loading={isBtnLoading}
+                isSuccess={isSubmissionSuccess}
+                setShowError={setIsError}
+                isError={isError}
+                isDisabled={isBtnDisabled}
+                errorMessage={errorMessage}
             />
 
             <div className={styles.contentContainer}>
@@ -131,7 +166,13 @@ const CardDesign = () => {
                                     title='No Stamp Border Color'
                                     type='h3'
                                 />
-                                <MuiColorInput className={styles.colorInput} format="hex" value={cardNoStampBorderColor} onChange={(color) => { setCardNoStampBorderColor(color) }} />
+                                <MuiColorInput 
+                                    className={styles.colorInput} 
+                                    format="hex" value={cardNoStampBorderColor} 
+                                    onChange={(color) => { 
+                                        setCardNoStampBorderColor(color);
+                                        enableSaveBtn();
+                                    }} />
                             </div>
 
                             <div className={styles.field}>
@@ -139,7 +180,14 @@ const CardDesign = () => {
                                     title='No Stamp Background Color'
                                     type='h3'
                                 />
-                                <MuiColorInput className={styles.colorInput} format="hex" value={cardNoStampBackgroundColor} onChange={(color) => { setCardNoStampBackgroundColor(color) }} />
+                                <MuiColorInput 
+                                    className={styles.colorInput} 
+                                    format="hex" 
+                                    value={cardNoStampBackgroundColor} 
+                                    onChange={(color) => { 
+                                        setCardNoStampBackgroundColor(color);
+                                        enableSaveBtn();
+                                    }} />
                             </div>
 
                             <div className={styles.field}>
@@ -147,7 +195,14 @@ const CardDesign = () => {
                                     title='Stamp Border Color'
                                     type='h3'
                                 />
-                                <MuiColorInput className={styles.colorInput} format="hex" value={cardStampCollectedBorderColor} onChange={(color) => { setCardStampCollectedBorderColor(color) }} />
+                                <MuiColorInput 
+                                    className={styles.colorInput} 
+                                    format="hex" 
+                                    value={cardStampCollectedBorderColor} 
+                                    onChange={(color) => { 
+                                        setCardStampCollectedBorderColor(color);
+                                        enableSaveBtn();
+                                    }} />
                             </div>
 
                             <div className={styles.field}>
@@ -155,7 +210,14 @@ const CardDesign = () => {
                                     title='Stamp Background Color'
                                     type='h3'
                                 />
-                                <MuiColorInput className={styles.colorInput} format="hex" value={cardStampBackground} onChange={(color) => { setCardStampBackground(color) }} />
+                                <MuiColorInput 
+                                    className={styles.colorInput} 
+                                    format="hex" 
+                                    value={cardStampBackground} 
+                                    onChange={(color) => { 
+                                        setCardStampBackground(color);
+                                        enableSaveBtn();
+                                    }} />
                             </div>
 
                             <div className={styles.field}>
@@ -163,7 +225,14 @@ const CardDesign = () => {
                                     title='Checkmark Color'
                                     type='h3'
                                 />
-                                <MuiColorInput className={styles.colorInput} format="hex" value={checkmarkColor} onChange={(color) => { setCheckmarkColor(color) }} />
+                                <MuiColorInput 
+                                    className={styles.colorInput} 
+                                    format="hex" 
+                                    value={checkmarkColor} 
+                                    onChange={(color) => { 
+                                        setCheckmarkColor(color);
+                                        enableSaveBtn();
+                                    }} />
                             </div>
                         </div>
                     </div>
@@ -187,7 +256,10 @@ const CardDesign = () => {
                                     format="hex" 
                                     value={cardBackground} 
                                     isAlphaHidden
-                                    onChange={(color) => { setCardBackgroundColor(color) }} />
+                                    onChange={(color) => { 
+                                        setCardBackgroundColor(color);
+                                        enableSaveBtn();
+                                    }} />
                             </div>
 
                             <div className={styles.field}>
@@ -200,7 +272,10 @@ const CardDesign = () => {
                                     format="hex" 
                                     value={cardTitleColor} 
                                     isAlphaHidden
-                                    onChange={(color) => { setCardTitleColor(color) }} />
+                                    onChange={(color) => {
+                                        setCardTitleColor(color);
+                                        enableSaveBtn();
+                                    }} />
                             </div>
 
                             <div className={styles.field}>
@@ -213,7 +288,10 @@ const CardDesign = () => {
                                     format="hex"
                                     value={cardFooterColor} 
                                     isAlphaHidden
-                                    onChange={(color) => { setCardFooterColor(color) }} />
+                                    onChange={(color) => { 
+                                        setCardFooterColor(color);
+                                        enableSaveBtn();
+                                    }} />
                             </div>
                         </div>
                     </div>
