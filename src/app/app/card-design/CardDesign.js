@@ -147,221 +147,221 @@ const CardDesign = () => {
 
             {
                 isLoading ?
-                <LoadingPage/> :
-                isLoadingErrorMessage !== null ?
-                <ErrorPage/> :
-                <div className={styles.contentContainer}>
-                <ContentCard className={styles.cardContainer}>
-                    <StampCard 
-                        title="Get Free Spiacy Black Whole Leg"
-                        description={`Earn a stamp when you spend SGD $10.00`}
-                        totalStamps={numberOfStamp}
-                        collectedStamps={collectedStamps}
-                        expiryDate={expiryDate}
-                        spendAmount={spendAmount}
-                        cardBackground={cardBackground}
-                        cardTitleColor={cardTitleColor}
-                        cardFooterColor={cardFooterColor}
-                        cardNoStampBorderColor={cardNoStampBorderColor}
-                        cardStampBackground={cardStampBackground}
-                        cardNoStampBackgroundColor={cardNoStampBackgroundColor}
-                        cardStampCollectedBorderColor={cardStampCollectedBorderColor}
-                        checkmarkColor={checkmarkColor}
-                        prizeSteps={prizeSteps}
-                    />
-
-                    <p className={styles.cardDescription}><Link href='/app/stamp-management'>Modify</Link> number of stamp and stamp icon is at <Link href='/app/stamp-management'>Stamp Management</Link>.</p>
-                </ContentCard>
-
-                <ContentCard>
-                    <div>
-                        <FieldHeader
-                            title='Preview Configuration'
-                            type='h2'
-                        />
-
-                        <div className={styles.cardConfigContainer}>
-                            <div className={`${styles.field} ${styles.prizeField}`}>
-                                <FieldHeader
-                                    title='Collected Stamps'
-                                    type='h3'
+                    <LoadingPage /> :
+                    isLoadingErrorMessage !== null ?
+                        <ErrorPage /> :
+                        <div className={styles.contentContainer}>
+                            <ContentCard className={styles.cardContainer}>
+                                <StampCard
+                                    title="Get Free Spiacy Black Whole Leg"
+                                    description={`Earn a stamp when you spend SGD $10.00`}
+                                    totalStamps={numberOfStamp}
+                                    collectedStamps={collectedStamps}
+                                    expiryDate={expiryDate}
+                                    spendAmount={spendAmount}
+                                    cardBackground={cardBackground}
+                                    cardTitleColor={cardTitleColor}
+                                    cardFooterColor={cardFooterColor}
+                                    cardNoStampBorderColor={cardNoStampBorderColor}
+                                    cardStampBackground={cardStampBackground}
+                                    cardNoStampBackgroundColor={cardNoStampBackgroundColor}
+                                    cardStampCollectedBorderColor={cardStampCollectedBorderColor}
+                                    checkmarkColor={checkmarkColor}
+                                    prizeSteps={prizeSteps}
                                 />
-                                <div className={styles.sliderContainer}>
-                                    <Slider
-                                        value={collectedStamps}
-                                        onChange={handleCollectedStampsChange}
-                                        aria-labelledby="collected-stamps-slider"
-                                        valueLabelDisplay="auto"
-                                        step={1}
-                                        marks
-                                        min={0}
-                                        max={numberOfStamp}
-                                        className={styles.slider}
+
+                                <p className={styles.cardDescription}><Link href='/app/stamp-management'>Modify</Link> number of stamp and stamp icon is at <Link href='/app/stamp-management'>Stamp Management</Link>.</p>
+                            </ContentCard>
+
+                            <ContentCard>
+                                <div>
+                                    <FieldHeader
+                                        title='Preview Configuration'
+                                        type='h2'
                                     />
-                                    <div className={styles.sliderValue}>
-                                        {collectedStamps} / {numberOfStamp}
+
+                                    <div className={styles.cardConfigContainer}>
+                                        <div className={`${styles.field} ${styles.prizeField}`}>
+                                            <FieldHeader
+                                                title='Collected Stamps'
+                                                type='h3'
+                                            />
+                                            <div className={styles.sliderContainer}>
+                                                <Slider
+                                                    value={collectedStamps}
+                                                    onChange={handleCollectedStampsChange}
+                                                    aria-labelledby="collected-stamps-slider"
+                                                    valueLabelDisplay="auto"
+                                                    step={1}
+                                                    marks
+                                                    min={0}
+                                                    max={numberOfStamp}
+                                                    className={styles.slider}
+                                                />
+                                                <div className={styles.sliderValue}>
+                                                    {collectedStamps} / {numberOfStamp}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </ContentCard>
+
+                            <ContentCard>
+                                <div>
+                                    <FieldHeader
+                                        title='Stamp Configuration'
+                                        type='h2'
+                                    />
+
+                                    <div className={styles.cardConfigContainer}>
+                                        <div className={styles.field}>
+                                            <FieldHeader
+                                                title='No Stamp Border Color'
+                                                type='h3'
+                                            />
+                                            <MuiColorInput
+                                                className={styles.colorInput}
+                                                format="hex" value={cardNoStampBorderColor}
+                                                onChange={(color) => {
+                                                    setCardNoStampBorderColor(color);
+                                                    enableSaveBtn();
+                                                }} />
+                                        </div>
+
+                                        <div className={styles.field}>
+                                            <FieldHeader
+                                                title='No Stamp Background Color'
+                                                type='h3'
+                                            />
+                                            <MuiColorInput
+                                                className={styles.colorInput}
+                                                format="hex"
+                                                value={cardNoStampBackgroundColor}
+                                                onChange={(color) => {
+                                                    setCardNoStampBackgroundColor(color);
+                                                    enableSaveBtn();
+                                                }} />
+                                        </div>
+
+                                        <div className={styles.field}>
+                                            <FieldHeader
+                                                title='Stamp Border Color'
+                                                type='h3'
+                                            />
+                                            <MuiColorInput
+                                                className={styles.colorInput}
+                                                format="hex"
+                                                value={cardStampCollectedBorderColor}
+                                                onChange={(color) => {
+                                                    setCardStampCollectedBorderColor(color);
+                                                    enableSaveBtn();
+                                                }} />
+                                        </div>
+
+                                        <div className={styles.field}>
+                                            <FieldHeader
+                                                title='Stamp Background Color'
+                                                type='h3'
+                                            />
+                                            <MuiColorInput
+                                                className={styles.colorInput}
+                                                format="hex"
+                                                value={cardStampBackground}
+                                                onChange={(color) => {
+                                                    setCardStampBackground(color);
+                                                    enableSaveBtn();
+                                                }} />
+                                        </div>
+
+                                        <div className={styles.field}>
+                                            <FieldHeader
+                                                title='Checkmark Color'
+                                                type='h3'
+                                            />
+                                            <MuiColorInput
+                                                className={styles.colorInput}
+                                                format="hex"
+                                                value={checkmarkColor}
+                                                onChange={(color) => {
+                                                    setCheckmarkColor(color);
+                                                    enableSaveBtn();
+                                                }} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </ContentCard>
+
+                            <ContentCard>
+                                <div>
+                                    <FieldHeader
+                                        title='Card Configuration'
+                                        type='h2'
+                                    />
+
+                                    <div className={styles.cardConfigContainer}>
+                                        <div className={styles.field}>
+                                            <FieldHeader
+                                                title='Background Color'
+                                                type='h3'
+                                            />
+                                            <MuiColorInput
+                                                className={styles.colorInput}
+                                                format="hex"
+                                                value={cardBackground}
+                                                isAlphaHidden
+                                                onChange={(color) => {
+                                                    setCardBackgroundColor(color);
+                                                    enableSaveBtn();
+                                                }} />
+                                        </div>
+
+                                        <div className={styles.field}>
+                                            <FieldHeader
+                                                title='Title Color'
+                                                type='h3'
+                                            />
+                                            <MuiColorInput
+                                                className={styles.colorInput}
+                                                format="hex"
+                                                value={cardTitleColor}
+                                                isAlphaHidden
+                                                onChange={(color) => {
+                                                    setCardTitleColor(color);
+                                                    enableSaveBtn();
+                                                }} />
+                                        </div>
+
+                                        <div className={styles.field}>
+                                            <FieldHeader
+                                                title='Footer text Color'
+                                                type='h3'
+                                            />
+                                            <MuiColorInput
+                                                className={styles.colorInput}
+                                                format="hex"
+                                                value={cardFooterColor}
+                                                isAlphaHidden
+                                                onChange={(color) => {
+                                                    setCardFooterColor(color);
+                                                    enableSaveBtn();
+                                                }} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </ContentCard>
+
+                            <ContentCard className={styles.footerContainer}>
+                                <Button
+                                    variant="text"
+                                    color="error"
+                                    className={styles.resetButton}
+                                    onClick={resetToDefaultColor}
+                                >
+                                    Reset to Default
+                                </Button>
+                            </ContentCard>
                         </div>
-                    </div>
-                </ContentCard>
-
-                <ContentCard>
-                    <div>
-                        <FieldHeader
-                            title='Stamp Configuration'
-                            type='h2'
-                        />
-
-                        <div className={styles.cardConfigContainer}>
-                            <div className={styles.field}>
-                                <FieldHeader
-                                    title='No Stamp Border Color'
-                                    type='h3'
-                                />
-                                <MuiColorInput 
-                                    className={styles.colorInput} 
-                                    format="hex" value={cardNoStampBorderColor} 
-                                    onChange={(color) => { 
-                                        setCardNoStampBorderColor(color);
-                                        enableSaveBtn();
-                                    }} />
-                            </div>
-
-                            <div className={styles.field}>
-                                <FieldHeader
-                                    title='No Stamp Background Color'
-                                    type='h3'
-                                />
-                                <MuiColorInput 
-                                    className={styles.colorInput} 
-                                    format="hex" 
-                                    value={cardNoStampBackgroundColor} 
-                                    onChange={(color) => { 
-                                        setCardNoStampBackgroundColor(color);
-                                        enableSaveBtn();
-                                    }} />
-                            </div>
-
-                            <div className={styles.field}>
-                                <FieldHeader
-                                    title='Stamp Border Color'
-                                    type='h3'
-                                />
-                                <MuiColorInput 
-                                    className={styles.colorInput} 
-                                    format="hex" 
-                                    value={cardStampCollectedBorderColor} 
-                                    onChange={(color) => { 
-                                        setCardStampCollectedBorderColor(color);
-                                        enableSaveBtn();
-                                    }} />
-                            </div>
-
-                            <div className={styles.field}>
-                                <FieldHeader
-                                    title='Stamp Background Color'
-                                    type='h3'
-                                />
-                                <MuiColorInput 
-                                    className={styles.colorInput} 
-                                    format="hex" 
-                                    value={cardStampBackground} 
-                                    onChange={(color) => { 
-                                        setCardStampBackground(color);
-                                        enableSaveBtn();
-                                    }} />
-                            </div>
-
-                            <div className={styles.field}>
-                                <FieldHeader
-                                    title='Checkmark Color'
-                                    type='h3'
-                                />
-                                <MuiColorInput 
-                                    className={styles.colorInput} 
-                                    format="hex" 
-                                    value={checkmarkColor} 
-                                    onChange={(color) => { 
-                                        setCheckmarkColor(color);
-                                        enableSaveBtn();
-                                    }} />
-                            </div>
-                        </div>
-                    </div>
-                </ContentCard>
-
-                <ContentCard>
-                    <div>
-                        <FieldHeader
-                            title='Card Configuration'
-                            type='h2'
-                        />
-
-                        <div className={styles.cardConfigContainer}>
-                            <div className={styles.field}>
-                                <FieldHeader
-                                    title='Background Color'
-                                    type='h3'
-                                />
-                                <MuiColorInput 
-                                    className={styles.colorInput} 
-                                    format="hex" 
-                                    value={cardBackground} 
-                                    isAlphaHidden
-                                    onChange={(color) => { 
-                                        setCardBackgroundColor(color);
-                                        enableSaveBtn();
-                                    }} />
-                            </div>
-
-                            <div className={styles.field}>
-                                <FieldHeader
-                                    title='Title Color'
-                                    type='h3'
-                                />
-                                <MuiColorInput 
-                                    className={styles.colorInput} 
-                                    format="hex" 
-                                    value={cardTitleColor} 
-                                    isAlphaHidden
-                                    onChange={(color) => {
-                                        setCardTitleColor(color);
-                                        enableSaveBtn();
-                                    }} />
-                            </div>
-
-                            <div className={styles.field}>
-                                <FieldHeader
-                                    title='Footer text Color'
-                                    type='h3'
-                                />
-                                <MuiColorInput 
-                                    className={styles.colorInput} 
-                                    format="hex"
-                                    value={cardFooterColor} 
-                                    isAlphaHidden
-                                    onChange={(color) => { 
-                                        setCardFooterColor(color);
-                                        enableSaveBtn();
-                                    }} />
-                            </div>
-                        </div>
-                    </div>
-                </ContentCard>
-
-                <ContentCard className={styles.footerContainer}>
-                    <Button 
-                        variant="text" 
-                        color="error"
-                        className={styles.resetButton}
-                        onClick={resetToDefaultColor}
-                    >
-                        Reset to Default
-                    </Button>
-                </ContentCard>
-            </div>
             }
         </form>
     )
