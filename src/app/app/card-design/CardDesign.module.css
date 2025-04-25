@@ -116,3 +116,12 @@
     color: #666;
     margin-top: 4px;
 }
+
+.footerContainer {
+    background-color: var(--background) !important;
+}
+
+.resetButton {
+    text-transform: none !important;
+    width: 100%;
+}
