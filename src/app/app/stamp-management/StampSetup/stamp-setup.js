@@ -16,6 +16,8 @@ import EditStampStep from './_views/EditStampStep';
 import Image from 'next/image';
 import apiClient from '@/utility/api';
 import { STAMP_MANAGEMENT } from '@/utility/apiPaths';
+import LoadingPage from '@/components/LoadingPage/LoadingPage';
+import ErrorPage from '@/components/ErrorPage/ErrorPage';
 
 const NO_EXPIRATION = { value: 'noExpiration', title: 'No Expiration' };
 const END_OF_MONTH_EXPIRATION = { value: 'endOfMonth', title: 'End of Month' };
@@ -46,6 +48,10 @@ const DEFAULT_STAMP_STEP = {
 }
 
 export default function StampSetup() {
+  // For Initial Loading
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
+
   // For Header Status
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -67,7 +73,76 @@ export default function StampSetup() {
     id: index + 1
   })))
 
-  const formSubmissionHandler = async(event) => {
+  // Fetch stamp management data when component loads
+  useEffect(() => {
+    const fetchStampManagementData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await apiClient.get(STAMP_MANAGEMENT);
+
+        if (response.data) {
+          const data = response.data.data;
+
+          // Update state with fetched data
+          setCardTitle(data.cardTitle || '');
+          setCardDescription(data.cardDescription || '');
+          setNumberOfStamps(data.numberOfStamps || 6);
+          setExpirationType(data.expirationType || VALID_FOR_DAYS_EXPIRATION.value);
+          setNumberOfDaysToExpire(data.numberOfDaysToExpire || 30);
+
+          // Handle stamp icons if they exist
+          if (data.defaultStampedUrl_Presign) {
+            setRewardStampIcon([{
+              name: data.defaultStampedUrl_Presign,
+              file: null, // We don't have the file object from the server
+              url: data.defaultStampedUrl_Presign
+            }]);
+          }
+
+          if (data.defaultUnStampedUrl_Presign) {
+            setRewardUnstampedIcon([{
+              name: data.defaultUnStampedUrl_Presign,
+              file: null, // We don't have the file object from the server
+              url: data.defaultUnStampedUrl_Presign
+            }]);
+          }
+
+          // Handle card steps if they exist
+          if (data.cardStepDetails) {
+            try {
+              // Parse the JSON string if it's a string, otherwise use it as is
+              const parsedCardSteps = typeof data.cardStepDetails === 'string'
+                ? JSON.parse(data.cardStepDetails)
+                : data.cardStepDetails;
+
+              if (Array.isArray(parsedCardSteps)) {
+                setCardSteps(parsedCardSteps);
+              }
+            } catch (parseError) {
+              console.error('Error parsing cardStepDetails:', parseError);
+              // Set default card steps if parsing fails
+              setCardSteps(Array.from({ length: 6 }, (_, index) => ({
+                ...DEFAULT_STAMP_STEP,
+                id: index + 1
+              })));
+            }
+          }
+
+          setIsBtnDisabled(false);
+        }
+      } catch (error) {
+        console.error('Error fetching stamp management data:', error);
+        setIsError(true);
+        setErrorMessage('Failed to load stamp management data. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStampManagementData();
+  }, []);
+
+  const formSubmissionHandler = async (event) => {
     event.preventDefault();
     setIsBtnLoading(true);
 
@@ -110,10 +185,10 @@ export default function StampSetup() {
     } finally {
       setIsBtnLoading(false);
     }
-    
+
   };
 
-  const resetSaving= () => {
+  const resetSaving = () => {
     setIsSubmissionSuccess(false);
     setIsBtnDisabled(false);
   };
@@ -145,7 +220,7 @@ export default function StampSetup() {
     setCardSteps(prevValue => {
       const data = prevValue.map((value) => {
         if (value.stampedIcon === 'default' || value.stampedIcon === null || value.stampedIcon.length === 0) {
-          return { ...value, stampedIcon: 'default'}
+          return { ...value, stampedIcon: 'default' }
         }
 
         return { ...value };
@@ -159,7 +234,7 @@ export default function StampSetup() {
     setCardSteps(prevValue => {
       const data = prevValue.map((value) => {
         if (value.unStampedIcon === null || value.unStampedIcon === 'default' || value.unStampedIcon.length === 0) {
-          return { ...value, unStampedIcon: 'default'}
+          return { ...value, unStampedIcon: 'default' }
         }
 
         return { ...value };
@@ -211,7 +286,7 @@ export default function StampSetup() {
   const handleEdit = () => {
     console.log('Edit location with id:', selectedRowId);
     setIsEditStampOpen(true);
-    
+
     const currentStepDetail = cardSteps[selectedRowId - 1];
 
     if (currentStepDetail.stampedIcon === 'default') {
@@ -367,176 +442,184 @@ export default function StampSetup() {
           errorMessage={errorMessage}
         />
 
-        <ContentCard>
-          <FieldHeader
-            title='Card Setup'
-          />
+        {
+          isLoading ?
+            <LoadingPage /> :
+            isLoadingErrorMessage !== null ?
+              <ErrorPage /> :
+              <>
+                <ContentCard>
+                  <FieldHeader
+                    title='Card Setup'
+                  />
 
-          <div className={styles.fieldsContainer}>
-            <FormTextField
-              title='Card title (Optional)'
-              subtitle='A name for your stamp card. For example, BUY 6 COFFEES AND GET ONE FREE!'
-              placeholder=''
-              id='Card Title'
-              name='Card Title'
-              helperText={''}
-              error={false}
-              value={cardTitle}
-              onChange={(event) => { 
-                resetSaving();
-                setCardTitle(event.target.value) 
-              }}
-            />
+                  <div className={styles.fieldsContainer}>
+                    <FormTextField
+                      title='Card title (Optional)'
+                      subtitle='A name for your stamp card. For example, BUY 6 COFFEES AND GET ONE FREE!'
+                      placeholder=''
+                      id='Card Title'
+                      name='Card Title'
+                      helperText={''}
+                      error={false}
+                      value={cardTitle}
+                      onChange={(event) => {
+                        resetSaving();
+                        setCardTitle(event.target.value)
+                      }}
+                    />
 
-            <FormTextField
-              title='Card description (Optional)'
-              subtitle='A short description of your program. Displays on the front of your the card to customers like BUY 6 COFFEES AND GET ONE FREE!'
-              placeholder=''
-              id='Card Description'
-              name='Card Description'
-              helperText={''}
-              error={false}
-              value={cardDescription}
-              onChange={(event) => { 
-                resetSaving();
-                setCardDescription(event.target.value) 
-              }}
-            />
+                    <FormTextField
+                      title='Card description (Optional)'
+                      subtitle='A short description of your program. Displays on the front of your the card to customers like BUY 6 COFFEES AND GET ONE FREE!'
+                      placeholder=''
+                      id='Card Description'
+                      name='Card Description'
+                      helperText={''}
+                      error={false}
+                      value={cardDescription}
+                      onChange={(event) => {
+                        resetSaving();
+                        setCardDescription(event.target.value)
+                      }}
+                    />
 
-            <FormTextField
-              title='Number of stamps'
-              subtitle='Total amount of stamps your stamp card should have. (Maximum of 16)'
-              placeholder='10'
-              type='number'
-              id='Card Title'
-              name='Card Title'
-              InputProps={{ inputProps: { min: 1, max: 16 } }}
-              helperText={''}
-              error={false}
-              value={numberOfStamps}
-              onChange={(event) => { 
-                resetSaving();
-                numberOfStampsHandler(event);
-              }}
-            />
-          </div>
-        </ContentCard>
+                    <FormTextField
+                      title='Number of stamps'
+                      subtitle='Total amount of stamps your stamp card should have. (Maximum of 16)'
+                      placeholder='10'
+                      type='number'
+                      id='Card Title'
+                      name='Card Title'
+                      InputProps={{ inputProps: { min: 1, max: 16 } }}
+                      helperText={''}
+                      error={false}
+                      value={numberOfStamps}
+                      onChange={(event) => {
+                        resetSaving();
+                        numberOfStampsHandler(event);
+                      }}
+                    />
+                  </div>
+                </ContentCard>
 
-        <ContentCard>
-          <FieldHeader
-            title='Card&apos;s Expiration Settings'
-          />
+                <ContentCard>
+                  <FieldHeader
+                    title='Card&apos;s Expiration Settings'
+                  />
 
-          <div className={styles.fieldsContainer}>
-            <FieldHeader
-              title='Expiration Type'
-              description='Once the expiration type are released, any changes require a minimum of 1 month&apos;s notice to ensure customers are informed in advance.'
-              type='h3'
-            />
+                  <div className={styles.fieldsContainer}>
+                    <FieldHeader
+                      title='Expiration Type'
+                      description='Once the expiration type are released, any changes require a minimum of 1 month&apos;s notice to ensure customers are informed in advance.'
+                      type='h3'
+                    />
 
-            <FullWidthDropdown
-              options={EXPIRATION_TYPE_OPTIONS}
-              labelId='expiration_type'
-              id='expiration_type'
-              value={expirationType}
-              onChange={(event) => { 
-                resetSaving();
-                setExpirationType(event.target.value);
-               }}
-            />
+                    <FullWidthDropdown
+                      options={EXPIRATION_TYPE_OPTIONS}
+                      labelId='expiration_type'
+                      id='expiration_type'
+                      value={expirationType}
+                      onChange={(event) => {
+                        resetSaving();
+                        setExpirationType(event.target.value);
+                      }}
+                    />
 
 
-            {expirationType === VALID_FOR_DAYS_EXPIRATION.value && <FormTextField
-              title='Number of Days to Expire'
-              placeholder='30'
-              type='number'
-              id='Card Title'
-              name='Card Title'
-              helperText={''}
-              error={false}
-              value={numberOfDaysToExpire}
-              onChange={(event) => { 
-                resetSaving();
-                setNumberOfDaysToExpire(event.target.value);
-              }}
-            />}
-          </div>
-        </ContentCard>
+                    {expirationType === VALID_FOR_DAYS_EXPIRATION.value && <FormTextField
+                      title='Number of Days to Expire'
+                      placeholder='30'
+                      type='number'
+                      id='Card Title'
+                      name='Card Title'
+                      helperText={''}
+                      error={false}
+                      value={numberOfDaysToExpire}
+                      onChange={(event) => {
+                        resetSaving();
+                        setNumberOfDaysToExpire(event.target.value);
+                      }}
+                    />}
+                  </div>
+                </ContentCard>
 
-        <ContentCard>
+                <ContentCard>
 
-          <div className={styles.fieldsContainer}>
-            <div>
-              <FieldHeader
-                title='Default Reward Stamp Design'
-                type='h2'
-              />
+                  <div className={styles.fieldsContainer}>
+                    <div>
+                      <FieldHeader
+                        title='Default Reward Stamp Design'
+                        type='h2'
+                      />
 
-              <FieldHeader
-                title='Reward Stamp Icons'
-                description='(Optional) This icon indicates a collected stamp on the loyalty card. It must always be displayed once the stamp is earned. We recommend using a distinct design or color to clearly show that it is stamped.'
-                type='h3'
-                className={styles.headerBtnMargin}
-              />
+                      <FieldHeader
+                        title='Reward Stamp Icons'
+                        description='(Optional) This icon indicates a collected stamp on the loyalty card. It must always be displayed once the stamp is earned. We recommend using a distinct design or color to clearly show that it is stamped.'
+                        type='h3'
+                        className={styles.headerBtnMargin}
+                      />
 
-              <DragDropImageUploader
-                images={rewardStampIcon}
-                setImages={setRewardStampIcon}
-                noOfImages={1}
-                resetSaving={resetSaving}
-                width={100}
-                height={100}
-                imageClassName={styles.dragdropBannerImage}
-              />
-            </div>
+                      <DragDropImageUploader
+                        images={rewardStampIcon}
+                        setImages={setRewardStampIcon}
+                        noOfImages={1}
+                        resetSaving={resetSaving}
+                        width={100}
+                        height={100}
+                        imageClassName={styles.dragdropBannerImage}
+                      />
+                    </div>
 
-            <div>
-              <FieldHeader
-                title='Reward Unstamped Icons'
-                description='(Optional) This icon is primarily for design, indicating that no stamp is present. It&apos;s recommended to use a lighter color to distinguish it from a stamped icon. If no icon is specified, the area remains empty.'
-                type='h3'
-                className={styles.headerBtnMargin}
-              />
+                    <div>
+                      <FieldHeader
+                        title='Reward Unstamped Icons'
+                        description='(Optional) This icon is primarily for design, indicating that no stamp is present. It&apos;s recommended to use a lighter color to distinguish it from a stamped icon. If no icon is specified, the area remains empty.'
+                        type='h3'
+                        className={styles.headerBtnMargin}
+                      />
 
-              <DragDropImageUploader
-                images={rewardUnstampedIcon}
-                setImages={setRewardUnstampedIcon}
-                resetSaving={resetSaving}
-                noOfImages={1}
-                width={100}
-                height={100}
-                imageClassName={styles.dragdropBannerImage}
-              />
-            </div>
-          </div>
-        </ContentCard>
+                      <DragDropImageUploader
+                        images={rewardUnstampedIcon}
+                        setImages={setRewardUnstampedIcon}
+                        resetSaving={resetSaving}
+                        noOfImages={1}
+                        width={100}
+                        height={100}
+                        imageClassName={styles.dragdropBannerImage}
+                      />
+                    </div>
+                  </div>
+                </ContentCard>
 
-        <ContentCard>
-          <FieldHeader
-            title='Card Steps Setup'
-            description='Create the rewards that your customers will love. This will make to always come back!'
-            type='h3'
-          />
-        </ContentCard>
+                <ContentCard>
+                  <FieldHeader
+                    title='Card Steps Setup'
+                    description='Create the rewards that your customers will love. This will make to always come back!'
+                    type='h3'
+                  />
+                </ContentCard>
 
-        <div className={styles.tableContainer}>
-          <DataGrid
-            rows={cardSteps}
-            columns={columns}
-            initialState={{ pagination: { paginationModel } }}
-            disableColumnFilter
-            disableColumnMenu
-            disableRowSelectionOnClick
-            pageSizeOptions={[20]}
-            disableSelectionOnClick
-            getRowHeight={() => 'auto'}
-            style={{ width: '100%', borderRadius: 12 }}
-            pagination
-          />
-        </div>
+                <div className={styles.tableContainer}>
+                  <DataGrid
+                    rows={cardSteps}
+                    columns={columns}
+                    initialState={{ pagination: { paginationModel } }}
+                    disableColumnFilter
+                    disableColumnMenu
+                    disableRowSelectionOnClick
+                    pageSizeOptions={[20]}
+                    disableSelectionOnClick
+                    getRowHeight={() => 'auto'}
+                    style={{ width: '100%', borderRadius: 12 }}
+                    pagination
+                  />
+                </div>
+              </>
+        }
       </form>
 
-      <EditStampStep 
+      <EditStampStep
         selectedRowId={selectedRowId}
         isOpen={isEditStampOpen}
         setIsOpen={setIsEditStampOpen}
