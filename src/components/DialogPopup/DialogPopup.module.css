@@ -28,7 +28,7 @@
 .footer {
     position: sticky;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     padding: 12px 16px;
     background-color: rgb(242, 242, 246);
     border-top: 2px solid rgb(226, 226, 234);
@@ -53,4 +53,9 @@
     color: rgb(114, 114, 114);
     background-color: rgb(246, 246, 246);
     border: 0.5px solid rgb(137, 137, 137);
+}
+
+.footer .rightButtons {
+    display: flex;
+    gap: 16px;
 }

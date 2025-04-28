@@ -30,7 +30,8 @@ const CreateRewardPopup = ({
     isOpen,
     setIsOpen,
     onClose,
-    selectedReward
+    selectedReward,
+    onArchive
 }) => {
     const [isRewardImageOpen, setIsRewardImageOpen] = useState(false);
     const [isExpiryOpen, setIsExpiryOpen] = useState(false);
@@ -111,6 +112,8 @@ const CreateRewardPopup = ({
         <DialogPopup
             title={selectedReward !== null ? 'Modify Reward' : 'Create New Reward'}
             actionTitle={selectedReward !== null ? 'Save' : 'Create'}
+            deleteText={'Archive'}
+            onDelete={onArchive}
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             PaperProps={{

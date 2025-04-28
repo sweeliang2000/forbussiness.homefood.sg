@@ -11,12 +11,14 @@ const DialogPopup = ({
     onAction,
     children,
     onSubmit,
+    deleteText,
+    onDelete,
     ...props
 }) => {
     const closeHandler = () => {
         setIsOpen(false)
     }
-    
+
     return (
         <Dialog
             open={isOpen}
@@ -33,20 +35,38 @@ const DialogPopup = ({
                 {children}
 
                 <div className={styles.footer}>
-                    <Button
-                        variant='contained'
-                        className={`${styles.button} ${styles.cancel}`}
-                        onClick={closeHandler}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        type='submit'
-                        variant='contained'
-                        className={styles.button}
-                    >
-                        {actionTitle === undefined ? 'Save' : actionTitle}
-                    </Button>
+                    <div>
+                        {
+                            onDelete && (
+                                <Button
+                                    type='submit'
+                                    variant='text'
+                                    color="error"
+                                    className={styles.button}
+                                    onClick={onDelete}
+                                >
+                                    { deleteText === undefined ? 'Delete' : deleteText }
+                                </Button>
+                            )
+                        }
+                    </div>
+
+                    <div className={styles.rightButtons}>
+                        <Button
+                            variant='contained'
+                            className={`${styles.button} ${styles.cancel}`}
+                            onClick={closeHandler}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type='submit'
+                            variant='contained'
+                            className={styles.button}
+                        >
+                            {actionTitle === undefined ? 'Save' : actionTitle}
+                        </Button>
+                    </div>
                 </div>
             </form>
         </Dialog>
