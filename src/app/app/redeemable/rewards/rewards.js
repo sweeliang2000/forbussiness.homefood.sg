@@ -8,6 +8,7 @@ import CreateRewardPopup from './_views/CreateRewardPopup';
 import { use, useEffect, useState } from 'react';
 import RewardsLists from './_views/RewardsLists';
 import AlertModal from '@/components/AlertModal/AlertModal';
+import RewardCard from './_views/RewardCard';
 
 const Rewards = () => {
     const [isCreateNewRewardOpen, setIsCreateNewRewardOpen] = useState(false);
@@ -63,6 +64,19 @@ const Rewards = () => {
                     }
                 }}
             />
+
+            <ContentCard className={styles.legendContainer}>
+                <div className={styles.legendItems}>
+                    <div className={styles.legendItem}>
+                        <span className={`${styles.legendTag} ${styles.selectedTag}`}>Currently Selected</span>
+                        <p className={styles.legendDescription}>This reward is actively selected in a rewardcard (but maybe not published and visable in app).</p>
+                    </div>
+                    <div className={styles.legendItem}>
+                        <span className={`${styles.legendTag} ${styles.publishedTag}`}>Live and In Use</span>
+                        <p className={styles.legendDescription}>This reward is already published and visable in app to your customers.</p>
+                    </div>
+                </div>
+            </ContentCard>
 
             <RewardsLists onCardSelected={onCardSelected} />
         </div>

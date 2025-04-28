@@ -2,7 +2,6 @@
     position: sticky !important;
     top: 0;
     z-index: 97;
-    height: 100px;
     border-radius: 0 !important;
     border-bottom: 2px solid rgb(160, 166, 180);
 }

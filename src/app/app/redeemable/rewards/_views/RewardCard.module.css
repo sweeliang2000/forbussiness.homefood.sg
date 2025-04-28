@@ -16,8 +16,7 @@
   flex-direction: column;
   gap: 4px;
   margin-top: 12px;
-  padding: 0 12px;
-  padding-bottom: 8px;
+  padding: 4px 12px 24px;
 }
   
 .card .content h3 {
@@ -65,7 +64,33 @@
 }
 
 .card.selected {
-  border: 2px solid rgb(74,124,246);
-  background-color: rgb(244,249,254);
-  box-shadow: none;
+  background-color: white;
+  box-shadow: 0 0px 8px rgb(227, 227, 227);
+}
+
+.statusTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 12px 12px 0;
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  background-color: #f0f0f0;
+  color: #555;
+}
+
+.tag:nth-child(1) {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+.tag:nth-child(2) {
+  background-color: #f6ffed;
+  color: #52c41a;
 }

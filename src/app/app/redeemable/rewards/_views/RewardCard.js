@@ -6,7 +6,8 @@ const RewardCard = ({
     reward,
     onClick,
     isSelectable,
-    isCheck
+    isCheck,
+    isPublished
 }) => (
     <div 
         key={reward.id} 
@@ -26,6 +27,11 @@ const RewardCard = ({
             alt={reward.name}
             className={styles.image}
         />
+
+        <div className={styles.statusTags}>
+            {isCheck && <span className={styles.tag}>Currently Selected</span>}
+            {isPublished && <span className={styles.tag}>Live and In Use</span>}
+        </div>
 
         <div className={styles.content}>
             <h3>{reward.name}</h3>

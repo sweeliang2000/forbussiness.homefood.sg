@@ -15,6 +15,8 @@ const RewardsLists = ({
                 rewards.map((reward) => <RewardCard
                     key={reward.id}
                     reward={reward}
+                    isCheck={true}
+                    isPublished={true}
                     onClick={() => { onCardSelected(reward) }} />)
             }
         </ContentCard>
