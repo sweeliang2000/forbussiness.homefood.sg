@@ -137,7 +137,7 @@ export default function Sidebar({
                         title={'Redeemable'}
                         submenus={[
                             { href: '/app/redeemable/rewards', title: 'All Rewards' },
-                            { href: '/app/redeemable/new-join-rewards', title: 'New Join Rewards' },
+                            // { href: '/app/redeemable/new-join-rewards', title: 'New Join Rewards' },
                         ]}
                         isExpand={currentSelection == REDEEMABLE_TAB}
                         icon={BsGift}

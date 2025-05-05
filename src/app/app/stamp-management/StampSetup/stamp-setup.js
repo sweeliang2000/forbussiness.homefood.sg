@@ -12,7 +12,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { clamp } from '@/utility/numbers';
-import EditStampStep from './_views/EditStampStep';å
+import EditStampStep from './_views/EditStampStep';
 import apiClient from '@/utility/api';
 import { STAMP_MANAGEMENT } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';

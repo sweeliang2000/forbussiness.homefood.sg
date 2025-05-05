@@ -13,14 +13,19 @@ const NEW_JOIN = { value: 'newJoin', title: 'New Join' }
 const STAMP_REWARD = { value: 'stampReward', title: 'Stamp Reward' }
 const REWARD_TYPES = [
     STAMP_REWARD,
-    NEW_JOIN
+    // NEW_JOIN
 ];
+const EXPIRY_TYPE = [
+    { value: 'noExpiry', title: 'No Expiry' },
+    { value: 'expiryInDays', title: 'Expiry in Days' }
+]
 
 const REWARD_ID_KEY = 'id';
 const REWARD_TYPE_KEY = 'type';
 const REWARD_NAME_KEY = 'name';
 const REWARD_DESCRIPTION_KEY = 'description';
 const REWARD_IMAGE_KEY = 'image';
+const REWARD_EXPIRY_TYPE_KEY = 'expiry_type';
 const REWARD_EXPIRY_KEY = 'expiry';
 const REWARD_CUSTOM_ID_KEY = 'custom_id';
 const REWARD_TAGS_KEY = 'tags'
@@ -41,10 +46,10 @@ const CreateRewardPopup = ({
 
     const [rewardData, setRewardData] = useState({
         [REWARD_ID_KEY]: '',
-        [REWARD_TYPE_KEY]: '',
+        [REWARD_TYPE_KEY]: 'stampReward',
         [REWARD_NAME_KEY]: '',
         [REWARD_DESCRIPTION_KEY]: '',
-        [REWARD_EXPIRY_KEY]: '',
+        [REWARD_EXPIRY_TYPE_KEY]: 'expiryInDays',
         [REWARD_CUSTOM_ID_KEY]: '',
         [REWARD_TAGS_KEY]: '',
         [REWARD_IS_ACTIVATE]: false
@@ -91,9 +96,10 @@ const CreateRewardPopup = ({
         } else {
             setRewardData({
                 [REWARD_ID_KEY]: '',
-                [REWARD_TYPE_KEY]: '',
+                [REWARD_TYPE_KEY]: 'stampReward',
                 [REWARD_NAME_KEY]: '',
                 [REWARD_DESCRIPTION_KEY]: '',
+                [REWARD_EXPIRY_TYPE_KEY]: 'expiryInDays',
                 [REWARD_EXPIRY_KEY]: '',
                 [REWARD_CUSTOM_ID_KEY]: '',
                 [REWARD_TAGS_KEY]: '',
@@ -138,7 +144,9 @@ const CreateRewardPopup = ({
                         labelId='reward_type'
                         id='reward_type'
                         value={rewardData[REWARD_TYPE_KEY]}
-                        onChange={(event) => { updateValue(REWARD_TYPE_KEY, event.target.value) }}
+                        onChange={(event) => { 
+                            updateValue(REWARD_TYPE_KEY, event.target.value) 
+                        }}
                     />
                 </section>
 
@@ -215,7 +223,18 @@ const CreateRewardPopup = ({
                         </div>
 
                         {
-                            isExpiryOpen && <FormTextField
+                            isExpiryOpen && <FullWidthDropdown
+                                options={EXPIRY_TYPE}
+                                labelId='reward_type'
+                                id='reward_type'
+                                value={rewardData[REWARD_EXPIRY_TYPE_KEY]}
+                                onChange={(event) => { updateValue(REWARD_EXPIRY_TYPE_KEY, event.target.value) }}
+                                className={styles.field}
+                            />
+                        }
+
+                        {
+                            (isExpiryOpen && rewardData[REWARD_EXPIRY_TYPE_KEY] === 'expiryInDays') && <FormTextField
                                 id={REWARD_EXPIRY_KEY}
                                 name={REWARD_EXPIRY_KEY}
                                 helperText={''}
