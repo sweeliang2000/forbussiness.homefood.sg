@@ -1,12 +1,13 @@
 import { Button } from '@mui/material';
 import styles from './GeneralActionCell.module.css';
 
-const DangerActionCell = ({
+const GeneralActionCell = ({
     title,
     description,
     buttonTitle,
     onClick,
-    last
+    last,
+    type = 'primary' // 'primary' or 'danger'
 }) => (
     <div className={`${styles.cell} ${last ? '' : styles.underline }`}>
         <div className={styles.left}>
@@ -17,7 +18,7 @@ const DangerActionCell = ({
         <div>
             <Button
                 variant='contained'
-                className={styles.button}
+                className={`${styles.button} ${type === 'danger' ? styles.dangerButton : styles.primaryButton}`}
                 onClick={onClick}
             >
                 {buttonTitle}
@@ -26,4 +27,4 @@ const DangerActionCell = ({
     </div>
 );
 
-export default DangerActionCell;
+export default GeneralActionCell;

@@ -1,4 +1,5 @@
 // https://console.stampme.com/stamp-cards/editcard
+'use client';
 import { LoadingButton } from '@mui/lab';
 import styles from './AccountSetting.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
@@ -8,8 +9,13 @@ import ActionCell from './_views/DangerActionCell';
 import SignOutAllSessionCell from './_components/SignOutAllSessionsCell';
 import DeleteAccount from './_components/DeleteAccount';
 import SignoutSection from './_components/SignoutSection';
+import ManageSubscriptionCell from './_components/ManageSubscriptionCell';
+import UpgradeCell from './_components/UpgradeCell';
+import { useState } from 'react';
 
 const AccountSetting = () => {
+    const [isUserSubscripted, setIsUpdatePassword] = useState(false);
+
     return (
         <>
             <div className={styles.container}>
@@ -19,6 +25,19 @@ const AccountSetting = () => {
                         <p>you@example.com</p>
                         <p>Account Type: Free</p>
                         <p>Change Password</p>
+                    </div>
+                </ContentCard>
+
+                <ContentCard className={styles.content}>
+                    <div>
+                        <h2>Subscription</h2> 
+                        {
+                            isUserSubscripted ? (
+                                <ManageSubscriptionCell/>
+                            ) : (
+                                <UpgradeCell/>
+                            )
+                        }
                     </div>
                 </ContentCard>
 

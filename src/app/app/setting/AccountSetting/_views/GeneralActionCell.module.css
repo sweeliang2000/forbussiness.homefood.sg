@@ -18,20 +18,33 @@
     color: var(--on-primary) !important;
 }
 
-.cell.underline {
+/* .cell.underline {
     border-bottom: 1px solid #d8a3a3;
-}
+} */
 
 .button {
-    background-color: rgb(247, 247, 247) !important;
-    color: var(--error-color) !important;
-    border: 1px solid var(--error-color) !important;
     box-shadow: none !important;
     text-transform: none !important;
     font-size: 14px;
     font-weight: bold !important;
 }
 
-.button:hover {
+/* .primaryButton {
+    background-color: 'black';
+    color: white !important;
+    border: none !important;
+}
+
+.primaryButton:hover {
+    background-color: var(--primary-color-dark) !important;
+} */
+
+.dangerButton {
+    background-color: rgb(247, 247, 247) !important;
+    color: var(--error-color) !important;
+    border: 1px solid var(--error-color) !important;
+}
+
+.dangerButton:hover {
     background-color: #ffe6e6 !important;
 }

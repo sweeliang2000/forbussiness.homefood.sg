@@ -11,6 +11,10 @@
     gap: 32px;
 }
 
+.container .content {
+    
+}
+
 .content.danger {
     border: 1px solid var(--error-color);
 }
