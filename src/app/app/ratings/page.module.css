@@ -1,0 +1,22 @@
+.container {
+  max-width: 75rem;
+  margin: 0 auto;
+  padding: 24px;
+  height: auto;
+  min-height: unset;
+}
+
+.title {
+  margin-bottom: 24px;
+}
+
+.reviewsGrid {
+  column-count: 2;
+  column-gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .reviewsGrid {
+    column-count: 1;
+  }
+}

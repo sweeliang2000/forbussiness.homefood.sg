@@ -153,8 +153,8 @@ export default function Sidebar({
                     <Submenu
                         title={'Customers'}
                         submenus={[
-                            { href: '/', title: 'Ratings and Reviews' },
-                            { href: '/document', title: 'Direct Message' }
+                            { href: '/app/ratings', title: 'Ratings and Reviews' },
+                            { href: '/app/messages', title: 'Direct Message' }
                         ]}
                         isExpand={currentSelection == CUSTOMERS_TAB}
                         icon={AiOutlineMessage}

@@ -1,0 +1,45 @@
+.reviewBox {
+  break-inside: avoid;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 14px;
+  background: #fff;
+  box-shadow: 0 2px 8px #f0f0f0;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.reviewHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reviewTitle {
+  font-weight: 600;
+}
+
+.reviewMeta {
+  color: #888;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.reviewText {
+  margin-bottom: 12px;
+}
+
+.responseBox {
+  background: #f9f9f9;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 14px;
+  margin-top: 6px;
+  margin-bottom: 8px;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+} 

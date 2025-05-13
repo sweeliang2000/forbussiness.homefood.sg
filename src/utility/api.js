@@ -1,9 +1,10 @@
 import axios from 'axios';
+import { BASE_URL_BACKEND } from '../../config/config';
 
 // Create a centralized utility function for handling API calls. 
 // This makes your code cleaner and easier to maintain.
 const apiClient = axios.create({
-  baseURL: process.env.BE_API_BASE_URL || 'http://localhost:8080', 
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL_BACKEND,
   headers: {
     'Content-Type': 'application/json',
   },
