@@ -4,6 +4,8 @@ import { useState } from 'react';
 import styles from './ProductDetails.module.css';
 import PricingCard from './PricingCard';
 import { ONE_OUTLET_MONTHLY, ONE_OUTLET_YEARLY } from '../keys/SubscriptionKeys';
+import apiClient from '@/utility/api';
+import { CHECKOUT_SESSION_STRIPE } from '@/utility/apiPaths';
 
 const professionalPlanTypes = [
   { value: '2-3', label: '2 - 3 Outlets' },
@@ -69,9 +71,34 @@ const getProfessionalPrice = (planType, billingCycle) => {
   }
 };
 
+const getProfessionalLookupKey = (planType) => {
+  switch (planType) {
+    case '2-3':
+      return {
+        'monthly': '2-3_outlets-monthly',
+        'annually': '2-3_outlets-yearly'
+      };
+    case '4-6':
+      return {
+        'monthly': '4-6_outlets-monthly',
+        'annually': '4-6_outlets-yearly'
+      };
+    case 'others':
+      return {
+        'monthly': 'custom_outlets-monthly',
+        'annually': 'custom_outlets-yearly'
+      };
+    default:
+      return {
+        'monthly': '2-3_outlets-monthly',
+        'annually': '2-3_outlets-yearly'
+      };
+  }
+};
+
 export default function ProductDetails() {
   const [billingCycle, setBillingCycle] = useState('annually');
-  const [currentPlan, setCurrentPlan] = useState('Starter Plan');
+  const [currentPlan, setCurrentPlan] = useState(null); // Example: 'Starter Plan'
   const [professionalPlanType, setProfessionalPlanType] = useState('2-3');
 
   const plans = [
@@ -88,7 +115,11 @@ export default function ProductDetails() {
         { name: 'Customer Support', included: true },
         { name: 'Analytics', included: false },
         { name: 'Custom Integration Support', included: false },
-      ]
+      ],
+      lookupKey: {
+        'monthly': '1_outlet-monthly',
+        'annually': '1_outlet-monthly'
+      }
     },
     {
       title: 'Lite Plan',
@@ -105,7 +136,11 @@ export default function ProductDetails() {
         { name: 'Customer Support', included: true },
         { name: 'Analytics', included: true },
         { name: 'Custom Integration Support', included: false },
-      ]
+      ],
+      lookupKey: {
+        'monthly': '1_outlet-monthly',
+        'annually': '1_outlet-yearly'
+      }
     },
     {
       title: 'Professional Plan',
@@ -114,18 +149,38 @@ export default function ProductDetails() {
       isProfessional: true,
       selectedPlanType: professionalPlanType,
       planTypes: professionalPlanTypes,
-      features: getProfessionalFeatures(professionalPlanType)
+      features: getProfessionalFeatures(professionalPlanType),
+      lookupKey: getProfessionalLookupKey(professionalPlanType)
     }
   ];
 
-  const handlePlanSelect = (plan) => {
+  const handlePlanSelect = async (plan) => {
     if (plan.title === 'Professional Plan' && professionalPlanType === 'others') {
       // Handle contact us logic here
       console.log('Contact us for custom pricing');
       return;
     }
-    console.log(`Selected plan: ${plan.title}`);
-    setCurrentPlan(plan.title);
+
+    try {
+      const lookupKey = plan.lookupKey[billingCycle];
+      console.log(`Selected plan: ${plan.title} ${lookupKey}`);
+      const response = await apiClient.post(CHECKOUT_SESSION_STRIPE, {
+        "lookup_key": lookupKey
+      });
+      
+      // Redirect to Stripe Checkout
+      if (response.data?.url) {
+        window.location.href = response.data.url;
+      }
+    } catch (error) {
+      const message = error?.response?.data?.message || error.message;
+      const code = error?.response?.data?.code || error.code;
+      console.error(`Error creating checkout session: ${message} (Error code: ${code})`);
+      // TODO: Add proper error handling UI
+    }
+
+    // Todo: setup the current plan if user already purchased before
+    // setCurrentPlan(plan.title);
   };
 
   const handleProfessionalPlanTypeChange = (type) => {
