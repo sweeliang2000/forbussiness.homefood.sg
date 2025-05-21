@@ -188,7 +188,7 @@ export default function ProductDetails() {
       <div className={styles.header}>
         <h1 className={styles.title}>Grow Customer Loyalty Without Building an App</h1>
         <p className={styles.subtitle}>
-          Get started for free. Upgrade anytime when you're ready. Save 20% with annual billing. All prices are in SGD.
+          Get started for free. Upgrade anytime when you&apos;re ready. Save 20% with annual billing. All prices are in SGD.
         </p>
         
         <div className={styles.billingToggle}>
