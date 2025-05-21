@@ -7,6 +7,7 @@ import { FaRegLightbulb } from 'react-icons/fa6';
 import { PiGear } from 'react-icons/pi';
 import { BsGraphUpArrow } from 'react-icons/bs';
 import { FaRegHand } from 'react-icons/fa6';
+import { Button } from '@mui/material';
 
 const StampOnBoarding = () => {
     return (
