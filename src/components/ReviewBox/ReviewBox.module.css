@@ -2,7 +2,7 @@
   break-inside: avoid;
   border: 1px solid #eee;
   border-radius: 12px;
-  padding: 14px;
+  padding: 32px 26px;
   background: #fff;
   box-shadow: 0 2px 8px #f0f0f0;
   margin-bottom: 12px;
@@ -11,8 +11,9 @@
 
 .reviewHeader {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
+  margin-bottom: 8px;
 }
 
 .reviewTitle {
@@ -21,25 +22,44 @@
 
 .reviewMeta {
   color: #888;
-  font-size: 13px;
-  margin-bottom: 8px;
+  font-size: 12px;
+  margin-bottom: 24px;
 }
 
 .reviewText {
-  margin-bottom: 12px;
+  margin-bottom: 24px;
+  font-size: 14px;
 }
 
 .responseBox {
-  background: #f9f9f9;
   border-radius: 6px;
-  padding: 8px;
   font-size: 14px;
   margin-top: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 24px;
+}
+
+.responseBox .responseHeader {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 12px;
 }
 
 .actionButtons {
   display: flex;
-  gap: 12px;
+  gap: 24px;
   margin-top: 6px;
+  padding: 0 !important;
+  text-transform: none !important;
+}
+
+.actionButton {
+  padding: 0 !important;
+  text-transform: none !important;
+  min-width: auto !important;
+  background: none !important;
+}
+
+.actionButton:hover {
+  background: none !important;
+  text-decoration: underline;
 } 

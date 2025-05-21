@@ -3,10 +3,16 @@ import { Button } from '@mui/material';
 import styles from './ReviewBox.module.css';
 
 const StarRating = ({ count }) => (
-  <span style={{ color: '#FFD700' }}>
-    {'★'.repeat(count)}{'☆'.repeat(5 - count)}
+  <span>
+    <span style={{ color: '#000000' }}>
+      {'★'.repeat(count)}
+    </span>
+    <span style={{ color: '#CCCCCC' }}>
+      {'★'.repeat(5 - count)}
+    </span>
   </span>
 );
+
 
 const ReviewBox = ({ review }) => {
   return (
@@ -22,7 +28,7 @@ const ReviewBox = ({ review }) => {
       {review.response && (
         <>
           <div className={styles.responseBox}>
-            <b>Developer Response - {review.responseDate}</b>
+            <p className={styles.responseHeader}>Developer Response - {review.responseDate}</p>
             <div>{review.response}</div>
           </div>
         </>
