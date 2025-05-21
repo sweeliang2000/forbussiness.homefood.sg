@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import { IoMdArrowRoundBack } from 'react-icons/io';
 import Cookies from 'js-cookie';
 import apiClient from '@/utility/api';
-import { Button } from '@mui/lab';
 import { VscVerified } from 'react-icons/vsc';
 import withAuthorization from '@/hoc/withAuthorization';
 import { EMAIL_VERIFICATION, RESEND_VERIFICATION_CODE } from '@/utility/apiPaths';
