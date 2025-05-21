@@ -7,7 +7,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 
-export default function Success({ sessionId }) {
+export default function Success() {
   const router = useRouter();
 
   const handleBackToSettings = () => {
