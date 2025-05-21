@@ -171,7 +171,7 @@ export default function Sidebar({
                     </li>
 
                     <li>
-                        <Link href='/'>
+                        <Link href='/app/feedback'>
                             <HiOutlineSpeakerphone className={styles.icon} />
                             <span>Feedbacks</span>
                         </Link>
