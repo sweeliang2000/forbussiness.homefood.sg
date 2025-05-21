@@ -8,7 +8,6 @@ import { Alert, Button, TextField } from '@mui/material';
 import { useState } from 'react';
 import apiClient from '@/utility/api';
 import { useRouter } from 'next/navigation';
-import { LoadingButton } from '@mui/lab';
 import withAuthorization from '@/hoc/withAuthorization';
 import { SIGN_UP } from '@/utility/apiPaths';
 
@@ -173,7 +172,7 @@ const SignupViews = () => {
                             required
                         />
 
-                        <LoadingButton
+                        <Button
                             type='submit'
                             variant='contained'
                             fullWidth
@@ -181,7 +180,7 @@ const SignupViews = () => {
                             className={styles.createButton}
                         >
                             Sign up
-                        </LoadingButton>
+                        </Button>
                     </form>
 
 

@@ -1,9 +1,8 @@
 'use client';
-import { LoadingButton } from '@mui/lab';
 import styles from './UsersAndPermissions.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import { DataGrid } from '@mui/x-data-grid';
-import { IconButton, Menu, MenuItem } from '@mui/material';
+import { IconButton, Menu, MenuItem, Button } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useState } from 'react';
 import AddUsersDialog from './AddUsersDialog';
@@ -154,7 +153,7 @@ const UsersAndPermissions = () => {
                     <div className={styles.usersHeader}>
                         <h3 className={styles.noDescriptionTitle}>Users</h3>
 
-                        <LoadingButton
+                        <Button
                             size='small'
                             onClick={addUserHandler}
                             // loading={true}
@@ -164,7 +163,7 @@ const UsersAndPermissions = () => {
                             className={styles.button}
                         >
                             Invite user
-                        </LoadingButton>
+                        </Button>
                     </div>
                 </ContentCard>
 

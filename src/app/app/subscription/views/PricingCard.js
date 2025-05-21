@@ -23,7 +23,7 @@ const PricingCard = ({
     if (selectedPlanType === 'others') return 'Contact Us';
     if (isGetStarted) return 'Get Started';
     if (isCurrentPlan) return 'Current Plan';
-    return 'Select Plan';
+    return 'Upgrade Now';
   };
 
   return (

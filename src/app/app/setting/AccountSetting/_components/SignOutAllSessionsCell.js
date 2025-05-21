@@ -1,8 +1,7 @@
 'use client';
 import { useState } from 'react';
 import DangerActionCell from '../_views/DangerActionCell';
-import { Alert, Dialog } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
+import { Alert, Dialog, Button } from '@mui/material';
 import { IoMdClose } from 'react-icons/io';
 import styles from './SignOutAllSessionsCell.module.css';
 import { GLOBAL_SIGN_OUT } from '@/utility/apiPaths';
@@ -44,7 +43,7 @@ const SignOutAllSessionCell = () => {
                         to sign in again to use any of those sessions. Please note that any open sessions 
                         may continue to work until they naturally expire, usually within an hour.
                     </p>
-                    <LoadingButton
+                    <Button
                         className={styles.LoadingButton}
                         fullWidth 
                         variant='contained'
@@ -52,7 +51,7 @@ const SignOutAllSessionCell = () => {
                         loading={isButtonLoading}
                     >
                         I want to sign out all sessions including this
-                    </LoadingButton>
+                    </Button>
                 </div>
             </Dialog>
             <DangerActionCell

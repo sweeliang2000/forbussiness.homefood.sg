@@ -98,7 +98,7 @@ const getProfessionalLookupKey = (planType) => {
 
 export default function ProductDetails() {
   const [billingCycle, setBillingCycle] = useState('annually');
-  const [currentPlan, setCurrentPlan] = useState(null); // Example: 'Starter Plan'
+  const [currentPlan, setCurrentPlan] = useState('Starter Plan'); // Example: 'Starter Plan'
   const [professionalPlanType, setProfessionalPlanType] = useState('2-3');
 
   const plans = [
@@ -115,14 +115,10 @@ export default function ProductDetails() {
         { name: 'Customer Support', included: true },
         { name: 'Analytics', included: false },
         { name: 'Custom Integration Support', included: false },
-      ],
-      lookupKey: {
-        'monthly': '1_outlet-monthly',
-        'annually': '1_outlet-monthly'
-      }
+      ]
     },
     {
-      title: 'Lite Plan',
+      title: 'Single Outlet Plan',
       price: billingCycle === 'annually' ? 80 : 100,
       lookupKey: billingCycle === 'annually' ? ONE_OUTLET_YEARLY : ONE_OUTLET_MONTHLY,
       isPopular: true,
@@ -143,7 +139,7 @@ export default function ProductDetails() {
       }
     },
     {
-      title: 'Professional Plan',
+      title: 'Multiple Outlet Plan',
       price: getProfessionalPrice(professionalPlanType, billingCycle),
       description: 'For businesses with multiple outlets.',
       isProfessional: true,
@@ -152,7 +148,7 @@ export default function ProductDetails() {
       features: getProfessionalFeatures(professionalPlanType),
       lookupKey: getProfessionalLookupKey(professionalPlanType)
     }
-  ];
+  ].filter(plan => plan.title === 'Starter Plan' ? currentPlan === 'Starter Plan' : true);
 
   const handlePlanSelect = async (plan) => {
     if (plan.title === 'Professional Plan' && professionalPlanType === 'others') {
@@ -190,9 +186,9 @@ export default function ProductDetails() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Simple pricing for all your needs</h1>
+        <h1 className={styles.title}>Grow Customer Loyalty Without Building an App</h1>
         <p className={styles.subtitle}>
-          Start for free, upgrade when you love it --- No credit card required. All prices are in US Dollars.
+          Get started for free. Upgrade anytime when you're ready. Save 20% with annual billing. All prices are in SGD.
         </p>
         
         <div className={styles.billingToggle}>

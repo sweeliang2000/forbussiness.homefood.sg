@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Alert, Button, Dialog, TextField } from '@mui/material';
 import { useState } from 'react';
 import { IoMdArrowRoundBack } from 'react-icons/io';
-import { LoadingButton } from '@mui/lab';
 import apiClient from '@/utility/api';
 import { useRouter } from 'next/navigation';
 import { VscVerified } from 'react-icons/vsc';
@@ -244,7 +243,7 @@ const ForgotPassword = () => {
                             required
                         />}
 
-                        <LoadingButton
+                        <Button
                             type='submit'
                             variant='contained'
                             color='primary'
@@ -253,7 +252,7 @@ const ForgotPassword = () => {
                             className={styles.resetPwdButton}
                         >
                             {isAtRestPasswordStage ? 'Reset Password' : 'Email me'}
-                        </LoadingButton>
+                        </Button>
                     </form>
 
 

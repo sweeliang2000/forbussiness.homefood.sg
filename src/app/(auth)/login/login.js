@@ -3,10 +3,9 @@ import Image from 'next/image';
 import styles from './page.module.css';
 import { FaLevelDownAlt } from 'react-icons/fa';
 import Link from 'next/link';
-import { Alert, TextField } from '@mui/material';
+import { Alert, TextField, Button } from '@mui/material';
 import { useState } from 'react';
 import apiClient from '@/utility/api';
-import { LoadingButton } from '@mui/lab';
 import { useRouter } from 'next/navigation';
 import withAuthorization from '@/hoc/withAuthorization';
 import { SIGN_IN } from '@/utility/apiPaths';
@@ -146,7 +145,7 @@ import { SIGN_IN } from '@/utility/apiPaths';
                         </Link>
 
 
-                        <LoadingButton
+                        <Button
                             type='submit'
                             variant='contained'
                             color='primary'
@@ -155,7 +154,7 @@ import { SIGN_IN } from '@/utility/apiPaths';
                             loading={isSubmissionButtonLoading}
                         >
                             Login
-                        </LoadingButton>
+                        </Button>
                     </form>
 
 

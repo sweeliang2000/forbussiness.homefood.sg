@@ -1,10 +1,10 @@
 'use client';
-import { LoadingButton } from '@mui/lab';
 import styles from './SignoutSection.module.css';
 import { SIGN_OUT } from '@/utility/apiPaths';
 import { useState } from 'react';
 import apiClient from '@/utility/api';
 import { useRouter } from 'next/navigation';
+import { Button } from '@mui/material';
 
 const SignoutSection = () => {
     const router = useRouter();
@@ -27,7 +27,7 @@ const SignoutSection = () => {
 
     return(
         <div>
-            <LoadingButton 
+            <Button 
                 onClick={signoutHandler}
                 className={styles.button} 
                 loading={isButtonLoading}
@@ -35,7 +35,7 @@ const SignoutSection = () => {
                 variant="text" 
                 fullWidth>
                 Sign out
-            </LoadingButton>
+            </Button>
         </div>
     )
 };

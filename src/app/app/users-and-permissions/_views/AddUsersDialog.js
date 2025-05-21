@@ -1,7 +1,6 @@
 import { Button, Dialog, TextField } from '@mui/material';
 import styles from './AddUsersDialog.module.css';
 import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
-import { LoadingButton } from '@mui/lab';
 
 const AddUsersDialog = ({
     isOpen,
@@ -65,7 +64,7 @@ const AddUsersDialog = ({
                     Cancel
                 </Button>
 
-                <LoadingButton
+                <Button
                     // onClick={addLocationHandler}
                     // loading={true}
                     // disabled
@@ -74,7 +73,7 @@ const AddUsersDialog = ({
                     className={styles.addButton}
                 >
                     Add user
-                </LoadingButton>
+                </Button>
             </div>
         </Dialog>
     )

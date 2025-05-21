@@ -1,5 +1,4 @@
 // https://console.stampme.com/stamp-cards/editcard
-import { LoadingButton } from '@mui/lab';
 import styles from './StampOnboarding.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import Image from 'next/image';
@@ -25,7 +24,7 @@ const StampOnBoarding = () => {
                                 <Link href='/'><FaRegLightbulb /> Learn more</Link>
                             </div>
                         </div>
-                        <LoadingButton
+                        <Button
                             // onClick={addLocationHandler}
                             // loading={true}
                             // disabled
@@ -34,7 +33,7 @@ const StampOnBoarding = () => {
                             className={styles.button}
                         >
                             Get Started
-                        </LoadingButton>
+                        </Button>
                     </div>
                     <div className={styles.imageContainer}>
                         <Image

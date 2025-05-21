@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { IoMdArrowRoundBack } from 'react-icons/io';
 import Cookies from 'js-cookie';
 import apiClient from '@/utility/api';
-import { LoadingButton } from '@mui/lab';
+import { Button } from '@mui/lab';
 import { VscVerified } from 'react-icons/vsc';
 import withAuthorization from '@/hoc/withAuthorization';
 import { EMAIL_VERIFICATION, RESEND_VERIFICATION_CODE } from '@/utility/apiPaths';
@@ -165,7 +165,7 @@ const Verify = () => {
                             className={styles.textfield}
                         />
 
-                        <LoadingButton
+                        <Button
                             type='submit'
                             variant='contained'
                             color='primary'
@@ -175,7 +175,7 @@ const Verify = () => {
                             className={styles.confirmButton}
                         >
                             Confirm
-                        </LoadingButton>
+                        </Button>
                     </form>
 
                     <div className={styles.resentConatiner}>
