@@ -1,9 +1,8 @@
 // https://console.stampme.com/stamp-cards/editcard
-import { Button } from '@mui/lab';
 import styles from './PointsOnboarding.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import Image from 'next/image';
-import { Link } from '@mui/material';
+import { Link, Button } from '@mui/material';
 import { FaRegLightbulb } from 'react-icons/fa6';
 import { PiGear } from 'react-icons/pi';
 import { BsGraphUpArrow } from 'react-icons/bs';
