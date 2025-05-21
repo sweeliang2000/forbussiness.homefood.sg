@@ -4,7 +4,7 @@ import styles from './sidebar.module.css';
 import { LuClipboardList } from 'react-icons/lu';
 import { AiOutlineMessage } from 'react-icons/ai';
 import { BsGift } from 'react-icons/bs';
-import { FaAnglesLeft } from 'react-icons/fa6';
+import { FaRegStar } from "react-icons/fa6";
 import { FaMobileAlt } from 'react-icons/fa';
 import { RiUserSettingsLine, RiNewspaperLine } from 'react-icons/ri';
 import { ImCoinDollar } from 'react-icons/im';
@@ -27,7 +27,6 @@ export default function Sidebar({
     const STAMP_TAB = 'STAMP_TAB';
     const POINTS_TAB = 'POINTS_TAB';
     const REDEEMABLE_TAB = 'REDEEMABLE_TAB';
-    const CUSTOMERS_TAB = 'CUSTOMERS_TAB';
 
     const pathSegments = usePathname().split('/');
     const section = pathSegments[2]
@@ -150,16 +149,12 @@ export default function Sidebar({
                         </li>
                     }
 
-                    <Submenu
-                        title={'Customers'}
-                        submenus={[
-                            { href: '/app/ratings', title: 'Ratings and Reviews' },
-                            { href: '/app/messages', title: 'Direct Message' }
-                        ]}
-                        isExpand={currentSelection == CUSTOMERS_TAB}
-                        icon={AiOutlineMessage}
-                        onClick={() => { toggleMenus(CUSTOMERS_TAB) }}
-                    />
+                    <li className={section == 'ratings' ? styles.active : ''}>
+                        <Link href='/app/ratings'>
+                        <FaRegStar className={styles.icon} />
+                            <span>Ratings and Reviews</span>
+                        </Link>
+                    </li>
 
                     {
                         !sidebarMinimised && <li className={styles.labelLi}>
