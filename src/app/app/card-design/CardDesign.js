@@ -97,16 +97,18 @@ const CardDesign = () => {
         const retrieveCardDesignSetting = async () => {
             try {
                 const response = await apiClient.get(`${CARD_DESIGN_SETTING}`);
-                const data = response.data;
+                const data = response.data.data;
 
-                setCardBackgroundColor(data.data.backgroundColor);
-                setCardTitleColor(data.data.titleColor);
-                setCardFooterColor(data.data.footerTextColor)
-                setCardNoStampBorderColor(data.data.noStampBorderColor);
-                setCardNoStampBackgroundColor(data.data.noStampBackgroundColor)
-                setCardStampCollectedBorderColor(data.data.stampBorderColor);
-                setCardStampBackground(data.data.stampBackgroundColor);
-                setCheckmarkColor(data.data.checkmarkColor);
+                if (data) {
+                    setCardBackgroundColor(data.data.backgroundColor);
+                    setCardTitleColor(data.data.titleColor);
+                    setCardFooterColor(data.data.footerTextColor)
+                    setCardNoStampBorderColor(data.data.noStampBorderColor);
+                    setCardNoStampBackgroundColor(data.data.noStampBackgroundColor)
+                    setCardStampCollectedBorderColor(data.data.stampBorderColor);
+                    setCardStampBackground(data.data.stampBackgroundColor);
+                    setCheckmarkColor(data.data.checkmarkColor);
+                };
 
                 setIsLoading(false);
             } catch (error) {
@@ -114,6 +116,7 @@ const CardDesign = () => {
                 const code = error?.response?.data?.code || error.code;
                 setIsLoading(false);
                 setIsBtnLoading(false);
+                showError(`An error had occurred. ${message} (Error code: ${code})`);
                 setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
             };
         };
