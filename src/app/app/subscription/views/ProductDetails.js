@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import styles from './ProductDetails.module.css';
 import PricingCard from './PricingCard';
-import { ONE_OUTLET_MONTHLY, ONE_OUTLET_YEARLY } from '../keys/SubscriptionKeys';
+import { FOUR_TO_SIX_OUTLET_MONTHLY, FOUR_TO_SIX_OUTLET_YEARLY, ONE_OUTLET_MONTHLY, ONE_OUTLET_YEARLY, TWO_TO_THREE_OUTLET_MONTHLY, TWO_TO_THREE_OUTLET_YEARLY } from '../keys/SubscriptionKeys';
 import apiClient from '@/utility/api';
 import { CHECKOUT_SESSION_STRIPE } from '@/utility/apiPaths';
 
@@ -58,16 +58,15 @@ const getProfessionalFeatures = (planType) => {
 };
 
 const getProfessionalPrice = (planType, billingCycle) => {
-  const basePrice = billingCycle === 'annually' ? 12 : 15;
   switch (planType) {
     case '2-3':
-      return basePrice * 2;
+      return billingCycle === 'annually' ? (1920 / 12) : 200;
     case '4-6':
-      return basePrice * 4;
+      return billingCycle === 'annually' ? (3840 / 12) : 400;
     case 'others':
       return null; // Will show as "Custom"
     default:
-      return basePrice;
+      return 100;
   }
 };
 
@@ -75,13 +74,13 @@ const getProfessionalLookupKey = (planType) => {
   switch (planType) {
     case '2-3':
       return {
-        'monthly': '2-3_outlets-monthly',
-        'annually': '2-3_outlets-yearly'
+        'monthly': TWO_TO_THREE_OUTLET_MONTHLY,
+        'annually': TWO_TO_THREE_OUTLET_YEARLY
       };
     case '4-6':
       return {
-        'monthly': '4-6_outlets-monthly',
-        'annually': '4-6_outlets-yearly'
+        'monthly': FOUR_TO_SIX_OUTLET_MONTHLY,
+        'annually': FOUR_TO_SIX_OUTLET_YEARLY
       };
     case 'others':
       return {
@@ -109,7 +108,7 @@ export default function ProductDetails() {
       features: [
         { name: 'Release to app', included: false },
         { name: '1 Outlet / Shop', included: true },
-        { name: 'Max of 1 user', included: true },
+        { name: 'Max of 3 users', included: true },
         { name: 'Console management access', included: true },
         { name: 'Loyalty System (e.g., stamp)', included: true },
         { name: 'Customer Support', included: true },
@@ -134,8 +133,8 @@ export default function ProductDetails() {
         { name: 'Custom Integration Support', included: false },
       ],
       lookupKey: {
-        'monthly': '1_outlet-monthly',
-        'annually': '1_outlet-yearly'
+        'monthly': ONE_OUTLET_MONTHLY,
+        'annually': ONE_OUTLET_YEARLY
       }
     },
     {
