@@ -148,6 +148,7 @@ export default function StampSetup() {
         const code = error?.response?.data?.code || error.code;
         setIsLoading(false);
         setIsBtnLoading(false);
+        setErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
         setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
       }
     };

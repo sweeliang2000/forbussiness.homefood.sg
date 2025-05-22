@@ -78,8 +78,9 @@ export default function StampSetup() {
       try {
         setIsLoading(true);
         const response = await apiClient.get(STAMP_MANAGEMENT);
+        const data = response.data.data;
 
-        if (response.data) {
+        if (data) {
           const data = response.data.data;
 
           // Update state with fetched data
@@ -133,6 +134,7 @@ export default function StampSetup() {
         console.error('Error fetching stamp management data:', error);
         setIsError(true);
         setErrorMessage('Failed to load stamp management data. Please try again later.');
+        setIsLoadingErrorMessage('Failed to load stamp management data. Please try again later.');
       } finally {
         setIsLoading(false);
       }
