@@ -4,7 +4,7 @@ import styles from './page.module.css';
 import { FaLevelDownAlt } from 'react-icons/fa';
 import Link from 'next/link';
 import { Alert, TextField, Button } from '@mui/material';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import apiClient from '@/utility/api';
 import { useRouter, useSearchParams } from 'next/navigation';
 import withAuthorization from '@/hoc/withAuthorization';
@@ -12,10 +12,10 @@ import { SIGN_IN } from '@/utility/apiPaths';
 
 // export const metadata = {
 //     title: 'Sign up and Start your Loyalty Program | Collbine for Business Singapore',
-//     description: 'Collbine offers a loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop’s needs.',
+//     description: 'Collbine offers a loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop's needs.',
 // };
 
- const Login = () => {
+const LoginContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams()
     const redirectPath = searchParams.get('redirect');
@@ -180,12 +180,20 @@ import { SIGN_IN } from '@/utility/apiPaths';
                     </Button> */}
 
                     <div>
-                        <p className={styles.haveAccountTag}>Don’t have an account yet? <Link href='/signup' className={styles.link}>Sign up</Link></p>
+                        <p className={styles.haveAccountTag}>Don't have an account yet? <Link href='/signup' className={styles.link}>Sign up</Link></p>
                     </div>
                 </div>
             </section>
         </main>
     )
+};
+
+const Login = () => {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <LoginContent />
+        </Suspense>
+    );
 };
 
 export default withAuthorization(Login);
