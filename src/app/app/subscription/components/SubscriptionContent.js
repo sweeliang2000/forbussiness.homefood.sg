@@ -6,13 +6,12 @@ import Message from '../views/Message';
 
 export default function SubscriptionContent() {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get('session_id');
-  const success = searchParams.get('success') === 'true';
-  const message = searchParams.get('message') || '';
+  const canceled = searchParams.get('canceled') === 'true';
 
-  if (!success && message === '') {
-    return <ProductDetails />;
+  if (canceled) {
+    // TODO: Handle canceled subscription
+    // What should we do here?
   }
 
-  return <Message message={message} />;
+  return <ProductDetails />;
 } 
