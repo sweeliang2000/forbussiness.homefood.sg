@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Alert, TextField, Button } from '@mui/material';
 import { useState } from 'react';
 import apiClient from '@/utility/api';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import withAuthorization from '@/hoc/withAuthorization';
 import { SIGN_IN } from '@/utility/apiPaths';
 
@@ -17,6 +17,8 @@ import { SIGN_IN } from '@/utility/apiPaths';
 
  const Login = () => {
     const router = useRouter();
+    const searchParams = useSearchParams()
+    const redirectPath = searchParams.get('redirect');
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -46,7 +48,11 @@ import { SIGN_IN } from '@/utility/apiPaths';
                 return;
             }
 
-            router.push('/app')
+            if (redirectPath) {
+                router.push(redirectPath);
+            } else {
+                router.push('/app'); // default redirect
+            }
         } catch (error) {
             const message = error?.response?.data?.message || error.message;
             const code = error?.response?.data?.code || error.code;

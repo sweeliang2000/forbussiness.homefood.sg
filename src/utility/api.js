@@ -22,7 +22,11 @@ apiClient.interceptors.response.use(
       requestUrl !== '/api/auth/verifytoken'
     ) {
       // Optional: clear auth tokens/cookies if needed
-      window.location.href = '/login?message=401 Unauthorized';
+      const currentPath = window.location.pathname + window.location.search;
+      const encodedPath = encodeURIComponent(currentPath);
+
+      // Redirect to login with redirect path
+      window.location.href = `/login?message=401 Unauthorized&redirect=${encodedPath}`;
     } else {
       console.error('API Error:', error);
     }
