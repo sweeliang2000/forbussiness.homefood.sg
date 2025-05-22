@@ -120,25 +120,26 @@ export default function StampSetup() {
     const retrieveInformation = async (event) => {
       try {
         const response = await apiClient.get(`${OFFICIAL_BUSINESS_INFORMATION}`)
-        const data = response.data;
-        const addressBuildingName = data.data.addressBuildingName;
-        const addressPostalCode = data.data.addressPostalCode;
-        const addressStreetAddress = data.data.addressStreetAddress;
-        const addressUnitNumber = data.data.addressStreetAddress
-        const businessName = data.data.businessName;
-        const isBusinessDetailApproved = data.data.isBusinessDetailApproved;
-        const uen = data.data.uen;
+        const data = response.data.data;
 
-        console.log(businessName)
+        if (data) {
+          const addressBuildingName = data.data.addressBuildingName;
+          const addressPostalCode = data.data.addressPostalCode;
+          const addressStreetAddress = data.data.addressStreetAddress;
+          const addressUnitNumber = data.data.addressStreetAddress
+          const businessName = data.data.businessName;
+          const isBusinessDetailApproved = data.data.isBusinessDetailApproved;
+          const uen = data.data.uen;
 
-        setEnteredValues({
-          [BUSINESS_NAME]: businessName,
-          [UEN]: uen,
-          [UNIT_NUMBER]: addressUnitNumber,
-          [BUILDING_NAME]: addressBuildingName,
-          [STREET_ADDRESS]: addressStreetAddress,
-          [POSTAL_CODE]: addressPostalCode,
-        })
+          setEnteredValues({
+            [BUSINESS_NAME]: businessName,
+            [UEN]: uen,
+            [UNIT_NUMBER]: addressUnitNumber,
+            [BUILDING_NAME]: addressBuildingName,
+            [STREET_ADDRESS]: addressStreetAddress,
+            [POSTAL_CODE]: addressPostalCode,
+          })
+        }
 
         setIsLoading(false);
         setIsBtnLoading(false);
