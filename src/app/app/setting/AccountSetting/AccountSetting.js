@@ -11,6 +11,7 @@ import SignoutSection from './_components/SignoutSection';
 import ManageSubscriptionCell from './_components/ManageSubscriptionCell';
 import UpgradeCell from './_components/UpgradeCell';
 import { useState } from 'react';
+import ChangePasswordCell from './_components/ChangePasswordCell';
 
 const AccountSetting = () => {
     const [isUserSubscripted, setIsUpdatePassword] = useState(false);
@@ -21,9 +22,8 @@ const AccountSetting = () => {
                 <ContentCard className={styles.content}>
                     <div>
                         <h2>Basic Account Information</h2>
-                        <p>you@example.com</p>
-                        <p>Account Type: Free</p>
-                        <p>Change Password</p>
+
+                        <ChangePasswordCell/>
                     </div>
                 </ContentCard>
 

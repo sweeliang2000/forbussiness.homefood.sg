@@ -153,22 +153,24 @@ const CustomerFacingBusinessPage = () => {
             try {
                 const response = await apiClient.get(`${CUSTOMER_FACING_INFORMATION}`);
                 const data = response.data.data;
-    
-                setEnteredValues({
-                    [DISPLAY_NAME]: data.displayName,
-                    [SHOP_DESCRIPTION]: data.description,
-                    [WEBSITE]: data.website,
-                    [CATEGORY]: data.category,
-                    [HALAL_CERTIFIED]: data.halalcertified,
-                    [KEYWORDS]: data.keywords
-                })
-                if (data.thumbnail_signedUrl !== "") {
-                    setThumbnailImages([{ name: data.thumbnail_signedUrl, file: null, url: data.thumbnail_signedUrl }])
+
+                if (data) {
+                    setEnteredValues({
+                        [DISPLAY_NAME]: data.displayName,
+                        [SHOP_DESCRIPTION]: data.description,
+                        [WEBSITE]: data.website,
+                        [CATEGORY]: data.category,
+                        [HALAL_CERTIFIED]: data.halalcertified,
+                        [KEYWORDS]: data.keywords
+                    })
+                    if (data.thumbnail_signedUrl !== "") {
+                        setThumbnailImages([{ name: data.thumbnail_signedUrl, file: null, url: data.thumbnail_signedUrl }])
+                    }
+                    if (data.banner_signedUrl !== "") {
+                        setBannerImages([{ name: data.banner_signedUrl, file: null, url: data.banner_signedUrl }])
+                    }
+                    setLocations(data.locations);
                 }
-                if (data.banner_signedUrl !== "") {
-                    setBannerImages([{ name: data.banner_signedUrl, file: null, url: data.banner_signedUrl }])
-                }
-                setLocations(data.locations);
     
                 setIsLoading(false);
                 setIsBtnLoading(false);

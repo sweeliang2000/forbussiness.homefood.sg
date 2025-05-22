@@ -4,7 +4,7 @@ import { BASE_URL_BACKEND } from '../../config/config';
 // Create a centralized utility function for handling API calls. 
 // This makes your code cleaner and easier to maintain.
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL_BACKEND,
+  baseURL: 'http://localhost:8080/',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -14,7 +14,8 @@ const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // console.error('API Error:', error);
+    console.log("ERROR")
+    console.error('API Error:', error);
     return Promise.reject(error);
   }
 );
