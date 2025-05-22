@@ -180,7 +180,7 @@ const LoginContent = () => {
                     </Button> */}
 
                     <div>
-                        <p className={styles.haveAccountTag}>Don't have an account yet? <Link href='/signup' className={styles.link}>Sign up</Link></p>
+                        <p className={styles.haveAccountTag}>Don&apos;t have an account yet? <Link href='/signup' className={styles.link}>Sign up</Link></p>
                     </div>
                 </div>
             </section>
