@@ -12,5 +12,6 @@ export const OFFICIAL_BUSINESS_INFORMATION = '/api/data/official-bussiness-infor
 export const CUSTOMER_FACING_INFORMATION = '/api/data/customerDetails';
 export const STAMP_MANAGEMENT = '/api/data/stampManagement';
 export const CARD_DESIGN_SETTING = '/api/data/cardDesignSetting';
+export const ADD_USER = '/api/data/InviteUser';
 
 export const CHECKOUT_SESSION_STRIPE = '/api/subscription/create-checkout-session';
