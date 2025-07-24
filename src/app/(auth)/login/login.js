@@ -4,7 +4,7 @@ import styles from './page.module.css';
 import { FaLevelDownAlt } from 'react-icons/fa';
 import Link from 'next/link';
 import { Alert, TextField, Button } from '@mui/material';
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import apiClient from '@/utility/api';
 import { useRouter, useSearchParams } from 'next/navigation';
 import withAuthorization from '@/hoc/withAuthorization';
@@ -17,13 +17,21 @@ import { SIGN_IN } from '@/utility/apiPaths';
 
 const LoginContent = () => {
     const router = useRouter();
-    const searchParams = useSearchParams()
+    const searchParams = useSearchParams();
     const redirectPath = searchParams.get('redirect');
+    const urlMessage = searchParams.get('message');
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState(null);
     const [isSubmissionButtonLoading, setIsSubmissionButtonLoading] = useState(false);
+
+    // Show a friendly error if message=401 Unauthorized
+    useEffect(() => {
+        if (urlMessage && urlMessage.includes('401')) {
+            setErrorMessage('You must be logged in to access this page. Please log in to continue.');
+        }
+    }, [urlMessage]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
