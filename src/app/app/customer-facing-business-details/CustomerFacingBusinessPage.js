@@ -107,6 +107,7 @@ const CustomerFacingBusinessPage = () => {
 
         try {
             const formData = new FormData();
+            console.log(locations)
 
             formData.append('displayName', enteredValues[DISPLAY_NAME]);
             formData.append('description', enteredValues[SHOP_DESCRIPTION]);

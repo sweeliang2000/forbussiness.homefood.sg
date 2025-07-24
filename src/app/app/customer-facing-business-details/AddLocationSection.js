@@ -105,9 +105,65 @@ const AddLocationSection = ({
 
     useEffect(() => {
         if (selectedLocation) {
-
-        };
-    }, [])
+            // Find the location object by id
+            const locationObj = locations.find(
+                loc => loc.id === (typeof selectedLocation === 'string' ? selectedLocation : selectedLocation.id)
+            );
+            if (locationObj) {
+                const getTime = (isOpen, start, end) => {
+                    return {
+                        start: isOpen
+                            ? dayjs.tz(`2024-01-01 ${start}`, 'YYYY-MM-DD hh:mm A', 'Asia/Singapore')
+                            : dayjs.tz('2024-01-01 08:00 AM', 'YYYY-MM-DD hh:mm A', 'Asia/Singapore'),
+                        end: isOpen
+                            ? dayjs.tz(`2024-01-01 ${end}`, 'YYYY-MM-DD hh:mm A', 'Asia/Singapore')
+                            : dayjs.tz('2024-01-01 08:00 PM', 'YYYY-MM-DD hh:mm A', 'Asia/Singapore'),
+                    };
+                };
+                setEnteredValues({
+                    locationName: locationObj.locationName,
+                    address: locationObj.address,
+                    postalCode: locationObj.postalCode,
+                    mondayIsOpen: locationObj.operatingHours.monday.isOpen,
+                    ...(() => {
+                        const {start, end} = getTime(locationObj.operatingHours.monday.isOpen, locationObj.operatingHours.monday.start, locationObj.operatingHours.monday.end);
+                        return { mondayStart: start, mondayEnd: end };
+                    })(),
+                    tuesdayIsOpen: locationObj.operatingHours.tuesday.isOpen,
+                    ...(() => {
+                        const {start, end} = getTime(locationObj.operatingHours.tuesday.isOpen, locationObj.operatingHours.tuesday.start, locationObj.operatingHours.tuesday.end);
+                        return { tuesdayStart: start, tuesdayEnd: end };
+                    })(),
+                    wednesdayIsOpen: locationObj.operatingHours.wednesday.isOpen,
+                    ...(() => {
+                        const {start, end} = getTime(locationObj.operatingHours.wednesday.isOpen, locationObj.operatingHours.wednesday.start, locationObj.operatingHours.wednesday.end);
+                        return { wednesdayStart: start, wednesdayEnd: end };
+                    })(),
+                    thursdayIsOpen: locationObj.operatingHours.thursday.isOpen,
+                    ...(() => {
+                        const {start, end} = getTime(locationObj.operatingHours.thursday.isOpen, locationObj.operatingHours.thursday.start, locationObj.operatingHours.thursday.end);
+                        return { thursdayStart: start, thursdayEnd: end };
+                    })(),
+                    fridayIsOpen: locationObj.operatingHours.friday.isOpen,
+                    ...(() => {
+                        const {start, end} = getTime(locationObj.operatingHours.friday.isOpen, locationObj.operatingHours.friday.start, locationObj.operatingHours.friday.end);
+                        return { fridayStart: start, fridayEnd: end };
+                    })(),
+                    saturdayIsOpen: locationObj.operatingHours.saturday.isOpen,
+                    ...(() => {
+                        const {start, end} = getTime(locationObj.operatingHours.saturday.isOpen, locationObj.operatingHours.saturday.start, locationObj.operatingHours.saturday.end);
+                        return { saturdayStart: start, saturdayEnd: end };
+                    })(),
+                    sundayIsOpen: locationObj.operatingHours.sunday.isOpen,
+                    ...(() => {
+                        const {start, end} = getTime(locationObj.operatingHours.sunday.isOpen, locationObj.operatingHours.sunday.start, locationObj.operatingHours.sunday.end);
+                        return { sundayStart: start, sundayEnd: end };
+                    })(),
+                });
+            }
+        }
+        // eslint-disable-next-line
+    }, [selectedLocation, locations]);
 
     const inputChangeHandler = (key, value) => {
         // setIsSubmissionSuccess(false);
@@ -121,11 +177,24 @@ const AddLocationSection = ({
     const formSubmissionHandler = async (event) => {
         event.preventDefault();
         const transformedData = transformValues(enteredValues);
-        
-        setLocations((preValue) => [...preValue, transformedData]);
+
+        if (selectedLocation) {
+            // Modify existing location
+            setLocations((prevLocations) =>
+                prevLocations.map((loc) =>
+                    loc.id === (typeof selectedLocation === 'string' ? selectedLocation : selectedLocation.id)
+                        ? transformedData
+                        : loc
+                )
+            );
+        } else {
+            // Add new location
+            setLocations((prevLocations) => [...prevLocations, transformedData]);
+        }
+
         resetSaving();
         closeAddLocationHandler();
-    }
+    };
 
     const formatSGT = (time) => time.tz('Asia/Singapore').format('hh:mm A');
 
@@ -139,38 +208,38 @@ const AddLocationSection = ({
             operatingHours: {
                 monday: {
                     isOpen: values.mondayIsOpen,
-                    start: values.mondayIsOpen ? formatSGT(values.mondayStart) : null,
-                    end: values.mondayIsOpen ? formatSGT(values.mondayEnd) : null,
+                    start: values.mondayIsOpen ? formatSGT(values.mondayStart) : sgtTime('00:00'),
+                    end: values.mondayIsOpen ? formatSGT(values.mondayEnd) : sgtTime('00:00'),
                 },
                 tuesday: {
                     isOpen: values.tuesdayIsOpen,
-                    start: values.tuesdayIsOpen ? formatSGT(values.tuesdayStart) : null,
-                    end: values.tuesdayIsOpen ? formatSGT(values.tuesdayEnd) : null,
+                    start: values.tuesdayIsOpen ? formatSGT(values.tuesdayStart) : sgtTime('00:00'),
+                    end: values.tuesdayIsOpen ? formatSGT(values.tuesdayEnd) : sgtTime('00:00'),
                 },
                 wednesday: {
                     isOpen: values.wednesdayIsOpen,
-                    start: values.wednesdayIsOpen ? formatSGT(values.wednesdayStart) : null,
-                    end: values.wednesdayIsOpen ? formatSGT(values.wednesdayEnd) : null,
+                    start: values.wednesdayIsOpen ? formatSGT(values.wednesdayStart) : sgtTime('00:00'),
+                    end: values.wednesdayIsOpen ? formatSGT(values.wednesdayEnd) : sgtTime('00:00'),
                 },
                 thursday: {
                     isOpen: values.thursdayIsOpen,
-                    start: values.thursdayIsOpen ? formatSGT(values.thursdayStart) : null,
-                    end: values.thursdayIsOpen ? formatSGT(values.thursdayEnd) : null,
+                    start: values.thursdayIsOpen ? formatSGT(values.thursdayStart) : sgtTime('00:00'),
+                    end: values.thursdayIsOpen ? formatSGT(values.thursdayEnd) : sgtTime('00:00'),
                 },
                 friday: {
                     isOpen: values.fridayIsOpen,
-                    start: values.fridayIsOpen ? formatSGT(values.fridayStart) : null,
-                    end: values.fridayIsOpen ? formatSGT(values.fridayEnd) : null,
+                    start: values.fridayIsOpen ? formatSGT(values.fridayStart) : sgtTime('00:00'),
+                    end: values.fridayIsOpen ? formatSGT(values.fridayEnd) : sgtTime('00:00'),
                 },
                 saturday: {
                     isOpen: values.saturdayIsOpen,
-                    start: values.saturdayIsOpen ? formatSGT(values.saturdayStart) : null,
-                    end: values.saturdayIsOpen ? formatSGT(values.saturdayEnd) : null,
+                    start: values.saturdayIsOpen ? formatSGT(values.saturdayStart) : sgtTime('00:00'),
+                    end: values.saturdayIsOpen ? formatSGT(values.saturdayEnd) : sgtTime('00:00'),
                 },
                 sunday: {
                     isOpen: values.sundayIsOpen,
-                    start: values.sundayIsOpen ? formatSGT(values.sundayStart) : null,
-                    end: values.sundayIsOpen ? formatSGT(values.sundayEnd) : null,
+                    start: values.sundayIsOpen ? formatSGT(values.sundayStart) : sgtTime('00:00'),
+                    end: values.sundayIsOpen ? formatSGT(values.sundayEnd) : sgtTime('00:00'),
                 },
             }
         };

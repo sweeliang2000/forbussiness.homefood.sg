@@ -50,7 +50,7 @@ const LocationSection = ({
     };
 
     const handleDelete = () => {
-        console.log('Delete location with id:', selectedRowId);
+        setLocations((prevLocations) => prevLocations.filter((location) => location.id !== selectedRowId));
         handleMenuClose();
     };
 
