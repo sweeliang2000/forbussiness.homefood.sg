@@ -3,7 +3,7 @@ import styles from './AddUsersDialog.module.css';
 import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
 import { useEffect, useState } from 'react';
 import apiClient from '@/utility/api';
-import { ADD_USER } from '@/utility/apiPaths';
+import { ADD_USER, LIST_LOCATIONS } from '@/utility/apiPaths';
 
 const roles = [
     { value: 'Owner', title: 'Owner' },
@@ -21,14 +21,32 @@ const AddUsersDialog = ({
     ]);
 
     const [email, setEmail] = useState('');
-    const [selectedLocation, setSelectedLocation] = useState('all');
+    const [selectedLocation, setSelectedLocation] = useState({ value: 'all', title: 'All Locations' });
     const [selectedRole, setSelectedRole] = useState(roles[3].value);
     const [addUserLoading, setAddUserLoading] = useState(false);
     const [buttonDisabled, setButtonDisabled] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
-        // TODO: Fetch locations from API
+        const fetchLocations = async () => {
+            try {
+                const response = await apiClient.get(LIST_LOCATIONS);
+                const data = response.data;
+
+                const locationOptions = [
+                    { value: 'all', title: 'All Locations' },
+                    ...data.locations.map(loc => ({
+                        value: loc.id,
+                        title: `${loc.locationName}, ${loc.address}`
+                    }))
+                ];
+                setLocations(locationOptions);
+            } catch (error) {
+                console.error('Failed to fetch locations:', error);
+            }
+        };
+        
+        fetchLocations();
     }, []);
 
     const addUserHandler = async (event) => {
@@ -66,7 +84,7 @@ const AddUsersDialog = ({
 
     const onLocationChangeHandler = (event) => {
         valueChanged();
-        setSelectedLocation(event.target.value);
+        setSelectedLocation(event.target);
     };
 
     const onRoleChangeHandler = (event) => {
@@ -114,11 +132,9 @@ const AddUsersDialog = ({
                         <h3>Location</h3>
 
                         <FullWidthDropdown
-                            value={selectedLocation}
+                            value={selectedLocation.value}
                             onChange={(event) => { onLocationChangeHandler(event) }}
-                            options={[
-                                { value: 'all', title: 'All Locations' }
-                            ]}
+                            options={locations}
                             name='location'
                         />
                     </div>
