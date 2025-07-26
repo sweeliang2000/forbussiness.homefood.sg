@@ -14,7 +14,8 @@ const roles = [
 
 const AddUsersDialog = ({
     isOpen,
-    closeAddUserHandler
+    closeAddUserHandler,
+    onUserInvited
 }) => {
     const [locations, setLocations] = useState([
         { value: 'all', title: 'All Locations' }
@@ -51,18 +52,32 @@ const AddUsersDialog = ({
 
     const addUserHandler = async (event) => {
         event.preventDefault();
-        setAddUserLoading();
+        setAddUserLoading(true);
         setErrorMessage(null);
-        console.log(email, selectedLocation, selectedRole);
+        console.log(email, selectedLocation.value, selectedRole);
 
         const payload = {
             "receiverEmail": email,
-            "location": selectedLocation,
-            "role": selectedLocation
+            "location": selectedLocation.value,
+            "locationName": selectedLocation.title,
+            "role": selectedRole
         };
 
         try {
             await apiClient.post(`${ADD_USER}`, payload);
+            // Call the success callback with user data
+            if (onUserInvited) {
+                onUserInvited({
+                    email: email,
+                    location: selectedLocation.title,
+                    role: selectedRole
+                });
+            }
+            // Reset form
+            setEmail('');
+            setSelectedLocation({ value: 'all', title: 'All Locations' });
+            setSelectedRole(roles[3].value);
+            setButtonDisabled(true);
         } catch (error) {
             console.log(error);
             const message = error?.response?.data?.message || error.message;

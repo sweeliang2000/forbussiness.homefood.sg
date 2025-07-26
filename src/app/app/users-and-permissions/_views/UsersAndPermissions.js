@@ -1,38 +1,20 @@
 'use client';
 import styles from './UsersAndPermissions.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
+import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { DataGrid } from '@mui/x-data-grid';
 import { IconButton, Menu, MenuItem, Button } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useState } from 'react';
 import AddUsersDialog from './AddUsersDialog';
+import UserTable from './UserTable';
+import InvitedUserTable from './InvitedUserTable';
 
 const UsersAndPermissions = () => {
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [selectedRowId, setSelectedRowId] = useState(null);
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
-    const handleMenuOpen = (event, rowId) => {
-        setAnchorEl(event.currentTarget);
-        setSelectedRowId(rowId);
-    };
-
-    const handleMenuClose = () => {
-        setAnchorEl(null);
-        setSelectedRowId(null);
-    };
-
-    const handleEdit = () => {
-        console.log('Edit location with id:', selectedRowId);
-        handleMenuClose();
-    };
-
-    const handleDelete = () => {
-        console.log('Delete location with id:', selectedRowId);
-        handleMenuClose();
-    };
-
-    const data = [
+    const usersTable = [
         {
             id: 1,
             email: 'mokiohub@example.com',
@@ -65,64 +47,40 @@ const UsersAndPermissions = () => {
         }
     ];
 
-    const rows = data.map((item, index) => ({
+    const usersRows = usersTable.map((item, index) => ({
         id: item.id,
         email: item.email,
         location: item.location,
         role: item.role
     }));
 
-    const columns = [
+    const invitedUsersTable = [
         {
-            field: 'id',
-            headerName: '#',
-            // resizable: true,
-            sortable: false,
-            width: 0.5,
+            id: 101,
+            email: 'invited1@example.com',
+            location: 'All',
+            role: 'Manager'
         },
         {
-            field: 'email',
-            headerName: 'Email',
-            // resizable: true,
-            flex: 2, // Optional flex setting for responsive layout
+            id: 102,
+            email: 'invited2@example.com',
+            location: 'Orchard Central',
+            role: 'Viewer'
         },
         {
-            field: 'location',
-            headerName: 'Location',
-            // resizable: true,
-            flex: 2,
-        },
-        {
-            field: 'role',
-            headerName: 'Role',
-            // resizable: true,
-            flex: 1,
-        },
-        {
-            field: 'actions',
-            headerName: '',
-            width: 50,
-            sortable: false,
-            align: 'right',
-            renderCell: (params) => (
-                <div>
-                    <IconButton onClick={(event) => handleMenuOpen(event, params.row.id)}>
-                        <MoreVertIcon />
-                    </IconButton>
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl) && selectedRowId === params.row.id}
-                        onClose={handleMenuClose}
-                    >
-                        <MenuItem onClick={handleEdit}>Edit</MenuItem>
-                        <MenuItem onClick={handleDelete}>Delete</MenuItem>
-                    </Menu>
-                </div>
-            ),
-        },
+            id: 103,
+            email: 'invited3@example.com',
+            location: 'VivoCity',
+            role: 'Viewer'
+        }
     ];
 
-    const paginationModel = { page: 0, pageSize: 10 };
+    const invitedUsersRows = invitedUsersTable.map((item) => ({
+        id: item.id,
+        email: item.email,
+        location: item.location,
+        role: item.role
+    }));
 
     const addUserHandler = () => {
         setIsAddUserOpen(true);
@@ -132,22 +90,37 @@ const UsersAndPermissions = () => {
         setIsAddUserOpen(false);
     };
 
+    const handleUserInvited = (userData) => {
+        const message = `${userData.email} has been invited successfully. An email has been sent to their account, or they can login to accept the role.`;
+        setSuccessMessage(message);
+        setIsAddUserOpen(false);
+    };
+
+    const clearSuccessMessage = () => {
+        setSuccessMessage('');
+    };
+
     return (
         <>
             <AddUsersDialog 
                 isOpen={isAddUserOpen}
                 closeAddUserHandler={closeAddUserHandler}
+                onUserInvited={handleUserInvited}
             />
 
             <div className={styles.container}>
-                <ContentCard className={styles.content}>
-                    <div>
-                        <h2>Users Management</h2>
-                        <p className={styles.description}>
+                <HeaderSection
+                    className={styles.header}
+                    title='Users Management'
+                    description={
+                        <p>
                             Manage user accounts and configure permission settings to control access levels and ensure secure operations.
                         </p>
-                    </div>
-                </ContentCard>
+                    }
+                    showButton={false}
+                    successMessage={successMessage}
+                    setShowSuccess={clearSuccessMessage}
+                />
 
                 <ContentCard className={styles.content}>
                     <div className={styles.usersHeader}>
@@ -166,21 +139,22 @@ const UsersAndPermissions = () => {
                         </Button>
                     </div>
                 </ContentCard>
+            
+                <section>
+                    <h4 className={styles.sectionHeaderIos}>Invited users</h4>
 
-                <div className={styles.tableContainer}>
-                    <DataGrid
-                        rows={rows}
-                        columns={columns}
-                        initialState={{ pagination: { paginationModel } }}
-                        disableColumnFilter
-                        disableColumnMenu
-                        pageSizeOptions={[10]}
-                        disableSelectionOnClick
-                        getRowHeight={() => 'auto'}
-                        style={{ width: '100%' }}
-                        pagination
-                    />
-                </div>
+                    <div className={styles.tableContainer}>
+                        <InvitedUserTable invitedUsersRows={invitedUsersRows} />
+                    </div>
+                </section>
+
+                <section>
+                    <h4 className={styles.sectionHeaderIos}>Users with access</h4>
+
+                    <div className={styles.tableContainer}>
+                        <UserTable usersRows={usersRows} />
+                    </div>
+                </section>
             </div>
         </>
     )

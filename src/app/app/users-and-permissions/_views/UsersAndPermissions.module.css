@@ -11,6 +11,13 @@
     gap: 32px;
 }
 
+.header {
+    position: -webkit-sticky;
+    position: sticky !important;
+    top: 0;
+    z-index: 97;
+}
+
 .description {
     margin-top: 12px;
 }
@@ -33,4 +40,17 @@
     max-width: 75rem;
     margin:  0 auto;
     width: 100%;
+}
+
+.sectionHeaderIos {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #535356;
+  letter-spacing: 0.04em;
+  padding: 16px 0 4px 0;
+  margin: 0 auto;
+  margin-bottom: 4px;
+  background: none;
+  border: none;
+  max-width: 75rem;
 }
