@@ -36,7 +36,8 @@ const CreateRewardPopup = ({
     setIsOpen,
     onClose,
     selectedReward,
-    onArchive
+    onArchive,
+    onSubmit
 }) => {
     const [isRewardImageOpen, setIsRewardImageOpen] = useState(false);
     const [isExpiryOpen, setIsExpiryOpen] = useState(false);
@@ -59,13 +60,34 @@ const CreateRewardPopup = ({
         setRewardData((prevValue) => ({ ...prevValue, [key]: value }))
     };
 
-    const onSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
+
+        // Basic validation
+        if (!rewardData.name || !rewardData.description) {
+            alert('Please fill in all required fields (Reward name and Description)');
+            return;
+        }
 
         if (selectedReward !== null) {
             console.log('Saved Form. Data:')
+            // Handle update logic here if needed
         } else {
             console.log('Submitted. Data:')
+            // Prepare form data with image
+            const formDataWithImage = {
+                ...rewardData,
+                image: rewardImage.length > 0 ? rewardImage[0] : null
+            };
+            
+            // Debug: log the image data structure
+            console.log('Image data:', rewardImage);
+            console.log('Form data with image:', formDataWithImage);
+            
+            // Call the parent's onSubmit function with the form data
+            if (onSubmit) {
+                await onSubmit(formDataWithImage);
+            }
         }
         console.log(rewardData)
     }
@@ -128,7 +150,7 @@ const CreateRewardPopup = ({
                     maxHeight: '70vh',
                 },
             }}
-            onSubmit={onSubmit}
+            onSubmit={handleSubmit}
         >
             <div className={styles.content}>
                 <section>
