@@ -5,7 +5,7 @@
   gap: 16px;
   padding: 16px;
   width: 100%;
-  background-color: var(--background);
+  background-color: var(--background) !important;
   padding-top: 0;
   padding-bottom: 0;
   margin-top: 4px;
@@ -17,7 +17,6 @@
   align-items: center;
   min-height: calc(100vh - 420px);
   width: 100%;
-  background-color: var(--background);
   padding-top: 0;
   color: gray;
 }
