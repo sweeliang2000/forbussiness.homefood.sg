@@ -14,7 +14,7 @@
 .card .content {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   margin-top: 12px;
   padding: 4px 12px 24px;
 }
@@ -93,4 +93,9 @@
 .tag:nth-child(2) {
   background-color: #f6ffed;
   color: #52c41a;
+}
+
+.notUsedTag {
+  background-color: #fff2f0 !important;
+  color: #ff4d4f !important;
 }

@@ -5,18 +5,16 @@ import { FaCheck } from "react-icons/fa6";
 const RewardCard = ({
     reward,
     onClick,
-    isSelectable,
-    isCheck,
-    isPublished
+    isSelectable
 }) => (
     <div 
         key={reward.id} 
-        className={`${styles.card} ${isCheck && styles.selected}`}
+        className={`${styles.card} ${reward.isCheck && styles.selected}`}
         onClick={onClick}>
         {
             isSelectable && 
-            <div className={`${styles.check} ${isCheck && styles.selected}`}>
-                { isCheck && <FaCheck className={styles.tick}/> }
+            <div className={`${styles.check} ${reward.isCheck && styles.selected}`}>
+                { reward.isCheck && <FaCheck className={styles.tick}/> }
             </div>
         }
 
@@ -28,10 +26,18 @@ const RewardCard = ({
             className={styles.image}
         />
 
-        <div className={styles.statusTags}>
-            {isCheck && <span className={styles.tag}>Currently Selected</span>}
-            {isPublished && <span className={styles.tag}>Live and In Use</span>}
-        </div>
+        {(reward.isCheck || reward.isPublished) && (
+            <div className={styles.statusTags}>
+                {reward.isCheck && <span className={styles.tag}>Currently Selected</span>}
+                {reward.isPublished && <span className={styles.tag}>Live and In Use</span>}
+            </div>
+        )}
+
+        {(!reward.isCheck && !reward.isPublished) && (
+            <div className={styles.statusTags}>
+                <span className={`${styles.tag} ${styles.notUsedTag}`}>Not Used</span>
+            </div>
+        )}
 
         <div className={styles.content}>
             <h3>{reward.name}</h3>

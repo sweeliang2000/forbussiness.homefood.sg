@@ -39,8 +39,7 @@ const RewardsLists = ({
                 rewards.map((reward) => <RewardCard
                     key={reward.id}
                     reward={reward}
-                    isCheck={true}
-                    isPublished={true}
+                    isSelectable={false} // Not used here
                     onClick={() => { onCardSelected(reward) }} />)
             }
         </ContentCard>

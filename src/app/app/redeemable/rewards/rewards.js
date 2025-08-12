@@ -23,6 +23,7 @@ const Rewards = () => {
             setLoading(true);
             const response = await apiClient.get(REWARDS);
             const apiRewards = response.data.data;
+            console.log('API rewards:', apiRewards);    
             
             // Transform API response to match expected structure
             const transformedRewards = apiRewards.map(reward => ({
@@ -36,7 +37,8 @@ const Rewards = () => {
                 expiry: reward.expiryNumberOfDays?.toString() || '30',
                 custom_id: reward.customRewardId || '',
                 tags: reward.rewardTags || '',
-                in_used: true // Default to true as per the sample data pattern
+                isCheck: reward.isCheck === 'true' || reward.isCheck === true,
+                isPublished: reward.isPublished === 'true' || reward.isPublished === true
             }));
 
             console.log('Transformed rewards:', transformedRewards);
@@ -156,6 +158,10 @@ const Rewards = () => {
                     <div className={styles.legendItem}>
                         <span className={`${styles.legendTag} ${styles.publishedTag}`}>Live and In Use</span>
                         <p className={styles.legendDescription}>This reward is already published and visable in app to your customers.</p>
+                    </div>
+                    <div className={styles.legendItem}>
+                        <span className={`${styles.legendTag} ${styles.notUsedTag}`}>Not Used</span>
+                        <p className={styles.legendDescription}>This reward is not currently selected or published and is not visible to customers.</p>
                     </div>
                 </div>
             </ContentCard>
