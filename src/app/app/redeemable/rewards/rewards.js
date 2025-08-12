@@ -8,7 +8,7 @@ import RewardsLists from './_views/RewardsLists';
 import AlertModal from '@/components/AlertModal/AlertModal';
 import RewardCard from './_views/RewardCard';
 import apiClient from '@/utility/api';
-import { REWARDS, CREATE_REWARD } from '@/utility/apiPaths';
+import { REWARDS, CREATE_REWARD, DELETE_REWARD } from '@/utility/apiPaths';
 
 const Rewards = () => {
     const [isCreateNewRewardOpen, setIsCreateNewRewardOpen] = useState(false);
@@ -65,11 +65,33 @@ const Rewards = () => {
         setIsArchiveModalOpen(true);
     }
 
-    const handleArchiveConfirm = () => {
-        // Implement the actual archive functionality here
-        console.log('Archive confirmed for reward:', selectedReward);
-        setIsArchiveModalOpen(false);
-        setIsCreateNewRewardOpen(false);
+    const handleArchiveConfirm = async () => {
+        try {
+            if (selectedReward && selectedReward.id) {
+                console.log('Deleting reward:', selectedReward);
+                
+                // Make DELETE request to remove the reward
+                const response = await apiClient.delete(DELETE_REWARD, {
+                    data: {
+                        reward_id: selectedReward.id
+                    }
+                });
+                
+                if (response.status === 200 || response.status === 204) {
+                    console.log('Reward deleted successfully');
+                    // Refresh the rewards list after successful deletion
+                    await fetchRewards();
+                } else {
+                    console.error('Failed to delete reward:', response);
+                }
+            }
+        } catch (err) {
+            console.error('Error deleting reward:', err);
+            // You might want to show an error message to the user here
+        } finally {
+            setIsArchiveModalOpen(false);
+            setIsCreateNewRewardOpen(false);
+        }
     }
 
     const handleSubmitReward = async (formData) => {
