@@ -11,7 +11,7 @@ const RewardsLists = ({
 }) => {
     if (loading) {
         return (
-            <ContentCard className={styles.container}>
+            <ContentCard className={styles.messageContainer}>
                 <div>Loading rewards...</div>
             </ContentCard>
         );
@@ -19,8 +19,16 @@ const RewardsLists = ({
 
     if (error) {
         return (
-            <ContentCard className={styles.container}>
+            <ContentCard className={styles.messageContainer}>
                 <div>Error: {error}</div>
+            </ContentCard>
+        );
+    }
+
+    if (rewards.length === 0) {
+        return (
+            <ContentCard className={styles.messageContainer}>
+                <div>No reward available. Start creating</div>
             </ContentCard>
         );
     }

@@ -11,6 +11,17 @@
   margin-top: 4px;
 }
 
+.messageContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 420px);
+  width: 100%;
+  background-color: var(--background);
+  padding-top: 0;
+  color: gray;
+}
+
 /* For screens smaller than 1200px */
 @media (max-width: 1200px) {
   .container {

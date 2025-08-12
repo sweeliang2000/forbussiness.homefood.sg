@@ -38,6 +38,8 @@ const Rewards = () => {
                 tags: reward.rewardTags || '',
                 in_used: true // Default to true as per the sample data pattern
             }));
+
+            console.log('Transformed rewards:', transformedRewards);
             
             setRewards(transformedRewards);
         } catch (err) {
@@ -58,7 +60,6 @@ const Rewards = () => {
     };
 
     const onArchive = () => {
-        console.log('Archive')
         setIsArchiveModalOpen(true);
     }
 
