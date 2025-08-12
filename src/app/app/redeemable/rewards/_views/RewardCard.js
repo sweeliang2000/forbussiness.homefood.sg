@@ -5,16 +5,17 @@ import { FaCheck } from "react-icons/fa6";
 const RewardCard = ({
     reward,
     onClick,
+    currentCheck,
     isSelectable
 }) => (
     <div 
         key={reward.id} 
-        className={`${styles.card} ${reward.isCheck && styles.selected}`}
+        className={`${styles.card} ${currentCheck && styles.selected}`}
         onClick={onClick}>
         {
             isSelectable && 
-            <div className={`${styles.check} ${reward.isCheck && styles.selected}`}>
-                { reward.isCheck && <FaCheck className={styles.tick}/> }
+            <div className={`${styles.check} ${currentCheck && styles.selected}`}>
+                { currentCheck && <FaCheck className={styles.tick}/> }
             </div>
         }
 

@@ -2,8 +2,9 @@
 import styles from './AddNewReward.module.css';
 import RewardCard from '@/app/app/redeemable/rewards/_views/RewardCard';
 import DialogPopup from '@/components/DialogPopup/DialogPopup';
-import { REWARDS_SAMPLE } from "@/sample_data/reward_sample";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import apiClient from '@/utility/api';
+import { REWARDS } from '@/utility/apiPaths';
 
 const AddNewReward = ({
     isOpen,
@@ -11,8 +12,47 @@ const AddNewReward = ({
     onSave
 }) => {
     const [selected, setSelected] = useState(null);
-    const rewards = REWARDS_SAMPLE;
+    const [rewards, setRewards] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
+    const fetchRewards = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await apiClient.get(REWARDS);
+            const apiRewards = response.data.data;
+            
+            // Transform API response to match expected structure
+            const transformedRewards = apiRewards.map(reward => ({
+                id: reward.reward_id,
+                type: reward.rewardType || 'stampReward',
+                name: reward.rewardName || 'Unnamed Reward',
+                description: reward.description || 'No description available',
+                image: {
+                    url: reward.rewardImage || '/images/placeholder/reward_placeholder.png'
+                },
+                expiry: reward.expiryNumberOfDays?.toString() || '30',
+                custom_id: reward.customRewardId || '',
+                tags: reward.rewardTags || '',
+                isCheck: reward.isCheck === 'true' || reward.isCheck === true,
+                isPublished: reward.isPublished === 'true' || reward.isPublished === true
+            }));
+            
+            setRewards(transformedRewards);
+        } catch (err) {
+            console.error('Error fetching rewards:', err);
+            setError('Failed to load rewards');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchRewards();
+        }
+    }, [isOpen]);
 
     const saveHandler = (event) => {
         event.preventDefault();
@@ -36,14 +76,28 @@ const AddNewReward = ({
             onSubmit={saveHandler}
         >
             <div className={styles.container}>
-                {
+                {loading ? (
+                    <div>
+                        <div>Loading rewards...</div>
+                    </div>
+                ) : error ? (
+                    <div>
+                        <div>Error: {error}</div>
+                    </div>
+                ) : rewards.length === 0 ? (
+                    <div>
+                        <div>No rewards available</div>
+                    </div>
+                ) : (
                     rewards.map((reward) => <RewardCard
                         key={reward.id}
                         reward={reward}
                         isSelectable={true}
-                        isCheck={selected && (selected.id === reward.id)}
-                        onClick={() => { setSelected(reward) }} />)
-                }
+                        currentCheck={true}
+                        onClick={() => { 
+                            console.log('reward', reward);  
+                            setSelected(reward) }} />)
+                )}
             </div>
         </DialogPopup>
     )
