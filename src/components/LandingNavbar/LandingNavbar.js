@@ -23,19 +23,28 @@ const signup = { label: 'Sign up for free', href: '/signup' };
 
 const LandingNavbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isNotificationVisible, setIsNotificationVisible] = useState(true);
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
 
+    const handleNotificationClose = () => {
+        setIsNotificationVisible(false);
+    };
+
     return (
         <>
             <nav className={styles.navbar}>
-                <Notification
-                    message="🎉 New Feature: Advanced Analytics Dashboard Now Available!"
-                    href="/app/analytics"
-                    variant="success"
-                />
+                {isNotificationVisible && (
+                    <Notification
+                        message="🎉 New Feature: Advanced Analytics Dashboard Now Available!"
+                        href="/app/analytics"
+                        variant="success"
+                        onClose={handleNotificationClose}
+                        isVisible={isNotificationVisible}
+                    />
+                )}
 
                 <div className={styles.navContainer}>
                     {/* Logo */}
@@ -74,7 +83,12 @@ const LandingNavbar = () => {
 
             </nav>
             {/* Mobile Menu */}
-            <div className={`${styles.mobileMenu} ${isMenuOpen ? styles.mobileMenuOpen : ''}`}>
+            <div 
+                className={`${styles.mobileMenu} ${isMenuOpen ? styles.mobileMenuOpen : ''}`}
+                style={{
+                    paddingTop: isNotificationVisible ? '64px' : '32px'
+                }}
+            >
                 <div className={styles.mobileMenuItems}>
                     {menuItems.map((item, index) => (
                         <a
