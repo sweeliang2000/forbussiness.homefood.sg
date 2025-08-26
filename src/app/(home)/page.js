@@ -1,12 +1,6 @@
 'use client';
-import styles from './page.module.css';
+import LandingPage from '@/app/(home)/_views/LandingPage/LandingPage';
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <h1>Login Status</h1>
-      </main>
-    </div>
-  );
+  return <LandingPage />;
 }

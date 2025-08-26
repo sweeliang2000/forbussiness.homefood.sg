@@ -1,0 +1,215 @@
+.navbar {
+    position: sticky;
+    top: 0;
+    /* background-color: var(--primary); */
+    background-color: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 999;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.navbar:has(a:hover) {
+    background-color: white;
+}
+
+.navContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--side-spacing);
+    height: 4rem;
+    gap: 2rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.desktopMenu {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    list-style: none;
+}
+
+.navLink {
+    color: var(--on-primary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+    position: relative;
+}
+
+.navLink:hover {
+    color: var(--accent-color);
+}
+
+.navLink::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--accent-color);
+    transition: width 0.3s ease;
+}
+
+.navLink:hover::after {
+    width: 100%;
+}
+
+.ctaButtons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* Button styles moved to Abutton component */
+
+.mobileMenuToggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.menuIcon {
+    font-size: 34px;
+    color: var(--on-primary);
+    border: 1px solid rgb(220, 220, 220);
+    border-radius: 50%;
+    padding: 6px;
+}
+
+.mobileMenu {
+    position: fixed;
+    overflow-y: scroll;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--primary);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding-top: 64px;
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 998;
+    margin: 0 48px;
+}
+
+.mobileMenuOpen {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: hidden;
+}
+
+.mobileMenuItems {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem var(--side-spacing);
+    gap: 0.5rem;
+}
+
+.mobileNavLink {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--on-primary);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.mobileNavLink:hover {
+    font-weight: bold;
+    color: var(--link-hover-color);
+    border-bottom: 1px solid var(--link-hover-color);
+}
+
+.mobileNavLink:hover > span {
+    color: var(--link-hover-color);
+}
+
+.mobileCtaButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 16px;
+    padding-top: 32px;
+}
+
+.socialMediaIcons {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.socialIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    color: var(--on-primary);
+    text-decoration: none;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.socialIcon:hover {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+/* Mobile button styles moved to Abutton component */
+
+/* Mobile Styles */
+@media only screen and (max-width: 1024px) {
+    /* .navbar {
+        background-color: var(--primary);
+    } */
+
+    .navContainer {
+        gap: 1rem;
+    }
+
+    .desktopMenu,
+    .ctaButtons {
+        display: none;
+    }
+
+    .mobileMenuToggle {
+        display: block;
+    }
+
+    .mobileMenuOpen {
+        visibility: visible;
+    }
+    
+}
+
+/* Tablet Styles */
+@media only screen and (max-width: 1024px) and (min-width: 769px) {
+    .desktopMenu {
+        gap: 1.5rem;
+    }
+    
+    .navContainer {
+        gap: 1.5rem;
+    }
+}

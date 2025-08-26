@@ -1,0 +1,78 @@
+.demo {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-top: 2rem;
+}
+
+.demo h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: var(--on-primary);
+}
+
+.demo p {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--on-primary-light2);
+}
+
+.buttonGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 3rem;
+}
+
+.notificationContainer {
+    position: relative;
+    height: 300px;
+    margin-bottom: 2rem;
+}
+
+.notificationWrapper {
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+
+.codeExample {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-color);
+}
+
+.codeExample h3 {
+    margin-bottom: 1rem;
+    color: var(--on-primary);
+}
+
+.codeExample pre {
+    background-color: #e9ecef;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.codeExample code {
+    color: var(--secondary-color);
+}
+
+/* Mobile responsive */
+@media only screen and (max-width: 768px) {
+    .demo {
+        padding: 1rem;
+    }
+    
+    .buttonGrid {
+        grid-template-columns: 1fr;
+    }
+    
+    .codeExample pre {
+        font-size: 0.8rem;
+    }
+}

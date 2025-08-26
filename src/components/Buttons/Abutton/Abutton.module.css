@@ -1,0 +1,255 @@
+/* Base button styles */
+.button {
+    display: inline-block;
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: 200px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+/* Button variants */
+.primary {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.primary:hover {
+    background-color: #0d3d91;
+    transform: translateY(-1px);
+}
+
+.secondary {
+    background-color: transparent;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+}
+
+.secondary:hover {
+    background-color: var(--accent-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.outline {
+    background-color: transparent;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+}
+
+.outline:hover {
+    background-color: var(--accent-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Additional outline variants */
+.outline-primary {
+    background-color: transparent;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+}
+
+.outline-primary:hover {
+    background-color: var(--accent-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.outline-secondary {
+    background-color: transparent;
+    color: var(--secondary-color);
+    border: 2px solid var(--secondary-color);
+}
+
+.outline-secondary:hover {
+    background-color: var(--secondary-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.outline-white {
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+}
+
+.outline-white:hover {
+    background-color: white;
+    color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.outline-success {
+    background-color: transparent;
+    color: #28a745;
+    border: 2px solid #28a745;
+}
+
+.outline-success:hover {
+    background-color: #28a745;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.outline-warning {
+    background-color: transparent;
+    color: #ffc107;
+    border: 2px solid #ffc107;
+}
+
+.outline-warning:hover {
+    background-color: #ffc107;
+    color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.outline-danger {
+    background-color: transparent;
+    color: var(--error-color);
+    border: 2px solid var(--error-color);
+}
+
+.outline-danger:hover {
+    background-color: var(--error-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Thin outline variants (1px border) */
+.outline-thin {
+    background-color: transparent;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+}
+
+.outline-thin:hover {
+    background-color: rgba(14, 70, 163, 0.1);
+    transform: translateY(-1px);
+}
+
+.outline-thin-white {
+    background-color: transparent;
+    color: white;
+    border: 1px solid white;
+}
+
+.outline-thin-white:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+/* Dashed outline variants */
+.outline-dashed {
+    background-color: transparent;
+    color: var(--accent-color);
+    border: 2px dashed var(--accent-color);
+}
+
+.outline-dashed:hover {
+    background-color: rgba(14, 70, 163, 0.1);
+    border-style: solid;
+    transform: translateY(-1px);
+}
+
+.outline-dashed-secondary {
+    background-color: transparent;
+    color: var(--secondary-color);
+    border: 2px dashed var(--secondary-color);
+}
+
+.outline-dashed-secondary:hover {
+    background-color: rgba(36, 36, 39, 0.1);
+    border-style: solid;
+    transform: translateY(-1px);
+}
+
+/* Special outline variant for CTA section (white outline) - keeping for backward compatibility */
+.outline.white-outline {
+    border-color: white;
+    color: white;
+}
+
+.outline.white-outline:hover {
+    background-color: white;
+    color: var(--accent-color);
+}
+
+.ghost {
+    background-color: transparent;
+    color: var(--accent-color);
+    border: none;
+}
+
+.ghost:hover {
+    background-color: rgba(14, 70, 163, 0.1);
+}
+
+.white {
+    background-color: white;
+    color: var(--accent-color);
+    border: none;
+}
+
+.white:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-2px);
+}
+
+/* Button sizes */
+.small {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.medium {
+    padding: 12px 24px;
+    font-size: 16px;
+}
+
+.large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+.xlarge {
+    padding: 1.25rem 2.5rem;
+    font-size: 1.2rem;
+}
+
+/* Special styles for enhanced buttons */
+.enhanced {
+    box-shadow: 0 4px 15px rgba(14, 70, 163, 0.3);
+}
+
+.enhanced:hover {
+    box-shadow: 0 6px 20px rgba(14, 70, 163, 0.4);
+}
+
+/* Mobile specific styles */
+@media only screen and (max-width: 768px) {
+    .button {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .small {
+        padding: 0.6rem 1rem;
+    }
+    
+    .medium {
+        padding: 0.75rem 1rem;
+    }
+    
+    .large {
+        padding: 1rem 1.5rem;
+    }
+    
+    .xlarge {
+        padding: 1.25rem 2rem;
+    }
+}
