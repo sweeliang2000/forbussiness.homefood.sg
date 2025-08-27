@@ -1,6 +1,7 @@
 'use client';
 import styles from './LandingPage.module.css';
 import Abutton from '@/components/Buttons/Abutton';
+import HeroSection from '../HeroSection/HeroSection';
 
 const LandingPage = () => {
     const features = [
@@ -59,60 +60,7 @@ const LandingPage = () => {
 
     return (
         <div className={styles.landingPage}>
-            {/* Hero Section */}
-            <section id="home" className={styles.heroSection}>
-                <div className={styles.heroContainer}>
-                    <div className={styles.heroContent}>
-                        <h1 className={styles.heroTitle}>
-                            Empower Your Business with 
-                            <span className={styles.highlight}> Smart Loyalty Systems</span>
-                        </h1>
-                        <p className={styles.heroSubtitle}>
-                            Create customizable loyalty programs that keep customers coming back. 
-                            Perfect for Singapore merchants looking to build lasting customer relationships.
-                        </p>
-                        <div className={styles.heroButtons}>
-                            <Abutton href="/signup" variant="primary" size="large" className="enhanced">
-                                Start Free Trial
-                            </Abutton>
-                            <Abutton href="#features" variant="outline-primary" size="large">
-                                Learn More
-                            </Abutton>
-                        </div>
-                        <div className={styles.heroStats}>
-                            <div className={styles.stat}>
-                                <span className={styles.statNumber}>500+</span>
-                                <span className={styles.statLabel}>Active Businesses</span>
-                            </div>
-                            <div className={styles.stat}>
-                                <span className={styles.statNumber}>50K+</span>
-                                <span className={styles.statLabel}>Happy Customers</span>
-                            </div>
-                            <div className={styles.stat}>
-                                <span className={styles.statNumber}>95%</span>
-                                <span className={styles.statLabel}>Satisfaction Rate</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className={styles.heroImage}>
-                        <div className={styles.mockupContainer}>
-                            <div className={styles.phoneFrame}>
-                                <div className={styles.stampCard}>
-                                    <h3>Coffee Loyalty Card</h3>
-                                    <div className={styles.stamps}>
-                                        {[...Array(10)].map((_, i) => (
-                                            <div key={i} className={`${styles.stamp} ${i < 7 ? styles.stamped : ''}`}>
-                                                ☕
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <p>7/10 stamps - 3 more for a free coffee!</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <HeroSection/>
 
             {/* Features Section */}
             <section id="features" className={styles.featuresSection}>

@@ -1,56 +1,5 @@
 .landingPage {
     min-height: 100vh;
-    background-color: red
-}
-
-/* Hero Section */
-.heroSection {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    padding: 4rem 0;
-    min-height: calc(100vh - 4rem);
-    display: flex;
-    align-items: center;
-}
-
-.heroContainer {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    padding: 0 var(--side-spacing);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    align-items: center;
-}
-
-.heroContent {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.heroTitle {
-    font-size: 3.5rem;
-    font-weight: 700;
-    line-height: 1.2;
-    color: var(--on-primary);
-    margin-bottom: 1rem;
-}
-
-.highlight {
-    color: var(--accent-color);
-}
-
-.heroSubtitle {
-    font-size: 1.25rem;
-    color: var(--on-primary-light2);
-    line-height: 1.6;
-    margin-bottom: 2rem;
-}
-
-.heroButtons {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 3rem;
 }
 
 /* Button styles moved to Abutton component */

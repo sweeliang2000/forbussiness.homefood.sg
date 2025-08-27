@@ -1,0 +1,196 @@
+/* heroTopContainer */
+.heroSection {
+    display: flex;
+    flex-direction: column;
+    height: 800px;
+    padding: 90px var(--side-spacing);
+}
+
+.heroTopContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: var(--max-width);
+    padding: 0 calc(var(--side-spacing) * 4);
+    margin: 0 auto;
+}
+
+.heroInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.heroTopContainer h1 {
+    font-size: 70px;
+}
+
+.heroSubtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    max-width: 50%;
+}
+
+.heroButtons {
+    display: flex;
+    gap: 16px;
+}
+
+.heroBottomContainer {
+    position: relative;
+    display: flex;
+    justify-content: end;
+    align-items: flex-end;
+    flex: 1;
+    max-width: var(--max-width);
+    padding: 0 calc(var(--side-spacing) * 4);
+    margin: 0 auto;
+    width: 100%;
+}
+
+.heroBottomImage {
+    position: absolute;
+    height: 520px;
+    width: auto;
+    right: 48px;
+    bottom: 0;
+    object-fit: contain;
+    z-index: 1;
+}
+
+.heroBottomCardImage {
+    position: absolute;
+    height: 280px;
+    width: auto;
+    right: 220px;
+    bottom: 0;
+    object-fit: contain;
+    z-index: 2;
+}
+
+/* Ensure motion wrappers don't interfere with image positioning */
+.heroBottomContainer > div {
+    position: static;
+}
+
+.heroBottomContainer > div > img {
+    display: block;
+}
+
+@media only screen and (max-width: 1250px) {
+    .heroBottomCardImage {
+        height: 210px;
+        width: auto;
+    }
+}
+
+/* Tablet Styles */
+@media only screen and (max-width: 1024px) {
+    .heroSection {
+        padding: 60px var(--side-spacing);
+    }
+
+    .heroTopContainer {
+        padding: 0 calc(var(--side-spacing) * 2);
+        text-align: center;
+    }
+
+    .heroTopContainer h1 {
+        font-size: 56px;
+    }
+
+    .heroSubtitle {
+        max-width: 80%;
+        margin: 0 auto;
+    }
+
+    .heroBottomContainer {
+        justify-content: center;
+        padding: 48px calc(var(--side-spacing) * 2);
+    }
+
+    .heroBottomImage {
+        position: relative;
+        height: 440px;
+        right: 0;
+    }
+
+    .heroBottomCardImage {
+        position: relative;
+        margin: 0;
+        right: 0;
+        height: 180px;
+    }
+
+    .heroButtons {
+        display: flex;
+        justify-content: center;
+    }
+}
+
+/* Mobile Responsive Styles */
+@media only screen and (max-width: 768px) {
+    .heroSection {
+        height: auto;
+        min-height: 100vh;
+        padding: 80px var(--side-spacing) 60px;
+    }
+
+    .heroTopContainer {
+        padding: 0;
+        gap: 32px;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .heroTopContainer h1 {
+        font-size: 42px;
+        line-height: 1.2;
+    }
+
+    .heroSubtitle {
+        font-size: 18px;
+        max-width: 100%;
+        line-height: 1.5;
+    }
+
+    .heroButtons {
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .heroBottomContainer {
+        padding: 80px 0;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .heroBottomImage {
+        height: 580px;
+    }
+}
+
+/* Small Mobile Styles */
+@media only screen and (max-width: 580px) {
+    .heroSection {
+        padding: 30px var(--side-spacing) 40px;
+    }
+
+    .heroTopContainer {
+        gap: 24px;
+    }
+
+    .heroTopContainer h1 {
+        font-size: 32px;
+    }
+
+    .heroSubtitle {
+        font-size: 16px;
+    }
+
+    .heroBottomImageContainer,
+    .heroBottomCardImage {
+        display: none;
+    }
+}
