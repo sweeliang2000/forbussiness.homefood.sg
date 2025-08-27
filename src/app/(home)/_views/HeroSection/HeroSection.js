@@ -65,7 +65,7 @@ const HeroSection = () => {
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.4, type: "spring", stiffness: 120 }}
+                    transition={{ duration: 0.4, delay: 0.4, type: "spring", stiffness: 120 }}
                     className={styles.heroBottomImageContainer}
                     >
                     <Image
@@ -81,7 +81,7 @@ const HeroSection = () => {
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.4, type: "spring", stiffness: 120 }}
+                    transition={{ duration: 0.4, delay: 0.4, type: "spring", stiffness: 120 }}
                     >
                     <Image
                         className={styles.heroBottomImage}
