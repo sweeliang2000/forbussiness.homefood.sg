@@ -87,12 +87,14 @@
 /* Tablet Styles */
 @media only screen and (max-width: 1024px) {
     .heroSection {
-        padding: 60px var(--side-spacing);
+        padding: 80px var(--side-spacing);
+        height: auto;
     }
 
     .heroTopContainer {
         padding: 0 calc(var(--side-spacing) * 2);
         text-align: center;
+        margin-top: 72px;
     }
 
     .heroTopContainer h1 {
@@ -132,8 +134,6 @@
 @media only screen and (max-width: 768px) {
     .heroSection {
         height: auto;
-        min-height: 100vh;
-        padding: 80px var(--side-spacing) 60px;
     }
 
     .heroTopContainer {
