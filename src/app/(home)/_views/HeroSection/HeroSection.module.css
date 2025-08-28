@@ -2,8 +2,8 @@
 .heroSection {
     display: flex;
     flex-direction: column;
-    height: 800px;
-    padding: 90px var(--side-spacing);
+    height: 740px;
+    padding: 90px var(--side-spacing) 0;
 }
 
 .heroTopContainer {
