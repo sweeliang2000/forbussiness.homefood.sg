@@ -86,6 +86,7 @@ const CustomerFacingBusinessPage = () => {
     const resetSaving= () => {
         setIsSubmissionSuccess(false);
         setIsBtnDisabled(false);
+        console.log('resetSaving');
     };
 
     const inputChangeHandler = (key, value) => {
@@ -127,9 +128,9 @@ const CustomerFacingBusinessPage = () => {
 
             // Debugging: log each form data entry
             // Uncomment this to look at the form data
-            for (let [key, value] of formData.entries()) {
-                console.log(`${key}:`, value);
-            }
+            // for (let [key, value] of formData.entries()) {
+            //     console.log(`${key}:`, value);
+            // }
 
             // Use POST for new data, PUT for updating existing data
             const httpMethod = hasExistingData ? 'put' : 'post';

@@ -60,6 +60,7 @@ const DragDropImageUploader = ({
         setImages((prevImages) =>
             prevImages.filter((_, i) => i !== index)
         );
+        resetSaving();
     };
 
     const onDragOver = (event) => {
