@@ -133,8 +133,7 @@ export default function StampSetup() {
     const retrieveInformation = async (event) => {
       try {
         const response = await apiClient.get(`${OFFICIAL_BUSINESS_INFORMATION}`)
-        const data = response.data.data;
-        console.log('data', data);
+        const data = response.data;
 
         if (data && data.data) {
           const addressBuildingName = data.data.addressBuildingName;
