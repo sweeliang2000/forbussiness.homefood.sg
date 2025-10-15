@@ -69,7 +69,7 @@ const AddNewReward = ({
 
     return(
         <DialogPopup
-            title='Add New Reward'
+            title='Add Reward'
             actionTitle='Add'
             isOpen={isOpen}
             setIsOpen={setIsOpen}
