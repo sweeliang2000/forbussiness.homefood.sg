@@ -19,7 +19,9 @@ const StampCard = ({
   cardNoStampBackgroundColor,
   cardStampCollectedBorderColor,
   checkmarkColor,
-  prizeSteps = [6]
+  prizeSteps = [6],
+  stamped_url,
+  unstamped_url
 }) => {
   // Ensure totalStamps is within bounds (5-16)
   const validTotalStamps = Math.min(Math.max(totalStamps, 5), 18);
@@ -75,10 +77,10 @@ const StampCard = ({
               {isPrize ? (
                 <div className={styles.prizeImageContainer}>
                   <Image 
-                    src={isCollected ? "/images/stamps/stampped-prize.png" : "/images/stamps/unstampped-prize.png"} 
+                    src={isCollected ? (stamped_url && stamped_url.trim() !== '' ? stamped_url : "/images/stamps/stampped-prize.png") : (unstamped_url && unstamped_url.trim() !== '' ? unstamped_url : "/images/stamps/unstampped-prize.png")} 
                     alt={isCollected ? "Stamped Prize" : "Unstamped Prize"}
-                    width={24}
-                    height={24}
+                    width={100}
+                    height={100}
                     className={styles.prizeImage}
                   />
                 </div>

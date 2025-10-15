@@ -406,7 +406,7 @@ export default function StampSetup() {
       renderCell: (params) => {
         const reward = cardSteps[params.row.id - 1].reward;
 
-        if (reward === undefined) {
+        if (!reward) {
           return <p>No Reward</p>
         }
 

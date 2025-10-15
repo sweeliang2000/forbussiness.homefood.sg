@@ -44,6 +44,8 @@ const CardDesign = () => {
     const [numberOfStamps, setNumberOfStamps] = useState(6);
     const [expirationType, setExpirationType] = useState('validForDays');
     const [numberOfDaysToExpire, setNumberOfDaysToExpire] = useState(30);
+    const [stamped_url, setStamped_url] = useState('');
+    const [unstamped_url, setUnstamped_url] = useState('');
 
     const resetToDefaultColor = () => {
         setCardBackgroundColor('#ffffff');
@@ -111,7 +113,8 @@ const CardDesign = () => {
 
                 // Handle card design data
                 if (cardDesignResponse.status === 'fulfilled') {
-                    const cardDesignData = cardDesignResponse.value.data.data;
+                    const cardDesignData = cardDesignResponse.value.data;
+                    console.log(cardDesignData)
 
                     if (cardDesignData) {
                         setCardBackgroundColor(cardDesignData.data.backgroundColor);
@@ -130,12 +133,15 @@ const CardDesign = () => {
                 // Handle stamp management data
                 if (stampManagementResponse.status === 'fulfilled') {
                     const stampData = stampManagementResponse.value.data.data;
+                    console.log(stampData)
                     if (stampData) {
                         setCardTitle(stampData.cardTitle || '');
                         setCardDescription(stampData.cardDescription || '');
                         setNumberOfStamps(stampData.numberOfStamps || 6);
                         setExpirationType(stampData.expirationType || 'validForDays');
                         setNumberOfDaysToExpire(stampData.numberOfDaysToExpire || 30);
+                        setStamped_url(stampData.defaultStampedUrl_Presign || '');
+                        setUnstamped_url(stampData.defaultUnStampedUrl_Presign || '');
 
                         // Parse cardStepDetails and extract prize steps
                         if (stampData.cardStepDetails) {
@@ -240,6 +246,8 @@ const CardDesign = () => {
                                     cardStampCollectedBorderColor={cardStampCollectedBorderColor}
                                     checkmarkColor={checkmarkColor}
                                     prizeSteps={prizeSteps}
+                                    stamped_url={stamped_url}
+                                    unstamped_url={unstamped_url}
                                 />
 
                                 <p className={styles.cardDescription}><Link href='/app/stamp-management'>Modify</Link> number of stamp and stamp icon is at <Link href='/app/stamp-management'>Stamp Management</Link>.</p>
