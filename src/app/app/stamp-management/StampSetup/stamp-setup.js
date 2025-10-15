@@ -410,7 +410,7 @@ export default function StampSetup() {
           return <p>No Reward</p>
         }
 
-        return (<p>{reward.name}</p>)
+        return (<p>{reward.name || ""}</p>)
       }
     },
     {
