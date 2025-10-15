@@ -85,6 +85,11 @@ export default function StampSetup() {
     setErrorMessage(message)
   };
 
+  const clearError = () => {
+    setIsError(false);
+    setErrorMessage('')
+  };
+
   const formSubmissionHandler = async (event) => {
     event.preventDefault();
     setIsBtnLoading(true);
@@ -112,6 +117,7 @@ export default function StampSetup() {
       // TODO: - Create UI to show successfully saved
       setIsSubmissionSuccess(true);
       setIsBtnLoading(false);
+      clearError();
     } catch (error) {
       // TODO: - Create UI to show error if happened.
       const message = error?.response?.data?.message || error.message;
