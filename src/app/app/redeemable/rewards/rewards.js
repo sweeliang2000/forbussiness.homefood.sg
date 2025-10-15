@@ -28,11 +28,11 @@ const Rewards = () => {
             
             // Filter currently_selected to only get items with rewards and extract the reward IDs
             const selectedRewards = currently_selected
-                .filter(item => item.reward)
-                .map(item => item.reward.id);
+                ?.filter(item => item.reward)
+                ?.map(item => item.reward.id) || [];
             
             // Transform API response to match expected structure
-            const transformedRewards = apiRewards.map(reward => ({
+            const transformedRewards = (apiRewards || []).map(reward => ({
                 id: reward.reward_id,
                 type: reward.rewardType || 'stampReward',
                 name: reward.rewardName || 'Unnamed Reward',

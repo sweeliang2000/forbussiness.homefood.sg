@@ -19,7 +19,7 @@ const StampCard = ({
   cardNoStampBackgroundColor,
   cardStampCollectedBorderColor,
   checkmarkColor,
-  prizeSteps = []
+  prizeSteps = [6]
 }) => {
   // Ensure totalStamps is within bounds (5-16)
   const validTotalStamps = Math.min(Math.max(totalStamps, 5), 18);

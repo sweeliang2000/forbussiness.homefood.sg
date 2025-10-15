@@ -8,7 +8,7 @@ import { MuiColorInput } from 'mui-color-input'
 import { useEffect, useState } from 'react';
 import StampCard from '@/components/StampCard/StampCard';
 import { Button, Slider } from '@mui/material';
-import { CARD_DESIGN_SETTING } from '@/utility/apiPaths';
+import { CARD_DESIGN_SETTING, STAMP_MANAGEMENT } from '@/utility/apiPaths';
 import apiClient from '@/utility/api';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
@@ -36,7 +36,14 @@ const CardDesign = () => {
     const [collectedStamps, setCollectedStamps] = useState(10);
     const [spendAmount, setSpendAmount] = useState(10);
     const [expiryDate, setExpiryDate] = useState('31 Dec 2023');
-    const [prizeSteps, setPrizeSteps] = useState([5, 10, 18]);
+    const [prizeSteps, setPrizeSteps] = useState([6]);
+
+    // Stamp management data
+    const [cardTitle, setCardTitle] = useState('');
+    const [cardDescription, setCardDescription] = useState('');
+    const [numberOfStamps, setNumberOfStamps] = useState(6);
+    const [expirationType, setExpirationType] = useState('validForDays');
+    const [numberOfDaysToExpire, setNumberOfDaysToExpire] = useState(30);
 
     const resetToDefaultColor = () => {
         setCardBackgroundColor('#ffffff');
@@ -94,21 +101,84 @@ const CardDesign = () => {
     useEffect(() => {
         setIsLoading(true);
 
-        const retrieveCardDesignSetting = async () => {
+        const fetchAllData = async () => {
             try {
-                const response = await apiClient.get(`${CARD_DESIGN_SETTING}`);
-                const data = response.data.data;
+                // Fetch both card design and stamp management data in parallel
+                const [cardDesignResponse, stampManagementResponse] = await Promise.allSettled([
+                    apiClient.get(CARD_DESIGN_SETTING),
+                    apiClient.get(STAMP_MANAGEMENT)
+                ]);
 
-                if (data) {
-                    setCardBackgroundColor(data.data.backgroundColor);
-                    setCardTitleColor(data.data.titleColor);
-                    setCardFooterColor(data.data.footerTextColor)
-                    setCardNoStampBorderColor(data.data.noStampBorderColor);
-                    setCardNoStampBackgroundColor(data.data.noStampBackgroundColor)
-                    setCardStampCollectedBorderColor(data.data.stampBorderColor);
-                    setCardStampBackground(data.data.stampBackgroundColor);
-                    setCheckmarkColor(data.data.checkmarkColor);
-                };
+                // Handle card design data
+                if (cardDesignResponse.status === 'fulfilled') {
+                    const cardDesignData = cardDesignResponse.value.data.data;
+
+                    if (cardDesignData) {
+                        setCardBackgroundColor(cardDesignData.data.backgroundColor);
+                        setCardTitleColor(cardDesignData.data.titleColor);
+                        setCardFooterColor(cardDesignData.data.footerTextColor);
+                        setCardNoStampBorderColor(cardDesignData.data.noStampBorderColor);
+                        setCardNoStampBackgroundColor(cardDesignData.data.noStampBackgroundColor);
+                        setCardStampCollectedBorderColor(cardDesignData.data.stampBorderColor);
+                        setCardStampBackground(cardDesignData.data.stampBackgroundColor);
+                        setCheckmarkColor(cardDesignData.data.checkmarkColor);
+                    }
+                } else {
+                    console.warn('Failed to fetch card design data:', cardDesignResponse.reason);
+                }
+
+                // Handle stamp management data
+                if (stampManagementResponse.status === 'fulfilled') {
+                    const stampData = stampManagementResponse.value.data.data;
+                    if (stampData) {
+                        setCardTitle(stampData.cardTitle || '');
+                        setCardDescription(stampData.cardDescription || '');
+                        setNumberOfStamps(stampData.numberOfStamps || 6);
+                        setExpirationType(stampData.expirationType || 'validForDays');
+                        setNumberOfDaysToExpire(stampData.numberOfDaysToExpire || 30);
+
+                        // Parse cardStepDetails and extract prize steps
+                        if (stampData.cardStepDetails) {
+                            try {
+                                const parsedCardSteps = typeof stampData.cardStepDetails === 'string'
+                                    ? JSON.parse(stampData.cardStepDetails)
+                                    : stampData.cardStepDetails;
+                                
+                                // Extract prize steps from card steps that have rewards
+                                const prizeStepsFromData = parsedCardSteps
+                                    .filter(step => step.reward && step.reward !== null)
+                                    .map(step => step.id);
+                                
+                                if (prizeStepsFromData.length > 0) {
+                                    setPrizeSteps(prizeStepsFromData);
+                                } else {
+                                    setPrizeSteps([]);
+                                }
+                                
+                                console.log('Parsed cardStepDetails:', parsedCardSteps);
+                                console.log('Extracted prize steps:', prizeStepsFromData);
+                            } catch (parseError) {
+                                console.error('Error parsing cardStepDetails:', parseError);
+                            }
+                        }
+                        
+                        // Update the preview values
+                        setNumberOfStamp(stampData.numberOfStamps || 6);
+                        setSpendAmount(10); // Default spend amount
+                        setExpiryDate('31 Dec 2023'); // Default expiry date
+                    }
+                } else {
+                    console.warn('Failed to fetch stamp management data:', stampManagementResponse.reason);
+                }
+
+                // Only show error if both requests failed
+                if (cardDesignResponse.status === 'rejected' && stampManagementResponse.status === 'rejected') {
+                    const error = cardDesignResponse.reason || stampManagementResponse.reason;
+                    const message = error?.response?.data?.message || error?.message || 'Failed to load data';
+                    const code = error?.response?.data?.code || error?.code || 'UNKNOWN';
+                    showError(`An error had occurred. ${message} (Error code: ${code})`);
+                    setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
+                }
 
                 setIsLoading(false);
             } catch (error) {
@@ -118,11 +188,10 @@ const CardDesign = () => {
                 setIsBtnLoading(false);
                 showError(`An error had occurred. ${message} (Error code: ${code})`);
                 setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
-            };
+            }
         };
 
-        retrieveCardDesignSetting();
-
+        fetchAllData();
     }, []);
 
     return (
@@ -156,8 +225,8 @@ const CardDesign = () => {
                         <div className={styles.contentContainer}>
                             <ContentCard className={styles.cardContainer}>
                                 <StampCard
-                                    title="Get Free Spiacy Black Whole Leg"
-                                    description={`Earn a stamp when you spend SGD $10.00`}
+                                    title={cardTitle || "Get Free Spiacy Black Whole Leg"}
+                                    description={cardDescription || `Earn a stamp when you spend SGD $10.00`}
                                     totalStamps={numberOfStamp}
                                     collectedStamps={collectedStamps}
                                     expiryDate={expiryDate}
