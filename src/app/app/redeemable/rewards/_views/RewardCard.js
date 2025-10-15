@@ -6,7 +6,8 @@ const RewardCard = ({
     reward,
     onClick,
     currentCheck,
-    isSelectable
+    isSelectable, 
+    disableTags
 }) => (
     <div 
         key={reward.id} 
@@ -27,17 +28,21 @@ const RewardCard = ({
             className={styles.image}
         />
 
-        {(reward.isCheck || reward.isPublished) && (
-            <div className={styles.statusTags}>
-                {reward.isCheck && <span className={styles.tag}>Currently Selected</span>}
-                {reward.isPublished && <span className={styles.tag}>Live and In Use</span>}
-            </div>
-        )}
+        {!disableTags && (
+            <>
+                {(reward.isCheck || reward.isPublished) && (
+                    <div className={styles.statusTags}>
+                        {reward.isCheck && <span className={styles.tag}>Currently Selected</span>}
+                        {reward.isPublished && <span className={styles.tag}>Live and In Use</span>}
+                    </div>
+                )}
 
-        {(!reward.isCheck && !reward.isPublished) && (
-            <div className={styles.statusTags}>
-                <span className={`${styles.tag} ${styles.notUsedTag}`}>Not Used</span>
-            </div>
+                {(!reward.isCheck && !reward.isPublished) && (
+                    <div className={styles.statusTags}>
+                        <span className={`${styles.tag} ${styles.notUsedTag}`}>Not Used</span>
+                    </div>
+                )}
+            </>
         )}
 
         <div className={styles.content}>

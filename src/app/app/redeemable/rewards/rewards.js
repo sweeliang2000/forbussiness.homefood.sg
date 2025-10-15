@@ -24,7 +24,12 @@ const Rewards = () => {
             const response = await apiClient.get(REWARDS);
             const data = response.data.data
             const apiRewards = data.rewards;
-            console.log('API rewards:', apiRewards);    
+            const currently_selected = data.currently_selected;  
+            
+            // Filter currently_selected to only get items with rewards and extract the reward IDs
+            const selectedRewards = currently_selected
+                .filter(item => item.reward)
+                .map(item => item.reward.id);
             
             // Transform API response to match expected structure
             const transformedRewards = apiRewards.map(reward => ({
@@ -38,7 +43,7 @@ const Rewards = () => {
                 expiry: reward.expiryNumberOfDays?.toString() || '30',
                 custom_id: reward.customRewardId || '',
                 tags: reward.rewardTags || '',
-                isCheck: reward.isCheck === 'true' || reward.isCheck === true,
+                isCheck: selectedRewards.includes(reward.reward_id),
                 isPublished: reward.isPublished === 'true' || reward.isPublished === true
             }));
 

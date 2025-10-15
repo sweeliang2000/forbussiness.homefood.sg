@@ -3,6 +3,7 @@ import styles from './EditStampStep.module.css';
 import { Button, Dialog } from '@mui/material';
 import { IoCloseSharp } from 'react-icons/io5';
 import { IoMdAdd } from "react-icons/io";
+import { IoMdRemove } from "react-icons/io";
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 import AddNewReward from './AddNewReward';
 import { useState } from 'react';
@@ -32,6 +33,10 @@ const EditStampStep = ({
 
     const onNewRewardSaved = (reward) => {
         setReward(reward)
+    }
+
+    const onRemoveReward = () => {
+        setReward(null)
     }
 
     return (
@@ -88,11 +93,29 @@ const EditStampStep = ({
                             hClassName={styles.title}
                         />
 
-                        <Button variant="outlined" className={styles.addBtn} onClick={onAddNewReward}>
-                            {reward === null ? <><IoMdAdd /> New Reward </>: 'Modify'}
-                        </Button>
+                        <div className={styles.rewardButtons}>
+                            <Button variant="outlined" className={styles.addBtn} onClick={onAddNewReward}>
+                                {reward === null ? <><IoMdAdd /> New Reward </>: 'Modify'}
+                            </Button>
+                            
+                            {reward && (
+                                <Button 
+                                    variant="outlined" 
+                                    className={styles.removeBtn} 
+                                    onClick={onRemoveReward}
+                                    color="error"
+                                >
+                                    <IoMdRemove /> Remove Reward
+                                </Button>
+                            )}
+                        </div>
 
-                        { reward && <div className={styles.rewardDiv}> <RewardCard reward={reward} onClick={onAddNewReward}/> </div> }
+                        { reward && <div className={styles.rewardDiv}> 
+                            <RewardCard 
+                                reward={reward}
+                                disableTags={true} 
+                                onClick={onAddNewReward}/> 
+                        </div> }
                     </div>
                 </div>
 

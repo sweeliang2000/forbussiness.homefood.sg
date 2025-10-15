@@ -21,7 +21,14 @@ const AddNewReward = ({
             setLoading(true);
             setError(null);
             const response = await apiClient.get(REWARDS);
-            const apiRewards = response.data.data;
+            const data = response.data.data
+            const apiRewards = data.rewards;
+            const currently_selected = data.currently_selected;
+            
+            // Filter currently_selected to only get items with rewards and extract the reward IDs
+            const selectedRewards = currently_selected
+                .filter(item => item.reward)
+                .map(item => item.reward.id);
             
             // Transform API response to match expected structure
             const transformedRewards = apiRewards.map(reward => ({
@@ -35,7 +42,7 @@ const AddNewReward = ({
                 expiry: reward.expiryNumberOfDays?.toString() || '30',
                 custom_id: reward.customRewardId || '',
                 tags: reward.rewardTags || '',
-                isCheck: reward.isCheck === 'true' || reward.isCheck === true,
+                isCheck: selectedRewards.includes(reward.reward_id),
                 isPublished: reward.isPublished === 'true' || reward.isPublished === true
             }));
             
@@ -94,6 +101,7 @@ const AddNewReward = ({
                         reward={reward}
                         isSelectable={true}
                         currentCheck={true}
+                        disableTags={true}
                         onClick={() => { 
                             console.log('reward', reward);  
                             setSelected(reward) }} />)

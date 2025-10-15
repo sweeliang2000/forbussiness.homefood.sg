@@ -44,7 +44,19 @@
     align-items: flex-start;
 }
 
+.rewardButtons {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
 .addBtn {
+    display: flex;
+    gap: 8px;
+    text-transform: none;
+}
+
+.removeBtn {
     display: flex;
     gap: 8px;
     text-transform: none;
