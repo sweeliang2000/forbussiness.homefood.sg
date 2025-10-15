@@ -71,6 +71,7 @@ export default function StampSetup() {
     ...DEFAULT_STAMP_STEP,
     id: index + 1
   })))
+  const [hasExistingData, setHasExistingData] = useState(false);
 
   // Fetch stamp management data when component loads
   useEffect(() => {
@@ -82,6 +83,19 @@ export default function StampSetup() {
 
         if (data) {
           const data = response.data.data;
+
+          // Check if we have existing data (not empty, null, or empty array)
+          const hasData = data && 
+            (data.cardTitle || 
+             data.cardDescription || 
+             data.numberOfStamps || 
+             data.expirationType || 
+             data.numberOfDaysToExpire ||
+             data.defaultStampedUrl_Presign ||
+             data.defaultUnStampedUrl_Presign ||
+             (data.cardStepDetails && data.cardStepDetails !== '[]'));
+
+          setHasExistingData(hasData);
 
           // Update state with fetched data
           setCardTitle(data.cardTitle || '');
@@ -172,7 +186,11 @@ export default function StampSetup() {
         console.log(pair[0] + ': ' + pair[1]);
       }
 
-      await apiClient.post(STAMP_MANAGEMENT, formData, {
+      // Use POST for new data, PUT for updates
+      const httpMethod = hasExistingData ? 'put' : 'post';
+      console.log(`Using ${httpMethod.toUpperCase()} method for submission`);
+
+      await apiClient[httpMethod](STAMP_MANAGEMENT, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
