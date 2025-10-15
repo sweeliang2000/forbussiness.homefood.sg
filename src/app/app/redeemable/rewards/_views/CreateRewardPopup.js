@@ -69,25 +69,20 @@ const CreateRewardPopup = ({
             return;
         }
 
-        if (selectedReward !== null) {
-            console.log('Saved Form. Data:')
-            // Handle update logic here if needed
-        } else {
-            console.log('Submitted. Data:')
-            // Prepare form data with image
-            const formDataWithImage = {
-                ...rewardData,
-                image: rewardImage.length > 0 ? rewardImage[0] : null
-            };
-            
-            // Debug: log the image data structure
-            console.log('Image data:', rewardImage);
-            console.log('Form data with image:', formDataWithImage);
-            
-            // Call the parent's onSubmit function with the form data
-            if (onSubmit) {
-                await onSubmit(formDataWithImage);
-            }
+        // Prepare form data with image for both create and update
+        const formDataWithImage = {
+            ...rewardData,
+            image: rewardImage.length > 0 ? rewardImage[0] : null
+        };
+        
+        // Debug: log the image data structure
+        console.log('Image data:', rewardImage);
+        console.log('Form data with image:', formDataWithImage);
+        console.log('Is update mode:', selectedReward !== null);
+        
+        // Call the parent's onSubmit function with the form data
+        if (onSubmit) {
+            await onSubmit(formDataWithImage);
         }
         console.log(rewardData)
     }

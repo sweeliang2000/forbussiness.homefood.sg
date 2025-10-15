@@ -16,6 +16,7 @@ export const ADD_USER = '/api/data/InviteUser';
 export const LIST_LOCATIONS = '/api/data/listOfLocations';
 export const REWARDS = '/api/data/rewards';
 export const CREATE_REWARD = '/api/data/reward';
+export const UPDATE_REWARD = '/api/data/reward';
 export const DELETE_REWARD = '/api/data/reward';
 
 export const CHECKOUT_SESSION_STRIPE = '/api/subscription/create-checkout-session';

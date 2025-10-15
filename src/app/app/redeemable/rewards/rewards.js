@@ -8,7 +8,7 @@ import RewardsLists from './_views/RewardsLists';
 import AlertModal from '@/components/AlertModal/AlertModal';
 import RewardCard from './_views/RewardCard';
 import apiClient from '@/utility/api';
-import { REWARDS, CREATE_REWARD, DELETE_REWARD } from '@/utility/apiPaths';
+import { REWARDS, CREATE_REWARD, UPDATE_REWARD, DELETE_REWARD } from '@/utility/apiPaths';
 
 const Rewards = () => {
     const [isCreateNewRewardOpen, setIsCreateNewRewardOpen] = useState(false);
@@ -22,7 +22,8 @@ const Rewards = () => {
         try {
             setLoading(true);
             const response = await apiClient.get(REWARDS);
-            const apiRewards = response.data.data;
+            const data = response.data.data
+            const apiRewards = data.rewards;
             console.log('API rewards:', apiRewards);    
             
             // Transform API response to match expected structure
@@ -98,6 +99,7 @@ const Rewards = () => {
         try {
             console.log('Received form data:', formData);
             console.log('Image data:', formData.image);
+            console.log('Selected reward:', selectedReward);
             
             // Create FormData for multipart/form-data submission
             const submitFormData = new FormData();
@@ -119,20 +121,38 @@ const Rewards = () => {
                 console.log('No image file found');
             }
 
-            const response = await apiClient.post(CREATE_REWARD, submitFormData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            let response;
+            let isUpdate = selectedReward !== null;
+
+            if (isUpdate) {
+                // Update existing reward
+                console.log('Updating reward with ID:', selectedReward.id);
+                submitFormData.append('reward_id', selectedReward.id);
+                
+                response = await apiClient.put(UPDATE_REWARD, submitFormData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+            } else {
+                // Create new reward
+                console.log('Creating new reward');
+                response = await apiClient.post(CREATE_REWARD, submitFormData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+            }
             
             if (response.status === 200 || response.status === 201) {
-                // Refresh the rewards list after successful creation
+                // Refresh the rewards list after successful creation/update
                 await fetchRewards();
                 setIsCreateNewRewardOpen(false);
                 setSelectedReward(null);
+                console.log(`Reward ${isUpdate ? 'updated' : 'created'} successfully`);
             }
         } catch (err) {
-            console.error('Error creating reward:', err);
+            console.error(`Error ${selectedReward ? 'updating' : 'creating'} reward:`, err);
             // You might want to show an error message to the user here
         }
     };
