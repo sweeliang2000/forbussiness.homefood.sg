@@ -28,6 +28,7 @@ export default function StampSetup() {
   const [errorMessage, setErrorMessage] = useState('');
   const [isBtnLoading, setIsBtnLoading] = useState(false);
   const [isBtnDisabled, setIsBtnDisabled] = useState(true);
+  const [isUpdate, setIsUpdate] = useState(false);
 
   const [enteredValues, setEnteredValues] = useState({
     [BUSINESS_NAME]: '',
@@ -101,7 +102,13 @@ export default function StampSetup() {
     };
 
     try {
-      await apiClient.post(`${OFFICIAL_BUSINESS_INFORMATION}`, payload);
+      if (isUpdate) {
+        console.log('Updating existing business information');
+        await apiClient.put(`${OFFICIAL_BUSINESS_INFORMATION}`, payload);
+      } else {
+        console.log('Creating new business information');
+        await apiClient.post(`${OFFICIAL_BUSINESS_INFORMATION}`, payload);
+      }
       // TODO: - Create UI to show successfully saved
       setIsSubmissionSuccess(true);
       setIsBtnLoading(false);
@@ -121,24 +128,31 @@ export default function StampSetup() {
       try {
         const response = await apiClient.get(`${OFFICIAL_BUSINESS_INFORMATION}`)
         const data = response.data.data;
+        console.log('data', data);
 
-        if (data) {
+        if (data && data.data) {
           const addressBuildingName = data.data.addressBuildingName;
           const addressPostalCode = data.data.addressPostalCode;
           const addressStreetAddress = data.data.addressStreetAddress;
-          const addressUnitNumber = data.data.addressStreetAddress
+          const addressUnitNumber = data.data.addressUnitNumber;
           const businessName = data.data.businessName;
           const isBusinessDetailApproved = data.data.isBusinessDetailApproved;
           const uen = data.data.uen;
 
-          setEnteredValues({
-            [BUSINESS_NAME]: businessName,
-            [UEN]: uen,
-            [UNIT_NUMBER]: addressUnitNumber,
-            [BUILDING_NAME]: addressBuildingName,
-            [STREET_ADDRESS]: addressStreetAddress,
-            [POSTAL_CODE]: addressPostalCode,
-          })
+          // Check if any of the required fields have values to determine if this is an update
+          const hasData = businessName || uen || addressUnitNumber || addressBuildingName || addressStreetAddress || addressPostalCode;
+          
+          if (hasData) {
+            setIsUpdate(true);
+            setEnteredValues({
+              [BUSINESS_NAME]: businessName || '',
+              [UEN]: uen || '',
+              [UNIT_NUMBER]: addressUnitNumber || '',
+              [BUILDING_NAME]: addressBuildingName || '',
+              [STREET_ADDRESS]: addressStreetAddress || '',
+              [POSTAL_CODE]: addressPostalCode || '',
+            });
+          }
         }
 
         setIsLoading(false);
