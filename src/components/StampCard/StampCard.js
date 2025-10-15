@@ -24,11 +24,8 @@ const StampCard = ({
   // Ensure totalStamps is within bounds (5-16)
   const validTotalStamps = Math.min(Math.max(totalStamps, 5), 18);
   
-  // Process prize steps - if only one step is provided, add the total stamps as the last step
+  // Use prize steps as provided without automatic modification
   const processedPrizeSteps = [...prizeSteps];
-  if (processedPrizeSteps.length === 1 && processedPrizeSteps[0] < validTotalStamps) {
-    processedPrizeSteps.push(validTotalStamps);
-  }
   
   // Check if a stamp index is a prize step
   const isPrizeStep = (index) => {
