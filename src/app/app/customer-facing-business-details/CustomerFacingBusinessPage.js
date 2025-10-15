@@ -50,7 +50,7 @@ const CustomerFacingBusinessPage = () => {
     const [isBtnLoading, setIsBtnLoading] = useState(false);
     const [isBtnDisabled, setIsBtnDisabled] = useState(true);
     const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
-
+    const [hasExistingData, setHasExistingData] = useState(false);
 
     const [thumbnailImages, setThumbnailImages] = useState([]);
     const [bannerImages, setBannerImages] = useState([]);
@@ -131,7 +131,9 @@ const CustomerFacingBusinessPage = () => {
                 console.log(`${key}:`, value);
             }
 
-            await apiClient.post(CUSTOMER_FACING_INFORMATION, formData, {
+            // Use POST for new data, PUT for updating existing data
+            const httpMethod = hasExistingData ? 'put' : 'post';
+            await apiClient[httpMethod](CUSTOMER_FACING_INFORMATION, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -156,6 +158,7 @@ const CustomerFacingBusinessPage = () => {
                 const data = response.data.data;
 
                 if (data) {
+                    setHasExistingData(true);
                     setEnteredValues({
                         [DISPLAY_NAME]: data.displayName,
                         [SHOP_DESCRIPTION]: data.description,
@@ -171,6 +174,8 @@ const CustomerFacingBusinessPage = () => {
                         setBannerImages([{ name: data.banner_signedUrl, file: null, url: data.banner_signedUrl }])
                     }
                     setLocations(data.locations);
+                } else {
+                    setHasExistingData(false);
                 }
     
                 setIsLoading(false);
