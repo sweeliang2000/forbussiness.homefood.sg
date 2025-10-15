@@ -14,7 +14,7 @@ const StatementSection = () => {
                         </p>
                     </div>
 
-                    <p class="footnote">
+                    <p>
                         *Source: The Value of Online Customer Loyalty, Bain & Company / Mainspring
                     </p>
                 </div>

@@ -12,6 +12,8 @@ const roles = [
     { value: 'Viewer', title: 'Viewer' },
 ];
 
+const defaultLocation = { value: 'all', title: 'All Locations', location_id: 'all' };
+
 const AddUsersDialog = ({
     isOpen,
     closeAddUserHandler,
@@ -22,7 +24,7 @@ const AddUsersDialog = ({
     ]);
 
     const [email, setEmail] = useState('');
-    const [selectedLocation, setSelectedLocation] = useState({ value: 'all', title: 'All Locations' });
+    const [selectedLocation, setSelectedLocation] = useState(defaultLocation);
     const [selectedRole, setSelectedRole] = useState(roles[3].value);
     const [addUserLoading, setAddUserLoading] = useState(false);
     const [buttonDisabled, setButtonDisabled] = useState(true);
@@ -35,7 +37,7 @@ const AddUsersDialog = ({
                 const data = response.data;
 
                 const locationOptions = [
-                    { value: 'all', title: 'All Locations' },
+                    { value: 'all', title: 'All Locations', location_id: 'all'},
                     ...data.locations.map(loc => ({
                         value: loc.id,
                         title: `${loc.locationName}, ${loc.address}`
@@ -58,10 +60,12 @@ const AddUsersDialog = ({
 
         const payload = {
             "receiverEmail": email,
-            "location": selectedLocation.value,
-            "locationName": selectedLocation.title,
+            "location_id": selectedLocation.location_id,
+            "location_name": selectedLocation.title,
             "role": selectedRole
         };
+
+        console.log(payload);
 
         try {
             await apiClient.post(`${ADD_USER}`, payload);
@@ -75,7 +79,7 @@ const AddUsersDialog = ({
             }
             // Reset form
             setEmail('');
-            setSelectedLocation({ value: 'all', title: 'All Locations' });
+            setSelectedLocation(defaultLocation);
             setSelectedRole(roles[3].value);
             setButtonDisabled(true);
         } catch (error) {

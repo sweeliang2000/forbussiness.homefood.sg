@@ -3,6 +3,7 @@ import styles from './LandingPage.module.css';
 import Abutton from '@/components/Buttons/Abutton';
 import HeroSection from '../HeroSection/HeroSection';
 import StatementSection from '../StatementSection/StatementSection';
+import FeaturesSection from '../FeaturesSection/FeaturesSection';
 
 const LandingPage = () => {
     const features = [
@@ -64,6 +65,8 @@ const LandingPage = () => {
             <HeroSection/>
 
             <StatementSection/>
+
+            <FeaturesSection/>
 
             {/* Features Section */}
             <section id="features" className={styles.featuresSection}>
