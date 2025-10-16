@@ -5,6 +5,7 @@ import { AppFooter } from '@/components/AppFooter/AppFooter';
 import AppNav from './_views/AppNav/AppNav';
 import { useEffect, useState } from 'react';
 import { getShopSubscriptionStatus } from '@/utility/api';
+import { getSubscriptionLookupKey, setSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 
 // export const metadata = {
 //   title: 'Collbine for Business | Customisable Loyalty Systems in Singapore',
@@ -24,12 +25,25 @@ export default function RootLayout({ children }) {
     // 4. Implement role-based access control for different sections
     console.log("[INITIAL SETUP] CALLED INSIDE LAYOUT OF APP")
     
+    // Check if lookup_key exists in localStorage first
+    const storedLookupKey = getSubscriptionLookupKey();
+    if (storedLookupKey) {
+      setSubscriptionStatus(storedLookupKey);
+      setIsLoadingSubscription(false);
+      console.log("[SUBSCRIPTION STATUS] Loaded from localStorage:", storedLookupKey);
+    }
+    
     // Fetch shop subscription status
     const fetchSubscriptionStatus = async () => {
       try {
         setIsLoadingSubscription(true);
         const subscriptionData = await getShopSubscriptionStatus();
-        setSubscriptionStatus(subscriptionData.lookup_key);
+        const lookupKey = subscriptionData.lookup_key;
+        
+        // Store lookup_key in localStorage
+        setSubscriptionLookupKey(lookupKey);
+        
+        setSubscriptionStatus(lookupKey);
         console.log("[SUBSCRIPTION STATUS] Loaded:", subscriptionData);
       } catch (error) {
         console.error("[SUBSCRIPTION STATUS] Error:", error);
