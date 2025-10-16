@@ -10,11 +10,21 @@ import DeleteAccount from './_components/DeleteAccount';
 import SignoutSection from './_components/SignoutSection';
 import ManageSubscriptionCell from './_components/ManageSubscriptionCell';
 import UpgradeCell from './_components/UpgradeCell';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ChangePasswordCell from './_components/ChangePasswordCell';
+import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 
 const AccountSetting = () => {
-    const [isUserSubscripted, setIsUpdatePassword] = useState(false);
+    const [isUserSubscripted, setIsUserSubscripted] = useState(false);
+
+    useEffect(() => {
+        const storedLookupKey = getSubscriptionLookupKey();
+        if (storedLookupKey) {
+            setIsUserSubscripted(true);
+        } else {
+            setIsUserSubscripted(false);
+        }
+    }, []);
 
     return (
         <>
