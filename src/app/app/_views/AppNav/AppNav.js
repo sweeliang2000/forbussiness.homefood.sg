@@ -4,7 +4,10 @@ import MobileNavbar from '../../../../components/App/MobileNavbar/MobileNavbar';
 import Sidebar from '@/components/App/sidebar/sidebar';
 import { useState } from 'react';
 
-const AppNav = () => {
+const AppNav = ({ 
+    subscriptionStatus, 
+    isLoadingSubscription 
+}) => {
     const [isMenuOpen, setIsMenuOpened] = useState(false);
 
     return (
@@ -17,7 +20,10 @@ const AppNav = () => {
             <Sidebar
                 isClose={!isMenuOpen}
                 onClose={() => { setIsMenuOpened(false) }}
-                className={`${styles.sidebar} ${isMenuOpen && styles.open}`} />
+                className={`${styles.sidebar} ${isMenuOpen && styles.open}`} 
+                subscriptionStatus={subscriptionStatus}
+                isLoadingSubscription={isLoadingSubscription}
+            />
         </>
     )
 };

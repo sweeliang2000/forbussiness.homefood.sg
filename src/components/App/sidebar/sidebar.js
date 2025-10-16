@@ -16,12 +16,16 @@ import { Submenu } from './submenu/submenu';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import CollbineForBusiness from '../../CollbineForBusiness/CollbineForBusiness';
+import { loyaltyInformation } from '@/utility/loyaltyInformation';
+import Shimmer from '../../Shimmer/Shimmer';
 
 
 export default function Sidebar({
     isClose,
     onClose,
-    className
+    className,
+    subscriptionStatus,
+    isLoadingSubscription
 }) {
     const RELEASES_TAB = 'RELEASES_TAB';
     const STAMP_TAB = 'STAMP_TAB';
@@ -31,6 +35,8 @@ export default function Sidebar({
     const pathSegments = usePathname().split('/');
     const section = pathSegments[2]
     const subSection = pathSegments[3];
+
+    const subscriptionPlan = loyaltyInformation[subscriptionStatus];
 
     const [sidebarMinimised, setSidebarMinimised] = useState(false);
     const [currentSelection, setCurrentSelection] = useState(undefined);
@@ -185,13 +191,33 @@ export default function Sidebar({
                     </li>
                 </ul>
                 <div className={styles.subscriptionContainer}>
-                    <div>
-                        <p className={styles.title}>Free</p>
-                        <p className={styles.cost}>No-Cost ($0/Month)</p>
-                    </div>
-                    <Link href="/app/subscription" className={styles.button}>
-                        Upgrade
-                    </Link>
+                    {isLoadingSubscription ? (
+                        <div className={styles.shimmerContainer}>
+                            <Shimmer 
+                                width="120px" 
+                                height="16px" 
+                                className={styles.titleShimmer}
+                                responsive={true}
+                            />
+                            <Shimmer 
+                                width="100px" 
+                                height="12px" 
+                                className={styles.costShimmer}
+                                responsive={false}
+                            />
+                        </div>
+                    ) : (
+                        <div>
+                            <p className={styles.title}>{subscriptionPlan?.plan_name || 'Free'}</p>
+                            <p className={styles.cost}>{subscriptionPlan?.payment_type + ' Subscription' || 'No-Cost ($0/Month)'}</p>
+                        </div>
+                    )}
+
+                    {!isLoadingSubscription && (!subscriptionPlan?.plan_name) &&
+                        <Link href="/app/subscription" className={styles.button}>
+                            Upgrade
+                        </Link>
+                    }
                 </div>
             </aside>
             { !isClose && <div className={styles.overlay} onClick={onClose}/>}

@@ -20,3 +20,4 @@ export const UPDATE_REWARD = '/api/data/reward';
 export const DELETE_REWARD = '/api/data/reward';
 
 export const CHECKOUT_SESSION_STRIPE = '/api/subscription/create-checkout-session';
+export const SHOP_SUBSCRIPTION_STATUS = '/api/data/shopSubscriptionStatus';

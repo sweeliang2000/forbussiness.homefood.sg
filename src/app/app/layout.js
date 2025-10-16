@@ -3,7 +3,8 @@ import { BreadcrumsBar } from '@/components/breadcrumbsbar/breadcrumsbar';
 import styles from './layout.module.css'
 import { AppFooter } from '@/components/AppFooter/AppFooter';
 import AppNav from './_views/AppNav/AppNav';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { getShopSubscriptionStatus } from '@/utility/api';
 
 // export const metadata = {
 //   title: 'Collbine for Business | Customisable Loyalty Systems in Singapore',
@@ -11,6 +12,8 @@ import { useEffect } from 'react';
 // };
 
 export default function RootLayout({ children }) {
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
   
   useEffect(() => {
     // TODO: Temporary console.log to verify component mounting
@@ -19,12 +22,29 @@ export default function RootLayout({ children }) {
     // 2. Add proper error handling and loading states
     // 3. Consider using Context/Redux for global role state management
     // 4. Implement role-based access control for different sections
-    console.log("CALLED INSIDE LAYOUT OF APP")
+    console.log("[INITIAL SETUP] CALLED INSIDE LAYOUT OF APP")
+    
+    // Fetch shop subscription status
+    const fetchSubscriptionStatus = async () => {
+      try {
+        setIsLoadingSubscription(true);
+        const subscriptionData = await getShopSubscriptionStatus();
+        setSubscriptionStatus(subscriptionData.lookup_key);
+        console.log("[SUBSCRIPTION STATUS] Loaded:", subscriptionData);
+      } catch (error) {
+        console.error("[SUBSCRIPTION STATUS] Error:", error);
+        setSubscriptionStatus({ lookup_key: null });
+      } finally {
+        setIsLoadingSubscription(false);
+      }
+    };
+
+    fetchSubscriptionStatus();
   }, [])
 
   return (
     <div className={styles.body}>
-      <AppNav/>
+      <AppNav subscriptionStatus={subscriptionStatus} isLoadingSubscription={isLoadingSubscription}/>
       <div className={styles.overlay}></div>
       <div className={styles.mainContainer}>
         <BreadcrumsBar />

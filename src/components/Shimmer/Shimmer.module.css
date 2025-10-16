@@ -1,0 +1,59 @@
+.shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    display: inline-block;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.responsive {
+    width: 100% !important;
+    min-width: 0;
+    flex-shrink: 1;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Variants for different shimmer effects */
+.shimmerPulse {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmerPulse 2s infinite;
+}
+
+@keyframes shimmerPulse {
+    0%, 100% {
+        background-position: -200% 0;
+        opacity: 1;
+    }
+    50% {
+        background-position: 200% 0;
+        opacity: 0.8;
+    }
+}
+
+.shimmerWave {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmerWave 1.8s infinite;
+}
+
+@keyframes shimmerWave {
+    0% {
+        background-position: -200% 0;
+    }
+    50% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
