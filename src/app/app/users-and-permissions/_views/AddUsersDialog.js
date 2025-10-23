@@ -83,9 +83,12 @@ const AddUsersDialog = ({
             setSelectedRole(roles[3].value);
             setButtonDisabled(true);
         } catch (error) {
-            console.log(error);
-            const message = error?.response?.data?.message || error.message;
-            const code = error?.response?.data?.code || error.code;
+            console.log('Error details:', error);
+            // Handle new error format with nested error object
+            const errorData = error?.response?.data;
+            const message = errorData?.error?.message;
+            const code = errorData?.error?.statusCode;
+
             setErrorMessage(`${message} (Error code: ${code})`);
         } finally {
             setAddUserLoading(false);
