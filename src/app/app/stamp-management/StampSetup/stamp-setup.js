@@ -72,6 +72,8 @@ export default function StampSetup() {
     id: index + 1
   })))
   const [hasExistingData, setHasExistingData] = useState(false);
+  const [isDefaultStampedIconDeleted, setIsDefaultStampedIconDeleted] = useState(false);
+  const [isDefaultUnStampedIconDeleted, setIsDefaultUnStampedIconDeleted] = useState(false);
 
   // Fetch stamp management data when component loads
   useEffect(() => {
@@ -180,6 +182,15 @@ export default function StampSetup() {
         formData.append('defaultUnStampedIcon', rewardUnstampedIcon[0].file);
       };
 
+      // Add deletion flags for PUT requests
+      if (hasExistingData && isDefaultStampedIconDeleted) {
+        formData.append('isDefaultStampedIconDeleted', 'true');
+      }
+      
+      if (hasExistingData && isDefaultUnStampedIconDeleted) {
+        formData.append('isDefaultUnStampedIconDeleted', 'true');
+      }
+
       // Log FormData contents properly
       console.log("FormData contents:");
       for (const pair of formData.entries()) {
@@ -234,6 +245,29 @@ export default function StampSetup() {
     setNumberOfStamps(value);
   }
 
+  // Track default stamped icon deletion
+  useEffect(() => {
+    if (hasExistingData) {
+      console.log('Default stamped icon changed:', {
+        hasExistingData,
+        rewardStampIconLength: rewardStampIcon.length,
+        rewardStampIcon: rewardStampIcon
+      });
+      
+      // If we had an existing stamped icon loaded from server and now it's deleted
+      if (rewardStampIcon.length === 0) {
+        console.log('DELETED - default stamped icon was deleted');
+        setIsDefaultStampedIconDeleted(true);
+      } else if (rewardStampIcon.length > 0) {
+        console.log('NOT DELETED - default stamped icon exists or was added');
+        setIsDefaultStampedIconDeleted(false);
+      }
+      
+      // Call resetSaving when stamped icon changes
+      resetSaving();
+    }
+  }, [rewardStampIcon, hasExistingData]);
+
   useEffect(() => {
     console.log("DEFAULT STAMPED MODIFIED", rewardStampIcon)
     setCardSteps(prevValue => {
@@ -248,6 +282,29 @@ export default function StampSetup() {
       return data
     })
   }, [rewardStampIcon])
+
+  // Track default unstamped icon deletion
+  useEffect(() => {
+    if (hasExistingData) {
+      console.log('Default unstamped icon changed:', {
+        hasExistingData,
+        rewardUnstampedIconLength: rewardUnstampedIcon.length,
+        rewardUnstampedIcon: rewardUnstampedIcon
+      });
+      
+      // If we had an existing unstamped icon loaded from server and now it's deleted
+      if (rewardUnstampedIcon.length === 0) {
+        console.log('DELETED - default unstamped icon was deleted');
+        setIsDefaultUnStampedIconDeleted(true);
+      } else if (rewardUnstampedIcon.length > 0) {
+        console.log('NOT DELETED - default unstamped icon exists or was added');
+        setIsDefaultUnStampedIconDeleted(false);
+      }
+      
+      // Call resetSaving when unstamped icon changes
+      resetSaving();
+    }
+  }, [rewardUnstampedIcon, hasExistingData]);
 
   useEffect(() => {
     setCardSteps(prevValue => {
