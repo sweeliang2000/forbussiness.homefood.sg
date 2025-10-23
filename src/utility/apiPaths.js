@@ -8,7 +8,7 @@ export const VERIFY_TOKEN = '/api/auth/verifytoken';
 export const GLOBAL_SIGN_OUT = '/api/auth/globalSignOut';
 export const SIGN_OUT = '/api/auth/signoutuser';
 
-export const OFFICIAL_BUSINESS_INFORMATION = '/api/data/official-bussiness-information';
+export const OFFICIAL_BUSINESS_INFORMATION = '/api/data/official-business-information';
 export const CUSTOMER_FACING_INFORMATION = '/api/data/customerDetails';
 export const STAMP_MANAGEMENT = '/api/data/stampManagement';
 export const CARD_DESIGN_SETTING = '/api/data/cardDesignSetting';
