@@ -54,7 +54,9 @@ const CustomerFacingBusinessPage = () => {
 
     const [thumbnailImages, setThumbnailImages] = useState([]);
     const [bannerImages, setBannerImages] = useState([]);
-    const [locations, setLocations] = useState([])
+    const [locations, setLocations] = useState([]);
+    const [isThumbnailDeleted, setIsThumbnailDeleted] = useState(false);
+    const [isBannerDeleted, setIsBannerDeleted] = useState(false);
 
     const [enteredValues, setEnteredValues] = useState({
         [DISPLAY_NAME]: '',
@@ -87,6 +89,11 @@ const CustomerFacingBusinessPage = () => {
         setIsSubmissionSuccess(false);
         setIsBtnDisabled(false);
         console.log('resetSaving');
+    };
+
+    const handleThumbnailImagesChange = (newImages) => {
+        setThumbnailImages(newImages);
+        resetSaving();
     };
 
     const inputChangeHandler = (key, value) => {
@@ -125,12 +132,24 @@ const CustomerFacingBusinessPage = () => {
             }
             formData.append('keywords', enteredValues[KEYWORDS]);
             formData.append('locations', JSON.stringify(locations));
+            
+            // Add isThumbnailDeleted flag for PUT requests
+            console.log('isThumbnailDeleted', isThumbnailDeleted)
+            if (isThumbnailDeleted) {
+                formData.append('isThumbnailDeleted', 'true');
+            }
+            
+            // Add isBannerDeleted flag for PUT requests
+            console.log('isBannerDeleted', isBannerDeleted)
+            if (isBannerDeleted) {
+                formData.append('isBannerDeleted', 'true');
+            }
 
             // Debugging: log each form data entry
             // Uncomment this to look at the form data
-            // for (let [key, value] of formData.entries()) {
-            //     console.log(`${key}:`, value);
-            // }
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}:`, value);
+            }
 
             // Use POST for new data, PUT for updating existing data
             const httpMethod = hasExistingData ? 'put' : 'post';
@@ -149,6 +168,50 @@ const CustomerFacingBusinessPage = () => {
             setIsBtnLoading(false);
         }
     };
+
+    // Track thumbnail deletion
+    useEffect(() => {
+        if (hasExistingData) {
+            console.log('Thumbnail images changed:', {
+                hasExistingData,
+                thumbnailImagesLength: thumbnailImages.length,
+                thumbnailImages: thumbnailImages
+            });
+            
+            // If we had an existing thumbnail loaded from server and now it's deleted
+            if (thumbnailImages.length === 0) {
+                setIsThumbnailDeleted(true);
+            } else if (thumbnailImages.length > 0) {
+                setIsThumbnailDeleted(false);
+            }
+            
+            // Call resetSaving when thumbnail changes
+            resetSaving();
+        }
+    }, [thumbnailImages, hasExistingData]);
+
+    // Track banner deletion
+    useEffect(() => {
+        if (hasExistingData) {
+            console.log('Banner images changed:', {
+                hasExistingData,
+                bannerImagesLength: bannerImages.length,
+                bannerImages: bannerImages
+            });
+            
+            // If we had an existing banner loaded from server and now it's deleted
+            if (bannerImages.length === 0) {
+                console.log('DELETED - banner was deleted');
+                setIsBannerDeleted(true);
+            } else if (bannerImages.length > 0) {
+                console.log('NOT DELETED - banner exists or was added');
+                setIsBannerDeleted(false);
+            }
+            
+            // Call resetSaving when banner changes
+            resetSaving();
+        }
+    }, [bannerImages, hasExistingData]);
 
     useEffect(() => {
         const getFormData = async () => {
