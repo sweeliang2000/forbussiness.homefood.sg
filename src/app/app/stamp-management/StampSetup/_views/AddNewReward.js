@@ -48,7 +48,10 @@ const AddNewReward = ({
             
             setRewards(transformedRewards);
         } catch (err) {
-            console.error('Error fetching rewards:', err);
+            const errorData = err?.response?.data;
+            const message = errorData?.error?.message;
+            const code = errorData?.error?.statusCode;
+            console.error(`Error fetching rewards: ${message} (Error code: ${code})`);
             setError('Failed to load rewards');
         } finally {
             setLoading(false);

@@ -76,8 +76,9 @@ const Verify = () => {
             setSuccessMessage('A 6-digit OTP has been resent to you.')
             resetCountdown()
         } catch (error) {
-            const message = error?.response?.data?.message || error.message;
-            const code = error?.response?.data?.code || error.code;
+            const errorData = error?.response?.data;
+            const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+            const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
             setErrorMessage(`${message} (Error code: ${code})`);
         }
     };
@@ -101,8 +102,9 @@ const Verify = () => {
             Cookies.remove('authStatus');
             setVerifiedConfirmed(true);
         } catch (error) {
-            const message = error?.response?.data?.message || error.message;
-            const code = error?.response?.data?.code || error.code;
+            const errorData = error?.response?.data;
+            const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+            const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
             setErrorMessage(`${message} (Error code: ${code})`);
         }
 

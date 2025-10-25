@@ -45,7 +45,10 @@ const AddUsersDialog = ({
                 ];
                 setLocations(locationOptions);
             } catch (error) {
-                console.error('Failed to fetch locations:', error);
+                const errorData = error?.response?.data;
+                const message = errorData?.error?.message;
+                const code = errorData?.error?.statusCode;
+                console.error(`Failed to fetch locations: ${message} (Error code: ${code})`);
             }
         };
         
@@ -83,8 +86,6 @@ const AddUsersDialog = ({
             setSelectedRole(roles[3].value);
             setButtonDisabled(true);
         } catch (error) {
-            console.log('Error details:', error);
-            // Handle new error format with nested error object
             const errorData = error?.response?.data;
             const message = errorData?.error?.message;
             const code = errorData?.error?.statusCode;

@@ -147,10 +147,13 @@ export default function StampSetup() {
           setIsBtnDisabled(false);
         }
       } catch (error) {
-        console.error('Error fetching stamp management data:', error);
+        const errorData = error?.response?.data;
+        const message = errorData?.error?.message || errorData?.message || error?.message || 'Failed to load stamp management data';
+        const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
+        console.error(`Error fetching stamp management data: ${message} (Error code: ${code})`);
         setIsError(true);
-        setErrorMessage('Failed to load stamp management data. Please try again later.');
-        setIsLoadingErrorMessage('Failed to load stamp management data. Please try again later.');
+        setErrorMessage(`Failed to load stamp management data. ${message} (Error code: ${code})`);
+        setIsLoadingErrorMessage(`Failed to load stamp management data. ${message} (Error code: ${code})`);
       } finally {
         setIsLoading(false);
       }
@@ -211,7 +214,10 @@ export default function StampSetup() {
       setIsSubmissionSuccess(true);
       setIsBtnLoading(false);
     } catch (error) {
-      console.error('Form submission error:', error);
+      const errorData = error?.response?.data;
+      const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+      const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
+      console.error(`Form submission error: ${message} (Error code: ${code})`);
     } finally {
       setIsBtnLoading(false);
     }

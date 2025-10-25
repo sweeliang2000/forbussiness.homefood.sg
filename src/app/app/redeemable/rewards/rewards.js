@@ -51,7 +51,10 @@ const Rewards = () => {
             
             setRewards(transformedRewards);
         } catch (err) {
-            console.error('Error fetching rewards:', err);
+            const errorData = err?.response?.data;
+            const message = errorData?.error?.message;
+            const code = errorData?.error?.statusCode;
+            console.error(`Error fetching rewards: ${message} (Error code: ${code})`);
             setError('Failed to load rewards');
         } finally {
             setLoading(false);
@@ -92,7 +95,10 @@ const Rewards = () => {
                 }
             }
         } catch (err) {
-            console.error('Error deleting reward:', err);
+            const errorData = err?.response?.data;
+            const message = errorData?.error?.message;
+            const code = errorData?.error?.statusCode;
+            console.error(`Error deleting reward: ${message} (Error code: ${code})`);
             // You might want to show an error message to the user here
         } finally {
             setIsArchiveModalOpen(false);
@@ -157,7 +163,10 @@ const Rewards = () => {
                 console.log(`Reward ${isUpdate ? 'updated' : 'created'} successfully`);
             }
         } catch (err) {
-            console.error(`Error ${selectedReward ? 'updating' : 'creating'} reward:`, err);
+            const errorData = err?.response?.data;
+            const message = errorData?.error?.message;
+            const code = errorData?.error?.statusCode;
+            console.error(`Error ${selectedReward ? 'updating' : 'creating'} reward: ${message} (Error code: ${code})`);
             // You might want to show an error message to the user here
         }
     };

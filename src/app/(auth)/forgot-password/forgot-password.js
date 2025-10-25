@@ -53,8 +53,9 @@ const ForgotPassword = () => {
             setIsAtRestPasswordStage(true);
             setSuccessMessage('An OTP values had been sent to your email. Enter your new password and OTP to reset.')
         } catch (error) {
-            const message = error?.response?.data?.message || error.message;
-            const code = error?.response?.data?.code || error.code;
+            const errorData = error?.response?.data;
+            const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+            const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
             setIsSubmissionButtonLoading(false);
             setErrorMessage(`${message} (Error code: ${code})`);
         }
@@ -91,8 +92,9 @@ const ForgotPassword = () => {
             setIsSubmissionButtonLoading(false);
             setIsResetSuccessfully(true)
         } catch (error) {
-            const message = error?.response?.data?.message || error.message;
-            const code = error?.response?.data?.code || error.code;
+            const errorData = error?.response?.data;
+            const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+            const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
             setIsSubmissionButtonLoading(false);
             setErrorMessage(`${message} (Error code: ${code})`);
         }

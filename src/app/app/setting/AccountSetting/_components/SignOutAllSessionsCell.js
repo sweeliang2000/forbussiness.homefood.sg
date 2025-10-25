@@ -22,8 +22,9 @@ const SignOutAllSessionCell = () => {
             await apiClient.post(`${GLOBAL_SIGN_OUT}`);
             router.replace('/login');
         } catch (error) {
-            const message = error?.response?.data?.message || error.message;
-            const code = error?.response?.data?.code || error.code;
+            const errorData = error?.response?.data;
+            const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+            const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
             setErrorMessage(`An error occurred. ${message} (Error code: ${code})`);
         }
     };

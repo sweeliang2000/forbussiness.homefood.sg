@@ -120,8 +120,9 @@ export default function StampSetup() {
       clearError();
     } catch (error) {
       // TODO: - Create UI to show error if happened.
-      const message = error?.response?.data?.message || error.message;
-      const code = error?.response?.data?.code || error.code;
+      const errorData = error?.response?.data;
+      const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+      const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
       showError(`An error had occurred. ${message} (Error code: ${code}). Please try to save it again.`);
       setIsBtnLoading(false);
     }

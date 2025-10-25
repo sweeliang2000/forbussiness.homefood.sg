@@ -163,7 +163,10 @@ const CustomerFacingBusinessPage = () => {
             setIsSubmissionSuccess(true);
             setIsBtnLoading(false);
         } catch (error) {
-            console.error('Form submission error:', error);
+            const errorData = error?.response?.data;
+            const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+            const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
+            console.error(`Form submission error: ${message} (Error code: ${code})`);
         } finally {
             setIsBtnLoading(false);
         }
@@ -245,8 +248,9 @@ const CustomerFacingBusinessPage = () => {
                 setIsLoading(false);
                 setIsBtnLoading(false);
             } catch (error) {
-                const message = error?.response?.data?.message || error.message;
-                const code = error?.response?.data?.code || error.code;
+                const errorData = error?.response?.data;
+                const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+                const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
                 setIsLoading(false);
                 setIsBtnLoading(false);
                 setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);

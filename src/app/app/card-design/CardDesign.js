@@ -93,8 +93,9 @@ const CardDesign = () => {
             setIsSubmissionSuccess(true);
             setIsBtnLoading(false);
         } catch (error) {
-            const message = error?.response?.data?.message || error.message;
-            const code = error?.response?.data?.code || error.code;
+            const errorData = error?.response?.data;
+            const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+            const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
             showError(`An error had occurred. ${message} (Error code: ${code}). Please try to save it again.`);
             setIsBtnLoading(false);
         }
@@ -180,8 +181,9 @@ const CardDesign = () => {
                 // Only show error if both requests failed
                 if (cardDesignResponse.status === 'rejected' && stampManagementResponse.status === 'rejected') {
                     const error = cardDesignResponse.reason || stampManagementResponse.reason;
-                    const message = error?.response?.data?.message || error?.message || 'Failed to load data';
-                    const code = error?.response?.data?.code || error?.code || 'UNKNOWN';
+                    const errorData = error?.response?.data;
+                    const message = errorData?.error?.message || errorData?.message || error?.message || 'Failed to load data';
+                    const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
                     showError(`An error had occurred. ${message} (Error code: ${code})`);
                     setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
                 }

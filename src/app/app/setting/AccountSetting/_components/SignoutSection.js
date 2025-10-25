@@ -19,8 +19,9 @@ const SignoutSection = () => {
             router.replace('/login');
         } catch (error) {
             console.log("SIGNOUT")
-            const message = error?.response?.data?.message || error.message;
-            const code = error?.response?.data?.code || error.code;
+            const errorData = error?.response?.data;
+            const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+            const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
             console.log(`An error occurred. ${message} (Error code: ${code})`);
         }
     };
