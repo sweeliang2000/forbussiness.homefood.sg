@@ -110,7 +110,8 @@ const UsersAndPermissions = () => {
         id: `${index + 1}`,
         email: item.email || 'Unknown',
         location: item.location_name || 'All Locations',
-        role: item.role || 'Viewer'
+        role: item.role || 'Viewer',
+        status: item.status || 'pending'
     }));
 
     const addUserHandler = () => {

@@ -89,6 +89,21 @@ const InvitedUserTable = ({ invitedUsersRows, onDeleteSuccess }) => {
             flex: 1,
         },
         {
+            field: 'status',
+            headerName: 'Status',
+            flex: 1,
+            renderCell: (params) => (
+                <span style={{ 
+                    textTransform: 'capitalize',
+                    color: params.value === 'pending' ? '#ff9800' : 
+                           params.value === 'accepted' ? '#4caf50' : 
+                           params.value === 'rejected' ? '#f44336' : '#666'
+                }}>
+                    {params.value}
+                </span>
+            ),
+        },
+        {
             field: 'actions',
             headerName: '',
             width: 50,
