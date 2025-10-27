@@ -17,8 +17,9 @@ const InvitedUserTable = ({ invitedUsersRows }) => {
         setSelectedRowId(null);
     };
 
-    const handleEdit = () => {
-        console.log('Edit location with id:', selectedRowId);
+    const handleResendInvite = () => {
+        console.log('Resend invite for user with id:', selectedRowId);
+        // TODO: Implement resend invite functionality
         handleMenuClose();
     };
 
@@ -65,7 +66,7 @@ const InvitedUserTable = ({ invitedUsersRows }) => {
                         open={Boolean(anchorEl) && selectedRowId === params.row.id}
                         onClose={handleMenuClose}
                     >
-                        <MenuItem onClick={handleEdit}>Edit</MenuItem>
+                        <MenuItem onClick={handleResendInvite}>Resend Invite</MenuItem>
                         <MenuItem onClick={handleDelete}>Delete</MenuItem>
                     </Menu>
                 </div>

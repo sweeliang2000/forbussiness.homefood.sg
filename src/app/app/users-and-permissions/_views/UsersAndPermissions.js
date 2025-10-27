@@ -110,6 +110,11 @@ const UsersAndPermissions = () => {
         setSuccessMessage('');
     };
 
+    const handleResendSuccess = (email) => {
+        const message = `Invite resent successfully to ${email}.`;
+        setSuccessMessage(message);
+    };
+
     return (
         <>
             <AddUsersDialog 
@@ -159,7 +164,10 @@ const UsersAndPermissions = () => {
                             <h4 className={styles.sectionHeaderIos}>Invited users</h4>
 
                             <div className={styles.tableContainer}>
-                                <InvitedUserTable invitedUsersRows={invitedUsersRows} />
+                                <InvitedUserTable 
+                                    invitedUsersRows={invitedUsersRows} 
+                                    onResendSuccess={handleResendSuccess}
+                                />
                             </div>
                         </section>
 
