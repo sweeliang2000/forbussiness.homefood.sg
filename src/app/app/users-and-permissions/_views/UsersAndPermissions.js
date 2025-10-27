@@ -10,9 +10,11 @@ import AddUsersDialog from './AddUsersDialog';
 import UserTable from './UserTable';
 import InvitedUserTable from './InvitedUserTable';
 import apiClient from '@/utility/api';
-import { GET_LIST_OF_USERS } from '@/utility/apiPaths';
+import { GET_LIST_OF_USERS, INVITATION_STATUS } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
+import InvitationBanner from '@/components/InvitationBanner/InvitationBanner';
+import { getUserDataFromCookie } from '@/utility/cookieUtils';
 
 // Function to get list of users
 const getListOfUsers = async () => {
@@ -25,6 +27,17 @@ const getListOfUsers = async () => {
     }
 };
 
+// Function to get invitation status
+const getInvitationStatus = async (email) => {
+    try {
+      const response = await apiClient.get(`${INVITATION_STATUS}?email=${encodeURIComponent(email)}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching invitation status:', error);
+      throw error;
+    }
+};
+
 const UsersAndPermissions = () => {
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
@@ -32,26 +45,44 @@ const UsersAndPermissions = () => {
         invited_users: [],
         actual_users: []
     });
+    const [invitations, setInvitations] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
 
-    // Fetch users data on component mount
+    // Fetch users data and invitation status on component mount
     useEffect(() => {
         setIsLoading(true);
 
-        const fetchUsersData = async () => {
+        const fetchData = async () => {
             try {
-                const response = await getListOfUsers();
+                // Fetch users data
+                const usersResponse = await getListOfUsers();
                 
-                if (response.success) {
-                    setUsersData(response.data);
-                    console.log(response.data);
+                if (usersResponse.success) {
+                    setUsersData(usersResponse.data);
+                    console.log('Users data:', usersResponse.data);
                 } else {
-                    const message = response.message || 'Failed to fetch users data';
+                    const message = usersResponse.message || 'Failed to fetch users data';
                     setIsLoadingErrorMessage(`An error had occurred. ${message}`);
                 }
+
+                // Fetch invitation status
+                const userData = getUserDataFromCookie();
+                if (userData && userData.user_id) {
+                    try {
+                        const invitationResponse = await getInvitationStatus(userData.user_id);
+                        console.log('Invitation response:', invitationResponse);
+                        if (invitationResponse.success && invitationResponse.data.is_invited) {
+                            setInvitations(invitationResponse.data.invitations || []);
+                            console.log('Invitations data:', invitationResponse.data.invitations);
+                        }
+                    } catch (invitationErr) {
+                        console.error('Error fetching invitation status:', invitationErr);
+                        // Don't set error for invitation fetch failure, just log it
+                    }
+                }
             } catch (err) {
-                console.error('Error fetching users:', err);
+                console.error('Error fetching data:', err);
                 const message = err?.response?.data?.message || err.message;
                 const code = err?.response?.data?.code || err.code;
                 setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
@@ -60,7 +91,7 @@ const UsersAndPermissions = () => {
             }
         };
 
-        fetchUsersData();
+        fetchData();
     }, []);
 
     // Process actual users data with defaults
@@ -154,6 +185,22 @@ const UsersAndPermissions = () => {
                     successMessage={successMessage}
                     setShowSuccess={clearSuccessMessage}
                 />
+
+                {invitations.length > 0 && (
+                    <div className={styles.invitationBanner}>
+                        {invitations.map((invitation, index) => {
+                            console.log('Invitation:', invitation.invitedFrom);
+                            return (
+                            <InvitationBanner
+                                key={`${invitation.shop_id}-${index}`}
+                                invitedby={invitation.invitedFrom}
+                                shopname={invitation.shop_id}
+                                role={invitation.role}
+                            />
+                        )})
+                        }
+                    </div>
+                )}
 
                 <ContentCard className={styles.content}>
                     <div className={styles.usersHeader}>
