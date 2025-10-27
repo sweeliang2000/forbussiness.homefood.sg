@@ -178,17 +178,19 @@ const UsersAndPermissions = () => {
                     isLoadingErrorMessage !== null ? 
                     <ErrorPage/> :
                     <>
-                        <section>
-                            <h4 className={styles.sectionHeaderIos}>Invited users</h4>
+                        { invitedUsersRows.length > 0 &&                    
+                            <section>
+                                <h4 className={styles.sectionHeaderIos}>Invited users</h4>
 
-                            <div className={styles.tableContainer}>
-                                <InvitedUserTable 
-                                    invitedUsersRows={invitedUsersRows} 
-                                    onResendSuccess={handleResendSuccess}
-                                    onDeleteSuccess={handleDeleteSuccess}
-                                />
-                            </div>
-                        </section>
+                                <div className={styles.tableContainer}>
+                                    <InvitedUserTable 
+                                        invitedUsersRows={invitedUsersRows} 
+                                        onResendSuccess={handleResendSuccess}
+                                        onDeleteSuccess={handleDeleteSuccess}
+                                    />
+                                </div>
+                            </section>
+                        }
 
                         <section>
                             <h4 className={styles.sectionHeaderIos}>Users with access</h4>
