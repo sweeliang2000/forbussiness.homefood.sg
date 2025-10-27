@@ -73,8 +73,11 @@ const UsersAndPermissions = () => {
                         const invitationResponse = await getInvitationStatus(userData.user_id);
                         console.log('Invitation response:', invitationResponse);
                         if (invitationResponse.success && invitationResponse.data.is_invited) {
-                            setInvitations(invitationResponse.data.invitations || []);
-                            console.log('Invitations data:', invitationResponse.data.invitations);
+                            // Filter out rejected invitations
+                            const filteredInvitations = (invitationResponse.data.invitations || [])
+                                .filter(invitation => invitation.status !== 'rejected');
+                            setInvitations(filteredInvitations);
+                            console.log('Invitations data:', filteredInvitations);
                         }
                     } catch (invitationErr) {
                         console.error('Error fetching invitation status:', invitationErr);
