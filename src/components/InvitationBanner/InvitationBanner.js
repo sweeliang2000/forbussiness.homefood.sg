@@ -1,12 +1,16 @@
 import { Button, TextField, Alert } from '@mui/material';
 import { useState } from 'react';
 import AlertModal from '../AlertModal/AlertModal';
+import apiClient from '@/utility/api';
+import { ACCEPT_INVITATION, REJECT_INVITATION } from '@/utility/apiPaths';
 import styles from './InvitationBanner.module.css';
 
 const InvitationBanner = ({
     invitedby,
     shopname,
-    role = 'Viewer'
+    role = 'Viewer',
+    email,
+    shop_id
 }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -22,17 +26,37 @@ const InvitationBanner = ({
             setConfirmationError('Please type "confirm" to proceed');
             return;
         }
-
+        
         setConfirmationError(''); // Clear any previous errors
         setShowConfirmModal(false);
+        setIsProcessing(true);
+        
         try {
-            // TODO: Implement accept invitation API call
             console.log('Accepting invitation...');
-            // Simulate API call
+            
+            // TODO: Accept invitation logic not implemented yet
+            // const payload = {
+            //     email: email,
+            //     shop_id: shop_id
+            // };
+            
+            // const response = await apiClient.post(ACCEPT_INVITATION, payload);
+            
+            // if (response.data.success) {
+            //     console.log('Invitation accepted successfully:', response.data);
+            //     // TODO: Handle success (e.g., show success message, refresh page, etc.)
+            //     // You might want to call a callback function passed from parent component
+            // } else {
+            //     console.error('Failed to accept invitation:', response.data.message);
+            //     // TODO: Handle error (e.g., show error message)
+            // }
+            
+            // Simulate API call for now
             await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Invitation accepted successfully');
+            console.log('Invitation accepted successfully (simulated)');
         } catch (error) {
             console.error('Error accepting invitation:', error);
+            // TODO: Handle error (e.g., show error message)
         } finally {
             setIsProcessing(false);
         }
@@ -47,13 +71,26 @@ const InvitationBanner = ({
     const handleDecline = async () => {
         setIsProcessing(true);
         try {
-            // TODO: Implement decline invitation API call
             console.log('Declining invitation...');
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Invitation declined successfully');
+            
+            const payload = {
+                email: email,
+                shop_id: shop_id
+            };
+            
+            const response = await apiClient.post(REJECT_INVITATION, payload);
+            
+            if (response.data.success) {
+                console.log('Invitation declined successfully:', response.data);
+                // TODO: Handle success (e.g., show success message, refresh page, etc.)
+                // You might want to call a callback function passed from parent component
+            } else {
+                console.error('Failed to decline invitation:', response.data.message);
+                // TODO: Handle error (e.g., show error message)
+            }
         } catch (error) {
             console.error('Error declining invitation:', error);
+            // TODO: Handle error (e.g., show error message)
         } finally {
             setIsProcessing(false);
         }

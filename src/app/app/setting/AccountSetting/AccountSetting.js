@@ -77,6 +77,8 @@ const AccountSetting = () => {
                                     invitedby={invitation.invitedFrom}
                                     shopname={invitation.shop_id}
                                     role={invitation.role}
+                                    email={invitation.email}
+                                    shop_id={invitation.shop_id}
                                 />
                             );
                         })}

@@ -24,3 +24,5 @@ export const SHOP_SUBSCRIPTION_STATUS = '/api/data/shopSubscriptionStatus';
 export const GET_LIST_OF_USERS = '/api/data/getListOfUsers';
 export const DELETE_INVITED_USER = '/api/data/invitedUser';
 export const INVITATION_STATUS = '/api/auth/invitationStatus';
+export const ACCEPT_INVITATION = '/api/auth/acceptInvitation';
+export const REJECT_INVITATION = '/api/auth/rejectInvitation';
