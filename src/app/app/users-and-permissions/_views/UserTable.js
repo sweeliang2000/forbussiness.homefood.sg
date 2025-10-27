@@ -2,10 +2,13 @@ import { DataGrid } from '@mui/x-data-grid';
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useState } from 'react';
+import AddUsersDialog from './AddUsersDialog';
 
-const UserTable = ({ usersRows }) => {
+const UserTable = ({ usersRows, onUserUpdated }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedRowId, setSelectedRowId] = useState(null);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState(null);
 
     const handleMenuOpen = (event, rowId) => {
         setAnchorEl(event.currentTarget);
@@ -18,13 +21,32 @@ const UserTable = ({ usersRows }) => {
     };
 
     const handleEdit = () => {
-        console.log('Edit location with id:', selectedRowId);
+        const userToEdit = usersRows.find(user => user.id === selectedRowId);
+        if (userToEdit) {
+            setEditingUser(userToEdit);
+            setIsEditDialogOpen(true);
+        }
         handleMenuClose();
     };
 
     const handleDelete = () => {
         console.log('Delete location with id:', selectedRowId);
         handleMenuClose();
+    };
+
+    const handleCloseEditDialog = () => {
+        setIsEditDialogOpen(false);
+        setEditingUser(null);
+    };
+
+    const handleUserUpdated = (updatedUserData) => {
+        console.log('User updated:', updatedUserData);
+        // TODO: Implement API call to update user
+        // For now, just call the parent callback if provided
+        if (onUserUpdated) {
+            onUserUpdated(updatedUserData);
+        }
+        handleCloseEditDialog();
     };
 
     const columns = [
@@ -76,18 +98,28 @@ const UserTable = ({ usersRows }) => {
     const paginationModel = { page: 0, pageSize: 10 };
 
     return (
-        <DataGrid
-            rows={usersRows}
-            columns={columns}
-            initialState={{ pagination: { paginationModel } }}
-            disableColumnFilter
-            disableColumnMenu
-            pageSizeOptions={[10]}
-            disableSelectionOnClick
-            getRowHeight={() => 'auto'}
-            style={{ width: '100%' }}
-            pagination
-        />
+        <>
+            <DataGrid
+                rows={usersRows}
+                columns={columns}
+                initialState={{ pagination: { paginationModel } }}
+                disableColumnFilter
+                disableColumnMenu
+                pageSizeOptions={[10]}
+                disableSelectionOnClick
+                getRowHeight={() => 'auto'}
+                style={{ width: '100%' }}
+                pagination
+            />
+            
+            <AddUsersDialog
+                isOpen={isEditDialogOpen}
+                closeAddUserHandler={handleCloseEditDialog}
+                onUserInvited={handleUserUpdated}
+                editingUser={editingUser}
+                isEditMode={true}
+            />
+        </>
     );
 };
 

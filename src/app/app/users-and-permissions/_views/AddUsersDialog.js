@@ -17,7 +17,9 @@ const defaultLocation = { value: 'all', title: 'All Locations', location_id: 'al
 const AddUsersDialog = ({
     isOpen,
     closeAddUserHandler,
-    onUserInvited
+    onUserInvited,
+    editingUser = null,
+    isEditMode = false
 }) => {
     const [locations, setLocations] = useState([
         { value: 'all', title: 'All Locations' }
@@ -34,7 +36,7 @@ const AddUsersDialog = ({
         const fetchLocations = async () => {
             try {
                 const response = await apiClient.get(LIST_LOCATIONS);
-                const data = response.data;
+                const data = response.data.data;
 
                 const locationOptions = [
                     { value: 'all', title: 'All Locations', location_id: 'all'},
@@ -45,6 +47,7 @@ const AddUsersDialog = ({
                 ];
                 setLocations(locationOptions);
             } catch (error) {
+                console.error('Error fetching locations:', error);
                 const errorData = error?.response?.data;
                 const message = errorData?.error?.message;
                 const code = errorData?.error?.statusCode;
@@ -55,24 +58,45 @@ const AddUsersDialog = ({
         fetchLocations();
     }, []);
 
+    // Populate form when editing a user
+    useEffect(() => {
+        if (isEditMode && editingUser) {
+            setEmail(editingUser.email || '');
+            setSelectedRole(editingUser.role || roles[3].value);
+            
+            // Find the matching location
+            const matchingLocation = locations.find(loc => 
+                loc.title === editingUser.location || 
+                (editingUser.location === 'All Locations' && loc.value === 'all')
+            );
+            if (matchingLocation) {
+                setSelectedLocation(matchingLocation);
+            }
+        } else {
+            // Reset form for add mode
+            setEmail('');
+            setSelectedLocation(defaultLocation);
+            setSelectedRole(roles[3].value);
+        }
+    }, [isEditMode, editingUser, locations]);
+
     const addUserHandler = async (event) => {
         event.preventDefault();
         setAddUserLoading(true);
         setErrorMessage(null);
         console.log(email, selectedLocation.value, selectedRole);
 
-        const payload = {
-            "receiverEmail": email,
-            "location_id": selectedLocation.location_id,
-            "location_name": selectedLocation.title,
-            "role": selectedRole
-        };
-
-        console.log(payload);
-
-        try {
-            await apiClient.post(`${ADD_USER}`, payload);
-            // Call the success callback with user data
+        if (isEditMode) {
+            // Edit mode - console log and add TODO
+            console.log('TODO: Implement edit user API call');
+            console.log('Edit user data:', {
+                email: email,
+                location: selectedLocation.title,
+                role: selectedRole,
+                originalUser: editingUser
+            });
+            
+            // Call the success callback with updated user data
             if (onUserInvited) {
                 onUserInvited({
                     email: email,
@@ -80,20 +104,42 @@ const AddUsersDialog = ({
                     role: selectedRole
                 });
             }
-            // Reset form
-            setEmail('');
-            setSelectedLocation(defaultLocation);
-            setSelectedRole(roles[3].value);
-            setButtonDisabled(true);
-        } catch (error) {
-            const errorData = error?.response?.data;
-            const message = errorData?.error?.message;
-            const code = errorData?.error?.statusCode;
+        } else {
+            // Add mode - existing logic
+            const payload = {
+                "receiverEmail": email,
+                "location_id": selectedLocation.location_id,
+                "location_name": selectedLocation.title,
+                "role": selectedRole
+            };
 
-            setErrorMessage(`${message} (Error code: ${code})`);
-        } finally {
-            setAddUserLoading(false);
+            console.log(payload);
+
+            try {
+                await apiClient.post(`${ADD_USER}`, payload);
+                // Call the success callback with user data
+                if (onUserInvited) {
+                    onUserInvited({
+                        email: email,
+                        location: selectedLocation.title,
+                        role: selectedRole
+                    });
+                }
+                // Reset form
+                setEmail('');
+                setSelectedLocation(defaultLocation);
+                setSelectedRole(roles[3].value);
+                setButtonDisabled(true);
+            } catch (error) {
+                const errorData = error?.response?.data;
+                const message = errorData?.error?.message;
+                const code = errorData?.error?.statusCode;
+
+                setErrorMessage(`${message} (Error code: ${code})`);
+            }
         }
+        
+        setAddUserLoading(false);
     };
 
     const valueChanged = () => {
@@ -129,7 +175,7 @@ const AddUsersDialog = ({
             }}>
             <form onSubmit={addUserHandler}>
                 <div className={styles.content}>
-                    <h2>Add new user</h2>
+                    <h2>{isEditMode ? 'Edit user' : 'Add new user'}</h2>
 
                     {errorMessage && (
                         <Alert severity="error" sx={{ mb: 2 }}>
@@ -148,6 +194,7 @@ const AddUsersDialog = ({
                             variant='outlined'
                             placeholder=''
                             fullWidth
+                            disabled={isEditMode}
                         />
                     </div>
 
@@ -191,7 +238,7 @@ const AddUsersDialog = ({
                         variant='contained'
                         className={styles.addButton}
                     >
-                        Add user
+                        {isEditMode ? 'Update user' : 'Add user'}
                     </Button>
                 </div>
             </form>

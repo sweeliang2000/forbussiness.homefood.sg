@@ -168,6 +168,24 @@ const UsersAndPermissions = () => {
         fetchUsersData();
     };
 
+    const handleUserUpdated = (updatedUserData) => {
+        const message = `User ${updatedUserData.email} has been updated successfully.`;
+        setSuccessMessage(message);
+        
+        // Refresh the users data after updating a user
+        const fetchUsersData = async () => {
+            try {
+                const response = await getListOfUsers();
+                if (response.success) {
+                    setUsersData(response.data);
+                }
+            } catch (err) {
+                console.error('Error refreshing users data:', err);
+            }
+        };
+        fetchUsersData();
+    };
+
     return (
         <>
             <AddUsersDialog 
@@ -249,7 +267,10 @@ const UsersAndPermissions = () => {
                             <h4 className={styles.sectionHeaderIos}>Users with access</h4>
 
                             <div className={styles.tableContainer}>
-                                <UserTable usersRows={usersRows} />
+                                <UserTable 
+                                    usersRows={usersRows} 
+                                    onUserUpdated={handleUserUpdated}
+                                />
                             </div>
                         </section>
                     </>
