@@ -115,6 +115,24 @@ const UsersAndPermissions = () => {
         setSuccessMessage(message);
     };
 
+    const handleDeleteSuccess = (email) => {
+        const message = `Invited user ${email} has been removed successfully.`;
+        setSuccessMessage(message);
+        
+        // Refresh the users data after deleting an invited user
+        const fetchUsersData = async () => {
+            try {
+                const response = await getListOfUsers();
+                if (response.success) {
+                    setUsersData(response.data);
+                }
+            } catch (err) {
+                console.error('Error refreshing users data:', err);
+            }
+        };
+        fetchUsersData();
+    };
+
     return (
         <>
             <AddUsersDialog 
@@ -167,6 +185,7 @@ const UsersAndPermissions = () => {
                                 <InvitedUserTable 
                                     invitedUsersRows={invitedUsersRows} 
                                     onResendSuccess={handleResendSuccess}
+                                    onDeleteSuccess={handleDeleteSuccess}
                                 />
                             </div>
                         </section>

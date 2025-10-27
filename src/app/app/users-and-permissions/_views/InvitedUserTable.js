@@ -2,10 +2,13 @@ import { DataGrid } from '@mui/x-data-grid';
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useState } from 'react';
+import apiClient from '@/utility/api';
+import { DELETE_INVITED_USER } from '@/utility/apiPaths';
 
-const InvitedUserTable = ({ invitedUsersRows }) => {
+const InvitedUserTable = ({ invitedUsersRows, onDeleteSuccess }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedRowId, setSelectedRowId] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const handleMenuOpen = (event, rowId) => {
         setAnchorEl(event.currentTarget);
@@ -23,9 +26,44 @@ const InvitedUserTable = ({ invitedUsersRows }) => {
         handleMenuClose();
     };
 
-    const handleDelete = () => {
-        console.log('Delete location with id:', selectedRowId);
-        handleMenuClose();
+    const handleDelete = async () => {
+        if (isDeleting) return;
+        
+        try {
+            setIsDeleting(true);
+            
+            // Find the selected user's email
+            const selectedUser = invitedUsersRows.find(user => user.id === selectedRowId);
+            if (!selectedUser) {
+                console.error('User not found');
+                return;
+            }
+
+            const payload = {
+                email: selectedUser.email
+            };
+
+            console.log('Deleting invited user:', selectedUser.email);
+            
+            const response = await apiClient.delete(DELETE_INVITED_USER, { data: payload });
+            
+            if (response.data.success) {
+                console.log('Invited user deleted successfully');
+                // Call the success callback if provided
+                if (onDeleteSuccess) {
+                    onDeleteSuccess(selectedUser.email);
+                }
+            } else {
+                console.error('Failed to delete invited user:', response.data.message);
+            }
+        } catch (error) {
+            console.error('Error deleting invited user:', error);
+            const message = error?.response?.data?.message || error.message;
+            console.error(`Delete invited user failed: ${message}`);
+        } finally {
+            setIsDeleting(false);
+            handleMenuClose();
+        }
     };
 
     const columns = [
@@ -67,7 +105,9 @@ const InvitedUserTable = ({ invitedUsersRows }) => {
                         onClose={handleMenuClose}
                     >
                         <MenuItem onClick={handleResendInvite}>Resend Invite</MenuItem>
-                        <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                        <MenuItem onClick={handleDelete} disabled={isDeleting}>
+                            {isDeleting ? 'Deleting...' : 'Delete'}
+                        </MenuItem>
                     </Menu>
                 </div>
             ),
