@@ -40,10 +40,10 @@ const AddUsersDialog = ({
 
                 const locationOptions = [
                     { value: 'all', title: 'All Locations', location_id: 'all'},
-                    ...data.locations.map(loc => ({
+                    ...(data.locations && Array.isArray(data.locations) ? data.locations.map(loc => ({
                         value: loc.id,
                         title: `${loc.locationName}, ${loc.address}`
-                    }))
+                    })) : [])
                 ];
                 setLocations(locationOptions);
             } catch (error) {
