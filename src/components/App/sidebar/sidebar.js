@@ -13,7 +13,7 @@ import { HiOutlineSpeakerphone } from 'react-icons/hi';
 import { MdOutlineSpaceDashboard, MdOutlineNotificationsNone } from 'react-icons/md';
 import { LuStamp } from 'react-icons/lu';
 import { Submenu } from './submenu/submenu';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import CollbineForBusiness from '../../CollbineForBusiness/CollbineForBusiness';
 import { loyaltyInformation } from '@/utility/loyaltyInformation';
@@ -32,7 +32,8 @@ export default function Sidebar({
     const POINTS_TAB = 'POINTS_TAB';
     const REDEEMABLE_TAB = 'REDEEMABLE_TAB';
 
-    const pathSegments = usePathname().split('/');
+    const pathname = usePathname();
+    const pathSegments = pathname.split('/');
     const section = pathSegments[2]
     const subSection = pathSegments[3];
 
@@ -40,6 +41,20 @@ export default function Sidebar({
 
     const [sidebarMinimised, setSidebarMinimised] = useState(false);
     const [currentSelection, setCurrentSelection] = useState(undefined);
+
+    // Auto-expand submenu based on current path
+    useEffect(() => {
+        const currentSection = pathname.split('/')[2];
+        if (currentSection === 'release') {
+            setCurrentSelection(RELEASES_TAB);
+        } else if (currentSection === 'stamp-management' || currentSection === 'card-design') {
+            setCurrentSelection(STAMP_TAB);
+        } else if (currentSection === 'redeemable') {
+            setCurrentSelection(REDEEMABLE_TAB);
+        } else if (currentSection === 'points-management') {
+            setCurrentSelection(POINTS_TAB);
+        }
+    }, [pathname]);
 
     const toggleSidebar = () => {
         setSidebarMinimised(!sidebarMinimised);
