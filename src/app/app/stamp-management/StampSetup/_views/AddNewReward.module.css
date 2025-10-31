@@ -1,10 +1,29 @@
-/* RewardsLists.module.css */
 .container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); 
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
     width: 100%;
     background-color: var(--background);
     padding: 24px 16px;
-  }
-    
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+}
+
+.createButton {
+    box-shadow: none;
+    text-transform: capitalize;
+}
+
+.rewardsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    width: 100%;
+}
+     

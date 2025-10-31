@@ -2,9 +2,11 @@
 import styles from './AddNewReward.module.css';
 import RewardCard from '@/app/app/redeemable/rewards/_views/RewardCard';
 import DialogPopup from '@/components/DialogPopup/DialogPopup';
+import CreateRewardPopup from '@/app/app/redeemable/rewards/_views/CreateRewardPopup';
 import { useState, useEffect } from 'react';
 import apiClient from '@/utility/api';
-import { REWARDS } from '@/utility/apiPaths';
+import { REWARDS, CREATE_REWARD } from '@/utility/apiPaths';
+import { Button } from '@mui/material';
 
 const AddNewReward = ({
     isOpen,
@@ -15,6 +17,8 @@ const AddNewReward = ({
     const [rewards, setRewards] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isCreateRewardOpen, setIsCreateRewardOpen] = useState(false);
+    const [selectedReward, setSelectedReward] = useState(null);
 
     const fetchRewards = async () => {
         try {
@@ -70,6 +74,56 @@ const AddNewReward = ({
         setIsOpen(false);
     }
 
+    const handleSubmitReward = async (formData) => {
+        try {
+            console.log('Received form data:', formData);
+            console.log('Image data:', formData.image);
+            
+            // Create FormData for multipart/form-data submission
+            const submitFormData = new FormData();
+            
+            // Add text fields
+            submitFormData.append('rewardType', formData.type);
+            submitFormData.append('rewardName', formData.name);
+            submitFormData.append('description', formData.description);
+            submitFormData.append('expiryType', formData.expiry_type || 'expiryInDays');
+            submitFormData.append('expiryNumberOfDays', formData.expiry || '30');
+            submitFormData.append('customRewardId', formData.custom_id || '');
+            submitFormData.append('rewardTags', formData.tags || '');
+
+            // Add image file if present
+            if (formData.image && formData.image.file) {
+                submitFormData.append('rewardImage', formData.image.file);
+                console.log('Image file appended:', formData.image.file);
+            }
+
+            // Create new reward
+            const response = await apiClient.post(CREATE_REWARD, submitFormData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            
+            if (response.status === 200 || response.status === 201) {
+                // Refresh the rewards list after successful creation
+                await fetchRewards();
+                setIsCreateRewardOpen(false);
+                setSelectedReward(null);
+                console.log('Reward created successfully');
+                
+                // Optionally select the newly created reward
+                // You may need to extract the reward ID from the response
+                // For now, we'll just refresh the list
+            }
+        } catch (err) {
+            const errorData = err?.response?.data;
+            const message = errorData?.error?.message;
+            const code = errorData?.error?.statusCode;
+            console.error(`Error creating reward: ${message} (Error code: ${code})`);
+            // You might want to show an error message to the user here
+        }
+    };
+
     return(
         <DialogPopup
             title='Add Reward'
@@ -86,6 +140,21 @@ const AddNewReward = ({
             onSubmit={saveHandler}
         >
             <div className={styles.container}>
+                <div className={styles.header}>
+                    <Button
+                        type='button'
+                        size='small'
+                        variant='contained'
+                        className={styles.createButton}
+                        onClick={() => {
+                            setSelectedReward(null);
+                            setIsCreateRewardOpen(true);
+                        }}
+                    >
+                        Create New Reward
+                    </Button>
+                </div>
+
                 {loading ? (
                     <div>
                         <div>Loading rewards...</div>
@@ -99,17 +168,27 @@ const AddNewReward = ({
                         <div>No rewards available</div>
                     </div>
                 ) : (
-                    rewards.map((reward) => <RewardCard
-                        key={reward.id}
-                        reward={reward}
-                        isSelectable={true}
-                        currentCheck={true}
-                        disableTags={true}
-                        onClick={() => { 
-                            console.log('reward', reward);  
-                            setSelected(reward) }} />)
+                    <div className={styles.rewardsGrid}>
+                        {rewards.map((reward) => <RewardCard
+                            key={reward.id}
+                            reward={reward}
+                            isSelectable={true}
+                            currentCheck={selected?.id === reward.id}
+                            disableTags={true}
+                            onClick={() => { 
+                                console.log('reward', reward);  
+                                setSelected(reward) }} />)}
+                    </div>
                 )}
             </div>
+
+            <CreateRewardPopup
+                isOpen={isCreateRewardOpen}
+                setIsOpen={setIsCreateRewardOpen}
+                selectedReward={selectedReward}
+                onArchive={null}
+                onSubmit={handleSubmitReward}
+            />
         </DialogPopup>
     )
 };
