@@ -107,7 +107,7 @@ export default function Sidebar({
                     </li>
 
                     <li>
-                        <Link href='/'>
+                        <Link href='/app/notifications'>
                             <MdOutlineNotificationsNone className={styles.icon} />
                             <span>Notifications</span>
                         </Link>
