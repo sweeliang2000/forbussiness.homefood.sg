@@ -141,6 +141,7 @@ const EditStampStep = ({
                 isOpen={isAddNewRewardOpen}
                 setIsOpen={setIsAddNewRewardOpen}
                 onSave={onNewRewardSaved}
+                currentReward={reward}
             />
         </>
     )

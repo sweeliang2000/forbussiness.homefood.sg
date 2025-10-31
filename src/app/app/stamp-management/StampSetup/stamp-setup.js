@@ -82,6 +82,7 @@ export default function StampSetup() {
         setIsLoading(true);
         const response = await apiClient.get(STAMP_MANAGEMENT);
         const data = response.data.data;
+        console.log('Stamp management data:', data);
 
         if (data) {
           const data = response.data.data;

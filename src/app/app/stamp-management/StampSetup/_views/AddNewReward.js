@@ -11,7 +11,8 @@ import { Button } from '@mui/material';
 const AddNewReward = ({
     isOpen,
     setIsOpen,
-    onSave
+    onSave,
+    currentReward
 }) => {
     const [selected, setSelected] = useState(null);
     const [rewards, setRewards] = useState([]);
@@ -33,6 +34,8 @@ const AddNewReward = ({
             const selectedRewards = currently_selected
                 ?.filter(item => item.reward)
                 ?.map(item => item.reward.id) || [];
+
+            console.log('selectedRewards', selectedRewards);
             
             // Transform API response to match expected structure
             const transformedRewards = (apiRewards || []).map(reward => ({
@@ -49,6 +52,8 @@ const AddNewReward = ({
                 isCheck: selectedRewards.includes(reward.reward_id),
                 isPublished: reward.isPublished === 'true' || reward.isPublished === true
             }));
+
+            console.log('transformedRewards', transformedRewards);
             
             setRewards(transformedRewards);
         } catch (err) {
@@ -65,8 +70,23 @@ const AddNewReward = ({
     useEffect(() => {
         if (isOpen) {
             fetchRewards();
+            // Reset selected when dialog opens only if no currentReward is provided
+            if (!currentReward) {
+                setSelected(null);
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, currentReward]);
+
+    // Set selected reward when rewards are loaded and currentReward is provided
+    useEffect(() => {
+        if (currentReward && rewards.length > 0 && isOpen) {
+            // Find the matching reward in the fetched rewards by ID
+            const matchingReward = rewards.find(reward => reward.id === currentReward.id);
+            if (matchingReward) {
+                setSelected(matchingReward);
+            }
+        }
+    }, [rewards, currentReward, isOpen]);
 
     const saveHandler = (event) => {
         event.preventDefault();
