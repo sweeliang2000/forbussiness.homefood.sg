@@ -106,7 +106,7 @@ export default function Sidebar({
                         </Link>
                     </li>
 
-                    <li>
+                    <li className={section == 'notifications' ? styles.active : ''}>
                         <Link href='/app/notifications'>
                             <MdOutlineNotificationsNone className={styles.icon} />
                             <span>Notifications</span>
