@@ -43,6 +43,89 @@
     margin-top: 16px;
 }
 
+.historyHeader {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.historyList {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.historyItem {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px;
+    padding-bottom: 24px;
+    margin: 0 -24px;
+    border-bottom: 1px solid #e5e5e5;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.2s ease;
+}
+
+.historyItemContent {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.historyItem:hover {
+    background-color: #f5f5f5;
+}
+
+.historyItem:first-child {
+    margin-top: -24px;
+    padding-top: 24px;
+}
+
+.historyItem:last-child {
+    border-bottom: none;
+    padding-bottom: 24px;
+    margin-bottom: -24px;
+}
+
+.versionInfo {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.version {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #242427;
+    letter-spacing: -0.02em;
+}
+
+.date {
+    font-size: 0.875rem;
+    color: #5b6264;
+    font-weight: 400;
+}
+
+.updateInfo {
+    font-size: 0.9375rem;
+    color: #242427;
+    line-height: 1.5;
+    margin: 0;
+    padding-left: 0;
+}
+
+.chevron {
+    color: #dcdfe1;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
 @media only screen and (max-width: 820px) {
     .header {
         top: 62px;
