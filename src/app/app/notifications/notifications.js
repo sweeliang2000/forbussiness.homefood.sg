@@ -6,7 +6,7 @@ import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import { Button } from '@mui/material';
-import { FaChevronRight } from 'react-icons/fa';
+import { FaChevronRight, FaArrowUp } from 'react-icons/fa';
 import { 
     MdOutlineNotificationsActive, 
     MdOutlineCheckCircle,
@@ -156,6 +156,13 @@ const NotificationsView = () => {
         }
     };
 
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
+
     return (
         <form
             className={styles.form}
@@ -245,6 +252,22 @@ const NotificationsView = () => {
                     })}
                 </div>
             </ContentCard>
+
+            <div className={styles.endOfNotifications}>
+                <p className={styles.endMessage}>End of notifications</p>
+            </div>
+
+            <div className={styles.scrollToTopContainer}>
+                <Button
+                    variant='contained'
+                    onClick={scrollToTop}
+                    className={styles.scrollToTopButton}
+                    aria-label="Scroll to top"
+                >
+                    <FaArrowUp className={styles.scrollToTopIcon} />
+                    <span>Back to top</span>
+                </Button>
+            </div>
 
         </form>
     )
