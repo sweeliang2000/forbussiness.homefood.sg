@@ -3,42 +3,10 @@ import styles from './LandingPage.module.css';
 import Abutton from '@/components/Buttons/Abutton';
 import HeroSection from '../HeroSection/HeroSection';
 import StatementSection from '../StatementSection/StatementSection';
+import WhyUsSection from '../WhyUsSection/WhyUsSection';
 import FeaturesSection from '../FeaturesSection/FeaturesSection';
 
 const LandingPage = () => {
-    const features = [
-        {
-            title: "Customizable Loyalty Systems",
-            description: "Create unique reward programs tailored to your business needs with flexible point systems and rewards.",
-            icon: "🎯"
-        },
-        {
-            title: "Customer Engagement",
-            description: "Keep customers coming back with engaging stamp cards, points, and personalized rewards.",
-            icon: "💝"
-        },
-        {
-            title: "Easy Management",
-            description: "Manage your loyalty program effortlessly with our intuitive dashboard and analytics.",
-            icon: "📊"
-        },
-        {
-            title: "Mobile Friendly",
-            description: "Your customers can easily access and use their loyalty cards on any device, anywhere.",
-            icon: "📱"
-        },
-        {
-            title: "Real-time Analytics",
-            description: "Track customer behavior, redemption rates, and program performance in real-time.",
-            icon: "📈"
-        },
-        {
-            title: "Seamless Integration",
-            description: "Integrate with your existing POS systems and business tools for a smooth workflow.",
-            icon: "🔗"
-        }
-    ];
-
     const testimonials = [
         {
             name: "Sarah Chen",
@@ -62,32 +30,13 @@ const LandingPage = () => {
 
     return (
         <div className={styles.landingPage}>
-            <HeroSection/>
+            <HeroSection />
 
-            <StatementSection/>
+            <StatementSection />
 
-            <FeaturesSection/>
+            <WhyUsSection />
 
-            {/* Features Section */}
-            <section id="features" className={styles.featuresSection}>
-                <div className={styles.sectionContainer}>
-                    <div className={styles.sectionHeader}>
-                        <h2 className={styles.sectionTitle}>Why Choose Collbine?</h2>
-                        <p className={styles.sectionSubtitle}>
-                            Everything you need to create and manage successful loyalty programs
-                        </p>
-                    </div>
-                    <div className={styles.featuresGrid}>
-                        {features.map((feature, index) => (
-                            <div key={index} className={styles.featureCard}>
-                                <div className={styles.featureIcon}>{feature.icon}</div>
-                                <h3 className={styles.featureTitle}>{feature.title}</h3>
-                                <p className={styles.featureDescription}>{feature.description}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+            <FeaturesSection />
 
             {/* Testimonials Section */}
             <section className={styles.testimonialsSection}>
@@ -144,7 +93,7 @@ const LandingPage = () => {
                             </ul>
                             <Abutton href="/signup" variant="primary" size="medium">Get Started</Abutton>
                         </div>
-                        
+
                         <div className={`${styles.pricingCard} ${styles.popular}`}>
                             <div className={styles.popularBadge}>Most Popular</div>
                             <div className={styles.pricingHeader}>
@@ -164,7 +113,7 @@ const LandingPage = () => {
                             </ul>
                             <Abutton href="/signup" variant="primary" size="medium">Get Started</Abutton>
                         </div>
-                        
+
                         <div className={styles.pricingCard}>
                             <div className={styles.pricingHeader}>
                                 <h3>Enterprise</h3>

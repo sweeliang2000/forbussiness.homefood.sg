@@ -1,0 +1,185 @@
+.whyUsSection {
+    padding: 80px var(--side-spacing);
+}
+
+.sectionContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.sectionHeader {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.sectionContent {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 24px;
+}
+
+.sectionTitle {
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--on-primary);
+}
+
+.sectionSubtitle {
+    font-size: 19px;
+    color: var(--on-primary-light2);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.featuresGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+}
+
+/* CTA Bubble */
+.ctaBubble {
+    position: relative;
+    background: #d4edda;
+    border-radius: 20px;
+    padding: 20px 24px;
+    margin-top: 48px;
+}
+
+.ctaContent {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.lightbulbIcon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #ffc107;
+}
+
+.ctaText {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ctaText p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--on-primary);
+}
+
+.tagline {
+    font-size: 13px;
+    color: var(--on-primary-light2);
+    font-weight: 500;
+}
+
+.ctaButton {
+    flex-shrink: 0;
+}
+
+.stickyNote {
+    position: absolute;
+    bottom: -24px;
+    right: -12px;
+    background: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--on-primary);
+    transform: rotate(-4deg);
+    border: 2px solid #f0f0f0;
+}
+
+.stickyNote::before {
+    content: '📎';
+    margin-right: 4px;
+}
+
+/* Mobile Responsive */
+@media only screen and (max-width: 1024px) {
+    .featuresGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Center the 3rd card when it's alone in the second row */
+    .featuresGrid > :nth-child(3):last-child {
+        grid-column: 1 / -1;
+        justify-self: center;
+        max-width: calc(50% - 16px);
+    }
+
+    .ctaContent {
+        flex-wrap: wrap;
+    }
+
+    .ctaButton {
+        width: 100%;
+    }
+
+    .ctaButton button {
+        width: 100%;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .featuresGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .sectionTitle {
+        font-size: 32px;
+    }
+
+    .sectionSubtitle {
+        font-size: 16px;
+    }
+
+    .ctaBubble {
+        padding: 16px 20px;
+    }
+
+    .ctaContent {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .lightbulbIcon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .ctaText p {
+        font-size: 14px;
+    }
+
+    .tagline {
+        font-size: 12px;
+    }
+
+    .stickyNote {
+        position: relative;
+        bottom: auto;
+        right: auto;
+        margin-top: 1rem;
+        transform: rotate(0deg);
+        display: inline-block;
+    }
+}
+

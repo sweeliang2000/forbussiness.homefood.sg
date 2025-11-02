@@ -92,7 +92,6 @@
 }
 
 /* Section Styles */
-.featuresSection,
 .testimonialsSection,
 .pricingSection {
     padding: 5rem 0;
@@ -121,44 +120,6 @@
     color: var(--on-primary-light2);
     max-width: 600px;
     margin: 0 auto;
-}
-
-/* Features Grid */
-.featuresGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-}
-
-.featureCard {
-    background: var(--primary);
-    padding: 2rem;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.featureCard:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-}
-
-.featureIcon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-}
-
-.featureTitle {
-    font-size: 1.3rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: var(--on-primary);
-}
-
-.featureDescription {
-    color: var(--on-primary-light2);
-    line-height: 1.6;
 }
 
 /* Testimonials */
@@ -430,7 +391,6 @@
         padding: 1.5rem;
     }
 
-    .featuresGrid,
     .testimonialsGrid,
     .pricingGrid {
         grid-template-columns: 1fr;
@@ -467,10 +427,6 @@
 
     .heroTitle {
         font-size: 3rem;
-    }
-
-    .featuresGrid {
-        grid-template-columns: repeat(2, 1fr);
     }
 
     .testimonialsGrid {
