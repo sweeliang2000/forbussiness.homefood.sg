@@ -1,4 +1,5 @@
 import styles from "./StatementSection.module.css";
+import Badge from "@/components/Badge";
 
 const StatementSection = () => {
     return (
@@ -6,6 +7,7 @@ const StatementSection = () => {
             <div className={styles.sectionContainer}>
                 <div className={styles.statementContainer}>
                     <div className={styles.statementContent}>
+                        <Badge variant="blue">Proved by Experts</Badge>
                         <h2>Get Customers to Come Back. Get Them to Spend More.</h2>
                         <p>
                             Research from Bain & Company shows that <strong>repeat purchasers simply spend 
