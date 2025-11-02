@@ -468,7 +468,7 @@ export default function StampSetup() {
       headerName: 'Reward',
       flex: 2,
       renderCell: (params) => {
-        const reward = cardSteps[params.row.id - 1].reward;
+        const reward = cardSteps[params.row.id - 1]?.reward || null;
 
         if (!reward) {
           return <p>No Reward</p>

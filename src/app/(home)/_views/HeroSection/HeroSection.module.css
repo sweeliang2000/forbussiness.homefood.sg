@@ -1,18 +1,20 @@
 /* heroTopContainer */
 .heroSection {
     display: flex;
-    flex-direction: column;
-    height: 740px;
-    padding: 90px var(--side-spacing) 0;
+    flex-direction: row;
+    padding: 90px var(--side-spacing);
+    max-width: var(--max-width);
+    margin: 0 auto;
+    gap: 48px;
+    align-items: flex-start;
 }
 
 .heroTopContainer {
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    max-width: var(--max-width);
-    padding: 0 calc(var(--side-spacing) * 4);
-    margin: 0 auto;
+    gap: 40px;
+    flex: 0.75;
+    flex-shrink: 0;
 }
 
 .heroInfo {
@@ -22,13 +24,12 @@
 }
 
 .heroTopContainer h1 {
-    font-size: 70px;
+    font-size: 62px;
 }
 
 .heroSubtitle {
     font-size: 16px;
     color: var(--text-secondary);
-    max-width: 50%;
 }
 
 .heroButtons {
@@ -36,161 +37,168 @@
     gap: 16px;
 }
 
-.heroBottomContainer {
+.heroRightContainer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 16px;
+    width: 100%;
+    min-height: 684px;
+    flex: 1;
+    flex-shrink: 0;
+    background-color: rgb(237, 237, 237);
+    border-radius: 42px;
+    padding: 12px;
+}
+
+.div1 {
+    grid-column: span 2 / span 2;
+    grid-row: span 4 / span 4;
+    border-radius: 34px;
+    overflow: hidden;
     position: relative;
     display: flex;
-    justify-content: end;
-    align-items: flex-end;
-    flex: 1;
-    max-width: var(--max-width);
-    padding: 0 calc(var(--side-spacing) * 4);
-    margin: 0 auto;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: auto;
+}
+
+.div1Image {
+    object-fit: contain;
+    width: 100%;
+    height: 100%;
+}
+
+.div2 {
+    grid-column: span 2 / span 2;
+    grid-row: span 2 / span 2;
+    grid-column-start: 3;
+    background-color: #ffffff;
+    border-radius: 34px;
+    overflow: hidden;
+    /* padding: 20px; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.animatedCardContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.animatedCardTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+    text-align: left;
+    padding: 20px;
     width: 100%;
 }
 
-.heroBottomImage {
+.animatedCardWrapper {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: var(--background);
+}
+
+.animatedCardImageHolder {
     position: absolute;
-    height: 520px;
-    width: auto;
-    right: 48px;
-    bottom: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.animatedCardImage {
     object-fit: contain;
-    z-index: 1;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 280px;
+    border-radius: 12px;
+    padding: 20px;
 }
 
-.heroBottomCardImage {
-    position: absolute;
-    height: 280px;
-    width: auto;
-    right: 220px;
-    bottom: 0;
-    object-fit: contain;
-    z-index: 2;
+.div3 {
+    grid-column: span 2 / span 2;
+    grid-row: span 2 / span 2;
+    grid-column-start: 3;
+    grid-row-start: 3;
+    background-color: #ffffff;
+    border-radius: 34px;
+    overflow: hidden;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Ensure motion wrappers don't interfere with image positioning */
-.heroBottomContainer > div {
-    position: static;
+.chartContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-.heroBottomContainer > div > img {
-    display: block;
+.chartHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
 }
 
-@media only screen and (max-width: 1250px) {
-    .heroBottomCardImage {
-        height: 210px;
-        width: auto;
-    }
+.chartTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 4px 0;
 }
 
-/* Tablet Styles */
-@media only screen and (max-width: 1024px) {
-    .heroSection {
-        padding: 80px var(--side-spacing);
-        height: auto;
-    }
-
-    .heroTopContainer {
-        padding: 0 calc(var(--side-spacing) * 2);
-        text-align: center;
-        margin-top: 72px;
-    }
-
-    .heroTopContainer h1 {
-        font-size: 56px;
-    }
-
-    .heroSubtitle {
-        max-width: 80%;
-        margin: 0 auto;
-    }
-
-    .heroBottomContainer {
-        justify-content: center;
-        padding: 48px calc(var(--side-spacing) * 2);
-    }
-
-    .heroBottomImage {
-        position: relative;
-        height: 440px;
-        right: 0;
-    }
-
-    .heroBottomCardImage {
-        position: relative;
-        margin: 0;
-        right: 0;
-        height: 180px;
-    }
-
-    .heroButtons {
-        display: flex;
-        justify-content: center;
-    }
+.chartSubtitle {
+    font-size: 12px;
+    color: #666;
+    margin: 0;
 }
 
-/* Mobile Responsive Styles */
-@media only screen and (max-width: 768px) {
-    .heroSection {
-        height: auto;
-    }
-
-    .heroTopContainer {
-        padding: 0;
-        gap: 32px;
-        text-align: center;
-        margin-bottom: 40px;
-    }
-
-    .heroTopContainer h1 {
-        font-size: 42px;
-        line-height: 1.2;
-    }
-
-    .heroSubtitle {
-        font-size: 18px;
-        max-width: 100%;
-        line-height: 1.5;
-    }
-
-    .heroButtons {
-        flex-direction: column;
-        gap: 12px;
-        align-items: center;
-    }
-
-    .heroBottomContainer {
-        padding: 80px 0;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .heroBottomImage {
-        height: 580px;
-    }
+.chartStats {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
-/* Small Mobile Styles */
-@media only screen and (max-width: 580px) {
-    .heroSection {
-        padding: 30px var(--side-spacing) 40px;
-    }
+.percentageBadge {
+    background-color: #fee2e2;
+    color: #dc2626;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
 
-    .heroTopContainer {
-        gap: 24px;
-    }
+.chartWrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    width: 100%;
+}
 
-    .heroTopContainer h1 {
-        font-size: 32px;
-    }
-
-    .heroSubtitle {
-        font-size: 16px;
-    }
-
-    .heroBottomImageContainer,
-    .heroBottomCardImage {
-        display: none;
-    }
+.chartResponsive {
+    flex: 1;
+    min-height: 200px;
+    width: 100%;
+    overflow: visible;
 }

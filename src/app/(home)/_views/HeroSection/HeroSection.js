@@ -3,6 +3,8 @@ import Abutton from '@/components/Buttons/Abutton';
 import styles from './HeroSection.module.css';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import TransactionChart from './TransactionChart';
+import AnimatedCardDisplay from './AnimatedCardDisplay';
 
 const HeroSection = () => {
     return (
@@ -60,37 +62,22 @@ const HeroSection = () => {
             </motion.div>
 
             <motion.div 
-                className={styles.heroBottomContainer}>
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: 0.4, type: "spring", stiffness: 120 }}
-                    className={styles.heroBottomImageContainer}
-                    >
+                className={styles.heroRightContainer}>
+                <div className={styles.div1}>
                     <Image
-                        className={styles.heroBottomCardImage}
-                        src='/images/pages/landing/hero/card.webp'
-                        alt='Hero Bottom'
-                        width={380}
-                        height={280}
+                        src="/images/pages/landing/hero/collbine_app.png"
+                        alt="Collbine App"
+                        fill
+                        className={styles.div1Image}
+                        priority
                     />
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: 0.4, type: "spring", stiffness: 120 }}
-                    >
-                    <Image
-                        className={styles.heroBottomImage}
-                        src='/images/pages/landing/hero/collbine_app.png'
-                        alt='Hero Bottom'
-                        width={280}
-                        height={600}
-                    />
-                </motion.div>
+                </div>
+                <div className={styles.div2}>
+                    <AnimatedCardDisplay />
+                </div>
+                <div className={styles.div3}>
+                    <TransactionChart />
+                </div>
             </motion.div>
 
         </motion.section>
