@@ -57,7 +57,7 @@
     border-radius: 34px;
     overflow: hidden;
     position: relative;
-    display: flex;
+    display: flex; 
     align-items: center;
     justify-content: center;
     aspect-ratio: auto;
@@ -201,4 +201,190 @@
     min-height: 200px;
     width: 100%;
     overflow: visible;
+}
+
+/* Tablet Styles */
+@media only screen and (max-width: 1024px) {
+    .heroSection {
+        flex-direction: column;
+        gap: 32px;
+        padding: 60px var(--side-spacing);
+    }
+
+    .heroTopContainer {
+        width: 100%;
+        flex: 1;
+    }
+
+    .heroRightContainer {
+        width: 100%;
+        min-height: auto;
+    }
+}
+
+/* Mobile Responsive Styles */
+@media only screen and (max-width: 768px) {
+    .heroSection {
+        flex-direction: column;
+        padding: 40px var(--side-spacing);
+        gap: 24px;
+    }
+
+    .heroTopContainer {
+        width: 100%;
+        flex: 1;
+        gap: 24px;
+    }
+
+    .heroTopContainer h1 {
+        font-size: 36px;
+    }
+
+    .heroSubtitle {
+        font-size: 14px;
+    }
+
+    .heroButtons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .heroRightContainer {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-height: auto;
+        padding: 12px;
+    }
+
+    .div1 {
+        grid-column: unset;
+        grid-row: unset;
+        width: 100%;
+        min-height: 400px;
+        order: 1;
+    }
+
+    .div2 {
+        grid-column: unset;
+        grid-row: unset;
+        grid-column-start: unset;
+        width: 100%;
+        min-height: 320px;
+        height: auto;
+        order: 2;
+        padding: 0;
+    }
+
+    .div3 {
+        grid-column: unset;
+        grid-row: unset;
+        grid-column-start: unset;
+        grid-row-start: unset;
+        width: 100%;
+        min-height: 300px;
+        order: 3;
+    }
+
+    .animatedCardContainer {
+        min-height: 300px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .animatedCardTitle {
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .animatedCardWrapper {
+        flex: 1;
+        min-height: 260px;
+        max-height: 280px;
+        height: 100%;
+        position: relative;
+    }
+
+    .animatedCardImageHolder {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+    }
+
+    .animatedCardImage {
+        padding: 0 16px 16px 16px;
+        max-height: 100%;
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+    }
+
+    .chartContainer {
+        padding: 0;
+    }
+
+    .chartHeader {
+        margin-bottom: 12px;
+    }
+
+    .chartTitle {
+        font-size: 16px;
+    }
+
+    .chartSubtitle {
+        font-size: 11px;
+    }
+}
+
+/* Small Mobile Styles */
+@media only screen and (max-width: 480px) {
+    .heroSection {
+        padding: 30px var(--side-spacing);
+        gap: 20px;
+    }
+
+    .heroTopContainer h1 {
+        font-size: 28px;
+    }
+
+    .heroTopContainer {
+        gap: 20px;
+    }
+
+    .div1 {
+        min-height: 350px;
+    }
+
+    .div2 {
+        min-height: 280px;
+    }
+
+    .div3 {
+        min-height: 250px;
+    }
+
+    .animatedCardContainer {
+        min-height: 280px;
+    }
+
+    .animatedCardTitle {
+        font-size: 14px;
+    }
+
+    .animatedCardWrapper {
+        min-height: 240px;
+        max-height: 260px;
+    }
+
+    .animatedCardImage {
+        padding: 0 12px 12px 12px;
+        max-height: 100%;
+    }
+
+    .chartTitle {
+        font-size: 14px;
+    }
 }
