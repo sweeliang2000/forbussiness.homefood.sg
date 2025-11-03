@@ -2,7 +2,7 @@ import { Button, TextField, Alert } from '@mui/material';
 import { useState } from 'react';
 import AlertModal from '../AlertModal/AlertModal';
 import apiClient from '@/utility/api';
-import { ACCEPT_INVITATION, REJECT_INVITATION } from '@/utility/apiPaths';
+import { ACCEPT_INVITATION, REJECT_INVITATION, REFRESH_USER_COOKIE } from '@/utility/apiPaths';
 import styles from './InvitationBanner.module.css';
 
 const InvitationBanner = ({
@@ -43,10 +43,16 @@ const InvitationBanner = ({
             
             if (response.data.success) {
                 console.log('Invitation accepted successfully:', response.data);
-                // TODO: Handle success (e.g., show success message, refresh page, etc.)
-                // You might want to call a callback function passed from parent component
-                // For now, we can reload the page to reflect the changes
-                window.location.reload();
+                
+                // Refresh user cookie/token
+                try {
+                    await apiClient.get(REFRESH_USER_COOKIE);
+                    window.location.reload();
+                } catch (refreshError) {
+                    window.location.reload();
+                }
+                
+                return;
             } else {
                 console.error('Failed to accept invitation:', response.data.message);
                 // TODO: Handle error (e.g., show error message)
