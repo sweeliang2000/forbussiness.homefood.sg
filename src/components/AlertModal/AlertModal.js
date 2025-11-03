@@ -34,7 +34,7 @@ const AlertModal = ({
       </div>
       
       <DialogContent>
-        <DialogContentText id="alert-dialog-description">
+        <DialogContentText id="alert-dialog-description" component="div">
           {description}
         </DialogContentText>
       </DialogContent>

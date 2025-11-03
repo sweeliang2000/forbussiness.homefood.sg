@@ -198,7 +198,8 @@ const AddUsersDialog = ({
                         />
                     </div>
 
-                    <div className={styles.field}>
+                    {/* TODO: In the future, we will allow users to select multiple locations. */}
+                    {/* <div className={styles.field}>
                         <h3>Location</h3>
 
                         <FullWidthDropdown
@@ -207,7 +208,7 @@ const AddUsersDialog = ({
                             options={locations}
                             name='location'
                         />
-                    </div>
+                    </div> */}
 
                     <div className={styles.field}>
                         <h3>Role</h3>

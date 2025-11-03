@@ -35,7 +35,7 @@ const WhyUsSection = () => {
                     <div className={styles.sectionContent}>
                         <h2 className={styles.sectionTitle}>Discover. Collect. Redeem. Repeat.</h2>
                         <p className={styles.sectionSubtitle}>
-                            Most loyalty systems are forgotten because customers have nowhere to find them. Ours is discoverable via app.
+                            Most loyalty systems are forgotten because customers have nowhere to find them. We help make your loyalty system discoverable — so customers always come back.
                         </p>
                     </div>
                 </div>

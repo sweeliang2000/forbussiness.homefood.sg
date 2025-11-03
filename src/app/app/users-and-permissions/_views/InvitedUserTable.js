@@ -34,10 +34,6 @@ const InvitedUserTable = ({ invitedUsersRows, onDeleteSuccess }) => {
             
             // Find the selected user's email
             const selectedUser = invitedUsersRows.find(user => user.id === selectedRowId);
-            if (!selectedUser) {
-                console.error('User not found');
-                return;
-            }
 
             const payload = {
                 email: selectedUser.email

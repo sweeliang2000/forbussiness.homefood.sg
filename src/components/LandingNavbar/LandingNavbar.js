@@ -13,8 +13,8 @@ import { motion } from 'motion/react';
 const menuItems = [
     { label: 'Why us?', href: '#home' },
     { label: 'Features', href: '#features' },
+    { label: 'Get Started', href: '#about' },
     { label: 'Pricing', href: '#pricing' },
-    { label: 'About', href: '#about' },
     { label: 'Contact', href: '#contact' }
 ];
 

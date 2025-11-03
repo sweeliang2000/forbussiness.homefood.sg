@@ -41,6 +41,8 @@ const getInvitationStatus = async (email) => {
 const UsersAndPermissions = () => {
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [isError, setIsError] = useState(false);
     const [usersData, setUsersData] = useState({
         invited_users: [],
         actual_users: []
@@ -125,6 +127,8 @@ const UsersAndPermissions = () => {
     const handleUserInvited = (userData) => {
         const message = `${userData.email} has been invited successfully. An email has been sent to their account, or they can login to accept the role.`;
         setSuccessMessage(message);
+        setIsError(false);
+        setErrorMessage('');
         setIsAddUserOpen(false);
         
         // Refresh the users data after inviting a new user
@@ -145,14 +149,43 @@ const UsersAndPermissions = () => {
         setSuccessMessage('');
     };
 
+    const clearErrorMessage = () => {
+        setErrorMessage('');
+        setIsError(false);
+    };
+
+    const handleDeleteError = (error) => {
+        let message = 'Failed to delete user.';
+        
+        // Prioritize backend response.data.message
+        if (error?.response?.data?.message) {
+            message = error.response.data.message;
+        } else if (error?.response?.data?.error?.message) {
+            message = error.response.data.error.message;
+        } else if (error?.response?.status === 401) {
+            message = 'Unauthorized: You do not have permission to delete this user.';
+        } else if (error?.message) {
+            message = error.message;
+        }
+        
+        setErrorMessage(message);
+        setIsError(true);
+        // Clear success message when error occurs
+        setSuccessMessage('');
+    };
+
     const handleResendSuccess = (email) => {
         const message = `Invite resent successfully to ${email}.`;
         setSuccessMessage(message);
+        setIsError(false);
+        setErrorMessage('');
     };
 
     const handleDeleteSuccess = (email) => {
         const message = `Invited user ${email} has been removed successfully.`;
         setSuccessMessage(message);
+        setIsError(false);
+        setErrorMessage('');
         
         // Refresh the users data after deleting an invited user
         const fetchUsersData = async () => {
@@ -171,6 +204,8 @@ const UsersAndPermissions = () => {
     const handleUserUpdated = (updatedUserData) => {
         const message = `User ${updatedUserData.email} has been updated successfully.`;
         setSuccessMessage(message);
+        setIsError(false);
+        setErrorMessage('');
         
         // Refresh the users data after updating a user
         const fetchUsersData = async () => {
@@ -206,6 +241,9 @@ const UsersAndPermissions = () => {
                     showButton={false}
                     successMessage={successMessage}
                     setShowSuccess={clearSuccessMessage}
+                    isError={isError}
+                    errorMessage={errorMessage}
+                    setShowError={clearErrorMessage}
                 />
 
                 {invitations.length > 0 && (
@@ -270,6 +308,7 @@ const UsersAndPermissions = () => {
                                 <UserTable 
                                     usersRows={usersRows} 
                                     onUserUpdated={handleUserUpdated}
+                                    onDeleteError={handleDeleteError}
                                 />
                             </div>
                         </section>

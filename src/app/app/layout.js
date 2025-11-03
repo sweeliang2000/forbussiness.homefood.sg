@@ -6,6 +6,9 @@ import AppNav from './_views/AppNav/AppNav';
 import { useEffect, useState } from 'react';
 import { getShopSubscriptionStatus } from '@/utility/api';
 import { getSubscriptionLookupKey, setSubscriptionLookupKey } from '@/utility/subscriptionStorage';
+import apiClient from '@/utility/api';
+import { REFRESH_USER_COOKIE } from '@/utility/apiPaths';
+import { useRouter, usePathname } from 'next/navigation';
 
 // export const metadata = {
 //   title: 'Collbine for Business | Customisable Loyalty Systems in Singapore',
@@ -15,6 +18,8 @@ import { getSubscriptionLookupKey, setSubscriptionLookupKey } from '@/utility/su
 export default function RootLayout({ children }) {
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
   
   useEffect(() => {
     // TODO: Temporary console.log to verify component mounting
@@ -33,6 +38,25 @@ export default function RootLayout({ children }) {
       console.log("[SUBSCRIPTION STATUS] Loaded from localStorage:", storedLookupKey);
     }
     
+    // Refresh user cookie
+    const refreshUserCookie = async () => {
+      try {
+        await apiClient.get(REFRESH_USER_COOKIE);
+        console.log("[REFRESH USER COOKIE] Successfully refreshed");
+      } catch (error) {
+        // If user not found (404), redirect to login
+        if (error?.response?.status === 404) {
+          const currentPath = pathname + (typeof window !== 'undefined' ? window.location.search : '');
+          const encodedPath = encodeURIComponent(currentPath);
+          const message = encodeURIComponent('401 Unauthorized\n\nPlease relogin to again access');
+          router.push(`/login?message=${message}&redirect=${encodedPath}`);
+          return;
+        }
+        // Silently handle other errors - missing userDataHTTP cookie is expected for unauthenticated users
+        console.log("[REFRESH USER COOKIE] Silent error (expected for unauthenticated users)");
+      }
+    };
+
     // Fetch shop subscription status
     const fetchSubscriptionStatus = async () => {
       try {
@@ -53,8 +77,9 @@ export default function RootLayout({ children }) {
       }
     };
 
+    refreshUserCookie();
     fetchSubscriptionStatus();
-  }, [])
+  }, [router, pathname])
 
   return (
     <div className={styles.body}>

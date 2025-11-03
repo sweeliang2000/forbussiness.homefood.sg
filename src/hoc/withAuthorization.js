@@ -2,7 +2,7 @@
 import apiClient from '@/utility/api';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { VERIFY_TOKEN } from '@/utility/apiPaths';
+import { REFRESH_USER_COOKIE } from '@/utility/apiPaths';
 
 // TODO: - Check if user has already logged in.
 export default function withAuthorization(WrappedComponent) {
@@ -12,13 +12,10 @@ export default function withAuthorization(WrappedComponent) {
         useEffect(() => {
             const verifyAuth = async () => {
                 try {
-                    await apiClient.post(`${VERIFY_TOKEN}`);
+                    await apiClient.get(REFRESH_USER_COOKIE);
                     router.replace('/app');
                 } catch (error) {
-                    const errorData = error?.response?.data;
-                    const message = errorData?.error?.message || errorData?.message || error?.message || 'Token verification failed';
-                    const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
-                    console.log(`Authorization verification failed: ${message} (Error code: ${code})`);
+                    // Silently handle errors - missing userDataHTTP cookie is expected for unauthenticated users
                 }
             };
 

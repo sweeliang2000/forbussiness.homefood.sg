@@ -5,6 +5,7 @@ export const RESEND_VERIFICATION_CODE = '/api/auth/resendCode';
 export const FORGOT_PASSWORD = '/api/auth/forgotPassword';
 export const CONFIRM_FORGOT_PASSWORD = '/api/auth/confirmForgotPassword';
 export const VERIFY_TOKEN = '/api/auth/verifytoken';
+export const REFRESH_USER_COOKIE = '/api/data/refreshUserCookie';
 export const GLOBAL_SIGN_OUT = '/api/auth/globalSignOut';
 export const SIGN_OUT = '/api/auth/signoutuser';
 
@@ -23,6 +24,7 @@ export const CHECKOUT_SESSION_STRIPE = '/api/subscription/create-checkout-sessio
 export const SHOP_SUBSCRIPTION_STATUS = '/api/data/shopSubscriptionStatus';
 export const GET_LIST_OF_USERS = '/api/data/getListOfUsers';
 export const DELETE_INVITED_USER = '/api/data/invitedUser';
+export const DELETE_USER_FROM_SHOP = '/api/data/userFromShop';
 export const INVITATION_STATUS = '/api/auth/invitationStatus';
 export const ACCEPT_INVITATION = '/api/auth/acceptInvitation';
 export const REJECT_INVITATION = '/api/auth/rejectInvitation';

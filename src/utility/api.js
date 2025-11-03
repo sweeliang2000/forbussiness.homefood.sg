@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { BASE_URL_BACKEND } from '../../config/config';
-import { SHOP_SUBSCRIPTION_STATUS, GET_LIST_OF_USERS } from './apiPaths';
+import { SHOP_SUBSCRIPTION_STATUS, GET_LIST_OF_USERS, REFRESH_USER_COOKIE, DELETE_USER_FROM_SHOP } from './apiPaths';
 
 // Create a centralized utility function for handling API calls. 
 // This makes your code cleaner and easier to maintain.
@@ -16,18 +16,31 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const requestUrl = error.config?.url;
+    const currentPath = window.location.pathname;
+
+    // Don't redirect if already on login/auth pages or if it's refreshUserCookie endpoint
+    const isAuthPage = currentPath.startsWith('/login') || 
+                       currentPath.startsWith('/signup') || 
+                       currentPath.startsWith('/verify') || 
+                       currentPath.startsWith('/forgot-password');
+
+    console.log('requestUrl:', requestUrl);
 
     if (
       error.response &&
       error.response.status === 401 &&
-      requestUrl !== '/api/auth/verifytoken'
+      requestUrl !== REFRESH_USER_COOKIE &&
+      requestUrl !== DELETE_USER_FROM_SHOP &&
+      !isAuthPage
     ) {
       // Optional: clear auth tokens/cookies if needed
-      const currentPath = window.location.pathname + window.location.search;
-      const encodedPath = encodeURIComponent(currentPath);
+      const fullPath = currentPath + window.location.search;
+      const encodedPath = encodeURIComponent(fullPath);
 
       // Redirect to login with redirect path
       window.location.href = `/login?message=401 Unauthorized&redirect=${encodedPath}`;
+    } else if (requestUrl === REFRESH_USER_COOKIE) {
+      // Silently handle refreshUserCookie errors - missing cookie is expected for unauthenticated users
     } else {
       console.error('API Error:', error);
     }
