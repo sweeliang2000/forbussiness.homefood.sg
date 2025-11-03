@@ -76,7 +76,7 @@ const UserTable = ({ usersRows, onUserUpdated, onDeleteError }) => {
                 console.log('User deleted successfully');
                 // Call the parent callback if provided to refresh the list
                 if (onUserUpdated) {
-                    onUserUpdated();
+                    onUserUpdated(selectedUser);
                 }
             } else {
                 console.error('Failed to delete user:', response.data.message);
