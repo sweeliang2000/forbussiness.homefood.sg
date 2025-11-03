@@ -5,7 +5,7 @@ import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import Checklists from './_views/Checklist';
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -13,6 +13,9 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
+import apiClient from '@/utility/api';
+import LoadingPage from '@/components/LoadingPage/LoadingPage';
+import ErrorPage from '@/components/ErrorPage/ErrorPage';
 
 
 
@@ -27,6 +30,13 @@ const tomorrowStart = dayjs().add(1, "day").startOf("day");
 const SubmissionView = () => {
     const [isBtnLoading, setIsBtnLoading] = useState(false);
     const [value, setValue] = useState(tomorrowStart);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
+    const [checklistStatus, setChecklistStatus] = useState({
+        businessHasAllRequiredField: false,
+        customerHasAllRequiredField: false,
+        stampHasAllRequiredField: false,
+    });
 
     const [enteredValues, setEnteredValues] = useState({
         [PUBLISHING_TYPE]: 'auto',
@@ -73,6 +83,35 @@ const SubmissionView = () => {
         }))
     };
 
+    useEffect(() => {
+        setIsLoading(true);
+
+        const fetchChecklistStatus = async () => {
+            try {
+                const response = await apiClient.get('/api/data/checklistStatus');
+                const data = response.data;
+
+                if (data && data.data) {
+                    setChecklistStatus({
+                        businessHasAllRequiredField: data.data.businessHasAllRequiredField || false,
+                        customerHasAllRequiredField: data.data.customerHasAllRequiredField || false,
+                        stampHasAllRequiredField: data.data.stampHasAllRequiredField || false,
+                    });
+                }
+
+                setIsLoading(false);
+            } catch (error) {
+                const errorData = error?.response?.data;
+                const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+                const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
+                setIsLoading(false);
+                setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code}). Please try to refresh the page.`);
+            }
+        };
+
+        fetchChecklistStatus();
+    }, []);
+
     return (
         <form
             className={styles.form}
@@ -90,15 +129,25 @@ const SubmissionView = () => {
                 }
             />
 
-            <ContentCard className={styles.content}>
-                <FieldHeader
-                    title='Checklists'
-                    description='Ensure that all required tasks have been completed before submitting for review. Please fix any issues.'
-                />
+            {
+                isLoading ? 
+                <LoadingPage/> :
+                isLoadingErrorMessage !== null ? 
+                <ErrorPage message={isLoadingErrorMessage} /> :
+                <>
+                    <ContentCard className={styles.content}>
+                        <FieldHeader
+                            title='Checklists'
+                            description='Ensure that all required tasks have been completed before submitting for review. Please fix any issues.'
+                        />
 
-                <Checklists />
-            </ContentCard>
+                        <Checklists checklistStatus={checklistStatus} />
+                    </ContentCard>
+                </>
+            }
 
+            {!isLoading && isLoadingErrorMessage === null && (
+            <>
             <ContentCard className={styles.content}>
                 <FieldHeader
                     title='Managed publishing'
@@ -176,6 +225,8 @@ const SubmissionView = () => {
                     onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
                 />
             </ContentCard>
+            </>
+            )}
 
         </form>
     )
