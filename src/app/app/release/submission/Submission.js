@@ -41,6 +41,7 @@ const SubmissionView = () => {
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [datetimeError, setDatetimeError] = useState(false);
+    const [releaseStatus, setReleaseStatus] = useState(null);
     const [checklistStatus, setChecklistStatus] = useState({
         businessHasAllRequiredField: false,
         customerHasAllRequiredField: false,
@@ -241,17 +242,28 @@ const SubmissionView = () => {
     useEffect(() => {
         setIsLoading(true);
 
-        const fetchChecklistStatus = async () => {
+        const fetchData = async () => {
             try {
-                const response = await apiClient.get('/api/data/checklistStatus');
-                const data = response.data;
+                // Fetch checklist status and release status in parallel
+                const [checklistResponse, releaseStatusResponse] = await Promise.all([
+                    apiClient.get('/api/data/checklistStatus'),
+                    apiClient.get('/api/data/releaseStatus')
+                ]);
 
-                if (data && data.data) {
+                // Process checklist status
+                const checklistData = checklistResponse.data;
+                if (checklistData && checklistData.data) {
                     setChecklistStatus({
-                        businessHasAllRequiredField: data.data.businessHasAllRequiredField || false,
-                        customerHasAllRequiredField: data.data.customerHasAllRequiredField || false,
-                        stampHasAllRequiredField: data.data.stampHasAllRequiredField || false,
+                        businessHasAllRequiredField: checklistData.data.businessHasAllRequiredField || false,
+                        customerHasAllRequiredField: checklistData.data.customerHasAllRequiredField || false,
+                        stampHasAllRequiredField: checklistData.data.stampHasAllRequiredField || false,
                     });
+                }
+
+                // Process release status
+                const releaseData = releaseStatusResponse.data;
+                if (releaseData && releaseData.data) {
+                    setReleaseStatus(releaseData.data.status);
                 }
 
                 setIsLoading(false);
@@ -264,8 +276,15 @@ const SubmissionView = () => {
             }
         };
 
-        fetchChecklistStatus();
+        fetchData();
     }, []);
+
+    const handleCancel = async () => {
+        // TODO: Implement cancel functionality
+        console.log('Cancel clicked');
+    };
+
+    const isPending = releaseStatus === 'pending';
 
     return (
         <form
@@ -287,6 +306,10 @@ const SubmissionView = () => {
                 setShowError={setIsError}
                 isError={isError}
                 errorMessage={errorMessage}
+                isDisabled={isPending}
+                infoMessage={isPending ? 'Your release had been sent to the reviewer and it will take 1 to 2 working days to get approved. Please wait or email to test@gmail.com if there are any questions.' : null}
+                showCancelButton={isPending}
+                onCancel={handleCancel}
             />
 
             {
@@ -323,6 +346,7 @@ const SubmissionView = () => {
                     labelId='manage_publishing'
                     id='manage_publishing'
                     value={enteredValues.publishingType}
+                    disabled={isPending || isBtnLoading}
                     onChange={(event) => {
                         inputChangeHandler(PUBLISHING_TYPE, event.target.value);
                         // Clear datetime error when switching away from scheduled
@@ -345,6 +369,7 @@ const SubmissionView = () => {
                                 }}
                                 format="DD/MM/YYYY hh:mm A"
                                 minDate={defaultStartDate}
+                                disabled={isPending || isBtnLoading}
                                 className={styles.datetimePicker}
                                 slotProps={{
                                     textField: {
@@ -374,7 +399,7 @@ const SubmissionView = () => {
                         helperText={helperText.name}
                         error={textfieldError.name}
                         value={enteredValues.name}
-                        disabled={isBtnLoading}
+                        disabled={isPending || isBtnLoading}
                         onChange={(event) => { inputChangeHandler(NAME, event.target.value) }}
                     />
                 </div>
@@ -387,7 +412,7 @@ const SubmissionView = () => {
                     helperText={helperText.role}
                     error={textfieldError.role}
                     value={enteredValues.role}
-                    disabled={isBtnLoading}
+                    disabled={isPending || isBtnLoading}
                     onChange={(event) => { inputChangeHandler(ROLE, event.target.value) }}
                 />
 
@@ -400,7 +425,7 @@ const SubmissionView = () => {
                     helperText={helperText.email}
                     error={textfieldError.email}
                     value={enteredValues.email}
-                    disabled={isBtnLoading}
+                    disabled={isPending || isBtnLoading}
                     onChange={(event) => { inputChangeHandler(EMAIL, event.target.value) }}
                 />
 
@@ -413,7 +438,7 @@ const SubmissionView = () => {
                     helperText={helperText.phoneNumber}
                     error={textfieldError.phoneNumber}
                     value={enteredValues.phoneNumber}
-                    disabled={isBtnLoading}
+                    disabled={isPending || isBtnLoading}
                     onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
                 />
             </ContentCard>

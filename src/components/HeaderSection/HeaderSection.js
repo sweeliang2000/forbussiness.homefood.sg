@@ -19,6 +19,9 @@ export const HeaderSection = ({
     successMessage,
     setShowSuccess,
     showButton = true,
+    infoMessage,
+    showCancelButton = false,
+    onCancel,
     ...props
 }) => {
     const [showSuccessAlert, setShowSuccessAlert] = useState(true);
@@ -32,22 +35,42 @@ export const HeaderSection = ({
             <div className={styles.titleSection}>
                 <h1 className={styles.title}>{title}</h1>
 
-                {showButton && (
-                    <Button
-                        type='submit'
-                        size='small'
-                        loadingPosition='start'
-                        variant='contained'
-                        className={`${styles.loadingButton} ${isSuccess ? styles.successfull : null}`}
-                        disabled={isSuccess || isDisabled}
-                        {...props}
-                    >
-                        {isSuccess ? <FaCheck className={styles.checked} /> : null}
-                        {isSuccess ? 'Saved' : 'Save'}
-                    </Button>
-                )}
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    {showCancelButton && (
+                        <Button
+                            size='small'
+                            variant='outlined'
+                            onClick={onCancel}
+                        >
+                            Cancel
+                        </Button>
+                    )}
+                    {showButton && (
+                        <Button
+                            type='submit'
+                            size='small'
+                            loadingPosition='start'
+                            variant='contained'
+                            className={`${styles.loadingButton} ${isSuccess ? styles.successfull : null}`}
+                            disabled={isSuccess || isDisabled}
+                            {...props}
+                        >
+                            {isSuccess ? <FaCheck className={styles.checked} /> : null}
+                            {isSuccess ? 'Saved' : 'Save'}
+                        </Button>
+                    )}
+                </div>
             </div>
             <div className={styles.description}>{description}</div>
+
+            {infoMessage && (
+                <Alert
+                    className={styles.alert}
+                    severity="info"
+                >
+                    {infoMessage}
+                </Alert>
+            )}
 
             {shouldShowSuccess && (
                 <Alert
