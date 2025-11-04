@@ -22,6 +22,8 @@ export const HeaderSection = ({
     infoMessage,
     showCancelButton = false,
     onCancel,
+    buttonText = 'Save',
+    successButtonText = 'Saved',
     ...props
 }) => {
     const [showSuccessAlert, setShowSuccessAlert] = useState(true);
@@ -58,7 +60,7 @@ export const HeaderSection = ({
                             {...props}
                         >
                             {isSuccess ? <FaCheck className={styles.checked} /> : null}
-                            {isSuccess ? 'Saved' : 'Save'}
+                            {isSuccess ? successButtonText : buttonText}
                         </Button>
                     )}
                 </div>

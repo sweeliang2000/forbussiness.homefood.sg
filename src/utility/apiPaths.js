@@ -29,3 +29,9 @@ export const UPDATE_USER_ROLE = '/api/data/userRole';
 export const INVITATION_STATUS = '/api/auth/invitationStatus';
 export const ACCEPT_INVITATION = '/api/auth/acceptInvitation';
 export const REJECT_INVITATION = '/api/auth/rejectInvitation';
+
+export const CHECKLIST_STATUS = '/api/data/checklistStatus';
+export const RELEASE_STATUS = '/api/data/releaseStatus';
+export const RELEASE_CONTACT = '/api/data/releaseContact';
+export const SEND_FOR_REVIEW = '/api/data/sendForReview';
+export const CANCEL_RELEASE = '/api/data/cancelRelease';

@@ -16,8 +16,10 @@ import localizedFormat from "dayjs/plugin/localizedFormat";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import apiClient from '@/utility/api';
+import { CHECKLIST_STATUS, RELEASE_STATUS, RELEASE_CONTACT, SEND_FOR_REVIEW, CANCEL_RELEASE } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
+import AlertModal from '@/components/AlertModal/AlertModal';
 
 
 
@@ -42,6 +44,8 @@ const SubmissionView = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [datetimeError, setDatetimeError] = useState(false);
     const [releaseStatus, setReleaseStatus] = useState(null);
+    const [showCancelDialog, setShowCancelDialog] = useState(false);
+    const [isCanceling, setIsCanceling] = useState(false);
     const [checklistStatus, setChecklistStatus] = useState({
         businessHasAllRequiredField: false,
         customerHasAllRequiredField: false,
@@ -225,11 +229,10 @@ const SubmissionView = () => {
                 payload.release_datetime = gstDateTime;
             }
 
-            await apiClient.post('/api/data/sendForReview', payload);
+            await apiClient.post(SEND_FOR_REVIEW, payload);
 
-            setIsSubmissionSuccess(true);
-            setIsBtnLoading(false);
-            clearError();
+            // Refresh the page after successful submission
+            window.location.reload();
         } catch (error) {
             const errorData = error?.response?.data;
             const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
@@ -245,10 +248,11 @@ const SubmissionView = () => {
 
         const fetchData = async () => {
             try {
-                // Fetch checklist status and release status in parallel
-                const [checklistResponse, releaseStatusResponse] = await Promise.all([
-                    apiClient.get('/api/data/checklistStatus'),
-                    apiClient.get('/api/data/releaseStatus')
+                // Fetch checklist status, release status, and release contact data in parallel
+                const [checklistResponse, releaseStatusResponse, releaseContactResponse] = await Promise.all([
+                    apiClient.get(CHECKLIST_STATUS),
+                    apiClient.get(RELEASE_STATUS),
+                    apiClient.get(RELEASE_CONTACT).catch(() => null) // Make it optional - don't fail if it doesn't exist
                 ]);
 
                 // Process checklist status
@@ -265,6 +269,42 @@ const SubmissionView = () => {
                 const releaseData = releaseStatusResponse.data;
                 if (releaseData && releaseData.data) {
                     setReleaseStatus(releaseData.data.status);
+                    
+                    if (releaseData.data.status === 'pending') {
+                        setIsSubmissionSuccess(true);
+                    }
+                }
+
+                // Process release contact data and populate form fields
+                if (releaseContactResponse && releaseContactResponse.data && releaseContactResponse.data.data) {
+                    const contactData = releaseContactResponse.data.data;
+                    
+                    // Determine publishing type based on release_type and release_datetime
+                    let publishingType = 'auto'; // default
+                    if (contactData.release_datetime) {
+                        publishingType = 'scheduled';
+                    } else if (contactData.release_type === 'immediate') {
+                        // Could be 'auto' or 'manually', default to 'auto'
+                        publishingType = 'auto';
+                    }
+                    
+                    // Populate all form fields in a single update
+                    setEnteredValues({
+                        [PUBLISHING_TYPE]: publishingType,
+                        [NAME]: contactData.contact_details_name || '',
+                        [ROLE]: contactData.contact_details_role || '',
+                        [EMAIL]: contactData.contact_details_email || '',
+                        [PHONE_NUMBER]: contactData.contact_details_phone_number || '',
+                    });
+
+                    // Handle datetime if it's a scheduled release
+                    if (contactData.release_datetime) {
+                        // Parse the datetime string (format: "2025-11-06T00:00:00+08:00")
+                        const parsedDateTime = dayjs(contactData.release_datetime);
+                        if (parsedDateTime.isValid()) {
+                            setValue(parsedDateTime);
+                        }
+                    }
                 }
 
                 setIsLoading(false);
@@ -274,6 +314,7 @@ const SubmissionView = () => {
                 const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
                 const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
                 setIsLoading(false);
+                setIsBtnLoading(false);
                 setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code}). Please try to refresh the page.`);
             }
         };
@@ -281,9 +322,30 @@ const SubmissionView = () => {
         fetchData();
     }, []);
 
-    const handleCancel = async () => {
-        // TODO: Implement cancel functionality
-        console.log('Cancel clicked');
+    const handleCancel = () => {
+        setShowCancelDialog(true);
+    };
+
+    const handleCancelConfirm = async () => {
+        setIsCanceling(true);
+        try {
+            await apiClient.delete(CANCEL_RELEASE);
+            // Refresh the page or refetch release status to update UI
+            window.location.reload();
+        } catch (error) {
+            const errorData = error?.response?.data;
+            const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+            const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
+            showError(`An error had occurred. ${message} (Error code: ${code}). Please try again.`);
+            setShowCancelDialog(false);
+            setIsCanceling(false);
+        }
+    };
+
+    const handleCancelDialogClose = () => {
+        if (!isCanceling) {
+            setShowCancelDialog(false);
+        }
     };
 
     const isPending = releaseStatus === 'pending';
@@ -312,6 +374,8 @@ const SubmissionView = () => {
                 infoMessage={isPending ? 'Your release had been sent to the reviewer and it will take 1 to 2 working days to get approved. Please wait or email to test@gmail.com if there are any questions.' : null}
                 showCancelButton={isPending}
                 onCancel={handleCancel}
+                buttonText='Send'
+                successButtonText='Sent'
             />
 
             {
@@ -447,6 +511,28 @@ const SubmissionView = () => {
             </>
             )}
 
+            <AlertModal
+                open={showCancelDialog}
+                onClose={handleCancelDialogClose}
+                title="Cancel Review"
+                description={
+                    <div>
+                        <p style={{ marginBottom: '16px' }}>
+                            Are you sure you want to cancel the review?
+                        </p>
+                        <p style={{ marginBottom: '16px' }}>
+                            Canceling will delay your release and you will need to resubmit for review again.
+                        </p>
+                        <p style={{ marginBottom: '16px', fontWeight: 'bold' }}>
+                            This action cannot be undone.
+                        </p>
+                    </div>
+                }
+                onAction={handleCancelConfirm}
+                actionButtonText={isCanceling ? 'Canceling...' : 'Cancel Review'}
+                type="error"
+                showActionButton={true}
+            />
         </form>
     )
 };
