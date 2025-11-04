@@ -33,7 +33,7 @@ dayjs.extend(timezone);
 const defaultStartDate = dayjs().add(2, "day").startOf("day");
 
 const SubmissionView = () => {
-    const [isBtnLoading, setIsBtnLoading] = useState(false);
+    const [isBtnLoading, setIsBtnLoading] = useState(true);
     const [value, setValue] = useState(defaultStartDate);
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
@@ -241,6 +241,7 @@ const SubmissionView = () => {
 
     useEffect(() => {
         setIsLoading(true);
+        setIsBtnLoading(true);
 
         const fetchData = async () => {
             try {
@@ -267,6 +268,7 @@ const SubmissionView = () => {
                 }
 
                 setIsLoading(false);
+                setIsBtnLoading(false);
             } catch (error) {
                 const errorData = error?.response?.data;
                 const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';

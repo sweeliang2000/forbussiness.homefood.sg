@@ -40,9 +40,11 @@ export const HeaderSection = ({
                         <Button
                             size='small'
                             variant='outlined'
+                            color='error'
                             onClick={onCancel}
+                            style={{ textTransform: 'none' }}
                         >
-                            Cancel
+                            Cancel Review
                         </Button>
                     )}
                     {showButton && (
