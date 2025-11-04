@@ -156,8 +156,9 @@ const SubmissionView = () => {
 
                 <FullWidthDropdown
                     options={[
+                        { value: 'auto', title: 'Automatically release this version' },
                         { value: 'manually', title: 'Manually release this version' },
-                        { value: 'auto', title: 'Automatically release this version' }
+                        { value: 'scheduled', title: 'Schedule release this version for a later date' }
                     ]}
                     labelId='manage_publishing'
                     id='manage_publishing'
@@ -165,7 +166,7 @@ const SubmissionView = () => {
                     onChange={(event) => { inputChangeHandler(PUBLISHING_TYPE, event.target.value) }}
                 />
                 {
-                    enteredValues.publishingType === 'manually' &&
+                    enteredValues.publishingType === 'scheduled' &&
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DateTimePicker
                             label="Select Date & Time"
