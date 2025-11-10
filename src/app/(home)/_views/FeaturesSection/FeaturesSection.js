@@ -1,9 +1,29 @@
 import Badge from "@/components/Badge";
 import Image from "next/image";
+import Link from "next/link";
 import Abutton from '@/components/Buttons/Abutton';
+import FeatureImageCard from '@/components/FeatureImageCard';
 import styles from "./FeaturesSection.module.css";
 
 const FeaturesSection = () => {
+    const features = [
+        {
+            image: "/images/pages/landing/hero/card_image.png",
+            title: "Customisable Card Designs",
+            description: "Create unique reward programs tailored to your business needs with flexible point systems and rewards.",
+        },
+        {
+            image: "/images/pages/landing/hero/card_image.png",
+            title: "Customisable Rewards",
+            description: "Keep customers coming back with engaging stamp cards, points, and personalized rewards.",
+        },
+        {
+            image: "/images/pages/landing/hero/card_image.png",
+            title: "Advance Analytics",
+            description: "Manage your loyalty program effortlessly with our intuitive dashboard and analytics.",
+        }
+    ];
+
     return (
         <section className={styles.featuresSection}>
 
@@ -63,6 +83,25 @@ const FeaturesSection = () => {
                             />
                         </div>
                     </div>
+                </div>
+
+                <div className={styles.featuresGrid}>
+                    {features.map((feature, index) => (
+                        <FeatureImageCard
+                            key={index}
+                            image={feature.image}
+                            title={feature.title}
+                            description={feature.description}
+                            imageWidth={420}
+                            imageHeight={320}
+                        />
+                    ))}
+                </div>
+
+                <div className={styles.findOutMoreContainer}>
+                    <Link href="/" className={styles.findOutMoreButton}>
+                        Find out more
+                    </Link>
                 </div>
             </div>
         </section>

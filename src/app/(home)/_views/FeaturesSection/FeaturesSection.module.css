@@ -36,6 +36,34 @@
 .featuresContainer {
     max-width: 1200px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.featuresGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+}
+
+.findOutMoreContainer {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+.findOutMoreButton {
+    color: var(--accent-color);
+    font-size: 16px;
+    text-decoration: none;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+    cursor: pointer;
+}
+
+.findOutMoreButton:hover {
+    color: var(--accent-color);
+    text-decoration: underline;
 }
 
 .featureItemSteps {
@@ -123,6 +151,17 @@
 
     .featureItemStepsContentItem2 {
         flex: 1;
+    }
+
+    .featuresGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Center the 3rd card when it's alone in the second row */
+    .featuresGrid > :nth-child(3):last-child {
+        grid-column: 1 / -1;
+        justify-self: center;
+        max-width: calc(50% - 16px);
     }
 }
 
@@ -217,5 +256,13 @@
     .learnMoreButton {
         margin-top: 16px;
         width: 100%;
+    }
+
+    .featuresGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .featuresContainer {
+        gap: 32px;
     }
 }
