@@ -94,6 +94,7 @@
 /* Section Styles */
 .testimonialsSection,
 .pricingSection {
+    background-color: #ffffff;
     padding: 5rem 0;
 }
 
@@ -264,43 +265,6 @@
 
 /* Pricing button styles moved to Abutton component */
 
-/* CTA Section */
-.ctaSection {
-    background: linear-gradient(135deg, var(--accent-color) 0%, #0d3d91 100%);
-    padding: 5rem 0;
-    text-align: center;
-}
-
-.ctaContainer {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    padding: 0 var(--side-spacing);
-}
-
-.ctaTitle {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    color: white;
-}
-
-.ctaSubtitle {
-    font-size: 1.2rem;
-    color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 2rem;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.ctaButtons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-}
-
-/* CTA button styles moved to Abutton component */
-
 /* Footer */
 .footer {
     background-color: var(--secondary-color);
@@ -402,15 +366,6 @@
 
     .sectionSubtitle {
         font-size: 1.1rem;
-    }
-
-    .ctaTitle {
-        font-size: 2rem;
-    }
-
-    .ctaButtons {
-        flex-direction: column;
-        align-items: center;
     }
 
     .footerContent {

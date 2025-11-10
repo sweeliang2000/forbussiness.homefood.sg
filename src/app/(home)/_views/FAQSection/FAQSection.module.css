@@ -1,0 +1,145 @@
+.faqSection {
+    padding: 80px var(--side-spacing);
+    background-color: #f2f9fc;
+}
+
+.faqContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 80px;
+    align-items: flex-start;
+}
+
+.faqLeftColumn {
+    display: flex;
+    align-items: flex-start;
+}
+
+.faqTitle {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--on-primary);
+    line-height: 1.2;
+    margin: 0;
+}
+
+.faqRightColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.faqItem {
+    display: flex;
+    flex-direction: column;
+}
+
+.faqQuestion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 20px 0;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--on-primary);
+    transition: color 0.3s ease;
+}
+
+.faqQuestion:hover {
+    color: var(--accent-color);
+}
+
+.faqQuestion span {
+    flex: 1;
+    padding-right: 16px;
+}
+
+.chevronIcon {
+    flex-shrink: 0;
+    font-size: 16px;
+    color: var(--on-primary);
+    transition: transform 0.3s ease;
+}
+
+.chevronIcon.rotated {
+    transform: rotate(180deg);
+}
+
+.faqAnswer {
+    padding: 0 0 20px 0;
+    color: var(--on-primary-light2);
+    font-size: 16px;
+    line-height: 1.6;
+    animation: fadeIn 0.3s ease;
+}
+
+.faqAnswer a {
+    color: var(--accent-color);
+    text-decoration: underline;
+    transition: opacity 0.3s ease;
+}
+
+.faqAnswer a:hover {
+    opacity: 0.8;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.faqDivider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 0;
+}
+
+/* Mobile Responsive */
+@media only screen and (max-width: 1024px) {
+    .faqContainer {
+        grid-template-columns: 1fr;
+        gap: 48px;
+    }
+
+    .faqTitle {
+        font-size: 40px;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .faqSection {
+        padding: 60px var(--side-spacing);
+    }
+
+    .faqContainer {
+        gap: 32px;
+    }
+
+    .faqTitle {
+        font-size: 32px;
+    }
+
+    .faqQuestion {
+        font-size: 16px;
+        padding: 16px 0;
+    }
+
+    .faqAnswer {
+        font-size: 15px;
+        padding-bottom: 16px;
+    }
+}
+

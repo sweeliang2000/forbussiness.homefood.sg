@@ -11,10 +11,11 @@ import Notification from '@/components/Notification';
 import { motion } from 'motion/react';
 
 const menuItems = [
-    { label: 'Why us?', href: '#home' },
+    { label: 'Why Collbine', href: '#home' },
     { label: 'Features', href: '#features' },
-    { label: 'Get Started', href: '#about' },
     { label: 'Pricing', href: '#pricing' },
+    { label: 'FAQ', href: '#faq' },
+    { label: 'Get Started', href: '#about' },
     { label: 'Contact', href: '#contact' }
 ];
 

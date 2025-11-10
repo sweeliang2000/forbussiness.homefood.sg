@@ -67,7 +67,7 @@
 
 .ctaButtons {
     display: flex;
-    gap: 1rem;
+    gap: 0.5rem;
     align-items: center;
 }
 
@@ -179,7 +179,7 @@
 /* Mobile button styles moved to Abutton component */
 
 /* Mobile Styles */
-@media only screen and (max-width: 1024px) {
+@media only screen and (max-width: 1120px) {
     /* .navbar {
         background-color: var(--primary);
     } */

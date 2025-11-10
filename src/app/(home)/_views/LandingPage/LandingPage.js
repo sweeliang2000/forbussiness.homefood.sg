@@ -5,29 +5,9 @@ import HeroSection from '../HeroSection/HeroSection';
 import StatementSection from '../StatementSection/StatementSection';
 import WhyUsSection from '../WhyUsSection/WhyUsSection';
 import FeaturesSection from '../FeaturesSection/FeaturesSection';
+import FAQSection from '../FAQSection/FAQSection';
 
 const LandingPage = () => {
-    const testimonials = [
-        {
-            name: "Sarah Chen",
-            business: "Generation Coffee",
-            text: "Collbine has transformed how we engage with our customers. Our repeat visits increased by 40% in just 3 months!",
-            rating: 5
-        },
-        {
-            name: "Mike Rodriguez",
-            business: "Keen's Bagelry",
-            text: "The stamp card feature is perfect for our bakery. Customers love collecting stamps and we love the increased loyalty.",
-            rating: 5
-        },
-        {
-            name: "Lisa Wong",
-            business: "Urban Bistro",
-            text: "Easy to set up, easy to manage. Our customers appreciate the modern approach to loyalty rewards.",
-            rating: 5
-        }
-    ];
-
     return (
         <div className={styles.landingPage}>
             <HeroSection />
@@ -37,34 +17,6 @@ const LandingPage = () => {
             <WhyUsSection />
 
             <FeaturesSection />
-
-            {/* Testimonials Section */}
-            <section className={styles.testimonialsSection}>
-                <div className={styles.sectionContainer}>
-                    <div className={styles.sectionHeader}>
-                        <h2 className={styles.sectionTitle}>What Our Customers Say</h2>
-                        <p className={styles.sectionSubtitle}>
-                            Join hundreds of satisfied businesses across Singapore
-                        </p>
-                    </div>
-                    <div className={styles.testimonialsGrid}>
-                        {testimonials.map((testimonial, index) => (
-                            <div key={index} className={styles.testimonialCard}>
-                                <div className={styles.rating}>
-                                    {[...Array(testimonial.rating)].map((_, i) => (
-                                        <span key={i} className={styles.star}>⭐</span>
-                                    ))}
-                                </div>
-                                <p className={styles.testimonialText}>&ldquo;{testimonial.text}&rdquo;</p>
-                                <div className={styles.testimonialAuthor}>
-                                    <strong>{testimonial.name}</strong>
-                                    <span>{testimonial.business}</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
 
             {/* Pricing Section */}
             <section id="pricing" className={styles.pricingSection}>
@@ -136,23 +88,7 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section className={styles.ctaSection}>
-                <div className={styles.ctaContainer}>
-                    <h2 className={styles.ctaTitle}>Ready to Build Customer Loyalty?</h2>
-                    <p className={styles.ctaSubtitle}>
-                        Join hundreds of Singapore businesses using Collbine to grow their customer base
-                    </p>
-                    <div className={styles.ctaButtons}>
-                        <Abutton href="/signup" variant="white" size="large">
-                            Start Your Free Trial
-                        </Abutton>
-                        <Abutton href="#contact" variant="outline-white" size="large">
-                            Contact Sales
-                        </Abutton>
-                    </div>
-                </div>
-            </section>
+            <FAQSection />
 
             {/* Footer */}
             <footer className={styles.footer}>
