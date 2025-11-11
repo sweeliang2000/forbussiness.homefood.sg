@@ -23,6 +23,7 @@ const CardDesign = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [isBtnLoading, setIsBtnLoading] = useState(false);
     const [isBtnDisabled, setIsBtnDisabled] = useState(true);
+    const [isEdit, setIsEdit] = useState(true);
 
     const [cardBackground, setCardBackgroundColor] = useState('#ffffff')
     const [cardTitleColor, setCardTitleColor] = useState('#000000')
@@ -48,6 +49,7 @@ const CardDesign = () => {
     const [unstamped_url, setUnstamped_url] = useState('');
 
     const resetToDefaultColor = () => {
+        if (!isEdit) return;
         setCardBackgroundColor('#ffffff');
         setCardTitleColor('#000000');
         setCardFooterColor('#797979');
@@ -117,7 +119,10 @@ const CardDesign = () => {
                     const cardDesignData = cardDesignResponse.value.data;
                     console.log(cardDesignData)
 
-                    if (cardDesignData) {
+                    if (cardDesignData && cardDesignData.data) {
+                        const isEditValue = cardDesignData.data.isEdit;
+                        setIsEdit(isEditValue !== undefined ? isEditValue : true);
+                        
                         setCardBackgroundColor(cardDesignData.data.backgroundColor);
                         setCardTitleColor(cardDesignData.data.titleColor);
                         setCardFooterColor(cardDesignData.data.footerTextColor);
@@ -221,8 +226,9 @@ const CardDesign = () => {
                 isSuccess={isSubmissionSuccess}
                 setShowError={setIsError}
                 isError={isError}
-                isDisabled={isBtnDisabled}
+                isDisabled={isBtnDisabled || !isEdit}
                 errorMessage={errorMessage}
+                infoMessage={!isEdit ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.' : null}
             />
 
             {
@@ -279,6 +285,7 @@ const CardDesign = () => {
                                                     min={0}
                                                     max={numberOfStamp}
                                                     className={styles.slider}
+                                                    disabled={!isEdit}
                                                 />
                                                 <div className={styles.sliderValue}>
                                                     {collectedStamps} / {numberOfStamp}
@@ -305,6 +312,7 @@ const CardDesign = () => {
                                             <MuiColorInput
                                                 className={styles.colorInput}
                                                 format="hex" value={cardNoStampBorderColor}
+                                                disabled={!isEdit}
                                                 onChange={(color) => {
                                                     setCardNoStampBorderColor(color);
                                                     enableSaveBtn();
@@ -320,6 +328,7 @@ const CardDesign = () => {
                                                 className={styles.colorInput}
                                                 format="hex"
                                                 value={cardNoStampBackgroundColor}
+                                                disabled={!isEdit}
                                                 onChange={(color) => {
                                                     setCardNoStampBackgroundColor(color);
                                                     enableSaveBtn();
@@ -335,6 +344,7 @@ const CardDesign = () => {
                                                 className={styles.colorInput}
                                                 format="hex"
                                                 value={cardStampCollectedBorderColor}
+                                                disabled={!isEdit}
                                                 onChange={(color) => {
                                                     setCardStampCollectedBorderColor(color);
                                                     enableSaveBtn();
@@ -350,6 +360,7 @@ const CardDesign = () => {
                                                 className={styles.colorInput}
                                                 format="hex"
                                                 value={cardStampBackground}
+                                                disabled={!isEdit}
                                                 onChange={(color) => {
                                                     setCardStampBackground(color);
                                                     enableSaveBtn();
@@ -365,6 +376,7 @@ const CardDesign = () => {
                                                 className={styles.colorInput}
                                                 format="hex"
                                                 value={checkmarkColor}
+                                                disabled={!isEdit}
                                                 onChange={(color) => {
                                                     setCheckmarkColor(color);
                                                     enableSaveBtn();
@@ -392,6 +404,7 @@ const CardDesign = () => {
                                                 format="hex"
                                                 value={cardBackground}
                                                 isAlphaHidden
+                                                disabled={!isEdit}
                                                 onChange={(color) => {
                                                     setCardBackgroundColor(color);
                                                     enableSaveBtn();
@@ -408,6 +421,7 @@ const CardDesign = () => {
                                                 format="hex"
                                                 value={cardTitleColor}
                                                 isAlphaHidden
+                                                disabled={!isEdit}
                                                 onChange={(color) => {
                                                     setCardTitleColor(color);
                                                     enableSaveBtn();
@@ -424,6 +438,7 @@ const CardDesign = () => {
                                                 format="hex"
                                                 value={cardFooterColor}
                                                 isAlphaHidden
+                                                disabled={!isEdit}
                                                 onChange={(color) => {
                                                     setCardFooterColor(color);
                                                     enableSaveBtn();
@@ -439,6 +454,7 @@ const CardDesign = () => {
                                     color="error"
                                     className={styles.resetButton}
                                     onClick={resetToDefaultColor}
+                                    disabled={!isEdit}
                                 >
                                     Reset to Default
                                 </Button>
