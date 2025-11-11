@@ -57,6 +57,7 @@ export default function StampSetup() {
   const [isBtnLoading, setIsBtnLoading] = useState(false);
   const [isBtnDisabled, setIsBtnDisabled] = useState(true);
   const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
+  const [isEdit, setIsEdit] = useState(true);
 
   // For Form Data
   const [cardTitle, setCardTitle] = useState('');
@@ -86,6 +87,10 @@ export default function StampSetup() {
 
         if (data) {
           const data = response.data.data;
+
+          // Extract isEdit from API response
+          const isEditValue = data.isEdit;
+          setIsEdit(isEditValue !== undefined ? isEditValue : true);
 
           // Check if we have existing data (not empty, null, or empty array)
           const hasData = data && 
@@ -485,17 +490,21 @@ export default function StampSetup() {
       align: 'right',
       renderCell: (params) => (
         <div>
-          <IconButton onClick={(event) => handleMenuOpen(event, params.row.id)}>
-            <MoreVertIcon />
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl) && selectedRowId === params.row.id}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={handleEdit}>Edit</MenuItem>
-            {/* <MenuItem onClick={handleDelete} className={styles.deleteBtn}>Delete</MenuItem> */}
-          </Menu>
+          {isEdit && (
+            <>
+              <IconButton onClick={(event) => handleMenuOpen(event, params.row.id)}>
+                <MoreVertIcon />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl) && selectedRowId === params.row.id}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={handleEdit}>Edit</MenuItem>
+                {/* <MenuItem onClick={handleDelete} className={styles.deleteBtn}>Delete</MenuItem> */}
+              </Menu>
+            </>
+          )}
         </div>
       ),
     },
@@ -521,8 +530,9 @@ export default function StampSetup() {
           loading={isBtnLoading}
           isSuccess={isSubmissionSuccess}
           isError={isError}
-          isDisabled={isBtnDisabled}
+          isDisabled={isBtnDisabled || !isEdit}
           errorMessage={errorMessage}
+          infoMessage={!isEdit ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.' : null}
         />
 
         {
@@ -546,6 +556,7 @@ export default function StampSetup() {
                       helperText={''}
                       error={false}
                       value={cardTitle}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         resetSaving();
                         setCardTitle(event.target.value)
@@ -561,6 +572,7 @@ export default function StampSetup() {
                       helperText={''}
                       error={false}
                       value={cardDescription}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         resetSaving();
                         setCardDescription(event.target.value)
@@ -578,6 +590,7 @@ export default function StampSetup() {
                       helperText={''}
                       error={false}
                       value={numberOfStamps}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         resetSaving();
                         numberOfStampsHandler(event);
@@ -603,6 +616,7 @@ export default function StampSetup() {
                       labelId='expiration_type'
                       id='expiration_type'
                       value={expirationType}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         resetSaving();
                         setExpirationType(event.target.value);
@@ -619,6 +633,7 @@ export default function StampSetup() {
                       helperText={''}
                       error={false}
                       value={numberOfDaysToExpire}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         resetSaving();
                         setNumberOfDaysToExpire(event.target.value);
@@ -651,6 +666,7 @@ export default function StampSetup() {
                         width={100}
                         height={100}
                         imageClassName={styles.dragdropBannerImage}
+                        disabled={!isEdit}
                       />
                     </div>
 
@@ -670,6 +686,7 @@ export default function StampSetup() {
                         width={100}
                         height={100}
                         imageClassName={styles.dragdropBannerImage}
+                        disabled={!isEdit}
                       />
                     </div>
                   </div>
@@ -713,6 +730,7 @@ export default function StampSetup() {
         reward={currentReward}
         setReward={setCurrentReward}
         onSave={modifyStampSaveHandler}
+        isEdit={isEdit}
       />
     </>
   );

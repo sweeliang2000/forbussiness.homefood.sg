@@ -19,7 +19,8 @@ const EditStampStep = ({
     setUnstampedIcon,
     reward,
     setReward,
-    onSave
+    onSave,
+    isEdit = true
 }) => {
     const [isAddNewRewardOpen, setIsAddNewRewardOpen] = useState(false);
 
@@ -28,6 +29,7 @@ const EditStampStep = ({
     }
 
     const onAddNewReward = () => {
+        if (!isEdit) return;
         setIsAddNewRewardOpen(true)
     }
 
@@ -36,6 +38,7 @@ const EditStampStep = ({
     }
 
     const onRemoveReward = () => {
+        if (!isEdit) return;
         setReward(null)
     }
 
@@ -94,7 +97,7 @@ const EditStampStep = ({
                         />
 
                         <div className={styles.rewardButtons}>
-                            <Button variant="outlined" className={styles.addBtn} onClick={onAddNewReward}>
+                            <Button variant="outlined" className={styles.addBtn} onClick={onAddNewReward} disabled={!isEdit}>
                                 {reward === null ? <><IoMdAdd /> New Reward </>: 'Modify'}
                             </Button>
                             
@@ -104,6 +107,7 @@ const EditStampStep = ({
                                     className={styles.removeBtn} 
                                     onClick={onRemoveReward}
                                     color="error"
+                                    disabled={!isEdit}
                                 >
                                     <IoMdRemove /> Remove Reward
                                 </Button>
@@ -131,6 +135,7 @@ const EditStampStep = ({
                         variant='contained'
                         className={styles.button}
                         onClick={onSave}
+                        disabled={!isEdit}
                     >
                         Save
                     </Button>
