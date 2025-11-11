@@ -44,7 +44,8 @@ const AddLocationSection = ({
     setLocations,
     closeAddLocationHandler,
     isAddLocationOpen,
-    resetSaving
+    resetSaving,
+    isEdit = true
 }) => {
 
     const sgtTime = (timeStr) => dayjs.tz(`2024-01-01T${timeStr}`, 'Asia/Singapore');
@@ -275,6 +276,7 @@ const AddLocationSection = ({
                             helperText={helperText.locationName}
                             value={enteredValues.locationName}
                             error={textfieldError.locationName}
+                            disabled={!isEdit}
                             onChange={(event) => { inputChangeHandler(LOCATION_NAME, event.target.value) }}
                         />
                     </div>
@@ -292,6 +294,7 @@ const AddLocationSection = ({
                             helperText={helperText.address}
                             value={enteredValues.address}
                             error={textfieldError.address}
+                            disabled={!isEdit}
                             onChange={(event) => { inputChangeHandler(ADDRESS, event.target.value) }}
                         />
                     </div>
@@ -309,6 +312,7 @@ const AddLocationSection = ({
                             helperText={helperText.postalCode}
                             value={enteredValues.postalCode}
                             error={textfieldError.postalCode}
+                            disabled={!isEdit}
                             onChange={(event) => { inputChangeHandler(POSTAL_CODE, event.target.value) }}
                         />
                     </div>
@@ -326,6 +330,7 @@ const AddLocationSection = ({
                             closeTime={enteredValues.mondayEnd}
                             onOpenTimeChange={(time) => { inputChangeHandler(MONDAY_START, time) }}
                             onCloseTimeChange={(time) => { inputChangeHandler(MONDAY_END, time) }}
+                            disabled={!isEdit}
                         />
 
                         <OpeningHoursInput
@@ -338,6 +343,7 @@ const AddLocationSection = ({
                             closeTime={enteredValues.tuesdayEnd}
                             onOpenTimeChange={(time) => { inputChangeHandler(TUESDAY_START, time) }}
                             onCloseTimeChange={(time) => { inputChangeHandler(TUESDAY_END, time) }}
+                            disabled={!isEdit}
                         />
 
                         <OpeningHoursInput
@@ -350,6 +356,7 @@ const AddLocationSection = ({
                             closeTime={enteredValues.wednesdayEnd}
                             onOpenTimeChange={(time) => { inputChangeHandler(WEDNESDAY_START, time) }}
                             onCloseTimeChange={(time) => { inputChangeHandler(WEDNESDAY_END, time) }}
+                            disabled={!isEdit}
                         />
 
                         <OpeningHoursInput
@@ -362,6 +369,7 @@ const AddLocationSection = ({
                             closeTime={enteredValues.thursdayEnd}
                             onOpenTimeChange={(time) => { inputChangeHandler(THURSDAY_START, time) }}
                             onCloseTimeChange={(time) => { inputChangeHandler(THURSDAY_END, time) }}
+                            disabled={!isEdit}
                         />
 
                         <OpeningHoursInput
@@ -374,6 +382,7 @@ const AddLocationSection = ({
                             closeTime={enteredValues.fridayEnd}
                             onOpenTimeChange={(time) => { inputChangeHandler(FRIDAY_START, time) }}
                             onCloseTimeChange={(time) => { inputChangeHandler(FRIDAY_END, time) }}
+                            disabled={!isEdit}
                         />
 
                         <OpeningHoursInput
@@ -386,6 +395,7 @@ const AddLocationSection = ({
                             closeTime={enteredValues.saturdayEnd}
                             onOpenTimeChange={(time) => { inputChangeHandler(SATURDAY_START, time) }}
                             onCloseTimeChange={(time) => { inputChangeHandler(SATURDAY_END, time) }}
+                            disabled={!isEdit}
                         />
 
                         <OpeningHoursInput
@@ -398,6 +408,7 @@ const AddLocationSection = ({
                             closeTime={enteredValues.sundayEnd}
                             onOpenTimeChange={(time) => { inputChangeHandler(SUNDAY_START, time) }}
                             onCloseTimeChange={(time) => { inputChangeHandler(SUNDAY_END, time) }}
+                            disabled={!isEdit}
                         />
                     </div>
                 </div>
@@ -405,7 +416,7 @@ const AddLocationSection = ({
                 <div className={styles.buttonContainer}>
                     <Button
                         // loading={true}
-                        // disabled
+                        disabled={!isEdit}
                         loadingPosition='start'
                         variant='contained'
                         className={styles.button}

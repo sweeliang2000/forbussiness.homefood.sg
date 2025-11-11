@@ -9,7 +9,8 @@ const OpeningHoursInput = ({
     openTime,                // Date object or time string for opening time
     closeTime,               // Date object or time string for closing time
     onOpenTimeChange,        // function to handle opening time change
-    onCloseTimeChange        // function to handle closing time change
+    onCloseTimeChange,       // function to handle closing time change
+    disabled = false         // whether the input is disabled
 }) => {
     return (
         <div className={styles.subContainer}>
@@ -20,6 +21,7 @@ const OpeningHoursInput = ({
                         <Switch
                             checked={isOpen}
                             onChange={onToggleOpen}
+                            disabled={disabled}
                         />
                     }
                     label="Open for Business?"
@@ -34,6 +36,7 @@ const OpeningHoursInput = ({
                         <BasicTimePicker
                             selectedTime={openTime}
                             setSelectedTime={onOpenTimeChange}
+                            disabled={disabled}
                         />
                     </div>
                     <div className={styles.timePickSubContainer}>
@@ -41,6 +44,7 @@ const OpeningHoursInput = ({
                         <BasicTimePicker
                             selectedTime={closeTime}
                             setSelectedTime={onCloseTimeChange}
+                            disabled={disabled}
                         />
                     </div>
                 </div>

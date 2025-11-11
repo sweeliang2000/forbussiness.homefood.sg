@@ -9,7 +9,7 @@ import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export default function CustomTimePicker({ selectedTime, setSelectedTime }) {
+export default function CustomTimePicker({ selectedTime, setSelectedTime, disabled = false }) {
   // Convert SGT time to local for display
   const displayTime = selectedTime.tz('Asia/Singapore').local();
 
@@ -33,6 +33,7 @@ export default function CustomTimePicker({ selectedTime, setSelectedTime }) {
         ampm={true}
         views={['hours', 'minutes']}
         format='hh:mm A'
+        disabled={disabled}
       />
     </LocalizationProvider>
   );

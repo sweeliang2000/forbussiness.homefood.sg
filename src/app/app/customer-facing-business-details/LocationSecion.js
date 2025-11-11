@@ -16,7 +16,8 @@ import FieldHeader from '@/components/FieldHeader/FieldHeader';
 const LocationSection = ({ 
     locations,
     setLocations,
-    resetSaving
+    resetSaving,
+    isEdit = true
  }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedRowId, setSelectedRowId] = useState(null);
@@ -36,6 +37,7 @@ const LocationSection = ({
     };
 
     const handleEdit = () => {
+        if (!isEdit) return;
         console.log('Edit location with id:', selectedRowId);
         const selectedLocation = locations.filter((location) => location.id === selectedRowId)[0];
 
@@ -50,6 +52,7 @@ const LocationSection = ({
     };
 
     const handleDelete = () => {
+        if (!isEdit) return;
         setLocations((prevLocations) => prevLocations.filter((location) => location.id !== selectedRowId));
         resetSaving();
         handleMenuClose();
@@ -103,23 +106,28 @@ const LocationSection = ({
             align: 'right',
             renderCell: (params) => (
                 <div>
-                    <IconButton onClick={(event) => handleMenuOpen(event, params.row.id)}>
-                        <MoreVertIcon />
-                    </IconButton>
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl) && selectedRowId === params.row.id}
-                        onClose={handleMenuClose}
-                    >
-                        <MenuItem onClick={handleEdit}>Edit</MenuItem>
-                        <MenuItem onClick={handleDelete}>Delete</MenuItem>
-                    </Menu>
+                    {isEdit && (
+                        <>
+                            <IconButton onClick={(event) => handleMenuOpen(event, params.row.id)}>
+                                <MoreVertIcon />
+                            </IconButton>
+                            <Menu
+                                anchorEl={anchorEl}
+                                open={Boolean(anchorEl) && selectedRowId === params.row.id}
+                                onClose={handleMenuClose}
+                            >
+                                <MenuItem onClick={handleEdit}>Edit</MenuItem>
+                                <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                            </Menu>
+                        </>
+                    )}
                 </div>
             ),
         },
     ];
 
     const addLocationHandler = () => {
+        if (!isEdit) return;
         setIsAddLocationOpen(true)
     };
 
@@ -140,7 +148,7 @@ const LocationSection = ({
                         size='small'
                         onClick={addLocationHandler}
                         // loading={true}
-                        // disabled
+                        disabled={!isEdit}
                         loadingPosition='start'
                         variant='contained'
                         className={styles.button}
@@ -172,6 +180,7 @@ const LocationSection = ({
                 closeAddLocationHandler={closeAddLocationHandler}
                 isAddLocationOpen={isAddLocationOpen}
                 resetSaving={resetSaving}
+                isEdit={isEdit}
             />
         </>
 

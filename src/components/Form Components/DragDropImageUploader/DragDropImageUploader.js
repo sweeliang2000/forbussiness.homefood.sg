@@ -13,17 +13,20 @@ const DragDropImageUploader = ({
     resetSaving,
     width,
     height,
-    imageClassName
+    imageClassName,
+    disabled = false
 }) => {
     // const [images, setImages] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
 
     const selectFiles = () => {
+        if (disabled) return;
         fileInputRef.current.click()
     };
 
     const onFileSelect = (event) => {
+        if (disabled) return;
         const files = event.target.files;
         if (files.length === 0) return;
         for (let i = 0; i < files.length; i++) {
@@ -57,6 +60,7 @@ const DragDropImageUploader = ({
     };
 
     const deleteImage = (index) => {
+        if (disabled) return;
         setImages((prevImages) =>
             prevImages.filter((_, i) => i !== index)
         );
@@ -64,6 +68,7 @@ const DragDropImageUploader = ({
     };
 
     const onDragOver = (event) => {
+        if (disabled) return;
         event.preventDefault();
         setIsDragging(true);
         event.dataTransfer.dropEffect = 'copy';
@@ -75,6 +80,7 @@ const DragDropImageUploader = ({
     };
 
     const onDrop = (event) => {
+        if (disabled) return;
         event.preventDefault();
         setIsDragging(false);
         const files = event.dataTransfer.files;
@@ -129,7 +135,7 @@ const DragDropImageUploader = ({
                                 console.log(images)
                                 return (
                                 <div className={styles.imageContainer} key={index}>
-                                    <FaMinusCircle className={styles.delete} onClick={() => deleteImage(index)} />
+                                    {!disabled && <FaMinusCircle className={styles.delete} onClick={() => deleteImage(index)} />}
                                     <Image
                                         className={`${styles.image} ${imageClassName}`}
                                         width={width}
@@ -149,6 +155,7 @@ const DragDropImageUploader = ({
                 multiple={noOfImages > 1}
                 ref={fileInputRef}
                 onChange={onFileSelect}
+                disabled={disabled}
             />
 
             <div className={styles.bottomFooter}>
@@ -158,6 +165,7 @@ const DragDropImageUploader = ({
                     className={styles.button}
                     onClick={selectFiles}
                     variant='text'
+                    disabled={disabled}
                 >
                     {images.length !== 0 & noOfImages === 1 ? 'Replace' : 'Choose File'}
                 </Button>

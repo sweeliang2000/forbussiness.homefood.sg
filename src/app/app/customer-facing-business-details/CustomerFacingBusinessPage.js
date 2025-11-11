@@ -51,6 +51,7 @@ const CustomerFacingBusinessPage = () => {
     const [isBtnDisabled, setIsBtnDisabled] = useState(true);
     const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
     const [hasExistingData, setHasExistingData] = useState(false);
+    const [isEdit, setIsEdit] = useState(true);
 
     const [thumbnailImages, setThumbnailImages] = useState([]);
     const [bannerImages, setBannerImages] = useState([]);
@@ -226,6 +227,9 @@ const CustomerFacingBusinessPage = () => {
 
                 if (data) {
                     setHasExistingData(true);
+                    const isEditValue = data.isEdit;
+                    setIsEdit(isEditValue !== undefined ? isEditValue : true);
+                    
                     setEnteredValues({
                         [DISPLAY_NAME]: data.displayName,
                         [SHOP_DESCRIPTION]: data.description,
@@ -278,8 +282,9 @@ const CustomerFacingBusinessPage = () => {
                     loading={isBtnLoading}
                     isSuccess={isSubmissionSuccess}
                     isError={isError}
-                    isDisabled={isBtnDisabled}
+                    isDisabled={isBtnDisabled || !isEdit}
                     errorMessage={errorMessage}
+                    infoMessage={!isEdit ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.' : null}
                 />
 
                 {
@@ -297,7 +302,7 @@ const CustomerFacingBusinessPage = () => {
                                     helperText={helperText.displayName}
                                     error={textfieldError.displayName}
                                     value={enteredValues.displayName}
-                                    disabled={isBtnLoading}
+                                    disabled={isBtnLoading || !isEdit}
                                     onChange={(event) => { inputChangeHandler(DISPLAY_NAME, event.target.value) }}
                                 />
 
@@ -310,7 +315,7 @@ const CustomerFacingBusinessPage = () => {
                                     helperText={helperText.description}
                                     error={textfieldError.description}
                                     value={enteredValues.description}
-                                    disabled={isBtnLoading}
+                                    disabled={isBtnLoading || !isEdit}
                                     onChange={(event) => { inputChangeHandler(SHOP_DESCRIPTION, event.target.value) }}
                                     multiline
                                     slotProps={{
@@ -328,7 +333,7 @@ const CustomerFacingBusinessPage = () => {
                                     helperText={helperText.website}
                                     error={textfieldError.website}
                                     value={enteredValues.website}
-                                    disabled={isBtnLoading}
+                                    disabled={isBtnLoading || !isEdit}
                                     onChange={(event) => { inputChangeHandler(WEBSITE, event.target.value) }}
                                 />
 
@@ -346,6 +351,7 @@ const CustomerFacingBusinessPage = () => {
                                             { value: 'retailers', title: 'Retailers' },
                                             { value: 'service', title: 'Service' }
                                         ]}
+                                        disabled={!isEdit}
                                     />
                                 </div>
                                 {
@@ -364,6 +370,7 @@ const CustomerFacingBusinessPage = () => {
                                                 { value: 'No', title: 'No' },
                                                 { value: 'Not Applicable', title: 'Not Applicable' }
                                             ]}
+                                            disabled={!isEdit}
                                         />
                                     </div>
                                 }
@@ -383,6 +390,7 @@ const CustomerFacingBusinessPage = () => {
                                         width={180}
                                         height={180}
                                         imageClassName={styles.dragdropImage}
+                                        disabled={!isEdit}
                                     />
                                 </div>
 
@@ -401,6 +409,7 @@ const CustomerFacingBusinessPage = () => {
                                         width={792}
                                         height={198}
                                         imageClassName={styles.dragdropBannerImage}
+                                        disabled={!isEdit}
                                     />
                                 </div>
 
@@ -412,7 +421,7 @@ const CustomerFacingBusinessPage = () => {
                                     helperText={helperText.keywords}
                                     error={textfieldError.keywords}
                                     value={enteredValues.keywords}
-                                    disabled={isBtnLoading}
+                                    disabled={isBtnLoading || !isEdit}
                                     onChange={(event) => { inputChangeHandler(KEYWORDS, event.target.value) }}
                                     slotProps={{
                                         input: {
@@ -431,6 +440,7 @@ const CustomerFacingBusinessPage = () => {
                     locations={locations}
                     setLocations={setLocations}
                     resetSaving={resetSaving}
+                    isEdit={isEdit}
                 />
             }
         </>
