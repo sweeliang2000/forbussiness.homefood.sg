@@ -29,6 +29,7 @@ export default function StampSetup() {
   const [isBtnLoading, setIsBtnLoading] = useState(false);
   const [isBtnDisabled, setIsBtnDisabled] = useState(true);
   const [isUpdate, setIsUpdate] = useState(false);
+  const [isEdit, setIsEdit] = useState(true);
 
   const [enteredValues, setEnteredValues] = useState({
     [BUSINESS_NAME]: '',
@@ -144,6 +145,10 @@ export default function StampSetup() {
           const businessName = data.data.businessName;
           const isBusinessDetailApproved = data.data.isBusinessDetailApproved;
           const uen = data.data.uen;
+          const isEditValue = data.data.isEdit;
+
+          // Set isEdit state
+          setIsEdit(isEditValue !== undefined ? isEditValue : true);
 
           // Check if any of the required fields have values to determine if this is an update
           const hasData = businessName || uen || addressUnitNumber || addressBuildingName || addressStreetAddress || addressPostalCode;
@@ -195,8 +200,9 @@ export default function StampSetup() {
         isSuccess={isSubmissionSuccess}
         setShowError={setIsError}
         isError={isError}
-        isDisabled={isBtnDisabled}
+        isDisabled={isBtnDisabled || !isEdit}
         errorMessage={errorMessage}
+        infoMessage={!isEdit ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.' : null}
       />
 
       {
@@ -220,7 +226,7 @@ export default function StampSetup() {
                 helperText={helperText.businessName}
                 error={textfieldError.businessName}
                 value={enteredValues.businessName}
-                disabled={isBtnLoading}
+                disabled={isBtnLoading || !isEdit}
                 onChange={(event) => { inputChangeHandler(BUSINESS_NAME, event.target.value) }}
               />
             </div>
@@ -236,7 +242,7 @@ export default function StampSetup() {
                 helperText={helperText.uen}
                 value={enteredValues.uen}
                 error={textfieldError.uen}
-                disabled={isBtnLoading}
+                disabled={isBtnLoading || !isEdit}
                 onChange={(event) => { inputChangeHandler(UEN, event.target.value) }}
               />
             </div>
@@ -259,7 +265,7 @@ export default function StampSetup() {
                   helperText={helperText.unitNumber}
                   value={enteredValues.unitNumber}
                   error={textfieldError.unitNumber}
-                  disabled={isBtnLoading}
+                  disabled={isBtnLoading || !isEdit}
                   onChange={(event) => { inputChangeHandler(UNIT_NUMBER, event.target.value) }}
                 />
 
@@ -273,7 +279,7 @@ export default function StampSetup() {
                   helperText={helperText.buildingName}
                   error={textfieldError.buildingName}
                   value={enteredValues.buildingName}
-                  disabled={isBtnLoading}
+                  disabled={isBtnLoading || !isEdit}
                   onChange={(event) => { inputChangeHandler(BUILDING_NAME, event.target.value) }}
                 />
 
@@ -287,7 +293,7 @@ export default function StampSetup() {
                   helperText={helperText.streetAddress}
                   error={textfieldError.streetAddress}
                   value={enteredValues.streetAddress}
-                  disabled={isBtnLoading}
+                  disabled={isBtnLoading || !isEdit}
                   onChange={(event) => { inputChangeHandler(STREET_ADDRESS, event.target.value) }}
                 />
 
@@ -307,7 +313,7 @@ export default function StampSetup() {
                   helperText={helperText.postalCode}
                   error={textfieldError.postalCode}
                   value={enteredValues.postalCode}
-                  disabled={isBtnLoading}
+                  disabled={isBtnLoading || !isEdit}
                   onChange={(event) => { inputChangeHandler(POSTAL_CODE, event.target.value) }}
                 />
               </div>
