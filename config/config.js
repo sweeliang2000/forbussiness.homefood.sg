@@ -4,6 +4,7 @@
 //    or services) without cluttering your root directory.
 
 const getEnvVariable = (key, fallback = '') => {
+    // Access the environment variable directly - Next.js will inline NEXT_PUBLIC_ variables at build time
     const value = process.env[key];
     if (!value) {
         console.warn(`Environment variable ${key} is not set. Using fallback: ${fallback}`);
@@ -11,6 +12,6 @@ const getEnvVariable = (key, fallback = '') => {
     return value || fallback;
 };
 
-
-export const BASE_URL_BACKEND = getEnvVariable('NEXT_PUBLIC_BASE_URL_BACKEND', 'http://localhost:8080');
+// Direct access to ensure Next.js can statically analyze and inline the value
+export const BASE_URL_BACKEND = process.env.NEXT_PUBLIC_BASE_URL_BACKEND || 'http://localhost:8080';
 
