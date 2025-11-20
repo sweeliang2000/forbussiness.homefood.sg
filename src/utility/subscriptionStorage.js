@@ -2,7 +2,7 @@
  * Utility functions for managing subscription lookup key in localStorage
  */
 
-const SUBSCRIPTION_LOOKUP_KEY = 'subscription_lookup_key';
+const SUBSCRIPTION_LOOKUP_KEY = '1_outlet-monthly';
 
 /**
  * Get the subscription lookup key from localStorage
