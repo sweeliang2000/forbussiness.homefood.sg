@@ -166,9 +166,9 @@ export default function ProductDetails() {
       console.log('response', response);
       
       // Redirect to Stripe Checkout
-      // if (response.data?.url) {
-      //   window.location.href = response.data.url;
-      // }
+      if (response.data?.data?.url) {
+        window.location.href = response.data.data.url;
+      }
     } catch (error) {
       const errorData = error?.response?.data;
       const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
