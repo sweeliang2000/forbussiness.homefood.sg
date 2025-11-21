@@ -162,11 +162,13 @@ export default function ProductDetails() {
       const response = await apiClient.post(CHECKOUT_SESSION_STRIPE, {
         "lookup_key": lookupKey
       });
+
+      console.log('response', response);
       
       // Redirect to Stripe Checkout
-      if (response.data?.url) {
-        window.location.href = response.data.url;
-      }
+      // if (response.data?.url) {
+      //   window.location.href = response.data.url;
+      // }
     } catch (error) {
       const errorData = error?.response?.data;
       const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
