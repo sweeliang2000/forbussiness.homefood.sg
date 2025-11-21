@@ -119,7 +119,7 @@ export default function ProductDetails() {
     {
       title: 'Single Outlet Plan',
       price: billingCycle === 'annually' ? 80 : 100,
-      lookupKey: billingCycle === 'annually' ? ONE_OUTLET_YEARLY : ONE_OUTLET_MONTHLY,
+      lookupKey: 'plan_2_outlets',
       isPopular: true,
       description: 'For the mockup enthusiasts and template lovers.',
       features: [
@@ -133,8 +133,8 @@ export default function ProductDetails() {
         { name: 'Custom Integration Support', included: false },
       ],
       lookupKey: {
-        'monthly': ONE_OUTLET_MONTHLY,
-        'annually': ONE_OUTLET_YEARLY
+        'monthly': 'plan_2_outlets',
+        'annually': 'plan_2_outlets'
       }
     },
     {
@@ -145,7 +145,7 @@ export default function ProductDetails() {
       selectedPlanType: professionalPlanType,
       planTypes: professionalPlanTypes,
       features: getProfessionalFeatures(professionalPlanType),
-      lookupKey: getProfessionalLookupKey(professionalPlanType)
+      lookupKey: 'plan_2_outlets'
     }
   ].filter(plan => plan.title === 'Starter Plan' ? currentPlan === 'Starter Plan' : true);
 
