@@ -14,17 +14,23 @@ const PricingCard = ({
   isCurrentPlan = false,
   isGetStarted = false,
   isProfessional = false,
+  isCustom = false,
   onSelect,
   onPlanTypeChange,
   selectedPlanType,
-  planTypes = []
+  planTypes = [],
+  outletOptions = []
 }) => {
   const getButtonText = () => {
-    if (selectedPlanType === 'others') return 'Contact Us';
+    if (selectedPlanType === 'others' || selectedPlanType === 'custom') return 'Contact Us';
     if (isGetStarted) return 'Get Started';
     if (isCurrentPlan) return 'Current Plan';
     return 'Upgrade Now';
   };
+
+  // Use outletOptions if available (for custom card), otherwise use planTypes
+  const dropdownOptions = isCustom && outletOptions.length > 0 ? outletOptions : planTypes;
+  const showDropdown = (isProfessional || isCustom) && dropdownOptions.length > 0;
 
   return (
     <div className={`${styles.pricingCard} ${isPopular ? styles.popular : ''}`}>
@@ -34,20 +40,22 @@ const PricingCard = ({
       
       <div className={styles.price}>
         <span className={styles.amount}>
-          {selectedPlanType === 'others' ? 'Custom' : (typeof price === 'number' ? `$${price}` : price)}
+          {selectedPlanType === 'others' || selectedPlanType === 'custom' || price === null 
+            ? 'Custom' 
+            : (typeof price === 'number' ? `SGD $${price}` : price)}
         </span>
-        {price !== 'Free' && selectedPlanType !== 'others' && <span className={styles.period}>/month</span>}
+        {price !== 'Free' && price !== null && selectedPlanType !== 'others' && selectedPlanType !== 'custom' && <span className={styles.period}>/month</span>}
       </div>
       
       <p className={styles.description}>{description}</p>
 
-      {isProfessional && planTypes.length > 0 && (
+      {showDropdown && (
         <select 
           className={styles.planTypeSelect}
           value={selectedPlanType}
           onChange={(e) => onPlanTypeChange(e.target.value)}
         >
-          {planTypes.map((type) => (
+          {dropdownOptions.map((type) => (
             <option key={type.value} value={type.value}>
               {type.label}
             </option>
@@ -86,7 +94,7 @@ const PricingCard = ({
 
 PricingCard.propTypes = {
   title: PropTypes.string.isRequired,
-  price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   description: PropTypes.string.isRequired,
   features: PropTypes.arrayOf(
     PropTypes.shape({
@@ -98,10 +106,17 @@ PricingCard.propTypes = {
   isCurrentPlan: PropTypes.bool,
   isGetStarted: PropTypes.bool,
   isProfessional: PropTypes.bool,
+  isCustom: PropTypes.bool,
   onSelect: PropTypes.func.isRequired,
   onPlanTypeChange: PropTypes.func,
   selectedPlanType: PropTypes.string,
   planTypes: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+    })
+  ),
+  outletOptions: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.string.isRequired,
       label: PropTypes.string.isRequired,
