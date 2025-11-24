@@ -53,8 +53,7 @@ const LoginContent = () => {
             
             if (message === 'Verification code resent successfully') {
                 console.log("verify to can called");
-                setIsSubmissionButtonLoading(false);
-                router.replace('/verify');
+                router.push('/verifya')
                 return;
             }
 
