@@ -53,6 +53,32 @@ const LoginContent = () => {
             
             if (message === 'Verification code resent successfully') {
                 console.log("verify to can called");
+                
+                // Check if backend cookie is available, if not set it manually as fallback
+                const authStatusCookie = Cookies.get('authStatus');
+                
+                if (!authStatusCookie) {
+                    console.log("Fallback: Set cookie manually to ensure it's available on frontend domain")
+
+                    const authStatus = {
+                        status: 'awaiting_verification',
+                        data: {
+                            email: email,
+                            result: email
+                        }
+                    };
+                    
+                    const isProduction = process.env.NODE_ENV === 'production';
+                    Cookies.set('authStatus', JSON.stringify(authStatus), {
+                        expires: 1,
+                        path: '/',
+                        secure: isProduction,
+                        sameSite: 'Lax',
+                        domain: isProduction ? '.collbine.com' : undefined,
+                    });
+                }
+                
+                setIsSubmissionButtonLoading(false);
                 setTimeout(() => {
                     router.push('/verify');
                 }, 100);
