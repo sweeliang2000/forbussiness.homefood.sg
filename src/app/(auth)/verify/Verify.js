@@ -37,7 +37,7 @@ const Verify = () => {
                 }
             } else {
                 console.log("authStatusCookie not found");
-                router.replace('/login');
+                // router.replace('/login');
             }
         };
 

@@ -83,14 +83,8 @@ const SignupViews = () => {
         try {
             await apiClient.post(`${SIGN_UP}`, payload);
             console.log("verify to can called");
-            // Set cookie with proper attributes for production (HTTPS)
-            Cookies.set('authStatus', JSON.stringify({ data: { email: email } }), {
-                secure: true,
-                sameSite: 'lax',
-                path: '/'
-            });
-            // Use window.location for full page reload to ensure cookie is set before middleware runs
-            window.location.href = '/verify';
+            Cookies.set('authStatus', JSON.stringify({ data: { email: email } }));
+            router.push('/verify')
         } catch (error) {
             const errorData = error?.response?.data;
             const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
