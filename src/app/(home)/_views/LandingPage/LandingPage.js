@@ -5,7 +5,9 @@ import HeroSection from '../HeroSection/HeroSection';
 import StatementSection from '../StatementSection/StatementSection';
 import WhyUsSection from '../WhyUsSection/WhyUsSection';
 import FeaturesSection from '../FeaturesSection/FeaturesSection';
+import PricingSection from '../PricingSection/PricingSection';
 import FAQSection from '../FAQSection/FAQSection';
+import ContactSection from '../ContactSection/ContactSection';
 
 const LandingPage = () => {
     return (
@@ -18,77 +20,11 @@ const LandingPage = () => {
 
             <FeaturesSection />
 
-            {/* Pricing Section */}
-            <section id="pricing" className={styles.pricingSection}>
-                <div className={styles.sectionContainer}>
-                    <div className={styles.sectionHeader}>
-                        <h2 className={styles.sectionTitle}>Simple, Transparent Pricing</h2>
-                        <p className={styles.sectionSubtitle}>
-                            Choose the plan that works best for your business
-                        </p>
-                    </div>
-                    <div className={styles.pricingGrid}>
-                        <div className={styles.pricingCard}>
-                            <div className={styles.pricingHeader}>
-                                <h3>Starter</h3>
-                                <div className={styles.price}>
-                                    <span className={styles.currency}>$</span>
-                                    <span className={styles.amount}>29</span>
-                                    <span className={styles.period}>/month</span>
-                                </div>
-                            </div>
-                            <ul className={styles.features}>
-                                <li>Up to 500 customers</li>
-                                <li>Basic stamp cards</li>
-                                <li>Email support</li>
-                                <li>Basic analytics</li>
-                            </ul>
-                            <Abutton href="/signup" variant="primary" size="medium">Get Started</Abutton>
-                        </div>
-
-                        <div className={`${styles.pricingCard} ${styles.popular}`}>
-                            <div className={styles.popularBadge}>Most Popular</div>
-                            <div className={styles.pricingHeader}>
-                                <h3>Professional</h3>
-                                <div className={styles.price}>
-                                    <span className={styles.currency}>$</span>
-                                    <span className={styles.amount}>79</span>
-                                    <span className={styles.period}>/month</span>
-                                </div>
-                            </div>
-                            <ul className={styles.features}>
-                                <li>Up to 2,000 customers</li>
-                                <li>Advanced loyalty programs</li>
-                                <li>Priority support</li>
-                                <li>Advanced analytics</li>
-                                <li>Custom branding</li>
-                            </ul>
-                            <Abutton href="/signup" variant="primary" size="medium">Get Started</Abutton>
-                        </div>
-
-                        <div className={styles.pricingCard}>
-                            <div className={styles.pricingHeader}>
-                                <h3>Enterprise</h3>
-                                <div className={styles.price}>
-                                    <span className={styles.currency}>$</span>
-                                    <span className={styles.amount}>199</span>
-                                    <span className={styles.period}>/month</span>
-                                </div>
-                            </div>
-                            <ul className={styles.features}>
-                                <li>Unlimited customers</li>
-                                <li>All features included</li>
-                                <li>24/7 phone support</li>
-                                <li>API access</li>
-                                <li>Custom integrations</li>
-                            </ul>
-                            <Abutton href="/signup" variant="primary" size="medium">Get Started</Abutton>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <PricingSection />
 
             <FAQSection />
+
+            <ContactSection />
 
             {/* Footer */}
             <footer className={styles.footer}>

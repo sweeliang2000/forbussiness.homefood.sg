@@ -1,0 +1,108 @@
+.contactSection {
+    background-color: white;
+    padding: 6rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--side-spacing);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+}
+
+.leftContent {
+    padding-top: 2rem;
+}
+
+.title {
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--on-primary);
+    line-height: 1.1;
+    margin-bottom: 2rem;
+    font-family: var(--font-raleway);
+}
+
+.description {
+    font-size: 1.1rem;
+    color: var(--on-primary-light2);
+    line-height: 1.6;
+    margin-bottom: 3rem;
+    max-width: 450px;
+}
+
+.contactDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.contactItem h4 {
+    font-size: 1rem;
+    color: var(--on-primary-light2);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.contactItem p, .contactItem a {
+    font-size: 1.2rem;
+    color: var(--on-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.formCard {
+    background: white;
+    padding: 3rem;
+    border-radius: 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.formGroup {
+    margin-bottom: 1.5rem;
+}
+
+.submitButtonWrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+@media (max-width: 968px) {
+    .container {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    .title {
+        font-size: 3rem;
+    }
+
+    .formCard {
+        padding: 2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .formRow {
+        grid-template-columns: 1fr;
+    }
+    
+    .title {
+        font-size: 2.5rem;
+    }
+}
+
