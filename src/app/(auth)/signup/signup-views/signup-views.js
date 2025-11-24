@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Alert, Button, TextField } from '@mui/material';
 import { useState } from 'react';
 import apiClient from '@/utility/api';
+import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import withAuthorization from '@/hoc/withAuthorization';
 import { SIGN_UP } from '@/utility/apiPaths';
@@ -82,7 +83,14 @@ const SignupViews = () => {
         try {
             await apiClient.post(`${SIGN_UP}`, payload);
             console.log("verify to can called");
-            router.push('/verify')
+            // Set cookie with proper attributes for production (HTTPS)
+            Cookies.set('authStatus', JSON.stringify({ data: { email: email } }), {
+                secure: true,
+                sameSite: 'lax',
+                path: '/'
+            });
+            // Use window.location for full page reload to ensure cookie is set before middleware runs
+            window.location.href = '/verify';
         } catch (error) {
             const errorData = error?.response?.data;
             const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';

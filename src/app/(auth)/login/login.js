@@ -7,6 +7,7 @@ import { Alert, TextField, Button } from '@mui/material';
 import { useState, Suspense, useEffect } from 'react';
 import apiClient from '@/utility/api';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Cookies from 'js-cookie';
 import withAuthorization from '@/hoc/withAuthorization';
 import { SIGN_IN } from '@/utility/apiPaths';
 

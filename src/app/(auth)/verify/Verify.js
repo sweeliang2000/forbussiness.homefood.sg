@@ -36,6 +36,7 @@ const Verify = () => {
                     console.error('Error parsing authStatus cookie:', error);
                 }
             } else {
+                console.log("authStatusCookie not found");
                 router.replace('/login');
             }
         };
