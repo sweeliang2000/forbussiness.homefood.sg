@@ -53,7 +53,9 @@ const LoginContent = () => {
             
             if (message === 'Verification code resent successfully') {
                 console.log("verify to can called");
-                router.push('/verify')
+                setTimeout(() => {
+                    router.push('/verify');
+                }, 100);
                 return;
             }
 
