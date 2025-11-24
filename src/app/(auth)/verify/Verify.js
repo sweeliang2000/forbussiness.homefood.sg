@@ -103,7 +103,12 @@ const Verify = () => {
 
         try {
             await apiClient.post(`${EMAIL_VERIFICATION}`, payload);
-            Cookies.remove('authStatus');
+            // Remove cookie with same options as when it was set
+            const isProduction = process.env.NODE_ENV === 'production';
+            Cookies.remove('authStatus', {
+                path: '/',
+                domain: isProduction ? '.collbine.com' : undefined,
+            });
             setVerifiedConfirmed(true);
         } catch (error) {
             const errorData = error?.response?.data;
@@ -118,7 +123,12 @@ const Verify = () => {
     const logoutHandler = (e) => {
         e.preventDefault();
 
-        Cookies.remove('authStatus');
+        // Remove cookie with same options as when it was set
+        const isProduction = process.env.NODE_ENV === 'production';
+        Cookies.remove('authStatus', {
+            path: '/',
+            domain: isProduction ? '.collbine.com' : undefined,
+        });
         router.replace('/login');
     };
 

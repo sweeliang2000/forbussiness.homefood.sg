@@ -10,6 +10,7 @@ import apiClient from '@/utility/api';
 import { useRouter } from 'next/navigation';
 import withAuthorization from '@/hoc/withAuthorization';
 import { SIGN_UP } from '@/utility/apiPaths';
+import Cookies from 'js-cookie';
 
 const SignupViews = () => {
     const router = useRouter();
@@ -82,6 +83,30 @@ const SignupViews = () => {
         try {
             await apiClient.post(`${SIGN_UP}`, payload);
             console.log("verify to can called");
+
+            const authStatusCookie = Cookies.get('authStatus');
+
+            if (!authStatusCookie) {
+                console.log("Signup fallback: setting authStatus cookie manually");
+
+                const authStatus = {
+                    status: 'awaiting_verification',
+                    data: {
+                        email: email,
+                        result: email,
+                    },
+                };
+
+                const isProduction = process.env.NODE_ENV === 'production';
+                Cookies.set('authStatus', JSON.stringify(authStatus), {
+                    expires: 1,
+                    path: '/',
+                    secure: isProduction,
+                    sameSite: 'Lax',
+                    domain: isProduction ? '.collbine.com' : undefined,
+                });
+            }
+
             router.push('/verify')
         } catch (error) {
             const errorData = error?.response?.data;
