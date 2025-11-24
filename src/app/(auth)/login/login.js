@@ -45,17 +45,22 @@ const LoginContent = () => {
 
         try {
             const response = await apiClient.post(`${SIGN_IN}`, payload);
-            const message = response.data.data.message
-            console.log(message);
+            const data = response.data;
+            const message = data.message
+            console.log(response.data);
+            console.log("message", message);
             
             if (message === 'Verification code resent successfully') {
+                console.log("verify to can called");
                 router.push('/verify')
                 return;
             }
 
             if (redirectPath) {
+                console.log("redirectPath", redirectPath);
                 router.push(redirectPath);
             } else {
+                console.log("app to can called");
                 router.push('/app'); // default redirect
             }
         } catch (error) {
