@@ -175,6 +175,59 @@ const AddLocationSection = ({
         }))
     };
 
+    const resetFormToDefaults = () => {
+        setEnteredValues({
+            [LOCATION_NAME]: '',
+            [ADDRESS]: '',
+            [POSTAL_CODE]: '',
+            [MONDAY_IS_OPEN]: true,
+            [MONDAY_START]: sgtTime('08:00'),
+            [MONDAY_END]: sgtTime('22:00'),
+            [TUESDAY_IS_OPEN]: true,
+            [TUESDAY_START]: sgtTime('08:00'),
+            [TUESDAY_END]: sgtTime('22:00'),
+            [WEDNESDAY_IS_OPEN]: true,
+            [WEDNESDAY_START]: sgtTime('08:00'),
+            [WEDNESDAY_END]: sgtTime('22:00'),
+            [THURSDAY_IS_OPEN]: true,
+            [THURSDAY_START]: sgtTime('08:00'),
+            [THURSDAY_END]: sgtTime('22:00'),
+            [FRIDAY_IS_OPEN]: true,
+            [FRIDAY_START]: sgtTime('08:00'),
+            [FRIDAY_END]: sgtTime('22:00'),
+            [SATURDAY_IS_OPEN]: true,
+            [SATURDAY_START]: sgtTime('08:00'),
+            [SATURDAY_END]: sgtTime('22:00'),
+            [SUNDAY_IS_OPEN]: true,
+            [SUNDAY_START]: sgtTime('08:00'),
+            [SUNDAY_END]: sgtTime('22:00'),
+        });
+        setTextfieldError({
+            [LOCATION_NAME]: false,
+            [ADDRESS]: false,
+            [POSTAL_CODE]: false,
+            [MONDAY_IS_OPEN]: false,
+            [TUESDAY_IS_OPEN]: false,
+            [WEDNESDAY_IS_OPEN]: false,
+            [THURSDAY_IS_OPEN]: false,
+            [FRIDAY_IS_OPEN]: false,
+            [SATURDAY_IS_OPEN]: false,
+            [SUNDAY_IS_OPEN]: false,
+        });
+        setHelperText({
+            [LOCATION_NAME]: '',
+            [ADDRESS]: '',
+            [POSTAL_CODE]: '',
+            [MONDAY_IS_OPEN]: '',
+            [TUESDAY_IS_OPEN]: '',
+            [WEDNESDAY_IS_OPEN]: '',
+            [THURSDAY_IS_OPEN]: '',
+            [FRIDAY_IS_OPEN]: '',
+            [SATURDAY_IS_OPEN]: '',
+            [SUNDAY_IS_OPEN]: '',
+        });
+    };
+
     const formSubmissionHandler = async (event) => {
         event.preventDefault();
         const transformedData = transformValues(enteredValues);
@@ -191,6 +244,8 @@ const AddLocationSection = ({
         } else {
             // Add new location
             setLocations((prevLocations) => [...prevLocations, transformedData]);
+            // Reset form fields to default values after adding a location
+            resetFormToDefaults();
         }
 
         resetSaving();
