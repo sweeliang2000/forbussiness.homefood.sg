@@ -12,6 +12,7 @@ function handleAuthStatus(request) {
     // Prevent redirect loop for '/verify'
     if (currentPath === '/verify') {
         if (!authStatusCookie) {
+            console.log("[MW] authStatusCookie not found");
             return NextResponse.redirect(new URL('/login', request.url));
         };
         
