@@ -53,7 +53,11 @@ const LoginContent = () => {
             
             if (message === 'Verification code resent successfully') {
                 console.log("verify to can called");
-                router.push('/verifya')
+                setIsSubmissionButtonLoading(false);
+                // Use window.location.href for hard navigation to ensure cookie is available
+                // when middleware runs. router.push doesn't work here because the cookie
+                // set by the backend response might not be available yet.
+                window.location.href = '/verify';
                 return;
             }
 
