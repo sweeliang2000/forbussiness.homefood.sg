@@ -25,14 +25,17 @@ const Verify = () => {
     useEffect(() => {
         const getCookiesInfo = () => {
             const authStatusCookie = Cookies.get('authStatus');
+            console.log("authStatusCookie 1", authStatusCookie);
 
             if (authStatusCookie) {
                 try {
+                    console.log("authStatusCookie 2", authStatusCookie);
                     const authStatus = JSON.parse(authStatusCookie);
                     const email = authStatus.data.email;
                     setEmailAddress(email);
                 } catch (error) {
                     // TODO: Handle Error.
+                    console.log("error 1", error);
                     console.error('Error parsing authStatus cookie:', error);
                 }
             } else {

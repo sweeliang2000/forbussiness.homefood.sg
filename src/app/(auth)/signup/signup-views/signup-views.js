@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { Alert, Button, TextField } from '@mui/material';
 import { useState } from 'react';
 import apiClient from '@/utility/api';
-import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import withAuthorization from '@/hoc/withAuthorization';
 import { SIGN_UP } from '@/utility/apiPaths';
@@ -83,7 +82,6 @@ const SignupViews = () => {
         try {
             await apiClient.post(`${SIGN_UP}`, payload);
             console.log("verify to can called");
-            Cookies.set('authStatus', JSON.stringify({ data: { email: email } }));
             router.push('/verify')
         } catch (error) {
             const errorData = error?.response?.data;
