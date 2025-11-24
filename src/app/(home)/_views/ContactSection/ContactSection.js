@@ -13,7 +13,7 @@ const ContactSection = () => {
                 <div className={styles.leftContent}>
                     <h2 className={styles.title}>Get in —<br />touch with us</h2>
                     <p className={styles.description}>
-                        We're here to help! Whether you have a question about our services, need assistance with your account, or want to provide feedback, our team is ready to assist you.
+                        We&apos;re here to help! Whether you have a question about our services, need assistance with your account, or want to provide feedback, our team is ready to assist you.
                     </p>
                     
                     <div className={styles.contactDetails}>
