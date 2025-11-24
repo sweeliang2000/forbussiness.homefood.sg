@@ -45,8 +45,8 @@ const LoginContent = () => {
 
         try {
             const response = await apiClient.post(`${SIGN_IN}`, payload);
-            const message = response.data.message
-            console.log(response.data);
+            const message = response.data.data.message
+            console.log(message);
             
             if (message === 'Verification code resent successfully') {
                 router.push('/verify')

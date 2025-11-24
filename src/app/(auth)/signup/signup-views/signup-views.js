@@ -81,6 +81,7 @@ const SignupViews = () => {
 
         try {
             await apiClient.post(`${SIGN_UP}`, payload);
+            console.log("verify to can called");
             router.push('/verify')
         } catch (error) {
             const errorData = error?.response?.data;
