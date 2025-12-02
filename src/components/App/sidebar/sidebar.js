@@ -7,7 +7,7 @@ import { BsGift } from 'react-icons/bs';
 import { FaRegStar } from "react-icons/fa6";
 import { FaMobileAlt } from 'react-icons/fa';
 import { RiUserSettingsLine, RiNewspaperLine } from 'react-icons/ri';
-import { ImCoinDollar } from 'react-icons/im';
+import { PiCashRegister } from "react-icons/pi";
 import { RxGear } from 'react-icons/rx';
 import { HiOutlineSpeakerphone } from 'react-icons/hi';
 import { MdOutlineSpaceDashboard, MdOutlineNotificationsNone } from 'react-icons/md';
@@ -83,6 +83,13 @@ export default function Sidebar({
                         <Link href='/app'>
                             <MdOutlineSpaceDashboard className={styles.icon} />
                             <span>Dashboard</span>
+                        </Link>
+                    </li>
+
+                    <li className={section === undefined ? styles.active : ''}>
+                        <Link href='/terminal'>
+                            <PiCashRegister className={styles.icon} />
+                            <span>Loyalty Terminal</span>
                         </Link>
                     </li>
 
