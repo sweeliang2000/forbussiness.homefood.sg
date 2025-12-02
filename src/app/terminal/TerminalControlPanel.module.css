@@ -1,0 +1,265 @@
+.rightSide {
+    width: 40%;
+    max-width: 480px;
+    min-width: 300px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    align-self: flex-start;
+}
+
+.rightContent {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    height: 100%;
+    max-height: 100vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.modeSelector {
+    width: 100%;
+}
+
+.modeSelector :global(.MuiToggleButtonGroup-root) {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 4px;
+    border: 1px solid #e9ecef;
+}
+
+.modeSelector :global(.MuiToggleButton-root) {
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: none;
+    transition: all 0.15s ease;
+}
+
+.modeSelector :global(.MuiToggleButton-root.Mui-selected) {
+    background: var(--accent-color);
+    color: white;
+    box-shadow: 0 2px 4px rgba(14, 70, 163, 0.2);
+}
+
+.modeSelector :global(.MuiToggleButton-root:hover) {
+    background: #e9ecef;
+}
+
+.modeSelector :global(.MuiToggleButton-root.Mui-selected:hover) {
+    background: #0d3d91;
+}
+
+.numberDisplay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.5rem 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    min-height: 100px;
+    flex-shrink: 0;
+    position: relative;
+    border: 1px solid #e9ecef;
+}
+
+.iconButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border: none;
+    background: var(--accent-color);
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 24px;
+    color: white;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(14, 70, 163, 0.2);
+}
+
+.iconButton:hover {
+    background: #0d3d91;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(14, 70, 163, 0.3);
+}
+
+.iconButton:active {
+    transform: scale(0.95);
+    box-shadow: 0 1px 2px rgba(14, 70, 163, 0.2);
+}
+
+.numberInput {
+    flex: 1;
+    min-width: 0;
+}
+
+.numberInput :global(.MuiOutlinedInput-root) {
+    background: transparent;
+    height: 100%;
+    border: none;
+}
+
+.numberInput :global(.MuiOutlinedInput-notchedOutline) {
+    border: none !important;
+}
+
+.numberInput :global(.MuiInputBase-input) {
+    text-align: center !important;
+    color: #212529 !important;
+}
+
+.numberPad {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    flex-shrink: 1;
+}
+
+.numberPadRow {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.numberPadButton {
+    flex: 1;
+    aspect-ratio: 1;
+    border: none;
+    background: #e9ecef;
+    border-radius: 12px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #212529;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px;
+    max-height: 70px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.numberPadButton:hover {
+    background: #dee2e6;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.numberPadButton:active {
+    transform: scale(0.95);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.numberPadButton svg {
+    font-size: 1.5rem;
+    color: white;
+}
+
+/* Operator buttons (C, ., backspace) - app blue */
+.operatorButton {
+    background: var(--accent-color) !important;
+    color: white !important;
+}
+
+.operatorButton:hover {
+    background: #0d3d91 !important;
+}
+
+.moneyDisplay {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    flex-shrink: 0;
+}
+
+.moneyInfo,
+.stampsInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.label {
+    font-size: 1rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.stamps {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.confirmButton {
+    width: 100%;
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.button {
+    padding: 1rem 1.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    text-transform: none;
+    min-height: 56px;
+    background: var(--accent-color) !important;
+    color: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(14, 70, 163, 0.3) !important;
+    transition: all 0.15s ease !important;
+}
+
+.button:hover {
+    background: #0d3d91 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(14, 70, 163, 0.4) !important;
+}
+
+.button:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(14, 70, 163, 0.3) !important;
+}
+
+@media (max-width: 768px) {
+    .rightSide {
+        width: 100%;
+        max-width: 100%;
+        position: relative;
+        height: auto;
+    }
+
+    .rightContent {
+        height: auto;
+        max-height: 100vh;
+    }
+
+    .numberPadButton {
+        min-height: 50px;
+        font-size: 1.25rem;
+    }
+}
+
