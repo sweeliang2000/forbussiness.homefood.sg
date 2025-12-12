@@ -358,17 +358,50 @@ const SubmissionView = () => {
     };
 
     const isPending = releaseStatus === 'pending';
+    const isRejected = releaseStatus === 'reject';
 
     // Generate info message with sent datetime if available
     const getInfoMessage = () => {
         if (!isPending) return null;
         
+        const viewDetailsLink = <Link href="/app/release/status" style={{ textDecoration: 'underline', fontWeight: 'bold' }}>View details</Link>;
+        
         if (sentDateTime) {
             const formattedDate = sentDateTime.format('DD MMM YYYY, hh:mm A');
-            return `Your review submitted on ${formattedDate} has been received and we are reviewing it. It will take 1 to 2 working days to get approved. Please wait or email to support@collbine.com if there are any questions.`;
+            return (
+                <>
+                    Your review submitted on {formattedDate} has been received and we are reviewing it. It will take 1 to 2 working days to get approved. Please wait or email to support@collbine.com if there are any questions. {viewDetailsLink}
+                </>
+            );
         }
         
-        return 'Your release had been sent to the reviewer and it will take 1 to 2 working days to get approved. Please wait or email to support@collbine.com if there are any questions.';
+        return (
+            <>
+                Your release had been sent to the reviewer and it will take 1 to 2 working days to get approved. Please wait or email to support@collbine.com if there are any questions. {viewDetailsLink}
+            </>
+        );
+    };
+
+    // Generate error message for rejected status
+    const getRejectErrorMessage = () => {
+        if (!isRejected) return null;
+        
+        const viewDetailsLink = <Link href="/app/release/status" style={{ textDecoration: 'underline', fontWeight: 'bold' }}>View details</Link>;
+        
+        if (sentDateTime) {
+            const formattedDate = sentDateTime.format('DD MMM YYYY, hh:mm A');
+            return (
+                <>
+                    Your review submitted on {formattedDate} has been rejected. Please review the feedback and resubmit. {viewDetailsLink}
+                </>
+            );
+        }
+        
+        return (
+            <>
+                Your review has been rejected. Please review the feedback and resubmit. {viewDetailsLink}
+            </>
+        );
     };
 
     return (
@@ -388,10 +421,10 @@ const SubmissionView = () => {
                 }
                 loading={isBtnLoading}
                 isSuccess={isSubmissionSuccess}
-                setShowError={setIsError}
-                isError={isError}
-                errorMessage={errorMessage}
-                isDisabled={isPending}
+                setShowError={isRejected ? () => {} : setIsError}
+                isError={isRejected ? true : isError}
+                errorMessage={isRejected ? getRejectErrorMessage() : errorMessage}
+                isDisabled={isPending || isRejected}
                 infoMessage={getInfoMessage()}
                 showCancelButton={isPending}
                 onCancel={handleCancel}
@@ -433,7 +466,7 @@ const SubmissionView = () => {
                     labelId='manage_publishing'
                     id='manage_publishing'
                     value={enteredValues.publishingType}
-                    disabled={isPending || isBtnLoading}
+                    disabled={isPending || isRejected || isBtnLoading}
                     onChange={(event) => {
                         inputChangeHandler(PUBLISHING_TYPE, event.target.value);
                         // Clear datetime error when switching away from scheduled
@@ -456,7 +489,7 @@ const SubmissionView = () => {
                                 }}
                                 format="DD/MM/YYYY hh:mm A"
                                 minDate={defaultStartDate}
-                                disabled={isPending || isBtnLoading}
+                                disabled={isPending || isRejected || isBtnLoading}
                                 className={styles.datetimePicker}
                                 slotProps={{
                                     textField: {
@@ -486,7 +519,7 @@ const SubmissionView = () => {
                         helperText={helperText.name}
                         error={textfieldError.name}
                         value={enteredValues.name}
-                        disabled={isPending || isBtnLoading}
+                        disabled={isPending || isRejected || isBtnLoading}
                         onChange={(event) => { inputChangeHandler(NAME, event.target.value) }}
                     />
                 </div>
@@ -498,9 +531,9 @@ const SubmissionView = () => {
                     name={ROLE}
                     helperText={helperText.role}
                     error={textfieldError.role}
-                    value={enteredValues.role}
-                    disabled={isPending || isBtnLoading}
-                    onChange={(event) => { inputChangeHandler(ROLE, event.target.value) }}
+                        value={enteredValues.role}
+                        disabled={isPending || isRejected || isBtnLoading}
+                        onChange={(event) => { inputChangeHandler(ROLE, event.target.value) }}
                 />
 
                 <FormTextField
@@ -511,9 +544,9 @@ const SubmissionView = () => {
                     type='email'
                     helperText={helperText.email}
                     error={textfieldError.email}
-                    value={enteredValues.email}
-                    disabled={isPending || isBtnLoading}
-                    onChange={(event) => { inputChangeHandler(EMAIL, event.target.value) }}
+                        value={enteredValues.email}
+                        disabled={isPending || isRejected || isBtnLoading}
+                        onChange={(event) => { inputChangeHandler(EMAIL, event.target.value) }}
                 />
 
                 <FormTextField
@@ -524,9 +557,9 @@ const SubmissionView = () => {
                     type='tel'
                     helperText={helperText.phoneNumber}
                     error={textfieldError.phoneNumber}
-                    value={enteredValues.phoneNumber}
-                    disabled={isPending || isBtnLoading}
-                    onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
+                        value={enteredValues.phoneNumber}
+                        disabled={isPending || isRejected || isBtnLoading}
+                        onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
                 />
             </ContentCard>
             </>
