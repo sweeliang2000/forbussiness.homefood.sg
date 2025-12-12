@@ -1,0 +1,195 @@
+.rightSide {
+    width: 40%;
+    max-width: 480px;
+    min-width: 300px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    align-self: flex-start;
+}
+
+.rightContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    height: 100%;
+    max-height: 100vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.logoContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.logo {
+    width: auto;
+    height: auto;
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: contain;
+}
+
+.header {
+    text-align: center;
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: #6c757d;
+    margin: 0;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.inputSection {
+    width: 100%;
+}
+
+.inputSection :global(.MuiOutlinedInput-input) {
+    text-align: left !important;
+}
+
+.prefix {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #212529;
+    padding-right: 0.5rem;
+}
+
+.numberPad {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    flex-shrink: 1;
+}
+
+.numberPadRow {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.numberPadButton {
+    flex: 1;
+    aspect-ratio: 1;
+    border: none;
+    background: #e9ecef;
+    border-radius: 12px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #212529;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px;
+    max-height: 70px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.numberPadButton:hover {
+    background: #dee2e6;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.numberPadButton:active {
+    transform: scale(0.95);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.numberPadButton svg {
+    font-size: 1.5rem;
+    color: white;
+}
+
+/* Operator buttons (C, backspace) - app blue */
+.operatorButton {
+    background: var(--accent-color) !important;
+    color: white !important;
+}
+
+.operatorButton:hover {
+    background: #0d3d91 !important;
+}
+
+.submitButton {
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.button {
+    padding: 1rem 1.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    text-transform: none;
+    min-height: 56px;
+    background: var(--accent-color) !important;
+    color: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(14, 70, 163, 0.3) !important;
+    transition: all 0.15s ease !important;
+}
+
+.button:hover {
+    background: #0d3d91 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(14, 70, 163, 0.4) !important;
+}
+
+.button:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(14, 70, 163, 0.3) !important;
+}
+
+.button:disabled {
+    background: #e9ecef !important;
+    color: #6c757d !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .rightSide {
+        width: 100%;
+        max-width: 100%;
+        position: relative;
+        height: auto;
+    }
+
+    .rightContent {
+        height: auto;
+        max-height: 100vh;
+    }
+
+    .numberPadButton {
+        min-height: 50px;
+        font-size: 1.25rem;
+    }
+}
+

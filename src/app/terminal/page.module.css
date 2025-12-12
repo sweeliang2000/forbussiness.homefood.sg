@@ -10,10 +10,79 @@
     min-width: 0;
 }
 
+.customerNavbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+}
+
+.customerInfo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.customerDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.customerName {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #212529;
+    margin: 0;
+}
+
+.customerPhone {
+    font-size: 1rem;
+    color: #6c757d;
+    margin: 0;
+}
+
+.changeCustomerButton {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    background: transparent;
+    border: 2px solid var(--accent-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-transform: none;
+}
+
+.changeCustomerButton:hover {
+    background: var(--accent-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.changeCustomerButton:active {
+    transform: scale(0.98);
+}
+
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
         padding: 1rem;
+    }
+
+    .customerNavbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .changeCustomerButton {
+        width: 100%;
     }
 }
 
