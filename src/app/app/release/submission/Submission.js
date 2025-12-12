@@ -44,6 +44,7 @@ const SubmissionView = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [datetimeError, setDatetimeError] = useState(false);
     const [releaseStatus, setReleaseStatus] = useState(null);
+    const [sentDateTime, setSentDateTime] = useState(null);
     const [showCancelDialog, setShowCancelDialog] = useState(false);
     const [isCanceling, setIsCanceling] = useState(false);
     const [checklistStatus, setChecklistStatus] = useState({
@@ -270,6 +271,14 @@ const SubmissionView = () => {
                 if (releaseData && releaseData.data) {
                     setReleaseStatus(releaseData.data.status);
                     
+                    // Extract and convert sentdatetime from UTC to SGT
+                    if (releaseData.data.sentdatetime) {
+                        // Parse UTC datetime and convert to SGT (Asia/Singapore)
+                        const utcDateTime = dayjs.utc(releaseData.data.sentdatetime);
+                        const sgtDateTime = utcDateTime.tz('Asia/Singapore');
+                        setSentDateTime(sgtDateTime);
+                    }
+                    
                     if (releaseData.data.status === 'pending') {
                         setIsSubmissionSuccess(true);
                     }
@@ -350,6 +359,18 @@ const SubmissionView = () => {
 
     const isPending = releaseStatus === 'pending';
 
+    // Generate info message with sent datetime if available
+    const getInfoMessage = () => {
+        if (!isPending) return null;
+        
+        if (sentDateTime) {
+            const formattedDate = sentDateTime.format('DD MMM YYYY, hh:mm A');
+            return `Your review submitted on ${formattedDate} has been received and we are reviewing it. It will take 1 to 2 working days to get approved. Please wait or email to support@collbine.com if there are any questions.`;
+        }
+        
+        return 'Your release had been sent to the reviewer and it will take 1 to 2 working days to get approved. Please wait or email to support@collbine.com if there are any questions.';
+    };
+
     return (
         <form
             className={styles.form}
@@ -371,7 +392,7 @@ const SubmissionView = () => {
                 isError={isError}
                 errorMessage={errorMessage}
                 isDisabled={isPending}
-                infoMessage={isPending ? 'Your release had been sent to the reviewer and it will take 1 to 2 working days to get approved. Please wait or email to test@gmail.com if there are any questions.' : null}
+                infoMessage={getInfoMessage()}
                 showCancelButton={isPending}
                 onCancel={handleCancel}
                 buttonText='Send'
