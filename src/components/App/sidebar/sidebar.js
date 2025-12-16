@@ -86,7 +86,7 @@ export default function Sidebar({
                         </Link>
                     </li>
 
-                    <li className={section === undefined ? styles.active : ''}>
+                    <li>
                         <Link href='/terminal'>
                             <PiCashRegister className={styles.icon} />
                             <span>Loyalty Terminal</span>
