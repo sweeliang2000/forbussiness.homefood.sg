@@ -424,7 +424,7 @@ const SubmissionView = () => {
                 setShowError={isRejected ? () => {} : setIsError}
                 isError={isRejected ? true : isError}
                 errorMessage={isRejected ? getRejectErrorMessage() : errorMessage}
-                isDisabled={isPending || isRejected}
+                isDisabled={isPending}
                 infoMessage={getInfoMessage()}
                 showCancelButton={isPending}
                 onCancel={handleCancel}
