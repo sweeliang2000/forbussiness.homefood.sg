@@ -148,6 +148,7 @@ const CardDesign = () => {
                         setNumberOfDaysToExpire(stampData.numberOfDaysToExpire || 30);
                         setStamped_url(stampData.defaultStampedUrl_Presign || '');
                         setUnstamped_url(stampData.defaultUnStampedUrl_Presign || '');
+                        console.log(stampData.defaultUnStampedUrl_Presign)
 
                         // Parse cardStepDetails and extract prize steps
                         if (stampData.cardStepDetails) {
