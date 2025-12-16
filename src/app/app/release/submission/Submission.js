@@ -359,6 +359,19 @@ const SubmissionView = () => {
 
     const isPending = releaseStatus === 'pending';
     const isRejected = releaseStatus === 'reject';
+    const isReleased = releaseStatus === 'Released';
+
+    // Generate success message for released status
+    const getReleasedSuccessMessage = () => {
+        if (!isReleased) return null;
+        
+        if (sentDateTime) {
+            const formattedDate = sentDateTime.format('DD MMM YYYY, hh:mm A');
+            return `Your release that was sent on ${formattedDate} is already live. Feel free to make any changes and submit a new release.`;
+        }
+        
+        return 'Your release is already live. Feel free to make any changes and submit a new release.';
+    };
 
     // Generate info message with sent datetime if available
     const getInfoMessage = () => {
@@ -424,6 +437,7 @@ const SubmissionView = () => {
                 setShowError={isRejected ? () => {} : setIsError}
                 isError={isRejected ? true : isError}
                 errorMessage={isRejected ? getRejectErrorMessage() : errorMessage}
+                successMessage={getReleasedSuccessMessage()}
                 isDisabled={isPending}
                 infoMessage={getInfoMessage()}
                 showCancelButton={isPending}
@@ -466,7 +480,7 @@ const SubmissionView = () => {
                     labelId='manage_publishing'
                     id='manage_publishing'
                     value={enteredValues.publishingType}
-                    disabled={isPending || isRejected || isBtnLoading}
+                    disabled={isPending || isRejected || isReleased || isBtnLoading}
                     onChange={(event) => {
                         inputChangeHandler(PUBLISHING_TYPE, event.target.value);
                         // Clear datetime error when switching away from scheduled
@@ -489,7 +503,7 @@ const SubmissionView = () => {
                                 }}
                                 format="DD/MM/YYYY hh:mm A"
                                 minDate={defaultStartDate}
-                                disabled={isPending || isRejected || isBtnLoading}
+                                disabled={isPending || isRejected || isReleased || isBtnLoading}
                                 className={styles.datetimePicker}
                                 slotProps={{
                                     textField: {
@@ -519,7 +533,7 @@ const SubmissionView = () => {
                         helperText={helperText.name}
                         error={textfieldError.name}
                         value={enteredValues.name}
-                        disabled={isPending || isRejected || isBtnLoading}
+                        disabled={isPending || isRejected || isReleased || isBtnLoading}
                         onChange={(event) => { inputChangeHandler(NAME, event.target.value) }}
                     />
                 </div>
@@ -532,7 +546,7 @@ const SubmissionView = () => {
                     helperText={helperText.role}
                     error={textfieldError.role}
                         value={enteredValues.role}
-                        disabled={isPending || isRejected || isBtnLoading}
+                        disabled={isPending || isRejected || isReleased || isBtnLoading}
                         onChange={(event) => { inputChangeHandler(ROLE, event.target.value) }}
                 />
 
@@ -545,7 +559,7 @@ const SubmissionView = () => {
                     helperText={helperText.email}
                     error={textfieldError.email}
                         value={enteredValues.email}
-                        disabled={isPending || isRejected || isBtnLoading}
+                        disabled={isPending || isRejected || isReleased || isBtnLoading}
                         onChange={(event) => { inputChangeHandler(EMAIL, event.target.value) }}
                 />
 
@@ -558,7 +572,7 @@ const SubmissionView = () => {
                     helperText={helperText.phoneNumber}
                     error={textfieldError.phoneNumber}
                         value={enteredValues.phoneNumber}
-                        disabled={isPending || isRejected || isBtnLoading}
+                        disabled={isPending || isRejected || isReleased || isBtnLoading}
                         onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
                 />
             </ContentCard>
