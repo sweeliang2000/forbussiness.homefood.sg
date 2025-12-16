@@ -52,7 +52,7 @@ const CustomerPhoneNumberControlPanel = ({ onPhoneNumberSubmit }) => {
                 </div>
                 <div className={styles.header}>
                     <h2 className={styles.title}>Enter Customer Phone Number</h2>
-                    <p className={styles.subtitle}>Enter the customer's phone number to continue</p>
+                    <p className={styles.subtitle}>Enter the customer&apos;s phone number to continue</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className={styles.form}>
