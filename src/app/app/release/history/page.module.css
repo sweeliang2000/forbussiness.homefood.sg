@@ -93,37 +93,29 @@
     margin-bottom: -24px;
 }
 
-.versionInfo {
+.dateInfo {
     display: flex;
     align-items: baseline;
-    gap: 12px;
-}
-
-.version {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #242427;
-    letter-spacing: -0.02em;
 }
 
 .date {
-    font-size: 0.875rem;
-    color: #5b6264;
-    font-weight: 400;
-}
-
-.updateInfo {
-    font-size: 0.9375rem;
-    color: #242427;
-    line-height: 1.5;
-    margin: 0;
-    padding-left: 0;
-}
-
-.chevron {
-    color: #dcdfe1;
     font-size: 1rem;
+    color: #242427;
+    font-weight: 500;
+}
+
+.viewMore {
+    color: #5b6264;
+    font-size: 0.875rem;
+    font-weight: 400;
     flex-shrink: 0;
+}
+
+.emptyState {
+    padding: 40px 20px;
+    text-align: center;
+    color: #5b6264;
+    font-size: 0.9375rem;
 }
 
 @media only screen and (max-width: 820px) {

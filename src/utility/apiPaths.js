@@ -35,3 +35,4 @@ export const RELEASE_STATUS = '/api/data/releaseStatus';
 export const RELEASE_CONTACT = '/api/data/releaseContact';
 export const SEND_FOR_REVIEW = '/api/data/sendForReview';
 export const CANCEL_RELEASE = '/api/data/cancelRelease';
+export const RELEASED_HISTORY = '/api/data/releasedHistory';

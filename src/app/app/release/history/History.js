@@ -1,38 +1,66 @@
+'use client';
 import styles from './page.module.css';
 import Link from 'next/link';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
-import { FaChevronRight } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import apiClient from '@/utility/api';
+import { RELEASED_HISTORY } from '@/utility/apiPaths';
+import LoadingPage from '@/components/LoadingPage/LoadingPage';
+import ErrorPage from '@/components/ErrorPage/ErrorPage';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const HistoryView = () => {
-    // Temporary data list
-    const releaseHistory = [
-        {
-            id: 1,
-            version: '1.2.0',
-            date: '2024-01-15',
-            update_information: 'Added new reward management features and improved user interface.'
-        },
-        {
-            id: 2,
-            version: '1.1.5',
-            date: '2023-12-20',
-            update_information: 'Fixed critical bugs in stamp collection system and enhanced performance.'
-        },
-        {
-            id: 3,
-            version: '1.1.0',
-            date: '2023-11-10',
-            update_information: 'Introduced subscription management and updated location tracking features.'
-        },
-        {
-            id: 4,
-            version: '1.0.5',
-            date: '2023-10-05',
-            update_information: 'Initial release with core functionality for stamp and rewards management.'
-        }
-    ];
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [releaseHistory, setReleaseHistory] = useState([]);
+
+    useEffect(() => {
+        const fetchReleaseHistory = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
+                const response = await apiClient.get(RELEASED_HISTORY);
+                
+                if (response.data.success && response.data.data && response.data.data.history) {
+                    setReleaseHistory(response.data.data.history);
+                } else {
+                    setError('Failed to load release history');
+                }
+            } catch (err) {
+                const errorData = err?.response?.data;
+                const message = errorData?.message || errorData?.error?.message || err?.message || 'Failed to load release history';
+                setError(message);
+                console.error('Error fetching release history:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchReleaseHistory();
+    }, []);
+
+    const formatDateTime = (dateString) => {
+        if (!dateString) return 'N/A';
+        // Parse UTC datetime and convert to Singapore time (Asia/Singapore)
+        const utcDateTime = dayjs.utc(dateString);
+        const sgtDateTime = utcDateTime.tz('Asia/Singapore');
+        return sgtDateTime.format('DD MMM YYYY, hh:mm A');
+    };
+
+    if (isLoading) {
+        return <LoadingPage />;
+    }
+
+    if (error) {
+        return <ErrorPage message={error} />;
+    }
 
     return (
         <form
@@ -47,6 +75,7 @@ const HistoryView = () => {
                         View the status of your past submissions. <Link href='/'>Find out more.</Link>
                     </p>
                 }
+                showButton={false}
             />
 
             <ContentCard className={styles.content}>
@@ -58,22 +87,26 @@ const HistoryView = () => {
                 </div>
 
                 <div className={styles.historyList}>
-                    {releaseHistory.map((release) => (
-                        <Link 
-                            key={release.id} 
-                            href={`/app/release/history/${release.id}`}
-                            className={styles.historyItem}
-                        >
-                            <div className={styles.historyItemContent}>
-                                <div className={styles.versionInfo}>
-                                    <span className={styles.version}>{release.version}</span>
-                                    <span className={styles.date}>{release.date}</span>
+                    {releaseHistory.length === 0 ? (
+                        <div className={styles.emptyState}>
+                            <p>No release history available.</p>
+                        </div>
+                    ) : (
+                        releaseHistory.map((release, index) => (
+                            <Link 
+                                key={release.datetime || index} 
+                                href={`/app/release/history/${index}`}
+                                className={styles.historyItem}
+                            >
+                                <div className={styles.historyItemContent}>
+                                    <div className={styles.dateInfo}>
+                                        <span className={styles.date}>{formatDateTime(release.datetime)}</span>
+                                    </div>
                                 </div>
-                                <p className={styles.updateInfo}>{release.update_information}</p>
-                            </div>
-                            <FaChevronRight className={styles.chevron} />
-                        </Link>
-                    ))}
+                                <span className={styles.viewMore}>View More &gt;</span>
+                            </Link>
+                        ))
+                    )}
                 </div>
             </ContentCard>
 
