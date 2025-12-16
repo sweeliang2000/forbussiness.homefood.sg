@@ -92,6 +92,11 @@
     color: #cc3;
 }
 
+.statusBadge.Released {
+    background-color: #efe;
+    color: #3c3;
+}
+
 .reasonContent {
     margin-top: 10px;
     padding-top: 24px;
