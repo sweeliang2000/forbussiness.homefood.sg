@@ -46,6 +46,39 @@
     margin: 0;
 }
 
+.customerBirthday {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin: 0.25rem 0 0 0;
+}
+
+.loadingText {
+    font-size: 1rem;
+    color: #6c757d;
+    margin: 0;
+    font-style: italic;
+}
+
+.errorContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.errorTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #dc3545;
+    margin: 0;
+}
+
+.errorMessage {
+    font-size: 0.95rem;
+    color: #6c757d;
+    margin: 0;
+    line-height: 1.5;
+}
+
 .changeCustomerButton {
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
