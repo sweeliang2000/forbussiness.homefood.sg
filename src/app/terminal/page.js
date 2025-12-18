@@ -1,7 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TerminalControlPanel from './TerminalControlPanel';
 import CustomerPhoneNumberControlPanel from './CustomerPhoneNumberControlPanel';
+import UserRewardsList from './UserRewardsList';
+import { getUserDataFromCookie } from '@/utility/cookieUtils';
 // Removed direct Supabase client import - using API route instead
 import styles from './page.module.css';
 
@@ -11,6 +13,13 @@ const TerminalPage = () => {
     const [customerBirthday, setCustomerBirthday] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [expirationType, setExpirationType] = useState(null);
+    const [numberOfDaysToExpire, setNumberOfDaysToExpire] = useState(null);
+    const [shopId, setShopId] = useState(null);
+    const [performedBy, setPerformedBy] = useState(null);
+    const [performedByName, setPerformedByName] = useState(null);
+    const [selectedReward, setSelectedReward] = useState(null);
+    const [rewardsRefreshKey, setRewardsRefreshKey] = useState(0);
 
     const handlePhoneNumberSubmit = async (phone) => {
         setPhoneNumber(phone);
@@ -72,7 +81,57 @@ const TerminalPage = () => {
         setCustomerName('');
         setCustomerBirthday('');
         setError(null);
+        setSelectedReward(null);
     };
+
+    // Fetch shop details when component mounts
+    useEffect(() => {
+        const fetchShopDetails = async () => {
+            try {
+                // Get shop_id and user info from cookie
+                const userData = getUserDataFromCookie();
+                const shopIdFromCookie = userData?.shop_id;
+                const userId = userData?.user_id;
+                const userEmail = userData?.email || null; // Use email as performed_by_name
+
+                if (!shopIdFromCookie) {
+                    console.warn('shop_id not found in user cookie');
+                    return;
+                }
+
+                setShopId(shopIdFromCookie);
+                setPerformedBy(userId);
+                setPerformedByName(userEmail);
+
+                // Fetch shop details from API
+                const response = await fetch(`/api/terminal/shop-details?shop_id=${encodeURIComponent(shopIdFromCookie)}`);
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('Error fetching shop details:', errorData);
+                    return;
+                }
+
+                const shopData = await response.json();
+                
+                // Store expiration info
+                setExpirationType(shopData.expirationType);
+                setNumberOfDaysToExpire(shopData.numberOfDaysToExpire);
+
+                // Console.log the information
+                console.log('Shop Details:', {
+                    shop_id: shopData.shop_id,
+                    expirationType: shopData.expirationType,
+                    numberOfDaysToExpire: shopData.numberOfDaysToExpire,
+                    fullStampData: shopData.stampData
+                });
+            } catch (err) {
+                console.error('Error fetching shop details:', err);
+            }
+        };
+
+        fetchShopDetails();
+    }, []);
 
     return (
         <div className={styles.container}>
@@ -146,12 +205,35 @@ const TerminalPage = () => {
                 ) : (
                     <h1>Terminal</h1>
                 )}
-                {/* Left side content can be added here */}
+                {/* User Rewards List */}
+                {phoneNumber && !error && (
+                    <UserRewardsList 
+                        key={rewardsRefreshKey}
+                        phoneNumber={phoneNumber}
+                        shopId={shopId}
+                        onRewardSelect={(reward) => {
+                            setSelectedReward(reward);
+                        }}
+                    />
+                )}
             </div>
 
             {/* Right Side */}
             {phoneNumber ? (
-                <TerminalControlPanel />
+                <TerminalControlPanel 
+                    phoneNumber={phoneNumber}
+                    shopId={shopId}
+                    expirationType={expirationType}
+                    numberOfDaysToExpire={numberOfDaysToExpire}
+                    onSuccess={handleChangeCustomer}
+                    performedBy={performedBy}
+                    performedByName={performedByName}
+                    selectedReward={selectedReward}
+                    onRewardRedeemed={() => {
+                        setSelectedReward(null);
+                        setRewardsRefreshKey(prev => prev + 1);
+                    }}
+                />
             ) : (
                 <CustomerPhoneNumberControlPanel onPhoneNumberSubmit={handlePhoneNumberSubmit} />
             )}
