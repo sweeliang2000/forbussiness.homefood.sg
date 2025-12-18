@@ -150,7 +150,7 @@ const TerminalPage = () => {
             </div>
 
             {/* Right Side */}
-            {phoneNumber && !error ? (
+            {phoneNumber ? (
                 <TerminalControlPanel />
             ) : (
                 <CustomerPhoneNumberControlPanel onPhoneNumberSubmit={handlePhoneNumberSubmit} />

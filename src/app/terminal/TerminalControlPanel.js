@@ -5,20 +5,21 @@ import { IoAdd, IoRemove, IoBackspace } from 'react-icons/io5';
 import styles from './TerminalControlPanel.module.css';
 
 const MODE_STAMP_INCREMENT = 'stamp';
-const MODE_MONEY_SPEND = 'money';
+// const MODE_MONEY_SPEND = 'money'; // Disabled for now
 const STAMPS_PER_DOLLAR = 5;
 
 const TerminalControlPanel = () => {
     const [mode, setMode] = useState(MODE_STAMP_INCREMENT);
     const [value, setValue] = useState('0');
 
-    const handleModeChange = (event, newMode) => {
-        if (newMode !== null) {
-            setMode(newMode);
-            // Reset value when switching modes
-            setValue('0');
-        }
-    };
+    // Mode change disabled - only stamp increment available
+    // const handleModeChange = (event, newMode) => {
+    //     if (newMode !== null) {
+    //         setMode(newMode);
+    //         // Reset value when switching modes
+    //         setValue('0');
+    //     }
+    // };
 
     const handleIncrement = () => {
         const numValue = parseFloat(value) || 0;
@@ -33,10 +34,10 @@ const TerminalControlPanel = () => {
     const handleTextFieldChange = (event) => {
         let inputValue = event.target.value;
         
-        // Remove $ and spaces if in money mode
-        if (mode === MODE_MONEY_SPEND) {
-            inputValue = inputValue.replace(/[$,\s]/g, '');
-        }
+        // Money mode disabled - only handle numbers
+        // if (mode === MODE_MONEY_SPEND) {
+        //     inputValue = inputValue.replace(/[$,\s]/g, '');
+        // }
         
         // Allow empty string or valid numbers
         if (inputValue === '' || /^\d*\.?\d*$/.test(inputValue)) {
@@ -75,41 +76,26 @@ const TerminalControlPanel = () => {
     const handleConfirm = () => {
         // TODO: Implement confirm logic
         const numValue = parseFloat(value) || 0;
-        console.log('Mode:', mode);
-        console.log('Value:', numValue);
-        if (mode === MODE_MONEY_SPEND) {
-            console.log('Money Spent:', numValue);
-            console.log('Stamps to give:', Math.floor(numValue / STAMPS_PER_DOLLAR));
-        } else {
-            console.log('Stamps to add:', Math.floor(numValue));
-        }
+        console.log('Stamps to add:', Math.floor(numValue));
     };
 
-    // Calculate stamps and money display
+    // Calculate stamps - only stamp increment mode available
     const numValue = parseFloat(value) || 0;
-    const moneyAmount = mode === MODE_MONEY_SPEND ? numValue : 0;
-    // In Money Spend mode: calculate stamps from money, in Stamp Increment mode: use the value directly
-    const stampsToGive = mode === MODE_MONEY_SPEND 
-        ? Math.floor(numValue / STAMPS_PER_DOLLAR) 
-        : Math.floor(numValue);
+    const stampsToGive = Math.floor(numValue);
 
     return (
         <div className={styles.rightSide}>
             <div className={styles.rightContent}>
-                {/* Mode Selector */}
+                {/* Mode Selector - Only Stamp Increment available */}
                 <div className={styles.modeSelector}>
                     <ToggleButtonGroup
-                        value={mode}
+                        value={MODE_STAMP_INCREMENT}
                         exclusive
-                        onChange={handleModeChange}
                         aria-label="mode selection"
                         fullWidth
                     >
                         <ToggleButton value={MODE_STAMP_INCREMENT} aria-label="stamp increment">
                             Stamp Increment
-                        </ToggleButton>
-                        <ToggleButton value={MODE_MONEY_SPEND} aria-label="money spend">
-                            Money Spend
                         </ToggleButton>
                     </ToggleButtonGroup>
                 </div>
@@ -128,7 +114,7 @@ const TerminalControlPanel = () => {
                     <TextField
                         className={styles.numberInput}
                         variant="outlined"
-                        value={mode === MODE_MONEY_SPEND ? (value === '0' ? '$0' : `$${value}`) : value}
+                        value={value}
                         onChange={handleTextFieldChange}
                         inputProps={{
                             style: {
@@ -137,7 +123,7 @@ const TerminalControlPanel = () => {
                                 fontWeight: 600,
                                 padding: '1rem',
                             },
-                            inputMode: 'decimal',
+                            inputMode: 'numeric',
                         }}
                     />
                     {mode === MODE_STAMP_INCREMENT && (
@@ -171,24 +157,15 @@ const TerminalControlPanel = () => {
                     <div className={styles.numberPadRow}>
                         <button className={`${styles.numberPadButton} ${styles.operatorButton}`} onClick={handleClear}>C</button>
                         <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('0')}>0</button>
-                        {mode === MODE_MONEY_SPEND ? (
-                            <button className={`${styles.numberPadButton} ${styles.operatorButton}`} onClick={handleDecimalClick}>.</button>
-                        ) : (
-                            <button className={`${styles.numberPadButton} ${styles.operatorButton}`} onClick={handleBackspace}>
-                                <IoBackspace />
-                            </button>
-                        )}
+                        {/* Money mode disabled - always show backspace */}
+                        <button className={`${styles.numberPadButton} ${styles.operatorButton}`} onClick={handleBackspace}>
+                            <IoBackspace />
+                        </button>
                     </div>
                 </div>
 
                 {/* Display Section */}
                 <div className={styles.moneyDisplay}>
-                    {mode === MODE_MONEY_SPEND && (
-                        <div className={styles.moneyInfo}>
-                            <span className={styles.label}>Money Spent:</span>
-                            <span className={styles.amount}>${moneyAmount.toFixed(2)}</span>
-                        </div>
-                    )}
                     <div className={styles.stampsInfo}>
                         <span className={styles.label}>Stamps to Give:</span>
                         <span className={styles.stamps}>{stampsToGive}</span>
