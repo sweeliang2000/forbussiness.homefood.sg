@@ -58,6 +58,32 @@ export async function GET(request) {
       .eq('shop_id', shopId)
       .maybeSingle();
 
+    // Get shop name from customer_facing_business_details or shops table
+    let shopName = null;
+    try {
+      const shopNameResult = await supabase
+        .from('customer_facing_business_details')
+        .select('businessName')
+        .eq('shop_id', shopId)
+        .maybeSingle();
+      
+      if (shopNameResult.data?.businessName) {
+        shopName = shopNameResult.data.businessName;
+      } else {
+        const shopsResult = await supabase
+          .from('shops')
+          .select('name, shop_name, business_name')
+          .eq('id', shopId)
+          .maybeSingle();
+        
+        if (shopsResult.data) {
+          shopName = shopsResult.data.name || shopsResult.data.shop_name || shopsResult.data.business_name || null;
+        }
+      }
+    } catch (shopNameError) {
+      console.error('Error getting shop name:', shopNameError);
+    }
+
     if (error) {
       console.error('Supabase query error:', error);
       // PGRST116 means no rows found, which is fine
@@ -107,6 +133,7 @@ export async function GET(request) {
       shop_id: data.shop_id,
       expirationType,
       numberOfDaysToExpire,
+      shopName,
       stampData // Include full stampdata for debugging
     });
   } catch (error) {

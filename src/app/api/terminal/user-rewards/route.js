@@ -197,6 +197,45 @@ export async function PATCH(request) {
       );
     }
 
+    // Log reward redemption to terminal_logs
+    // Get user_card_id from user_cards table using phone_number and shop_id
+    try {
+      const normalizedPhone = data.phone_number?.replace(/[\s\-\(\)]/g, '') || '';
+      const { data: userCard } = await supabase
+        .from('user_cards')
+        .select('id')
+        .eq('shop_id', data.shop_id)
+        .eq('phone_number', normalizedPhone)
+        .maybeSingle();
+
+      // Log to terminal_logs with reward_collection transaction type
+      // Valid transaction_type values: 'stamp_collection', 'stamp_redemption', 'reward_collection', 'stamp_deduction'
+      const { error: logError } = await supabase
+        .from('terminal_logs')
+        .insert({
+          shop_id: data.shop_id,
+          phone_number: normalizedPhone,
+          user_card_id: userCard?.id || null,
+          transaction_type: 'reward_collection',
+          stamps_amount: null, // Reward redemption doesn't change stamps
+          reward_id: data.id,
+          reward_name: data.reward_name || null,
+          reward_description: data.reward_description || null,
+          performed_by: null,
+          performed_by_name: null,
+          notes: null,
+          created_at: now
+        });
+
+      if (logError) {
+        console.error('Error logging reward redemption to terminal_logs:', logError);
+        // Don't fail the request if logging fails, just log the error
+      }
+    } catch (logErr) {
+      console.error('Error logging reward redemption:', logErr);
+      // Don't fail the request if logging fails
+    }
+
     console.log('Reward status updated successfully:', data);
     return NextResponse.json({ success: true, data });
   } catch (error) {

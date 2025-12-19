@@ -45,6 +45,8 @@ export async function POST(request) {
       );
     }
 
+    console.log('phone_number', phone_number);
+
     // Normalize phone number
     const normalizedPhone = phone_number.replace(/[\s\-\(\)]/g, '');
 
@@ -98,7 +100,8 @@ export async function POST(request) {
 
       // Log transaction to terminal_logs
       // Use actualStampChange (adjusted if redemption would go below 0)
-      const transactionType = actualStampChange >= 0 ? 'stamp_given' : 'stamp_removed';
+      // Valid transaction_type values: 'stamp_collection', 'stamp_redemption', 'reward_collection', 'stamp_deduction'
+      const transactionType = actualStampChange >= 0 ? 'stamp_collection' : 'stamp_deduction';
       const { error: logError } = await supabase
         .from('terminal_logs')
         .insert({
@@ -110,7 +113,7 @@ export async function POST(request) {
           reward_id: null,
           reward_name: null,
           reward_description: null,
-          performed_by: performed_by || null,
+          performed_by: null,
           performed_by_name: performed_by_name || null,
           notes: notes || null,
           created_at: nowUTC
@@ -174,7 +177,8 @@ export async function POST(request) {
       }
 
       // Log transaction to terminal_logs
-      const transactionType = stamp_change >= 0 ? 'stamp_given' : 'stamp_removed';
+      // Valid transaction_type values: 'stamp_collection', 'stamp_redemption', 'reward_collection', 'stamp_deduction'
+      const transactionType = stamp_change >= 0 ? 'stamp_collection' : 'stamp_deduction';
       const { error: logError } = await supabase
         .from('terminal_logs')
         .insert({

@@ -2,13 +2,14 @@
 import { useState } from 'react';
 import { Button, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { IoAdd, IoRemove, IoBackspace } from 'react-icons/io5';
+import { BASE_URL_BACKEND } from '../../../config/config';
 import styles from './TerminalControlPanel.module.css';
 
 const MODE_STAMP_INCREMENT = 'stamp';
 // const MODE_MONEY_SPEND = 'money'; // Disabled for now
 const STAMPS_PER_DOLLAR = 5;
 
-const TerminalControlPanel = ({ phoneNumber, shopId, expirationType, numberOfDaysToExpire, onSuccess, performedBy, performedByName, selectedReward, onRewardRedeemed }) => {
+const TerminalControlPanel = ({ phoneNumber, shopId, shopName, customerUserId, expirationType, numberOfDaysToExpire, onSuccess, performedBy, performedByName, selectedReward, onRewardRedeemed }) => {
     const [mode, setMode] = useState(MODE_STAMP_INCREMENT);
     const [value, setValue] = useState('0');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,6 +73,46 @@ const TerminalControlPanel = ({ phoneNumber, shopId, expirationType, numberOfDay
 
     const handleClear = () => {
         setValue('0');
+    };
+
+    // Helper function to send notification
+    const sendNotification = async (userId, title, body, data) => {
+        try {
+            //TODO: User ID shoudn't be hardcoded.
+            // Database is incorrect because it store user id. User Id should be phone number.
+            // Therefore, need to update the database
+            const hardcodedUserId = "1ba876eb-3596-1d62-c19b-000052f964c1";
+            if (!hardcodedUserId) {
+                console.warn('Cannot send notification: user_id is missing');
+                return;
+            }
+            
+            // Ensure proper URL construction (remove trailing slash from BASE_URL_BACKEND if present)
+            const baseUrl = BASE_URL_BACKEND.endsWith('/') ? BASE_URL_BACKEND.slice(0, -1) : BASE_URL_BACKEND;
+            const response = await fetch(`${baseUrl}/api/notifications/send-to-user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include', // Include cookies for authentication
+                body: JSON.stringify({
+                    userId: hardcodedUserId,
+                    title,
+                    body,
+                    data
+                })
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Failed to send notification:', response.status, errorText);
+            } else {
+                console.log('Notification sent successfully');
+            }
+        } catch (error) {
+            console.error('Error sending notification:', error);
+            // Don't throw - notification failure shouldn't break the main flow
+        }
     };
 
     const handleConfirm = async () => {
@@ -139,6 +180,36 @@ const TerminalControlPanel = ({ phoneNumber, shopId, expirationType, numberOfDay
 
                 console.log('Stamps updated successfully:', stampResult);
                 stampUpdateSuccess = true;
+
+                // Send notification if stamps were actually changed
+                const actualChange = stampResult.actualChange !== undefined ? stampResult.actualChange : (stampResult.action === 'created' ? stampChange : 0);
+                if (actualChange !== 0 && customerUserId) {
+                    try {
+                        let title, body;
+                        if (actualChange > 0) {
+                            // Stamps given
+                            title = shopName ? `Stamp Rewarded From ${shopName}` : 'Stamp Rewarded';
+                            body = actualChange === 1 
+                                ? `You have gained 1 stamp` 
+                                : `You have gained ${actualChange} stamps`;
+                        } else {
+                            // Stamps removed
+                            title = shopName ? `Stamp Removed From ${shopName}` : 'Stamp Removed';
+                            body = Math.abs(actualChange) === 1 
+                                ? `1 stamp had been removed` 
+                                : `${Math.abs(actualChange)} stamps had been removed`;
+                        }
+                        
+                        await sendNotification(customerUserId, title, body, {
+                            type: actualChange > 0 ? 'stamp_given' : 'stamp_removed',
+                            stampChange: actualChange,
+                            shopId: shopId,
+                            url: 'collbine://home/rewards'
+                        });
+                    } catch (notifError) {
+                        console.error('Error sending stamp notification:', notifError);
+                    }
+                }
             } else {
                 console.log('Skipping stamp update - stampChange is 0');
             }
@@ -172,6 +243,26 @@ const TerminalControlPanel = ({ phoneNumber, shopId, expirationType, numberOfDay
                         return;
                     } else {
                         console.log('Reward status updated to Redeemed successfully:', rewardResult);
+                        
+                        // Send notification for reward redemption
+                        if (customerUserId && selectedReward) {
+                            try {
+                                const title = 'Reward Redeem';
+                                const rewardName = selectedReward.reward_name || 'reward';
+                                const body = `You have used ${rewardName}`;
+                                
+                                await sendNotification(customerUserId, title, body, {
+                                    type: 'reward_redeemed',
+                                    rewardId: selectedReward.id,
+                                    rewardName: rewardName,
+                                    shopId: shopId,
+                                    url: 'collbine://home/rewards'
+                                });
+                            } catch (notifError) {
+                                console.error('Error sending reward redemption notification:', notifError);
+                            }
+                        }
+                        
                         // Clear selected reward and refresh rewards list
                         if (onRewardRedeemed) {
                             onRewardRedeemed();

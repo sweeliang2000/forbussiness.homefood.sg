@@ -16,10 +16,12 @@ const TerminalPage = () => {
     const [expirationType, setExpirationType] = useState(null);
     const [numberOfDaysToExpire, setNumberOfDaysToExpire] = useState(null);
     const [shopId, setShopId] = useState(null);
+    const [shopName, setShopName] = useState(null);
     const [performedBy, setPerformedBy] = useState(null);
     const [performedByName, setPerformedByName] = useState(null);
     const [selectedReward, setSelectedReward] = useState(null);
     const [rewardsRefreshKey, setRewardsRefreshKey] = useState(0);
+    const [customerUserId, setCustomerUserId] = useState(null);
 
     const handlePhoneNumberSubmit = async (phone) => {
         setPhoneNumber(phone);
@@ -53,6 +55,8 @@ const TerminalPage = () => {
                 const customerData = await response.json();
                 setCustomerName(customerData.name || '');
                 setCustomerBirthday(customerData.birthday || '');
+                // Use phone_number as userId since it's the primary key
+                setCustomerUserId(customerData.phone_number || null);
                 setError(null);
             }
         } catch (err) {
@@ -80,6 +84,7 @@ const TerminalPage = () => {
         setPhoneNumber('');
         setCustomerName('');
         setCustomerBirthday('');
+        setCustomerUserId(null);
         setError(null);
         setSelectedReward(null);
     };
@@ -114,9 +119,10 @@ const TerminalPage = () => {
 
                 const shopData = await response.json();
                 
-                // Store expiration info
+                // Store expiration info and shop name
                 setExpirationType(shopData.expirationType);
                 setNumberOfDaysToExpire(shopData.numberOfDaysToExpire);
+                setShopName(shopData.shopName || null);
 
                 // Console.log the information
                 console.log('Shop Details:', {
@@ -223,6 +229,8 @@ const TerminalPage = () => {
                 <TerminalControlPanel 
                     phoneNumber={phoneNumber}
                     shopId={shopId}
+                    shopName={shopName}
+                    customerUserId={customerUserId}
                     expirationType={expirationType}
                     numberOfDaysToExpire={numberOfDaysToExpire}
                     onSuccess={handleChangeCustomer}

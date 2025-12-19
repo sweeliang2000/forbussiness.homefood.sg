@@ -56,6 +56,7 @@ export async function GET(request) {
     const normalizedPhone = phoneNumber.replace(/[\s\-\(\)]/g, '');
     
     // Query the user_profiles table
+    // Note: phone_number is the primary key
     // Try exact match first
     let { data, error } = await supabase
       .from('user_profiles')
