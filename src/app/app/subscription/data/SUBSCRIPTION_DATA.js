@@ -25,7 +25,7 @@ export const SUBSCRIPTION_DATA = [
     {
         name: "1 Outlet with Analytics",
         lookup_key: "plan_1_outlet",
-        price: 9.99,   // Analytics add-on
+        price: 29.99,   // Analytics add-on
         features: [
             { name: "1 Outlet", included: true },
             { name: "Max of 3 users", included: true },
@@ -44,7 +44,7 @@ export const SUBSCRIPTION_DATA = [
     // ============================
     ...Array.from({ length: 9 }, (_, i) => {
         const outlets = i + 2;                   // 2 → 10
-        const price = (outlets - 1) * 39.99;     // Only 1 free
+        const price = (outlets - 1) * 59.99;     // Only 1 free
 
         return {
             name: `${outlets} Outlets`,
