@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './LandingNavbar.module.css';
 import CollbineForBusiness from '@/components/CollbineForBusiness/CollbineForBusiness';
 import Abutton from '@/components/Buttons/Abutton';
@@ -9,6 +9,8 @@ import { FaAngleRight, FaTiktok, FaFacebookF, FaInstagram } from "react-icons/fa
 import { FaXTwitter } from "react-icons/fa6";
 import Notification from '@/components/Notification';
 import { motion } from 'motion/react';
+import { getNotificationConfig } from '@/utility/firebaseClient';
+import { getDismissedNotification, setDismissedNotification, shouldShowNotification } from '@/utility/notificationStorage';
 
 const menuItems = [
     { label: 'Why Collbine', href: '#home' },
@@ -24,23 +26,72 @@ const signup = { label: 'Sign up for free', href: '/signup' };
 
 const LandingNavbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isNotificationVisible, setIsNotificationVisible] = useState(true);
+    const [isNotificationVisible, setIsNotificationVisible] = useState(false);
+    const [notificationConfig, setNotificationConfig] = useState(null);
+
+    // Fetch notification config from Remote Config on mount
+    useEffect(() => {
+        const fetchNotificationConfig = async () => {
+            try {
+                console.log('[LANDING NAVBAR] Fetching notification config...');
+                const config = await getNotificationConfig();
+                console.log('[LANDING NAVBAR] Received config:', config);
+                
+                if (!config) {
+                    console.log('[LANDING NAVBAR] No config received, hiding notification');
+                    setIsNotificationVisible(false);
+                    return;
+                }
+
+                // Check if notification should be shown
+                if (!config.is_shown) {
+                    console.log('[LANDING NAVBAR] is_shown is false, hiding notification');
+                    setIsNotificationVisible(false);
+                    return;
+                }
+
+                // Check localStorage for dismissal status
+                const dismissedTimestamp = getDismissedNotification(config.id);
+                console.log('[LANDING NAVBAR] Dismissed timestamp:', dismissedTimestamp);
+                const shouldShow = shouldShowNotification(config.id, dismissedTimestamp);
+                console.log('[LANDING NAVBAR] Should show notification:', shouldShow);
+
+                if (shouldShow) {
+                    console.log('[LANDING NAVBAR] Showing notification with config:', config);
+                    setNotificationConfig(config);
+                    setIsNotificationVisible(true);
+                } else {
+                    console.log('[LANDING NAVBAR] Not showing notification (dismissed or expired)');
+                    setIsNotificationVisible(false);
+                }
+            } catch (error) {
+                console.error('[LANDING NAVBAR] Failed to fetch notification config:', error);
+                setIsNotificationVisible(false);
+            }
+        };
+
+        fetchNotificationConfig();
+    }, []);
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
 
     const handleNotificationClose = () => {
+        if (notificationConfig?.id) {
+            // Save dismissal timestamp to localStorage
+            setDismissedNotification(notificationConfig.id);
+        }
         setIsNotificationVisible(false);
     };
 
     return (
         <>
             <nav className={styles.navbar}>
-                {isNotificationVisible && (
+                {isNotificationVisible && notificationConfig && (
                     <Notification
-                        message="🎉 New Feature: Advanced Analytics Dashboard Now Available!"
-                        href="/app/analytics"
+                        message={notificationConfig.message}
+                        href={notificationConfig.url}
                         variant="success"
                         onClose={handleNotificationClose}
                         isVisible={isNotificationVisible}
