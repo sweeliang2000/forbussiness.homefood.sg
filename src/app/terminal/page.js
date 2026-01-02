@@ -266,7 +266,11 @@ const TerminalPage = () => {
                         </button>
                     </div>
                 ) : (
-                    <h1>Terminal</h1>
+                    <div className={styles.welcomeSection}>
+                        <p className={styles.welcomeMessage}>
+                            Enter a customer phone number to view their loyalty information, manage stamps, and process rewards.
+                        </p>
+                    </div>
                 )}
                 {/* User Rewards List */}
                 {phoneNumber && !error && (
