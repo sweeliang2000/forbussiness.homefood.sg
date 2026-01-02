@@ -73,7 +73,6 @@ export default function StampSetup() {
 
   const inputChangeHandler = (key, value) => {
     setIsSubmissionSuccess(false);
-    setIsBtnDisabled(false);
     setEnteredValues((prevValues) => ({
       ...prevValues,
       [key]: value
@@ -237,6 +236,17 @@ export default function StampSetup() {
     retrieveInformation();
   
   }, []);
+
+  // Update button disabled state based on unsaved changes
+  useEffect(() => {
+    if (!isEdit) {
+      setIsBtnDisabled(true);
+      return;
+    }
+    
+    const hasChanges = hasUnsavedChanges();
+    setIsBtnDisabled(!hasChanges);
+  }, [enteredValues, isEdit]);
 
   // Handle browser refresh/close/back button warning
   useEffect(() => {

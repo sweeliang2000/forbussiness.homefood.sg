@@ -1,6 +1,6 @@
 'use client';
 import styles from './CustomerFacingBusinessPage.module.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
@@ -68,6 +68,22 @@ const CustomerFacingBusinessPage = () => {
         [KEYWORDS]: '',
     });
 
+    // Store initial values to compare for unsaved changes
+    const initialValuesRef = useRef({
+        [DISPLAY_NAME]: '',
+        [SHOP_DESCRIPTION]: '',
+        [WEBSITE]: '',
+        [CATEGORY]: '',
+        [HALAL_CERTIFIED]: '',
+        [KEYWORDS]: '',
+    });
+    const initialThumbnailImagesRef = useRef([]);
+    const initialBannerImagesRef = useRef([]);
+    const initialLocationsRef = useRef([]);
+    
+    // Track if we've pushed a history state for back button handling
+    const historyStatePushedRef = useRef(false);
+
     const [textfieldError, setTextfieldError] = useState({
         [DISPLAY_NAME]: false,
         [SHOP_DESCRIPTION]: false,
@@ -88,7 +104,6 @@ const CustomerFacingBusinessPage = () => {
 
     const resetSaving= () => {
         setIsSubmissionSuccess(false);
-        setIsBtnDisabled(false);
         console.log('resetSaving');
     };
 
@@ -163,6 +178,12 @@ const CustomerFacingBusinessPage = () => {
             console.log('Form submitted successfully');
             setIsSubmissionSuccess(true);
             setIsBtnLoading(false);
+            
+            // Update initial values after successful save
+            initialValuesRef.current = { ...enteredValues };
+            initialThumbnailImagesRef.current = JSON.parse(JSON.stringify(thumbnailImages));
+            initialBannerImagesRef.current = JSON.parse(JSON.stringify(bannerImages));
+            initialLocationsRef.current = JSON.parse(JSON.stringify(locations));
         } catch (error) {
             const errorData = error?.response?.data;
             const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
@@ -230,23 +251,47 @@ const CustomerFacingBusinessPage = () => {
                     const isEditValue = data.isEdit;
                     setIsEdit(isEditValue !== undefined ? isEditValue : true);
                     
-                    setEnteredValues({
+                    const loadedValues = {
                         [DISPLAY_NAME]: data.displayName,
                         [SHOP_DESCRIPTION]: data.description,
                         [WEBSITE]: data.website,
                         [CATEGORY]: data.category,
                         [HALAL_CERTIFIED]: data.halalcertified,
                         [KEYWORDS]: data.keywords
-                    })
-                    if (data.thumbnail_signedUrl !== "") {
-                        setThumbnailImages([{ name: data.thumbnail_signedUrl, file: null, url: data.thumbnail_signedUrl }])
-                    }
-                    if (data.banner_signedUrl !== "") {
-                        setBannerImages([{ name: data.banner_signedUrl, file: null, url: data.banner_signedUrl }])
-                    }
+                    };
+                    setEnteredValues(loadedValues);
+                    
+                    // Store initial values for comparison
+                    initialValuesRef.current = { ...loadedValues };
+                    
+                    const loadedThumbnails = data.thumbnail_signedUrl !== "" 
+                        ? [{ name: data.thumbnail_signedUrl, file: null, url: data.thumbnail_signedUrl }]
+                        : [];
+                    setThumbnailImages(loadedThumbnails);
+                    initialThumbnailImagesRef.current = JSON.parse(JSON.stringify(loadedThumbnails));
+                    
+                    const loadedBanners = data.banner_signedUrl !== "" 
+                        ? [{ name: data.banner_signedUrl, file: null, url: data.banner_signedUrl }]
+                        : [];
+                    setBannerImages(loadedBanners);
+                    initialBannerImagesRef.current = JSON.parse(JSON.stringify(loadedBanners));
+                    
                     setLocations(data.locations);
+                    initialLocationsRef.current = JSON.parse(JSON.stringify(data.locations));
                 } else {
                     setHasExistingData(false);
+                    // Initialize with empty values
+                    initialValuesRef.current = {
+                        [DISPLAY_NAME]: '',
+                        [SHOP_DESCRIPTION]: '',
+                        [WEBSITE]: '',
+                        [CATEGORY]: '',
+                        [HALAL_CERTIFIED]: '',
+                        [KEYWORDS]: '',
+                    };
+                    initialThumbnailImagesRef.current = [];
+                    initialBannerImagesRef.current = [];
+                    initialLocationsRef.current = [];
                 }
     
                 setIsLoading(false);
@@ -262,7 +307,136 @@ const CustomerFacingBusinessPage = () => {
         };
 
         getFormData();
-    }, [])
+    }, []);
+
+    // Check if there are unsaved changes
+    const checkUnsavedChanges = () => {
+        if (!isEdit) return false; // No unsaved changes if not in edit mode
+        
+        const current = enteredValues;
+        const initial = initialValuesRef.current;
+        
+        // Check form fields
+        const formFieldsChanged = (
+            current[DISPLAY_NAME] !== initial[DISPLAY_NAME] ||
+            current[SHOP_DESCRIPTION] !== initial[SHOP_DESCRIPTION] ||
+            current[WEBSITE] !== initial[WEBSITE] ||
+            current[CATEGORY] !== initial[CATEGORY] ||
+            current[HALAL_CERTIFIED] !== initial[HALAL_CERTIFIED] ||
+            current[KEYWORDS] !== initial[KEYWORDS]
+        );
+        
+        // Check thumbnail images (compare by URL, name, or file presence)
+        const normalizeImage = (img) => ({
+            url: img?.url || '',
+            name: img?.name || '',
+            hasFile: !!img?.file
+        });
+        const thumbnailChanged = JSON.stringify(thumbnailImages.map(normalizeImage)) !== 
+            JSON.stringify(initialThumbnailImagesRef.current.map(normalizeImage)) ||
+            thumbnailImages.length !== initialThumbnailImagesRef.current.length;
+        
+        // Check banner images
+        const bannerChanged = JSON.stringify(bannerImages.map(normalizeImage)) !== 
+            JSON.stringify(initialBannerImagesRef.current.map(normalizeImage)) ||
+            bannerImages.length !== initialBannerImagesRef.current.length;
+        
+        // Check locations
+        const locationsChanged = JSON.stringify(locations) !== JSON.stringify(initialLocationsRef.current);
+        
+        return formFieldsChanged || thumbnailChanged || bannerChanged || locationsChanged;
+    };
+
+    // Update button disabled state based on unsaved changes
+    useEffect(() => {
+        if (!isEdit) {
+            setIsBtnDisabled(true);
+            return;
+        }
+        
+        const hasChanges = checkUnsavedChanges();
+        setIsBtnDisabled(!hasChanges);
+    }, [enteredValues, thumbnailImages, bannerImages, locations, isEdit]);
+
+    // Handle browser refresh/close/back button warning
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (checkUnsavedChanges()) {
+                e.preventDefault();
+                // Modern browsers ignore custom messages, but we can still show a generic warning
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                return e.returnValue;
+            }
+        };
+
+        // Handle browser back/forward button using history manipulation
+        const handlePopState = (e) => {
+            if (checkUnsavedChanges()) {
+                const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave? Your changes will be lost.');
+                if (!confirmed) {
+                    // Push state back to prevent navigation
+                    window.history.pushState(null, '', window.location.href);
+                    historyStatePushedRef.current = true;
+                } else {
+                    // User confirmed, allow navigation
+                    historyStatePushedRef.current = false;
+                }
+            }
+        };
+
+        // Push a state to history when there are unsaved changes to intercept back button
+        const updateHistoryState = () => {
+            if (checkUnsavedChanges() && !historyStatePushedRef.current) {
+                window.history.pushState({ unsavedChanges: true }, '', window.location.href);
+                historyStatePushedRef.current = true;
+            } else if (!checkUnsavedChanges() && historyStatePushedRef.current) {
+                // If changes are saved, reset the flag
+                historyStatePushedRef.current = false;
+            }
+        };
+
+        // Intercept clicks on links to show confirmation
+        const handleLinkClick = (e) => {
+            if (checkUnsavedChanges()) {
+                // Check if it's a link that navigates away
+                const link = e.target.closest('a');
+                if (link && link.href) {
+                    // Check if it's an internal link (same origin) or external
+                    const isInternalLink = link.href.startsWith(window.location.origin) || link.href.startsWith('/');
+                    const isAnchorLink = link.href.includes('#') && link.href.split('#')[0] === window.location.href.split('#')[0];
+                    
+                    // Only intercept if it's navigating away (not anchor links)
+                    if (isInternalLink && !isAnchorLink) {
+                        const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave? Your changes will be lost.');
+                        if (!confirmed) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return false;
+                        }
+                    }
+                }
+            }
+        };
+
+        // Add beforeunload event listener for browser refresh/close/back button
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        
+        // Add popstate listener for back/forward button
+        window.addEventListener('popstate', handlePopState);
+
+        // Add click listener to intercept link clicks
+        document.addEventListener('click', handleLinkClick, true);
+
+        // Update history state when values change
+        updateHistoryState();
+
+        // Cleanup
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('popstate', handlePopState);
+            document.removeEventListener('click', handleLinkClick, true);
+        };
+    }, [enteredValues, thumbnailImages, bannerImages, locations, isEdit]);
 
     return (
         <>
