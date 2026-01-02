@@ -6,7 +6,7 @@ import DragDropImageUploader from '@/components/Form Components/DragDropImageUpl
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
 import { InputAdornment } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Switch from '@mui/material/Switch';
 
 const NEW_JOIN = { value: 'newJoin', title: 'New Join' }
@@ -44,6 +44,14 @@ const CreateRewardPopup = ({
     const [isRewardIdOpen, setRewardIdOpen] = useState(false);
     const [isRewardTagsOpen, setIsRewardTagOpen] = useState(false);
     const [rewardImage, setRewardImage] = useState([]);
+
+    // Store initial values to compare for unsaved changes
+    const initialRewardDataRef = useRef(null);
+    const initialRewardImageRef = useRef(null);
+    const initialIsExpiryOpenRef = useRef(null);
+    const initialIsRewardIdOpenRef = useRef(null);
+    const initialIsRewardTagsOpenRef = useRef(null);
+    const initialIsRewardImageOpenRef = useRef(null);
 
     const [rewardData, setRewardData] = useState({
         [REWARD_ID_KEY]: '',
@@ -83,35 +91,102 @@ const CreateRewardPopup = ({
         // Call the parent's onSubmit function with the form data
         if (onSubmit) {
             await onSubmit(formDataWithImage);
+            
+            // Update initial values after successful save
+            initialRewardDataRef.current = JSON.parse(JSON.stringify(rewardData));
+            initialRewardImageRef.current = JSON.parse(JSON.stringify(rewardImage));
+            initialIsExpiryOpenRef.current = isExpiryOpen;
+            initialIsRewardIdOpenRef.current = isRewardIdOpen;
+            initialIsRewardTagsOpenRef.current = isRewardTagsOpen;
+            initialIsRewardImageOpenRef.current = isRewardImageOpen;
         }
         console.log(rewardData)
     }
 
+    // Check if there are unsaved changes
+    const checkUnsavedChanges = () => {
+        if (initialRewardDataRef.current === null) return false; // Not initialized yet
+        
+        // Check reward data
+        const dataChanged = JSON.stringify(rewardData) !== JSON.stringify(initialRewardDataRef.current);
+        
+        // Check reward image (compare by URL, name, or file presence)
+        const normalizeImage = (img) => ({
+            url: img?.url || '',
+            name: img?.name || '',
+            hasFile: !!img?.file
+        });
+        const imageChanged = JSON.stringify(rewardImage.map(normalizeImage)) !== 
+            JSON.stringify((initialRewardImageRef.current || []).map(normalizeImage)) ||
+            rewardImage.length !== (initialRewardImageRef.current || []).length;
+        
+        // Check toggle states
+        const togglesChanged = (
+            isExpiryOpen !== initialIsExpiryOpenRef.current ||
+            isRewardIdOpen !== initialIsRewardIdOpenRef.current ||
+            isRewardTagsOpen !== initialIsRewardTagsOpenRef.current ||
+            isRewardImageOpen !== initialIsRewardImageOpenRef.current
+        );
+        
+        return dataChanged || imageChanged || togglesChanged;
+    };
+
+    // Handle popup close with unsaved changes check
+    const handleClose = (value) => {
+        if (checkUnsavedChanges()) {
+            const confirmed = window.confirm('You have unsaved changes. Are you sure you want to close? Your changes will be lost.');
+            if (!confirmed) {
+                return; // Don't close if user cancels
+            }
+        }
+        setIsOpen(value);
+    };
+
     useEffect(() => {
+        if (!isOpen) return; // Only initialize when popup opens
+
         if (selectedReward !== null) {
-            setRewardData(prev => ({
-                ...prev,
-                [REWARD_TYPE_KEY]: selectedReward.type,
-                [REWARD_NAME_KEY]: selectedReward.name,
-                [REWARD_DESCRIPTION_KEY]: selectedReward.description,
+            const loadedData = {
+                [REWARD_ID_KEY]: selectedReward.id || '',
+                [REWARD_TYPE_KEY]: selectedReward.type || 'stampReward',
+                [REWARD_NAME_KEY]: selectedReward.name || '',
+                [REWARD_DESCRIPTION_KEY]: selectedReward.description || '',
+                [REWARD_EXPIRY_TYPE_KEY]: 'expiryInDays',
                 [REWARD_EXPIRY_KEY]: selectedReward.expiry === undefined ? '' : selectedReward.expiry,
                 [REWARD_CUSTOM_ID_KEY]: selectedReward.custom_id === undefined ? '' : selectedReward.custom_id,
                 [REWARD_TAGS_KEY]: selectedReward.tags === undefined ? '' : selectedReward.tags,
                 [REWARD_IS_ACTIVATE]: selectedReward.is_activate === undefined ? false : selectedReward.is_activate
+            };
+            
+            setRewardData(prev => ({
+                ...prev,
+                ...loadedData
             }));
 
-            setRewardImage(
-                selectedReward.image === undefined ?
-                    [] :
-                    [{ url: selectedReward.image.url, name: selectedReward.name }]
-            )
+            const loadedImage = selectedReward.image === undefined ?
+                [] :
+                [{ url: selectedReward.image.url, name: selectedReward.name, file: null }];
+            setRewardImage(loadedImage);
 
-            setIsExpiryOpen(selectedReward.expiry !== undefined)
-            setRewardIdOpen(selectedReward.custom_id !== undefined)
-            setIsRewardTagOpen(selectedReward.tags !== undefined)
-            setIsRewardImageOpen(true)
+            const loadedIsExpiryOpen = selectedReward.expiry !== undefined;
+            const loadedIsRewardIdOpen = selectedReward.custom_id !== undefined;
+            const loadedIsRewardTagsOpen = selectedReward.tags !== undefined;
+            const loadedIsRewardImageOpen = true;
+
+            setIsExpiryOpen(loadedIsExpiryOpen);
+            setRewardIdOpen(loadedIsRewardIdOpen);
+            setIsRewardTagOpen(loadedIsRewardTagsOpen);
+            setIsRewardImageOpen(loadedIsRewardImageOpen);
+
+            // Store initial values for comparison
+            initialRewardDataRef.current = JSON.parse(JSON.stringify(loadedData));
+            initialRewardImageRef.current = JSON.parse(JSON.stringify(loadedImage));
+            initialIsExpiryOpenRef.current = loadedIsExpiryOpen;
+            initialIsRewardIdOpenRef.current = loadedIsRewardIdOpen;
+            initialIsRewardTagsOpenRef.current = loadedIsRewardTagsOpen;
+            initialIsRewardImageOpenRef.current = loadedIsRewardImageOpen;
         } else {
-            setRewardData({
+            const defaultData = {
                 [REWARD_ID_KEY]: '',
                 [REWARD_TYPE_KEY]: 'stampReward',
                 [REWARD_NAME_KEY]: '',
@@ -121,14 +196,55 @@ const CreateRewardPopup = ({
                 [REWARD_CUSTOM_ID_KEY]: '',
                 [REWARD_TAGS_KEY]: '',
                 [REWARD_IS_ACTIVATE]: false
-            })
-            setRewardImage([])
-            setIsExpiryOpen(false)
-            setRewardIdOpen(false)
-            setIsRewardTagOpen(false)
-            setIsRewardImageOpen(false)
+            };
+            
+            setRewardData(defaultData);
+            setRewardImage([]);
+            setIsExpiryOpen(false);
+            setRewardIdOpen(false);
+            setIsRewardTagOpen(false);
+            setIsRewardImageOpen(false);
+
+            // Store initial values for comparison
+            initialRewardDataRef.current = JSON.parse(JSON.stringify(defaultData));
+            initialRewardImageRef.current = [];
+            initialIsExpiryOpenRef.current = false;
+            initialIsRewardIdOpenRef.current = false;
+            initialIsRewardTagsOpenRef.current = false;
+            initialIsRewardImageOpenRef.current = false;
         }
-    }, [selectedReward]);
+    }, [selectedReward, isOpen]);
+
+    // Handle browser refresh/close/back button warning when popup is open
+    useEffect(() => {
+        if (!isOpen) return; // Only track when popup is open
+
+        const handleBeforeUnload = (e) => {
+            if (checkUnsavedChanges()) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                return e.returnValue;
+            }
+        };
+
+        // Handle browser back/forward button using history manipulation
+        const handlePopState = (e) => {
+            if (checkUnsavedChanges()) {
+                const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave? Your changes will be lost.');
+                if (!confirmed) {
+                    window.history.pushState(null, '', window.location.href);
+                }
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        window.addEventListener('popstate', handlePopState);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [isOpen, rewardData, rewardImage, isExpiryOpen, isRewardIdOpen, isRewardTagsOpen, isRewardImageOpen]);
 
 
     return (
@@ -138,7 +254,7 @@ const CreateRewardPopup = ({
             deleteText={'Archive'}
             onDelete={onArchive}
             isOpen={isOpen}
-            setIsOpen={setIsOpen}
+            setIsOpen={handleClose}
             PaperProps={{
                 sx: {
                     minHeight: '70vh',

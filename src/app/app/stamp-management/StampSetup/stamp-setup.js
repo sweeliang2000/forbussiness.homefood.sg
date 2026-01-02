@@ -4,7 +4,7 @@ import styles from './stamp-setup.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
@@ -76,6 +76,19 @@ export default function StampSetup() {
   const [isDefaultStampedIconDeleted, setIsDefaultStampedIconDeleted] = useState(false);
   const [isDefaultUnStampedIconDeleted, setIsDefaultUnStampedIconDeleted] = useState(false);
 
+  // Store initial values to compare for unsaved changes
+  const initialCardTitleRef = useRef('');
+  const initialCardDescriptionRef = useRef('');
+  const initialNumberOfStampsRef = useRef(6);
+  const initialRewardStampIconRef = useRef([]);
+  const initialRewardUnstampedIconRef = useRef([]);
+  const initialExpirationTypeRef = useRef(VALID_FOR_DAYS_EXPIRATION.value);
+  const initialNumberOfDaysToExpireRef = useRef(30);
+  const initialCardStepsRef = useRef([]);
+  
+  // Track if we've pushed a history state for back button handling
+  const historyStatePushedRef = useRef(false);
+
   // Fetch stamp management data when component loads
   useEffect(() => {
     const fetchStampManagementData = async () => {
@@ -106,30 +119,48 @@ export default function StampSetup() {
           setHasExistingData(hasData);
 
           // Update state with fetched data
-          setCardTitle(data.cardTitle || '');
-          setCardDescription(data.cardDescription || '');
-          setNumberOfStamps(data.numberOfStamps || 6);
-          setExpirationType(data.expirationType || VALID_FOR_DAYS_EXPIRATION.value);
-          setNumberOfDaysToExpire(data.numberOfDaysToExpire || 30);
+          const loadedCardTitle = data.cardTitle || '';
+          const loadedCardDescription = data.cardDescription || '';
+          const loadedNumberOfStamps = data.numberOfStamps || 6;
+          const loadedExpirationType = data.expirationType || VALID_FOR_DAYS_EXPIRATION.value;
+          const loadedNumberOfDaysToExpire = data.numberOfDaysToExpire || 30;
+
+          setCardTitle(loadedCardTitle);
+          setCardDescription(loadedCardDescription);
+          setNumberOfStamps(loadedNumberOfStamps);
+          setExpirationType(loadedExpirationType);
+          setNumberOfDaysToExpire(loadedNumberOfDaysToExpire);
+
+          // Store initial values for comparison
+          initialCardTitleRef.current = loadedCardTitle;
+          initialCardDescriptionRef.current = loadedCardDescription;
+          initialNumberOfStampsRef.current = loadedNumberOfStamps;
+          initialExpirationTypeRef.current = loadedExpirationType;
+          initialNumberOfDaysToExpireRef.current = loadedNumberOfDaysToExpire;
 
           // Handle stamp icons if they exist
-          if (data.defaultStampedUrl_Presign) {
-            setRewardStampIcon([{
-              name: data.defaultStampedUrl_Presign,
-              file: null, // We don't have the file object from the server
-              url: data.defaultStampedUrl_Presign
-            }]);
-          }
+          const loadedStampIcon = data.defaultStampedUrl_Presign ? [{
+            name: data.defaultStampedUrl_Presign,
+            file: null,
+            url: data.defaultStampedUrl_Presign
+          }] : [];
+          setRewardStampIcon(loadedStampIcon);
+          initialRewardStampIconRef.current = JSON.parse(JSON.stringify(loadedStampIcon));
 
-          if (data.defaultUnStampedUrl_Presign) {
-            setRewardUnstampedIcon([{
-              name: data.defaultUnStampedUrl_Presign,
-              file: null, // We don't have the file object from the server
-              url: data.defaultUnStampedUrl_Presign
-            }]);
-          }
+          const loadedUnstampedIcon = data.defaultUnStampedUrl_Presign ? [{
+            name: data.defaultUnStampedUrl_Presign,
+            file: null,
+            url: data.defaultUnStampedUrl_Presign
+          }] : [];
+          setRewardUnstampedIcon(loadedUnstampedIcon);
+          initialRewardUnstampedIconRef.current = JSON.parse(JSON.stringify(loadedUnstampedIcon));
 
           // Handle card steps if they exist
+          let loadedCardSteps = Array.from({ length: 6 }, (_, index) => ({
+            ...DEFAULT_STAMP_STEP,
+            id: index + 1
+          }));
+
           if (data.cardStepDetails) {
             try {
               // Parse the JSON string if it's a string, otherwise use it as is
@@ -138,19 +169,28 @@ export default function StampSetup() {
                 : data.cardStepDetails;
 
               if (Array.isArray(parsedCardSteps)) {
+                loadedCardSteps = parsedCardSteps;
                 setCardSteps(parsedCardSteps);
               }
             } catch (parseError) {
               console.error('Error parsing cardStepDetails:', parseError);
-              // Set default card steps if parsing fails
-              setCardSteps(Array.from({ length: 6 }, (_, index) => ({
-                ...DEFAULT_STAMP_STEP,
-                id: index + 1
-              })));
             }
           }
 
-          setIsBtnDisabled(false);
+          initialCardStepsRef.current = JSON.parse(JSON.stringify(loadedCardSteps));
+        } else {
+          // Initialize with default values
+          initialCardTitleRef.current = '';
+          initialCardDescriptionRef.current = '';
+          initialNumberOfStampsRef.current = 6;
+          initialRewardStampIconRef.current = [];
+          initialRewardUnstampedIconRef.current = [];
+          initialExpirationTypeRef.current = VALID_FOR_DAYS_EXPIRATION.value;
+          initialNumberOfDaysToExpireRef.current = 30;
+          initialCardStepsRef.current = JSON.parse(JSON.stringify(Array.from({ length: 6 }, (_, index) => ({
+            ...DEFAULT_STAMP_STEP,
+            id: index + 1
+          }))));
         }
       } catch (error) {
         const errorData = error?.response?.data;
@@ -167,6 +207,50 @@ export default function StampSetup() {
 
     fetchStampManagementData();
   }, []);
+
+  // Check if there are unsaved changes
+  const checkUnsavedChanges = () => {
+    if (!isEdit) return false; // No unsaved changes if not in edit mode
+    
+    // Check form fields
+    const formFieldsChanged = (
+      cardTitle !== initialCardTitleRef.current ||
+      cardDescription !== initialCardDescriptionRef.current ||
+      numberOfStamps !== initialNumberOfStampsRef.current ||
+      expirationType !== initialExpirationTypeRef.current ||
+      numberOfDaysToExpire !== initialNumberOfDaysToExpireRef.current
+    );
+    
+    // Check stamp icons (compare by URL, name, or file presence)
+    const normalizeImage = (img) => ({
+      url: img?.url || '',
+      name: img?.name || '',
+      hasFile: !!img?.file
+    });
+    const stampIconChanged = JSON.stringify(rewardStampIcon.map(normalizeImage)) !== 
+      JSON.stringify(initialRewardStampIconRef.current.map(normalizeImage)) ||
+      rewardStampIcon.length !== initialRewardStampIconRef.current.length;
+    
+    const unstampedIconChanged = JSON.stringify(rewardUnstampedIcon.map(normalizeImage)) !== 
+      JSON.stringify(initialRewardUnstampedIconRef.current.map(normalizeImage)) ||
+      rewardUnstampedIcon.length !== initialRewardUnstampedIconRef.current.length;
+    
+    // Check card steps
+    const cardStepsChanged = JSON.stringify(cardSteps) !== JSON.stringify(initialCardStepsRef.current);
+    
+    return formFieldsChanged || stampIconChanged || unstampedIconChanged || cardStepsChanged;
+  };
+
+  // Update button disabled state based on unsaved changes
+  useEffect(() => {
+    if (!isEdit) {
+      setIsBtnDisabled(true);
+      return;
+    }
+    
+    const hasChanges = checkUnsavedChanges();
+    setIsBtnDisabled(!hasChanges);
+  }, [cardTitle, cardDescription, numberOfStamps, expirationType, numberOfDaysToExpire, rewardStampIcon, rewardUnstampedIcon, cardSteps, isEdit]);
 
   const formSubmissionHandler = async (event) => {
     event.preventDefault();
@@ -219,6 +303,16 @@ export default function StampSetup() {
       console.log('Form submitted successfully');
       setIsSubmissionSuccess(true);
       setIsBtnLoading(false);
+      
+      // Update initial values after successful save
+      initialCardTitleRef.current = cardTitle;
+      initialCardDescriptionRef.current = cardDescription;
+      initialNumberOfStampsRef.current = numberOfStamps;
+      initialExpirationTypeRef.current = expirationType;
+      initialNumberOfDaysToExpireRef.current = numberOfDaysToExpire;
+      initialRewardStampIconRef.current = JSON.parse(JSON.stringify(rewardStampIcon));
+      initialRewardUnstampedIconRef.current = JSON.parse(JSON.stringify(rewardUnstampedIcon));
+      initialCardStepsRef.current = JSON.parse(JSON.stringify(cardSteps));
     } catch (error) {
       const errorData = error?.response?.data;
       const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
@@ -232,7 +326,6 @@ export default function StampSetup() {
 
   const resetSaving = () => {
     setIsSubmissionSuccess(false);
-    setIsBtnDisabled(false);
   };
 
   const numberOfStampsHandler = (event) => {
@@ -331,6 +424,86 @@ export default function StampSetup() {
       return data
     })
   }, [rewardUnstampedIcon])
+
+  // Handle browser refresh/close/back button warning
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (checkUnsavedChanges()) {
+        e.preventDefault();
+        // Modern browsers ignore custom messages, but we can still show a generic warning
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+
+    // Handle browser back/forward button using history manipulation
+    const handlePopState = (e) => {
+      if (checkUnsavedChanges()) {
+        const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave? Your changes will be lost.');
+        if (!confirmed) {
+          // Push state back to prevent navigation
+          window.history.pushState(null, '', window.location.href);
+          historyStatePushedRef.current = true;
+        } else {
+          // User confirmed, allow navigation
+          historyStatePushedRef.current = false;
+        }
+      }
+    };
+
+    // Push a state to history when there are unsaved changes to intercept back button
+    const updateHistoryState = () => {
+      if (checkUnsavedChanges() && !historyStatePushedRef.current) {
+        window.history.pushState({ unsavedChanges: true }, '', window.location.href);
+        historyStatePushedRef.current = true;
+      } else if (!checkUnsavedChanges() && historyStatePushedRef.current) {
+        // If changes are saved, reset the flag
+        historyStatePushedRef.current = false;
+      }
+    };
+
+    // Intercept clicks on links to show confirmation
+    const handleLinkClick = (e) => {
+      if (checkUnsavedChanges()) {
+        // Check if it's a link that navigates away
+        const link = e.target.closest('a');
+        if (link && link.href) {
+          // Check if it's an internal link (same origin) or external
+          const isInternalLink = link.href.startsWith(window.location.origin) || link.href.startsWith('/');
+          const isAnchorLink = link.href.includes('#') && link.href.split('#')[0] === window.location.href.split('#')[0];
+          
+          // Only intercept if it's navigating away (not anchor links)
+          if (isInternalLink && !isAnchorLink) {
+            const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave? Your changes will be lost.');
+            if (!confirmed) {
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            }
+          }
+        }
+      }
+    };
+
+    // Add beforeunload event listener for browser refresh/close/back button
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    // Add popstate listener for back/forward button
+    window.addEventListener('popstate', handlePopState);
+
+    // Add click listener to intercept link clicks
+    document.addEventListener('click', handleLinkClick, true);
+
+    // Update history state when values change
+    updateHistoryState();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+      document.removeEventListener('click', handleLinkClick, true);
+    };
+  }, [cardTitle, cardDescription, numberOfStamps, expirationType, numberOfDaysToExpire, rewardStampIcon, rewardUnstampedIcon, cardSteps, isEdit]);
 
   // ==== Modify Selection ===
   const [currentStepStampedIcon, setCurrentStepStampedIcon] = useState([]);

@@ -5,7 +5,7 @@ import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import { HeaderSection } from "@/components/HeaderSection/HeaderSection";
 import Link from "next/link";
 import { MuiColorInput } from 'mui-color-input'
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import StampCard from '@/components/StampCard/StampCard';
 import { Button, Slider } from '@mui/material';
 import { CARD_DESIGN_SETTING, STAMP_MANAGEMENT } from '@/utility/apiPaths';
@@ -48,6 +48,19 @@ const CardDesign = () => {
     const [stamped_url, setStamped_url] = useState('');
     const [unstamped_url, setUnstamped_url] = useState('');
 
+    // Store initial values to compare for unsaved changes
+    const initialCardBackgroundRef = useRef('#ffffff');
+    const initialCardTitleColorRef = useRef('#000000');
+    const initialCardFooterColorRef = useRef('#797979');
+    const initialCardNoStampBorderColorRef = useRef('#dddddd');
+    const initialCardStampBackgroundRef = useRef('#e8f9ff');
+    const initialCardNoStampBackgroundColorRef = useRef('#ffffff');
+    const initialCardStampCollectedBorderColorRef = useRef('#e8f9ff');
+    const initialCheckmarkColorRef = useRef('#6698aa');
+    
+    // Track if we've pushed a history state for back button handling
+    const historyStatePushedRef = useRef(false);
+
     const resetToDefaultColor = () => {
         if (!isEdit) return;
         setCardBackgroundColor('#ffffff');
@@ -67,7 +80,6 @@ const CardDesign = () => {
 
     const enableSaveBtn = () => {
         setIsSubmissionSuccess(false);
-        setIsBtnDisabled(false);
     };
 
     const showError = (message) => {
@@ -94,6 +106,16 @@ const CardDesign = () => {
             await apiClient.post(`${CARD_DESIGN_SETTING}`, payload);
             setIsSubmissionSuccess(true);
             setIsBtnLoading(false);
+            
+            // Update initial values after successful save
+            initialCardBackgroundRef.current = cardBackground;
+            initialCardTitleColorRef.current = cardTitleColor;
+            initialCardFooterColorRef.current = cardFooterColor;
+            initialCardNoStampBorderColorRef.current = cardNoStampBorderColor;
+            initialCardStampBackgroundRef.current = cardStampBackground;
+            initialCardNoStampBackgroundColorRef.current = cardNoStampBackgroundColor;
+            initialCardStampCollectedBorderColorRef.current = cardStampCollectedBorderColor;
+            initialCheckmarkColorRef.current = checkmarkColor;
         } catch (error) {
             const errorData = error?.response?.data;
             const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
@@ -123,14 +145,43 @@ const CardDesign = () => {
                         const isEditValue = cardDesignData.data.isEdit;
                         setIsEdit(isEditValue !== undefined ? isEditValue : true);
                         
-                        setCardBackgroundColor(cardDesignData.data.backgroundColor);
-                        setCardTitleColor(cardDesignData.data.titleColor);
-                        setCardFooterColor(cardDesignData.data.footerTextColor);
-                        setCardNoStampBorderColor(cardDesignData.data.noStampBorderColor);
-                        setCardNoStampBackgroundColor(cardDesignData.data.noStampBackgroundColor);
-                        setCardStampCollectedBorderColor(cardDesignData.data.stampBorderColor);
-                        setCardStampBackground(cardDesignData.data.stampBackgroundColor);
-                        setCheckmarkColor(cardDesignData.data.checkmarkColor);
+                        const loadedBackground = cardDesignData.data.backgroundColor || '#ffffff';
+                        const loadedTitleColor = cardDesignData.data.titleColor || '#000000';
+                        const loadedFooterColor = cardDesignData.data.footerTextColor || '#797979';
+                        const loadedNoStampBorderColor = cardDesignData.data.noStampBorderColor || '#dddddd';
+                        const loadedNoStampBackgroundColor = cardDesignData.data.noStampBackgroundColor || '#ffffff';
+                        const loadedStampCollectedBorderColor = cardDesignData.data.stampBorderColor || '#e8f9ff';
+                        const loadedStampBackground = cardDesignData.data.stampBackgroundColor || '#e8f9ff';
+                        const loadedCheckmarkColor = cardDesignData.data.checkmarkColor || '#6698aa';
+                        
+                        setCardBackgroundColor(loadedBackground);
+                        setCardTitleColor(loadedTitleColor);
+                        setCardFooterColor(loadedFooterColor);
+                        setCardNoStampBorderColor(loadedNoStampBorderColor);
+                        setCardNoStampBackgroundColor(loadedNoStampBackgroundColor);
+                        setCardStampCollectedBorderColor(loadedStampCollectedBorderColor);
+                        setCardStampBackground(loadedStampBackground);
+                        setCheckmarkColor(loadedCheckmarkColor);
+                        
+                        // Store initial values for comparison
+                        initialCardBackgroundRef.current = loadedBackground;
+                        initialCardTitleColorRef.current = loadedTitleColor;
+                        initialCardFooterColorRef.current = loadedFooterColor;
+                        initialCardNoStampBorderColorRef.current = loadedNoStampBorderColor;
+                        initialCardNoStampBackgroundColorRef.current = loadedNoStampBackgroundColor;
+                        initialCardStampCollectedBorderColorRef.current = loadedStampCollectedBorderColor;
+                        initialCardStampBackgroundRef.current = loadedStampBackground;
+                        initialCheckmarkColorRef.current = loadedCheckmarkColor;
+                    } else {
+                        // Initialize with default values
+                        initialCardBackgroundRef.current = '#ffffff';
+                        initialCardTitleColorRef.current = '#000000';
+                        initialCardFooterColorRef.current = '#797979';
+                        initialCardNoStampBorderColorRef.current = '#dddddd';
+                        initialCardStampBackgroundRef.current = '#e8f9ff';
+                        initialCardNoStampBackgroundColorRef.current = '#ffffff';
+                        initialCardStampCollectedBorderColorRef.current = '#e8f9ff';
+                        initialCheckmarkColorRef.current = '#6698aa';
                     }
                 } else {
                     console.warn('Failed to fetch card design data:', cardDesignResponse.reason);
@@ -207,6 +258,113 @@ const CardDesign = () => {
 
         fetchAllData();
     }, []);
+
+    // Check if there are unsaved changes
+    const checkUnsavedChanges = () => {
+        if (!isEdit) return false; // No unsaved changes if not in edit mode
+        
+        return (
+            cardBackground !== initialCardBackgroundRef.current ||
+            cardTitleColor !== initialCardTitleColorRef.current ||
+            cardFooterColor !== initialCardFooterColorRef.current ||
+            cardNoStampBorderColor !== initialCardNoStampBorderColorRef.current ||
+            cardStampBackground !== initialCardStampBackgroundRef.current ||
+            cardNoStampBackgroundColor !== initialCardNoStampBackgroundColorRef.current ||
+            cardStampCollectedBorderColor !== initialCardStampCollectedBorderColorRef.current ||
+            checkmarkColor !== initialCheckmarkColorRef.current
+        );
+    };
+
+    // Update button disabled state based on unsaved changes
+    useEffect(() => {
+        if (!isEdit) {
+            setIsBtnDisabled(true);
+            return;
+        }
+        
+        const hasChanges = checkUnsavedChanges();
+        setIsBtnDisabled(!hasChanges);
+    }, [cardBackground, cardTitleColor, cardFooterColor, cardNoStampBorderColor, cardStampBackground, cardNoStampBackgroundColor, cardStampCollectedBorderColor, checkmarkColor, isEdit]);
+
+    // Handle browser refresh/close/back button warning
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (checkUnsavedChanges()) {
+                e.preventDefault();
+                // Modern browsers ignore custom messages, but we can still show a generic warning
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                return e.returnValue;
+            }
+        };
+
+        // Handle browser back/forward button using history manipulation
+        const handlePopState = (e) => {
+            if (checkUnsavedChanges()) {
+                const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave? Your changes will be lost.');
+                if (!confirmed) {
+                    // Push state back to prevent navigation
+                    window.history.pushState(null, '', window.location.href);
+                    historyStatePushedRef.current = true;
+                } else {
+                    // User confirmed, allow navigation
+                    historyStatePushedRef.current = false;
+                }
+            }
+        };
+
+        // Push a state to history when there are unsaved changes to intercept back button
+        const updateHistoryState = () => {
+            if (checkUnsavedChanges() && !historyStatePushedRef.current) {
+                window.history.pushState({ unsavedChanges: true }, '', window.location.href);
+                historyStatePushedRef.current = true;
+            } else if (!checkUnsavedChanges() && historyStatePushedRef.current) {
+                // If changes are saved, reset the flag
+                historyStatePushedRef.current = false;
+            }
+        };
+
+        // Intercept clicks on links to show confirmation
+        const handleLinkClick = (e) => {
+            if (checkUnsavedChanges()) {
+                // Check if it's a link that navigates away
+                const link = e.target.closest('a');
+                if (link && link.href) {
+                    // Check if it's an internal link (same origin) or external
+                    const isInternalLink = link.href.startsWith(window.location.origin) || link.href.startsWith('/');
+                    const isAnchorLink = link.href.includes('#') && link.href.split('#')[0] === window.location.href.split('#')[0];
+                    
+                    // Only intercept if it's navigating away (not anchor links)
+                    if (isInternalLink && !isAnchorLink) {
+                        const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave? Your changes will be lost.');
+                        if (!confirmed) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return false;
+                        }
+                    }
+                }
+            }
+        };
+
+        // Add beforeunload event listener for browser refresh/close/back button
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        
+        // Add popstate listener for back/forward button
+        window.addEventListener('popstate', handlePopState);
+
+        // Add click listener to intercept link clicks
+        document.addEventListener('click', handleLinkClick, true);
+
+        // Update history state when values change
+        updateHistoryState();
+
+        // Cleanup
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('popstate', handlePopState);
+            document.removeEventListener('click', handleLinkClick, true);
+        };
+    }, [cardBackground, cardTitleColor, cardFooterColor, cardNoStampBorderColor, cardStampBackground, cardNoStampBackgroundColor, cardStampCollectedBorderColor, checkmarkColor, isEdit]);
 
     return (
         <form
