@@ -72,7 +72,7 @@ export default function Sidebar({
                 <ul className={styles.top}>
                     <li className={styles.logoLi}>
                         <Link className={styles.logoLink} href='/'>
-                            <CollbineForBusiness/>
+                            <CollbineForBusiness />
                         </Link>
                         {/* <div className={styles.minimiseSidebar} onClick={toggleSidebar}>
                             <FaAnglesLeft className={sidebarMinimised ? styles.rotate : styles.reverseRotate} />
@@ -171,16 +171,50 @@ export default function Sidebar({
                         onClick={() => { toggleMenus(REDEEMABLE_TAB) }}
                     />
 
-                    {
+                    {/* {
                         !sidebarMinimised && <li className={styles.labelLi}>
                             <label className={styles.label}>GROWTH & MARKETING</label>
+                        </li>
+                    } */}
+
+                    {/* <li className={section == 'ratings' ? styles.active : ''}>
+                        <Link href='/app/ratings'>
+                        <FaRegStar className={styles.icon} />
+                            <span>Ratings and Reviews</span>
+                        </Link>
+                    </li> */}
+
+                    {
+                        !sidebarMinimised && <li className={styles.labelLi}>
+                            <label className={styles.label}>Analytics</label>
                         </li>
                     }
 
                     <li className={section == 'ratings' ? styles.active : ''}>
                         <Link href='/app/ratings'>
                         <FaRegStar className={styles.icon} />
-                            <span>Ratings and Reviews</span>
+                            <span>Overview</span>
+                        </Link>
+                    </li>
+
+                    <li className={section == 'ratings' ? styles.active : ''}>
+                        <Link href='/app/ratings'>
+                        <FaRegStar className={styles.icon} />
+                            <span>Activity</span>
+                        </Link>
+                    </li>
+
+                    <li className={section == 'ratings' ? styles.active : ''}>
+                        <Link href='/app/ratings'>
+                        <FaRegStar className={styles.icon} />
+                            <span>Customers and Retentions</span>
+                        </Link>
+                    </li>
+
+                    <li className={section == 'ratings' ? styles.active : ''}>
+                        <Link href='/app/ratings'>
+                        <FaRegStar className={styles.icon} />
+                            <span>Card Distributions</span>
                         </Link>
                     </li>
 
@@ -193,7 +227,7 @@ export default function Sidebar({
 
                     <li className={section == 'users-and-permissions' ? styles.active : ''}>
                         <Link href='/app/users-and-permissions'>
-                        <RiUserSettingsLine className={styles.icon} />
+                            <RiUserSettingsLine className={styles.icon} />
                             <span>Users and permissions</span>
                         </Link>
                     </li>
@@ -215,15 +249,15 @@ export default function Sidebar({
                 <div className={styles.subscriptionContainer}>
                     {isLoadingSubscription ? (
                         <div className={styles.shimmerContainer}>
-                            <Shimmer 
-                                width="120px" 
-                                height="16px" 
+                            <Shimmer
+                                width="120px"
+                                height="16px"
                                 className={styles.titleShimmer}
                                 responsive={true}
                             />
-                            <Shimmer 
-                                width="100px" 
-                                height="12px" 
+                            <Shimmer
+                                width="100px"
+                                height="12px"
                                 className={styles.costShimmer}
                                 responsive={false}
                             />
@@ -242,7 +276,7 @@ export default function Sidebar({
                     }
                 </div>
             </aside>
-            { !isClose && <div className={styles.overlay} onClick={onClose}/>}
+            {!isClose && <div className={styles.overlay} onClick={onClose} />}
         </>
     )
 }
