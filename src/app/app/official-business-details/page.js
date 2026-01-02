@@ -5,7 +5,7 @@ import { ContentCard } from '@/components/ContentCard/ContentCard';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { TextField } from '@mui/material';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import apiClient from '@/utility/api';
 import { OFFICIAL_BUSINESS_INFORMATION } from '@/utility/apiPaths';
@@ -39,6 +39,19 @@ export default function StampSetup() {
     [STREET_ADDRESS]: '',
     [POSTAL_CODE]: '',
   });
+
+  // Store initial values to compare for unsaved changes
+  const initialValuesRef = useRef({
+    [BUSINESS_NAME]: '',
+    [UEN]: '',
+    [UNIT_NUMBER]: '',
+    [BUILDING_NAME]: '',
+    [STREET_ADDRESS]: '',
+    [POSTAL_CODE]: '',
+  });
+
+  // Track if we've pushed a history state for back button handling
+  const historyStatePushedRef = useRef(false);
 
   const [textfieldError, setTextfieldError] = useState({
     [BUSINESS_NAME]: false,
@@ -91,6 +104,23 @@ export default function StampSetup() {
     setErrorMessage('')
   };
 
+  // Check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    if (!isEdit) return false; // No unsaved changes if not in edit mode
+    
+    const current = enteredValues;
+    const initial = initialValuesRef.current;
+    
+    return (
+      current[BUSINESS_NAME] !== initial[BUSINESS_NAME] ||
+      current[UEN] !== initial[UEN] ||
+      current[UNIT_NUMBER] !== initial[UNIT_NUMBER] ||
+      current[BUILDING_NAME] !== initial[BUILDING_NAME] ||
+      current[STREET_ADDRESS] !== initial[STREET_ADDRESS] ||
+      current[POSTAL_CODE] !== initial[POSTAL_CODE]
+    );
+  };
+
   const formSubmissionHandler = async (event) => {
     event.preventDefault();
     setIsBtnLoading(true);
@@ -119,6 +149,9 @@ export default function StampSetup() {
       setIsSubmissionSuccess(true);
       setIsBtnLoading(false);
       clearError();
+      
+      // Update initial values after successful save
+      initialValuesRef.current = { ...enteredValues };
     } catch (error) {
       // TODO: - Create UI to show error if happened.
       const errorData = error?.response?.data;
@@ -155,15 +188,38 @@ export default function StampSetup() {
           
           if (hasData) {
             setIsUpdate(true);
-            setEnteredValues({
+            const loadedValues = {
               [BUSINESS_NAME]: businessName || '',
               [UEN]: uen || '',
               [UNIT_NUMBER]: addressUnitNumber || '',
               [BUILDING_NAME]: addressBuildingName || '',
               [STREET_ADDRESS]: addressStreetAddress || '',
               [POSTAL_CODE]: addressPostalCode || '',
-            });
+            };
+            setEnteredValues(loadedValues);
+            // Store initial values for comparison
+            initialValuesRef.current = { ...loadedValues };
+          } else {
+            // Initialize with empty values
+            initialValuesRef.current = {
+              [BUSINESS_NAME]: '',
+              [UEN]: '',
+              [UNIT_NUMBER]: '',
+              [BUILDING_NAME]: '',
+              [STREET_ADDRESS]: '',
+              [POSTAL_CODE]: '',
+            };
           }
+        } else {
+          // No data returned, initialize with empty values
+          initialValuesRef.current = {
+            [BUSINESS_NAME]: '',
+            [UEN]: '',
+            [UNIT_NUMBER]: '',
+            [BUILDING_NAME]: '',
+            [STREET_ADDRESS]: '',
+            [POSTAL_CODE]: '',
+          };
         }
 
         setIsLoading(false);
@@ -180,7 +236,104 @@ export default function StampSetup() {
 
     retrieveInformation();
   
-  }, [])
+  }, []);
+
+  // Handle browser refresh/close/back button warning
+  useEffect(() => {
+    const checkUnsavedChanges = () => {
+      if (!isEdit) return false;
+      
+      const current = enteredValues;
+      const initial = initialValuesRef.current;
+      
+      return (
+        current[BUSINESS_NAME] !== initial[BUSINESS_NAME] ||
+        current[UEN] !== initial[UEN] ||
+        current[UNIT_NUMBER] !== initial[UNIT_NUMBER] ||
+        current[BUILDING_NAME] !== initial[BUILDING_NAME] ||
+        current[STREET_ADDRESS] !== initial[STREET_ADDRESS] ||
+        current[POSTAL_CODE] !== initial[POSTAL_CODE]
+      );
+    };
+
+    // Handle browser refresh, close, and back button
+    const handleBeforeUnload = (e) => {
+      if (checkUnsavedChanges()) {
+        e.preventDefault();
+        // Modern browsers ignore custom messages, but we can still show a generic warning
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+
+    // Handle browser back/forward button using history manipulation
+    const handlePopState = (e) => {
+      if (checkUnsavedChanges()) {
+        const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave? Your changes will be lost.');
+        if (!confirmed) {
+          // Push state back to prevent navigation
+          window.history.pushState(null, '', window.location.href);
+          historyStatePushedRef.current = true;
+        } else {
+          // User confirmed, allow navigation
+          historyStatePushedRef.current = false;
+        }
+      }
+    };
+
+    // Push a state to history when there are unsaved changes to intercept back button
+    const updateHistoryState = () => {
+      if (checkUnsavedChanges() && !historyStatePushedRef.current) {
+        window.history.pushState({ unsavedChanges: true }, '', window.location.href);
+        historyStatePushedRef.current = true;
+      } else if (!checkUnsavedChanges() && historyStatePushedRef.current) {
+        // If changes are saved, reset the flag
+        historyStatePushedRef.current = false;
+      }
+    };
+
+    // Intercept clicks on links to show confirmation
+    const handleLinkClick = (e) => {
+      if (checkUnsavedChanges()) {
+        // Check if it's a link that navigates away
+        const link = e.target.closest('a');
+        if (link && link.href) {
+          // Check if it's an internal link (same origin) or external
+          const isInternalLink = link.href.startsWith(window.location.origin) || link.href.startsWith('/');
+          const isAnchorLink = link.href.includes('#') && link.href.split('#')[0] === window.location.href.split('#')[0];
+          
+          // Only intercept if it's navigating away (not anchor links)
+          if (isInternalLink && !isAnchorLink) {
+            const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave? Your changes will be lost.');
+            if (!confirmed) {
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            }
+          }
+        }
+      }
+    };
+
+    // Add beforeunload event listener for browser refresh/close/back button
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    // Add popstate listener for back/forward button
+    window.addEventListener('popstate', handlePopState);
+
+    // Add click listener to intercept link clicks
+    document.addEventListener('click', handleLinkClick, true);
+
+    // Update history state when values change
+    updateHistoryState();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+      document.removeEventListener('click', handleLinkClick, true);
+    };
+  }, [enteredValues, isEdit]);
 
   return (
     <form
