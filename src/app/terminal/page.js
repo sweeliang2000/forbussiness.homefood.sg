@@ -1,13 +1,17 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import TerminalControlPanel from './TerminalControlPanel';
 import CustomerPhoneNumberControlPanel from './CustomerPhoneNumberControlPanel';
 import UserRewardsList from './UserRewardsList';
 import { getUserDataFromCookie } from '@/utility/cookieUtils';
+import apiClient from '@/utility/api';
+import { REFRESH_USER_COOKIE } from '@/utility/apiPaths';
 // Removed direct Supabase client import - using API route instead
 import styles from './page.module.css';
 
 const TerminalPage = () => {
+    const router = useRouter();
     const [phoneNumber, setPhoneNumber] = useState('');
     const [customerName, setCustomerName] = useState('');
     const [customerBirthday, setCustomerBirthday] = useState('');
@@ -22,6 +26,7 @@ const TerminalPage = () => {
     const [selectedReward, setSelectedReward] = useState(null);
     const [rewardsRefreshKey, setRewardsRefreshKey] = useState(0);
     const [customerUserId, setCustomerUserId] = useState(null);
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
     const handlePhoneNumberSubmit = async (phone) => {
         setPhoneNumber(phone);
@@ -89,8 +94,42 @@ const TerminalPage = () => {
         setSelectedReward(null);
     };
 
-    // Fetch shop details when component mounts
+    // Check authentication when component mounts
     useEffect(() => {
+        const checkAuthentication = async () => {
+            try {
+                await apiClient.get(REFRESH_USER_COOKIE);
+                console.log('[TERMINAL] User is authenticated');
+                setIsCheckingAuth(false);
+            } catch (error) {
+                // If user not found (404), redirect to login
+                if (error?.response?.status === 404) {
+                    const currentPath = typeof window !== 'undefined' 
+                        ? window.location.pathname + window.location.search 
+                        : '/terminal';
+                    const encodedPath = encodeURIComponent(currentPath);
+                    const message = encodeURIComponent('401 Unauthorized\n\nPlease login to access the terminal');
+                    router.push(`/login?message=${message}&redirect=${encodedPath}`);
+                    return;
+                }
+                // For other errors, also redirect to login
+                console.error('[TERMINAL] Authentication error:', error);
+                const currentPath = typeof window !== 'undefined' 
+                    ? window.location.pathname + window.location.search 
+                    : '/terminal';
+                const encodedPath = encodeURIComponent(currentPath);
+                const message = encodeURIComponent('401 Unauthorized\n\nPlease login to access the terminal');
+                router.push(`/login?message=${message}&redirect=${encodedPath}`);
+            }
+        };
+
+        checkAuthentication();
+    }, [router]);
+
+    // Fetch shop details when component mounts (only after auth check passes)
+    useEffect(() => {
+        if (isCheckingAuth) return; // Wait for auth check to complete
+
         const fetchShopDetails = async () => {
             try {
                 // Get shop_id and user info from cookie
@@ -137,7 +176,25 @@ const TerminalPage = () => {
         };
 
         fetchShopDetails();
-    }, []);
+    }, [isCheckingAuth]);
+
+    // Show loading state while checking authentication
+    if (isCheckingAuth) {
+        return (
+            <div className={styles.container}>
+                <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    height: '100vh',
+                    flexDirection: 'column',
+                    gap: '1rem'
+                }}>
+                    <p>Checking authentication...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.container}>
