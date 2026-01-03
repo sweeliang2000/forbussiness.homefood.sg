@@ -1,10 +1,11 @@
 'use client';
 import Link from 'next/link';
 import styles from './sidebar.module.css';
-import { LuClipboardList } from 'react-icons/lu';
-import { AiOutlineMessage } from 'react-icons/ai';
+import { LuClipboardList, LuLayoutDashboard, LuCreditCard } from 'react-icons/lu';
+import { AiOutlineMessage, AiOutlineLineChart } from 'react-icons/ai';
 import { BsGift } from 'react-icons/bs';
 import { FaRegStar } from "react-icons/fa6";
+import { RiBubbleChartLine } from "react-icons/ri";
 import { FaMobileAlt } from 'react-icons/fa';
 import { RiUserSettingsLine, RiNewspaperLine } from 'react-icons/ri';
 import { PiCashRegister } from "react-icons/pi";
@@ -192,28 +193,28 @@ export default function Sidebar({
 
                     <li className={section == 'ratings' ? styles.active : ''}>
                         <Link href='/app/ratings'>
-                        <FaRegStar className={styles.icon} />
+                        <LuLayoutDashboard className={styles.icon} />
                             <span>Overview</span>
                         </Link>
                     </li>
 
                     <li className={section == 'ratings' ? styles.active : ''}>
                         <Link href='/app/ratings'>
-                        <FaRegStar className={styles.icon} />
+                        <AiOutlineLineChart className={styles.icon} />
                             <span>Activity</span>
                         </Link>
                     </li>
 
                     <li className={section == 'ratings' ? styles.active : ''}>
                         <Link href='/app/ratings'>
-                        <FaRegStar className={styles.icon} />
+                        <RiBubbleChartLine className={styles.icon} />
                             <span>Customers and Retentions</span>
                         </Link>
                     </li>
 
                     <li className={section == 'ratings' ? styles.active : ''}>
                         <Link href='/app/ratings'>
-                        <FaRegStar className={styles.icon} />
+                        <LuCreditCard className={styles.icon} />
                             <span>Card Distributions</span>
                         </Link>
                     </li>
