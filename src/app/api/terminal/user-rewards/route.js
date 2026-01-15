@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { getUserDataFromRequest } from '@/utility/serverCookieUtils';
 
 // Get Supabase configuration from environment variables (server-side only)
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -162,6 +163,11 @@ export async function PATCH(request) {
       );
     }
 
+    // Get user data from cookies (email and ID)
+    const userData = getUserDataFromRequest(request);
+    const performedByUserId = userData?.user_id || null;
+    const performedByEmail = userData?.email || null;
+
     console.log('Updating reward status to Redeemed for reward_id:', reward_id);
 
     // Get current server datetime in ISO 8601 format (UTC)
@@ -221,8 +227,8 @@ export async function PATCH(request) {
           reward_id: data.id,
           reward_name: data.reward_name || null,
           reward_description: data.reward_description || null,
-          performed_by: null,
-          performed_by_name: null,
+          performed_by: performedByUserId,
+          performed_by_name: performedByEmail,
           notes: null,
           created_at: now
         });

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { getUserDataFromRequest } from '@/utility/serverCookieUtils';
 
 // Get Supabase configuration from environment variables (server-side only)
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -36,6 +37,11 @@ export async function POST(request) {
       performed_by_name,
       notes
     } = body;
+
+    // Get user data from cookies (email and ID)
+    const userData = getUserDataFromRequest(request);
+    const performedByUserId = userData?.user_id || null;
+    const performedByEmail = userData?.email || null;
 
     // Validate required fields
     if (!shop_id || !phone_number || stamp_change === undefined) {
@@ -100,7 +106,7 @@ export async function POST(request) {
 
       // Log transaction to terminal_logs
       // Use actualStampChange (adjusted if redemption would go below 0)
-      // Valid transaction_type values: 'stamp_collection', 'stamp_redemption', 'reward_collection', 'stamp_deduction'
+      // Valid transaction_type values: 'stamp_collection', 'reward_redemption', 'reward_collection', 'stamp_deduction'
       const transactionType = actualStampChange >= 0 ? 'stamp_collection' : 'stamp_deduction';
       const { error: logError } = await supabase
         .from('terminal_logs')
@@ -113,8 +119,8 @@ export async function POST(request) {
           reward_id: null,
           reward_name: null,
           reward_description: null,
-          performed_by: null,
-          performed_by_name: performed_by_name || null,
+          performed_by: performedByUserId,
+          performed_by_name: performedByEmail,
           notes: notes || null,
           created_at: nowUTC
         });
@@ -190,8 +196,8 @@ export async function POST(request) {
           reward_id: null,
           reward_name: null,
           reward_description: null,
-          performed_by: performed_by || null,
-          performed_by_name: performed_by_name || null,
+          performed_by: performedByUserId,
+          performed_by_name: performedByEmail,
           notes: notes || null,
           created_at: nowUTC
         });
