@@ -33,7 +33,7 @@
 .tableContainer {
     overflow-x: scroll;
     background-color: white;
-    max-width: 75rem;
+    max-width: var(--max-width);
     margin:  0 auto;
     width: 100%;
 }
