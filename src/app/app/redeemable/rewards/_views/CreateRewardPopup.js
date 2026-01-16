@@ -8,6 +8,8 @@ import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown'
 import { InputAdornment } from '@mui/material';
 import { useEffect, useState, useRef } from 'react';
 import Switch from '@mui/material/Switch';
+import MDEditor from '@uiw/react-md-editor';
+import '@uiw/react-md-editor/markdown-editor.css';
 
 const NEW_JOIN = { value: 'newJoin', title: 'New Join' }
 const STAMP_REWARD = { value: 'stampReward', title: 'Stamp Reward' }
@@ -24,6 +26,7 @@ const REWARD_ID_KEY = 'id';
 const REWARD_TYPE_KEY = 'type';
 const REWARD_NAME_KEY = 'name';
 const REWARD_DESCRIPTION_KEY = 'description';
+const REWARD_TERMS_KEY = 'terms_and_conditions';
 const REWARD_IMAGE_KEY = 'image';
 const REWARD_EXPIRY_TYPE_KEY = 'expiry_type';
 const REWARD_EXPIRY_KEY = 'expiry';
@@ -40,7 +43,6 @@ const CreateRewardPopup = ({
     onSubmit
 }) => {
     const [isRewardImageOpen, setIsRewardImageOpen] = useState(false);
-    const [isExpiryOpen, setIsExpiryOpen] = useState(false);
     const [isRewardIdOpen, setRewardIdOpen] = useState(false);
     const [isRewardTagsOpen, setIsRewardTagOpen] = useState(false);
     const [rewardImage, setRewardImage] = useState([]);
@@ -48,7 +50,6 @@ const CreateRewardPopup = ({
     // Store initial values to compare for unsaved changes
     const initialRewardDataRef = useRef(null);
     const initialRewardImageRef = useRef(null);
-    const initialIsExpiryOpenRef = useRef(null);
     const initialIsRewardIdOpenRef = useRef(null);
     const initialIsRewardTagsOpenRef = useRef(null);
     const initialIsRewardImageOpenRef = useRef(null);
@@ -58,6 +59,7 @@ const CreateRewardPopup = ({
         [REWARD_TYPE_KEY]: 'stampReward',
         [REWARD_NAME_KEY]: '',
         [REWARD_DESCRIPTION_KEY]: '',
+        [REWARD_TERMS_KEY]: '',
         [REWARD_EXPIRY_TYPE_KEY]: 'expiryInDays',
         [REWARD_CUSTOM_ID_KEY]: '',
         [REWARD_TAGS_KEY]: '',
@@ -95,7 +97,6 @@ const CreateRewardPopup = ({
             // Update initial values after successful save (normalized)
             initialRewardDataRef.current = normalizeRewardData(rewardData);
             initialRewardImageRef.current = JSON.parse(JSON.stringify(rewardImage));
-            initialIsExpiryOpenRef.current = isExpiryOpen;
             initialIsRewardIdOpenRef.current = isRewardIdOpen;
             initialIsRewardTagsOpenRef.current = isRewardTagsOpen;
             initialIsRewardImageOpenRef.current = isRewardImageOpen;
@@ -111,6 +112,7 @@ const CreateRewardPopup = ({
             [REWARD_TYPE_KEY]: data[REWARD_TYPE_KEY] || 'stampReward',
             [REWARD_NAME_KEY]: data[REWARD_NAME_KEY] || '',
             [REWARD_DESCRIPTION_KEY]: data[REWARD_DESCRIPTION_KEY] || '',
+            [REWARD_TERMS_KEY]: data[REWARD_TERMS_KEY] === undefined ? '' : (data[REWARD_TERMS_KEY] || ''),
             [REWARD_EXPIRY_TYPE_KEY]: data[REWARD_EXPIRY_TYPE_KEY] || 'expiryInDays',
             [REWARD_EXPIRY_KEY]: data[REWARD_EXPIRY_KEY] === undefined ? '' : (data[REWARD_EXPIRY_KEY] || ''),
             [REWARD_CUSTOM_ID_KEY]: data[REWARD_CUSTOM_ID_KEY] === undefined ? '' : (data[REWARD_CUSTOM_ID_KEY] || ''),
@@ -140,7 +142,6 @@ const CreateRewardPopup = ({
         
         // Check toggle states
         const togglesChanged = (
-            isExpiryOpen !== initialIsExpiryOpenRef.current ||
             isRewardIdOpen !== initialIsRewardIdOpenRef.current ||
             isRewardTagsOpen !== initialIsRewardTagsOpenRef.current ||
             isRewardImageOpen !== initialIsRewardImageOpenRef.current
@@ -169,6 +170,7 @@ const CreateRewardPopup = ({
                 [REWARD_TYPE_KEY]: selectedReward.type || 'stampReward',
                 [REWARD_NAME_KEY]: selectedReward.name || '',
                 [REWARD_DESCRIPTION_KEY]: selectedReward.description || '',
+                [REWARD_TERMS_KEY]: selectedReward.terms_and_conditions === undefined ? '' : selectedReward.terms_and_conditions,
                 [REWARD_EXPIRY_TYPE_KEY]: selectedReward.expiry_type || 'expiryInDays',
                 [REWARD_EXPIRY_KEY]: selectedReward.expiry === undefined ? '' : selectedReward.expiry,
                 [REWARD_CUSTOM_ID_KEY]: selectedReward.custom_id === undefined ? '' : selectedReward.custom_id,
@@ -184,12 +186,10 @@ const CreateRewardPopup = ({
                 [{ url: selectedReward.image.url, name: selectedReward.name, file: null }];
             setRewardImage(loadedImage);
 
-            const loadedIsExpiryOpen = selectedReward.expiry !== undefined;
-            const loadedIsRewardIdOpen = selectedReward.custom_id !== undefined;
-            const loadedIsRewardTagsOpen = selectedReward.tags !== undefined;
+            const loadedIsRewardIdOpen = selectedReward.custom_id !== undefined && selectedReward.custom_id !== '' && selectedReward.custom_id.trim() !== '';
+            const loadedIsRewardTagsOpen = selectedReward.tags !== undefined && selectedReward.tags !== '' && selectedReward.tags.trim() !== '';
             const loadedIsRewardImageOpen = true;
 
-            setIsExpiryOpen(loadedIsExpiryOpen);
             setRewardIdOpen(loadedIsRewardIdOpen);
             setIsRewardTagOpen(loadedIsRewardTagsOpen);
             setIsRewardImageOpen(loadedIsRewardImageOpen);
@@ -197,7 +197,6 @@ const CreateRewardPopup = ({
             // Store initial values for comparison (normalized)
             initialRewardDataRef.current = normalizeRewardData(loadedData);
             initialRewardImageRef.current = JSON.parse(JSON.stringify(loadedImage));
-            initialIsExpiryOpenRef.current = loadedIsExpiryOpen;
             initialIsRewardIdOpenRef.current = loadedIsRewardIdOpen;
             initialIsRewardTagsOpenRef.current = loadedIsRewardTagsOpen;
             initialIsRewardImageOpenRef.current = loadedIsRewardImageOpen;
@@ -207,6 +206,7 @@ const CreateRewardPopup = ({
                 [REWARD_TYPE_KEY]: 'stampReward',
                 [REWARD_NAME_KEY]: '',
                 [REWARD_DESCRIPTION_KEY]: '',
+                [REWARD_TERMS_KEY]: '',
                 [REWARD_EXPIRY_TYPE_KEY]: 'expiryInDays',
                 [REWARD_EXPIRY_KEY]: '',
                 [REWARD_CUSTOM_ID_KEY]: '',
@@ -216,7 +216,6 @@ const CreateRewardPopup = ({
             
             setRewardData(defaultData);
             setRewardImage([]);
-            setIsExpiryOpen(false);
             setRewardIdOpen(false);
             setIsRewardTagOpen(false);
             setIsRewardImageOpen(false);
@@ -224,12 +223,26 @@ const CreateRewardPopup = ({
             // Store initial values for comparison (normalized)
             initialRewardDataRef.current = normalizeRewardData(defaultData);
             initialRewardImageRef.current = [];
-            initialIsExpiryOpenRef.current = false;
             initialIsRewardIdOpenRef.current = false;
             initialIsRewardTagsOpenRef.current = false;
             initialIsRewardImageOpenRef.current = false;
         }
     }, [selectedReward, isOpen]);
+
+    // Automatically turn off toggles when values become empty
+    useEffect(() => {
+        if (!isOpen) return;
+
+        // Turn off Reward ID toggle if value is empty
+        if (isRewardIdOpen && (!rewardData[REWARD_CUSTOM_ID_KEY] || rewardData[REWARD_CUSTOM_ID_KEY].trim() === '')) {
+            setRewardIdOpen(false);
+        }
+
+        // Turn off Tags toggle if value is empty
+        if (isRewardTagsOpen && (!rewardData[REWARD_TAGS_KEY] || rewardData[REWARD_TAGS_KEY].trim() === '')) {
+            setIsRewardTagOpen(false);
+        }
+    }, [rewardData[REWARD_CUSTOM_ID_KEY], rewardData[REWARD_TAGS_KEY], isOpen, isRewardIdOpen, isRewardTagsOpen]);
 
     // Handle browser refresh/close/back button warning when popup is open
     useEffect(() => {
@@ -260,7 +273,7 @@ const CreateRewardPopup = ({
             window.removeEventListener('beforeunload', handleBeforeUnload);
             window.removeEventListener('popstate', handlePopState);
         };
-    }, [isOpen, rewardData, rewardImage, isExpiryOpen, isRewardIdOpen, isRewardTagsOpen, isRewardImageOpen]);
+    }, [isOpen, rewardData, rewardImage, isRewardIdOpen, isRewardTagsOpen, isRewardImageOpen]);
 
 
     return (
@@ -310,16 +323,44 @@ const CreateRewardPopup = ({
                     onChange={(event) => { updateValue(REWARD_NAME_KEY, event.target.value) }}
                 />
 
-                <FormTextField
-                    title='Description*'
-                    subtitle='Provide a details instruction of the reward and what is minimum requirement to use.'
-                    id='description'
-                    name='description'
-                    helperText={''}
-                    error={false}
-                    value={rewardData[REWARD_DESCRIPTION_KEY]}
-                    onChange={(event) => { updateValue(REWARD_DESCRIPTION_KEY, event.target.value) }}
-                />
+                <section>
+                    <FieldHeader
+                        title='Description*'
+                        description='Provide a details instruction of the reward and what is minimum requirement to use. Supports markdown formatting (bold, lists, etc.).'
+                        type='h2'
+                        hClassName={styles.h2}
+                    />
+                    <div className={styles.markdownEditorSmall}>
+                        <MDEditor
+                            value={rewardData[REWARD_DESCRIPTION_KEY] || ''}
+                            onChange={(value) => { updateValue(REWARD_DESCRIPTION_KEY, value || '') }}
+                            preview='edit'
+                            hideToolbar={false}
+                            visibleDragBar={false}
+                            data-color-mode="light"
+                            height={120}
+                        />
+                    </div>
+                </section>
+
+                <section>
+                    <FieldHeader
+                        title='Terms and Conditions'
+                        description='(Optional) Additional terms and conditions for this reward. Supports markdown formatting (bold, lists, etc.).'
+                        type='h2'
+                        hClassName={styles.h2}
+                    />
+                    <div className={styles.markdownEditor}>
+                        <MDEditor
+                            value={rewardData[REWARD_TERMS_KEY] || ''}
+                            onChange={(value) => { updateValue(REWARD_TERMS_KEY, value || '') }}
+                            preview='edit'
+                            hideToolbar={false}
+                            visibleDragBar={false}
+                            data-color-mode="light"
+                        />
+                    </div>
+                </section>
 
                 <section>
                     <div className={styles.withToggleContainer}>
@@ -356,36 +397,27 @@ const CreateRewardPopup = ({
                     />
 
                     <div>
-                        <div className={styles.withToggleContainer}>
-                            <FieldHeader
-                                title='Expiry'
-                                description='The period of time the reward voucher should expire after (disappear from the user&#39;s app), calculated from when it is issued to the member. '
-                                type='h2'
-                                hClassName={styles.h2}
-                            />
+                        <FieldHeader
+                            title='Expiry'
+                            description='The period of time the reward voucher should expire after (disappear from the user&#39;s app), calculated from when it is issued to the member. '
+                            type='h2'
+                            hClassName={styles.h2}
+                        />
 
-                            <Switch
-                                size='small'
-                                checked={isExpiryOpen}
-                                onChange={() => { setIsExpiryOpen((prev) => !prev) }}
-                            />
-                        </div>
-
-                        {
-                            isExpiryOpen && <FullWidthDropdown
-                                options={EXPIRY_TYPE}
-                                labelId='reward_type'
-                                id='reward_type'
-                                value={rewardData[REWARD_EXPIRY_TYPE_KEY]}
-                                onChange={(event) => { updateValue(REWARD_EXPIRY_TYPE_KEY, event.target.value) }}
-                                className={styles.field}
-                            />
-                        }
+                        <FullWidthDropdown
+                            options={EXPIRY_TYPE}
+                            labelId='reward_type'
+                            id='reward_type'
+                            value={rewardData[REWARD_EXPIRY_TYPE_KEY]}
+                            onChange={(event) => { updateValue(REWARD_EXPIRY_TYPE_KEY, event.target.value) }}
+                            className={styles.field}
+                        />
 
                         {
-                            (isExpiryOpen && rewardData[REWARD_EXPIRY_TYPE_KEY] === 'expiryInDays') && <FormTextField
+                            rewardData[REWARD_EXPIRY_TYPE_KEY] === 'expiryInDays' && <FormTextField
                                 id={REWARD_EXPIRY_KEY}
                                 name={REWARD_EXPIRY_KEY}
+                                style={{ marginTop: '12px' }}
                                 helperText={''}
                                 error={false}
                                 type='number'
@@ -414,6 +446,7 @@ const CreateRewardPopup = ({
                                 size='small'
                                 checked={isRewardIdOpen}
                                 onChange={() => { setRewardIdOpen((prev) => !prev) }}
+                                disabled={selectedReward !== null && (!rewardData[REWARD_CUSTOM_ID_KEY] || rewardData[REWARD_CUSTOM_ID_KEY].trim() === '')}
                             />
                         </div>
 
@@ -444,6 +477,7 @@ const CreateRewardPopup = ({
                                 size='small'
                                 checked={isRewardTagsOpen}
                                 onChange={() => { setIsRewardTagOpen((prev) => !prev) }}
+                                disabled={selectedReward !== null && (!rewardData[REWARD_TAGS_KEY] || rewardData[REWARD_TAGS_KEY].trim() === '')}
                             />
                         </div>
 

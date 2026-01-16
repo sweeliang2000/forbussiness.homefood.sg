@@ -40,3 +40,31 @@
 .field {
     margin-top: 12px;
 }
+
+.markdownEditor {
+    margin-top: 8px;
+}
+
+.markdownEditorSmall {
+    margin-top: 8px;
+}
+
+.markdownEditor :global(.w-md-editor),
+.markdownEditorSmall :global(.w-md-editor) {
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.23);
+}
+
+.markdownEditor :global(.w-md-editor:hover),
+.markdownEditorSmall :global(.w-md-editor:hover) {
+    border-color: rgba(0, 0, 0, 0.87);
+}
+
+.markdownEditor :global(.w-md-editor-text),
+.markdownEditorSmall :global(.w-md-editor-text) {
+    min-height: 200px;
+}
+
+.markdownEditorSmall :global(.w-md-editor-text) {
+    min-height: 80px;
+}
