@@ -92,8 +92,8 @@ const CreateRewardPopup = ({
         if (onSubmit) {
             await onSubmit(formDataWithImage);
             
-            // Update initial values after successful save
-            initialRewardDataRef.current = JSON.parse(JSON.stringify(rewardData));
+            // Update initial values after successful save (normalized)
+            initialRewardDataRef.current = normalizeRewardData(rewardData);
             initialRewardImageRef.current = JSON.parse(JSON.stringify(rewardImage));
             initialIsExpiryOpenRef.current = isExpiryOpen;
             initialIsRewardIdOpenRef.current = isRewardIdOpen;
@@ -103,12 +103,30 @@ const CreateRewardPopup = ({
         console.log(rewardData)
     }
 
+    // Normalize reward data for comparison (ensure consistent structure)
+    const normalizeRewardData = (data) => {
+        if (!data) return null;
+        return {
+            [REWARD_ID_KEY]: data[REWARD_ID_KEY] || '',
+            [REWARD_TYPE_KEY]: data[REWARD_TYPE_KEY] || 'stampReward',
+            [REWARD_NAME_KEY]: data[REWARD_NAME_KEY] || '',
+            [REWARD_DESCRIPTION_KEY]: data[REWARD_DESCRIPTION_KEY] || '',
+            [REWARD_EXPIRY_TYPE_KEY]: data[REWARD_EXPIRY_TYPE_KEY] || 'expiryInDays',
+            [REWARD_EXPIRY_KEY]: data[REWARD_EXPIRY_KEY] === undefined ? '' : (data[REWARD_EXPIRY_KEY] || ''),
+            [REWARD_CUSTOM_ID_KEY]: data[REWARD_CUSTOM_ID_KEY] === undefined ? '' : (data[REWARD_CUSTOM_ID_KEY] || ''),
+            [REWARD_TAGS_KEY]: data[REWARD_TAGS_KEY] === undefined ? '' : (data[REWARD_TAGS_KEY] || ''),
+            [REWARD_IS_ACTIVATE]: data[REWARD_IS_ACTIVATE] === undefined ? false : data[REWARD_IS_ACTIVATE]
+        };
+    };
+
     // Check if there are unsaved changes
     const checkUnsavedChanges = () => {
         if (initialRewardDataRef.current === null) return false; // Not initialized yet
         
-        // Check reward data
-        const dataChanged = JSON.stringify(rewardData) !== JSON.stringify(initialRewardDataRef.current);
+        // Normalize and compare reward data
+        const normalizedCurrent = normalizeRewardData(rewardData);
+        const normalizedInitial = normalizeRewardData(initialRewardDataRef.current);
+        const dataChanged = JSON.stringify(normalizedCurrent) !== JSON.stringify(normalizedInitial);
         
         // Check reward image (compare by URL, name, or file presence)
         const normalizeImage = (img) => ({
@@ -151,17 +169,15 @@ const CreateRewardPopup = ({
                 [REWARD_TYPE_KEY]: selectedReward.type || 'stampReward',
                 [REWARD_NAME_KEY]: selectedReward.name || '',
                 [REWARD_DESCRIPTION_KEY]: selectedReward.description || '',
-                [REWARD_EXPIRY_TYPE_KEY]: 'expiryInDays',
+                [REWARD_EXPIRY_TYPE_KEY]: selectedReward.expiry_type || 'expiryInDays',
                 [REWARD_EXPIRY_KEY]: selectedReward.expiry === undefined ? '' : selectedReward.expiry,
                 [REWARD_CUSTOM_ID_KEY]: selectedReward.custom_id === undefined ? '' : selectedReward.custom_id,
                 [REWARD_TAGS_KEY]: selectedReward.tags === undefined ? '' : selectedReward.tags,
                 [REWARD_IS_ACTIVATE]: selectedReward.is_activate === undefined ? false : selectedReward.is_activate
             };
             
-            setRewardData(prev => ({
-                ...prev,
-                ...loadedData
-            }));
+            // Set state directly (not merging) to ensure consistent structure
+            setRewardData(loadedData);
 
             const loadedImage = selectedReward.image === undefined ?
                 [] :
@@ -178,8 +194,8 @@ const CreateRewardPopup = ({
             setIsRewardTagOpen(loadedIsRewardTagsOpen);
             setIsRewardImageOpen(loadedIsRewardImageOpen);
 
-            // Store initial values for comparison
-            initialRewardDataRef.current = JSON.parse(JSON.stringify(loadedData));
+            // Store initial values for comparison (normalized)
+            initialRewardDataRef.current = normalizeRewardData(loadedData);
             initialRewardImageRef.current = JSON.parse(JSON.stringify(loadedImage));
             initialIsExpiryOpenRef.current = loadedIsExpiryOpen;
             initialIsRewardIdOpenRef.current = loadedIsRewardIdOpen;
@@ -205,8 +221,8 @@ const CreateRewardPopup = ({
             setIsRewardTagOpen(false);
             setIsRewardImageOpen(false);
 
-            // Store initial values for comparison
-            initialRewardDataRef.current = JSON.parse(JSON.stringify(defaultData));
+            // Store initial values for comparison (normalized)
+            initialRewardDataRef.current = normalizeRewardData(defaultData);
             initialRewardImageRef.current = [];
             initialIsExpiryOpenRef.current = false;
             initialIsRewardIdOpenRef.current = false;
