@@ -1,4 +1,5 @@
 import { Button } from '@mui/material';
+import Link from 'next/link';
 import styles from './ChecklistCell.module.css';
 import { FaCheck } from "react-icons/fa6";
 import { MdClose } from "react-icons/md";
@@ -6,11 +7,32 @@ import { MdClose } from "react-icons/md";
 const ChecklistCell = ({
     title,
     description,
-    isCompleted
+    isCompleted,
+    editLink
 }) => {
-    return (
+    const EditButton = editLink ? (
+        <Link href={editLink} style={{ textDecoration: 'none' }} onClick={(e) => e.stopPropagation()}>
+            <Button
+                variant='contained'
+                color='primary'
+                className={styles.editButton}
+            >
+                Edit
+            </Button>
+        </Link>
+    ) : (
+        <Button
+            type='submit'
+            variant='contained'
+            color='primary'
+            className={styles.editButton}
+        >
+            Edit
+        </Button>
+    );
 
-        <div className={styles.checklistItem}>
+    const content = (
+        <>
             {
                 isCompleted ?
                     <div className={styles.checkedContainer}>
@@ -30,20 +52,28 @@ const ChecklistCell = ({
                 </div>
 
                 {!isCompleted && <div>
-                    <Button
-                        type='submit'
-                        variant='contained'
-                        color='primary'
-                        // onClick={loginNowHandler}
-                        className={styles.editButton}
-                    >
-                        Edit
-                    </Button>
+                    {EditButton}
                 </div>}
             </div>
+        </>
+    );
 
+    // If editLink is provided, make the entire item clickable
+    if (editLink) {
+        return (
+            <Link href={editLink} className={styles.checklistItemLink}>
+                <div className={styles.checklistItem}>
+                    {content}
+                </div>
+            </Link>
+        );
+    }
+
+    return (
+        <div className={styles.checklistItem}>
+            {content}
         </div>
-    )
+    );
 };
 
 export default ChecklistCell

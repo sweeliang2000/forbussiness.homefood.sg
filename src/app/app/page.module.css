@@ -1,0 +1,393 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 24px;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Purchase Banner */
+.banner {
+    background: linear-gradient(135deg, #0E46A3 0%, #0d3d91 100%);
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: 0 2px 8px rgba(14, 70, 163, 0.2);
+}
+
+.bannerContent {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.bannerIcon {
+    font-size: 24px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.bannerText {
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Section Titles */
+.sectionTitle {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--on-primary);
+    margin: 0 0 20px 0;
+}
+
+/* Quick Links and Checklist Section */
+.quickLinksAndChecklistSection {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+}
+
+/* Quick Links Section */
+.quickLinksSection {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.quickLinksGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    flex: 1;
+}
+
+/* Release Checklist Section */
+.checklistSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    height: 100%;
+}
+
+.checklistCard {
+    padding: 16px 24px 24px 24px !important;
+    margin-top: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.checklistCard :global(.container) {
+    margin-top: 0 !important;
+}
+
+.checklistCard :global(.container h2) {
+    margin-bottom: 4px !important;
+}
+
+.checklistList {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    flex: 1;
+    margin-top: 16px;
+}
+
+.quickLinkCard {
+    background-color: var(--primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+}
+
+.quickLinkCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: var(--accent-color);
+}
+
+.quickLinkIcon {
+    font-size: 24px;
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.quickLinkContent {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.quickLinkTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--on-primary);
+    margin: 0;
+}
+
+.quickLinkDescription {
+    font-size: 0.85rem;
+    color: var(--on-primary-light2);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Customer Stats Section */
+.statsSection {
+    display: flex;
+    flex-direction: column;
+}
+
+.statsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.viewMoreLink {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+}
+
+.viewMoreLink:hover {
+    color: var(--link-hover-color);
+    text-decoration: underline;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.statCard {
+    padding: 24px !important;
+}
+
+.statContent {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.statLabel {
+    font-size: 0.9rem;
+    color: var(--on-primary-light2);
+    margin: 0;
+    font-weight: 500;
+}
+
+.statValue {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--on-primary);
+    margin: 0;
+    font-family: var(--font-raleway);
+}
+
+/* Bottom Section */
+.bottomSection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Updates Card */
+.updatesCard {
+    padding: 24px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.updatesHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.updatesIcon {
+    font-size: 24px;
+    color: var(--accent-color);
+}
+
+.updatesTitle {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--on-primary);
+    margin: 0;
+}
+
+.updatesContent {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.updatesText {
+    font-size: 0.95rem;
+    color: var(--on-primary-light2);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.updatesList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.updateItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background-color: var(--background);
+    border-radius: 8px;
+}
+
+.updateItemIcon {
+    font-size: 20px;
+    color: var(--accent-color);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.updateItemText {
+    font-size: 0.9rem;
+    color: var(--on-primary-light2);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Contact Card */
+.contactCard {
+    padding: 24px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.contactHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.contactIcon {
+    font-size: 24px;
+    color: var(--accent-color);
+}
+
+.contactTitle {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--on-primary);
+    margin: 0;
+}
+
+.contactContent {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.contactText {
+    font-size: 0.95rem;
+    color: var(--on-primary-light2);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.contactActions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.contactButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background-color: var(--accent-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.contactButton:hover {
+    background-color: #0d3d91;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(14, 70, 163, 0.3);
+}
+
+.contactButtonIcon {
+    font-size: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .quickLinksAndChecklistSection {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 16px;
+        gap: 24px;
+    }
+
+    .quickLinksAndChecklistSection {
+        grid-template-columns: 1fr;
+    }
+
+    .quickLinksGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .bottomSection {
+        grid-template-columns: 1fr;
+    }
+
+    .statsHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .bannerContent {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .bannerText {
+        font-size: 0.9rem;
+    }
+}
