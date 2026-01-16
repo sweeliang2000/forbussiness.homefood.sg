@@ -80,8 +80,11 @@ const CreateRewardPopup = ({
         }
 
         // Prepare form data with image for both create and update
+        // If toggles are off, send empty strings for Reward ID and Tags
         const formDataWithImage = {
             ...rewardData,
+            [REWARD_CUSTOM_ID_KEY]: isRewardIdOpen ? rewardData[REWARD_CUSTOM_ID_KEY] : '',
+            [REWARD_TAGS_KEY]: isRewardTagsOpen ? rewardData[REWARD_TAGS_KEY] : '',
             image: rewardImage.length > 0 ? rewardImage[0] : null
         };
         
@@ -433,7 +436,8 @@ const CreateRewardPopup = ({
                         }
                     </div>
 
-                    <div className={styles.settingContainer}>
+                    {/* TODO: Include some advance analytics to include this features */}
+                    {/* <div className={styles.settingContainer}>
                         <div className={styles.withToggleContainer}>
                             <FieldHeader
                                 title='Reward ID'
@@ -492,7 +496,7 @@ const CreateRewardPopup = ({
                                 onChange={(event) => { updateValue(REWARD_TAGS_KEY, event.target.value) }}
                             />
                         }
-                    </div>
+                    </div> */}
 
                     {
                         rewardData[REWARD_TYPE_KEY] === NEW_JOIN.value && <div className={`${styles.withToggleContainer} ${styles.settingContainer}`}>
