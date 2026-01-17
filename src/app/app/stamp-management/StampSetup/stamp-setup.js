@@ -663,21 +663,17 @@ export default function StampSetup() {
       align: 'right',
       renderCell: (params) => (
         <div>
-          {isEdit && (
-            <>
-              <IconButton onClick={(event) => handleMenuOpen(event, params.row.id)}>
-                <MoreVertIcon />
-              </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl) && selectedRowId === params.row.id}
-                onClose={handleMenuClose}
-              >
-                <MenuItem onClick={handleEdit}>Edit</MenuItem>
-                {/* <MenuItem onClick={handleDelete} className={styles.deleteBtn}>Delete</MenuItem> */}
-              </Menu>
-            </>
-          )}
+          <IconButton onClick={(event) => handleMenuOpen(event, params.row.id)}>
+            <MoreVertIcon />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl) && selectedRowId === params.row.id}
+            onClose={handleMenuClose}
+          >
+            <MenuItem onClick={handleEdit}>Edit</MenuItem>
+            {/* <MenuItem onClick={handleDelete} className={styles.deleteBtn}>Delete</MenuItem> */}
+          </Menu>
         </div>
       ),
     },

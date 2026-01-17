@@ -46,6 +46,7 @@ const CreateRewardPopup = ({
     const [isRewardIdOpen, setRewardIdOpen] = useState(false);
     const [isRewardTagsOpen, setIsRewardTagOpen] = useState(false);
     const [rewardImage, setRewardImage] = useState([]);
+    const [errorMessage, setErrorMessage] = useState('');
 
     // Store initial values to compare for unsaved changes
     const initialRewardDataRef = useRef(null);
@@ -53,6 +54,9 @@ const CreateRewardPopup = ({
     const initialIsRewardIdOpenRef = useRef(null);
     const initialIsRewardTagsOpenRef = useRef(null);
     const initialIsRewardImageOpenRef = useRef(null);
+    const errorMessageRef = useRef(null);
+    const contentRef = useRef(null);
+    const hasErrorRef = useRef(false);
 
     const [rewardData, setRewardData] = useState({
         [REWARD_ID_KEY]: '',
@@ -72,12 +76,18 @@ const CreateRewardPopup = ({
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        event.stopPropagation(); // Prevent event bubbling
 
         // Basic validation
         if (!rewardData.name || !rewardData.description) {
-            alert('Please fill in all required fields (Reward name and Description)');
+            hasErrorRef.current = true;
+            setErrorMessage('Please fill in all required fields (Reward name and Description)');
             return;
         }
+
+        // Clear error message on successful validation
+        hasErrorRef.current = false;
+        setErrorMessage('');
 
         // Prepare form data with image for both create and update
         // If toggles are off, send empty strings for Reward ID and Tags
@@ -155,13 +165,38 @@ const CreateRewardPopup = ({
 
     // Handle popup close with unsaved changes check
     const handleClose = (value) => {
+        // Clear error when user explicitly closes
+        if (hasErrorRef.current || errorMessage) {
+            hasErrorRef.current = false;
+            setErrorMessage('');
+        }
+        
         if (checkUnsavedChanges()) {
             const confirmed = window.confirm('You have unsaved changes. Are you sure you want to close? Your changes will be lost.');
             if (!confirmed) {
-                return; // Don't close if user cancels
+                return false; // Don't close if user cancels
             }
         }
         setIsOpen(value);
+        return true; // Allow closing
+    };
+
+    // Custom onClose handler for Dialog component (called on backdrop click, ESC key, etc.)
+    const handleDialogClose = () => {
+        // Clear error when user explicitly closes
+        if (hasErrorRef.current || errorMessage) {
+            hasErrorRef.current = false;
+            setErrorMessage('');
+        }
+        
+        if (checkUnsavedChanges()) {
+            const confirmed = window.confirm('You have unsaved changes. Are you sure you want to close? Your changes will be lost.');
+            if (!confirmed) {
+                return false; // Don't close if user cancels
+            }
+        }
+        setIsOpen(false);
+        return true; // Allow closing
     };
 
     useEffect(() => {
@@ -278,6 +313,62 @@ const CreateRewardPopup = ({
         };
     }, [isOpen, rewardData, rewardImage, isRewardIdOpen, isRewardTagsOpen, isRewardImageOpen]);
 
+    // Scroll to top when error message appears
+    useEffect(() => {
+        if (errorMessage && contentRef.current) {
+            // Small delay to ensure DOM is updated
+            setTimeout(() => {
+                // Find the scrollable parent container by traversing up the DOM
+                let element = contentRef.current;
+                
+                while (element && element.parentElement) {
+                    const parent = element.parentElement;
+                    const style = window.getComputedStyle(parent);
+                    
+                    // Check if this element is scrollable
+                    const isScrollable = 
+                        (style.overflow === 'auto' || 
+                         style.overflow === 'scroll' || 
+                         style.overflowY === 'auto' || 
+                         style.overflowY === 'scroll') &&
+                        parent.scrollHeight > parent.clientHeight;
+                    
+                    if (isScrollable) {
+                        parent.scrollTo({ top: 0, behavior: 'smooth' });
+                        return;
+                    }
+                    
+                    // Also check for MUI Dialog Paper (common scrollable container)
+                    if (parent.classList.contains('MuiPaper-root') || 
+                        parent.classList.contains('MuiDialog-paper')) {
+                        parent.scrollTo({ top: 0, behavior: 'smooth' });
+                        return;
+                    }
+                    
+                    // Stop at dialog boundary
+                    if (parent.getAttribute('role') === 'dialog') {
+                        // Try to find and scroll the form element inside dialog
+                        const form = parent.querySelector('form');
+                        if (form && form.scrollHeight > form.clientHeight) {
+                            form.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                        return;
+                    }
+                    
+                    element = parent;
+                }
+            }, 150);
+        }
+    }, [errorMessage]);
+
+    // Clear error message when popup closes or when user starts typing
+    useEffect(() => {
+        if (!isOpen) {
+            hasErrorRef.current = false;
+            setErrorMessage('');
+        }
+    }, [isOpen]);
+
 
     return (
         <DialogPopup
@@ -287,6 +378,7 @@ const CreateRewardPopup = ({
             onDelete={onArchive}
             isOpen={isOpen}
             setIsOpen={handleClose}
+            onClose={handleDialogClose}
             PaperProps={{
                 sx: {
                     minHeight: '70vh',
@@ -295,7 +387,12 @@ const CreateRewardPopup = ({
             }}
             onSubmit={handleSubmit}
         >
-            <div className={styles.content}>
+            <div className={styles.content} ref={contentRef}>
+                {errorMessage && (
+                    <div className={styles.errorMessage} ref={errorMessageRef}>
+                        {errorMessage}
+                    </div>
+                )}
                 <section>
                     <FieldHeader
                         title='Reward type*'
@@ -323,7 +420,13 @@ const CreateRewardPopup = ({
                     helperText={''}
                     error={false}
                     value={rewardData[REWARD_NAME_KEY]}
-                    onChange={(event) => { updateValue(REWARD_NAME_KEY, event.target.value) }}
+                    onChange={(event) => { 
+                        updateValue(REWARD_NAME_KEY, event.target.value);
+                        if (errorMessage) {
+                            hasErrorRef.current = false;
+                            setErrorMessage('');
+                        }
+                    }}
                 />
 
                 <section>
@@ -336,10 +439,15 @@ const CreateRewardPopup = ({
                     <div className={styles.markdownEditorSmall}>
                         <MDEditor
                             value={rewardData[REWARD_DESCRIPTION_KEY] || ''}
-                            onChange={(value) => { updateValue(REWARD_DESCRIPTION_KEY, value || '') }}
+                            onChange={(value) => { 
+                                updateValue(REWARD_DESCRIPTION_KEY, value || '');
+                                if (errorMessage) {
+                                    hasErrorRef.current = false;
+                                    setErrorMessage('');
+                                }
+                            }}
                             preview='edit'
                             hideToolbar={false}
-                            visibleDragBar={false}
                             data-color-mode="light"
                             height={120}
                         />
@@ -359,7 +467,6 @@ const CreateRewardPopup = ({
                             onChange={(value) => { updateValue(REWARD_TERMS_KEY, value || '') }}
                             preview='edit'
                             hideToolbar={false}
-                            visibleDragBar={false}
                             data-color-mode="light"
                         />
                     </div>

@@ -13,16 +13,38 @@ const DialogPopup = ({
     onSubmit,
     deleteText,
     onDelete,
+    onClose,
     ...props
 }) => {
     const closeHandler = () => {
-        setIsOpen(false)
+        // If custom onClose is provided, use it; otherwise use default behavior
+        if (onClose) {
+            const shouldClose = onClose();
+            if (shouldClose !== false) {
+                setIsOpen(false);
+            }
+        } else {
+            setIsOpen(false);
+        }
+    }
+
+    // Handle MUI Dialog's onClose (called on backdrop click, ESC key, etc.)
+    const handleDialogClose = (event, reason) => {
+        // If custom onClose is provided, use it; otherwise use default behavior
+        if (onClose) {
+            const shouldClose = onClose();
+            if (shouldClose !== false) {
+                setIsOpen(false);
+            }
+        } else {
+            setIsOpen(false);
+        }
     }
 
     return (
         <Dialog
             open={isOpen}
-            onClose={closeHandler}
+            onClose={handleDialogClose}
             fullWidth
             {...props}
         >
