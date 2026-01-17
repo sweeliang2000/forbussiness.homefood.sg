@@ -17,8 +17,33 @@ import apiClient from '@/utility/api';
 import { STAMP_MANAGEMENT } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
-import MDEditor from '@uiw/react-md-editor';
+import MDEditor, { commands } from '@uiw/react-md-editor';
 import '@uiw/react-md-editor/markdown-editor.css';
+
+// Define custom commands: include bold, headings (title), and bullet points
+// Exclude: Link, Insert code, codeblock, comment, image, table, and open help
+const customCommands = [
+  commands.bold,
+  commands.divider,
+  commands.group(
+    [
+      commands.title1,
+      commands.title2,
+      commands.title3,
+      commands.title4,
+      commands.title5,
+      commands.title6,
+    ],
+    {
+      name: 'title',
+      groupName: 'title',
+      buttonProps: { 'aria-label': 'Title' },
+    }
+  ),
+  commands.divider,
+  commands.unorderedListCommand,
+  commands.orderedListCommand,
+];
 
 const NO_EXPIRATION = { value: 'noExpiration', title: 'No Expiration' };
 const END_OF_MONTH_EXPIRATION = { value: 'endOfMonth', title: 'End of Month' };
@@ -770,6 +795,7 @@ export default function StampSetup() {
                         <MDEditor
                           value={termsAndConditions || ''}
                           onChange={(value) => { 
+                            // value is in Markdown format (e.g., "# Heading", "**bold**")
                             if (!isEdit) return;
                             resetSaving();
                             setTermsAndConditions(value || '');
@@ -777,6 +803,7 @@ export default function StampSetup() {
                           preview='edit'
                           hideToolbar={!isEdit}
                           data-color-mode="light"
+                          commands={customCommands}
                         />
                       </div>
                     </div>

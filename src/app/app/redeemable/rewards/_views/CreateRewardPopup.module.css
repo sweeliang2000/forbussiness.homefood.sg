@@ -69,6 +69,38 @@
     min-height: 80px;
 }
 
+/* Remove underline from headings in the preview */
+.markdownEditor :global(.w-md-editor-preview h1),
+.markdownEditor :global(.w-md-editor-preview h2),
+.markdownEditor :global(.w-md-editor-preview h3),
+.markdownEditor :global(.w-md-editor-preview h4),
+.markdownEditor :global(.w-md-editor-preview h5),
+.markdownEditor :global(.w-md-editor-preview h6),
+.markdownEditorSmall :global(.w-md-editor-preview h1),
+.markdownEditorSmall :global(.w-md-editor-preview h2),
+.markdownEditorSmall :global(.w-md-editor-preview h3),
+.markdownEditorSmall :global(.w-md-editor-preview h4),
+.markdownEditorSmall :global(.w-md-editor-preview h5),
+.markdownEditorSmall :global(.w-md-editor-preview h6) {
+    text-decoration: none;
+    border-bottom: none;
+}
+
+.markdownEditor :global(.w-md-editor-preview h1 a),
+.markdownEditor :global(.w-md-editor-preview h2 a),
+.markdownEditor :global(.w-md-editor-preview h3 a),
+.markdownEditor :global(.w-md-editor-preview h4 a),
+.markdownEditor :global(.w-md-editor-preview h5 a),
+.markdownEditor :global(.w-md-editor-preview h6 a),
+.markdownEditorSmall :global(.w-md-editor-preview h1 a),
+.markdownEditorSmall :global(.w-md-editor-preview h2 a),
+.markdownEditorSmall :global(.w-md-editor-preview h3 a),
+.markdownEditorSmall :global(.w-md-editor-preview h4 a),
+.markdownEditorSmall :global(.w-md-editor-preview h5 a),
+.markdownEditorSmall :global(.w-md-editor-preview h6 a) {
+    text-decoration: none;
+}
+
 .errorMessage {
     background-color: #ffebee;
     color: #c62828;

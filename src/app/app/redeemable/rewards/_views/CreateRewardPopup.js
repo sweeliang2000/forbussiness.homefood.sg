@@ -8,8 +8,33 @@ import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown'
 import { InputAdornment } from '@mui/material';
 import { useEffect, useState, useRef } from 'react';
 import Switch from '@mui/material/Switch';
-import MDEditor from '@uiw/react-md-editor';
+import MDEditor, { commands } from '@uiw/react-md-editor';
 import '@uiw/react-md-editor/markdown-editor.css';
+
+// Define custom commands: include bold, headings (title), and bullet points
+// Exclude: Link, Insert code, codeblock, comment, image, table, and open help
+const customCommands = [
+  commands.bold,
+  commands.divider,
+  commands.group(
+    [
+      commands.title1,
+      commands.title2,
+      commands.title3,
+      commands.title4,
+      commands.title5,
+      commands.title6,
+    ],
+    {
+      name: 'title',
+      groupName: 'title',
+      buttonProps: { 'aria-label': 'Title' },
+    }
+  ),
+  commands.divider,
+  commands.unorderedListCommand,
+  commands.orderedListCommand,
+];
 
 const NEW_JOIN = { value: 'newJoin', title: 'New Join' }
 const STAMP_REWARD = { value: 'stampReward', title: 'Stamp Reward' }
@@ -450,6 +475,7 @@ const CreateRewardPopup = ({
                             hideToolbar={false}
                             data-color-mode="light"
                             height={120}
+                            commands={customCommands}
                         />
                     </div>
                 </section>
@@ -468,6 +494,7 @@ const CreateRewardPopup = ({
                             preview='edit'
                             hideToolbar={false}
                             data-color-mode="light"
+                            commands={customCommands}
                         />
                     </div>
                 </section>
