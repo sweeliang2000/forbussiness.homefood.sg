@@ -114,12 +114,12 @@ export default function Sidebar({
                         </Link>
                     </li>
 
-                    <li className={section == 'notifications' ? styles.active : ''}>
+                    {/* <li className={section == 'notifications' ? styles.active : ''}>
                         <Link href='/app/notifications'>
                             <MdOutlineNotificationsNone className={styles.icon} />
                             <span>Notifications</span>
                         </Link>
-                    </li>
+                    </li> */}
 
                     <Submenu
                         title={'Releases'}
@@ -212,12 +212,12 @@ export default function Sidebar({
                         </Link>
                     </li>
 
-                    <li className={section == 'ratings' ? styles.active : ''}>
+                    {/* <li className={section == 'ratings' ? styles.active : ''}>
                         <Link href='/app/ratings'>
                         <LuCreditCard className={styles.icon} />
                             <span>Card Distributions</span>
                         </Link>
-                    </li>
+                    </li> */}
 
                     {
                         !sidebarMinimised && <li className={styles.labelLi}>
