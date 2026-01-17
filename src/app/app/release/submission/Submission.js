@@ -259,6 +259,7 @@ const SubmissionView = () => {
                 // Process checklist status
                 const checklistData = checklistResponse.data;
                 if (checklistData && checklistData.data) {
+                    console.log('checklistData:', checklistData);
                     setChecklistStatus({
                         businessHasAllRequiredField: checklistData.data.businessHasAllRequiredField || false,
                         customerHasAllRequiredField: checklistData.data.customerHasAllRequiredField || false,
@@ -269,6 +270,7 @@ const SubmissionView = () => {
                 // Process release status
                 const releaseData = releaseStatusResponse.data;
                 if (releaseData && releaseData.data) {
+                    console.log('releaseData:', releaseData);
                     setReleaseStatus(releaseData.data.status);
                     
                     // Extract and convert sentdatetime from UTC to SGT
@@ -287,7 +289,7 @@ const SubmissionView = () => {
                 // Process release contact data and populate form fields
                 if (releaseContactResponse && releaseContactResponse.data && releaseContactResponse.data.data) {
                     const contactData = releaseContactResponse.data.data;
-                    
+                    console.log('contactData:', contactData);
                     // Determine publishing type based on release_type and release_datetime
                     let publishingType = 'auto'; // default
                     if (contactData.release_datetime) {

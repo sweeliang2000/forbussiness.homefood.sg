@@ -17,6 +17,8 @@ import apiClient from '@/utility/api';
 import { STAMP_MANAGEMENT } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
+import MDEditor from '@uiw/react-md-editor';
+import '@uiw/react-md-editor/markdown-editor.css';
 
 const NO_EXPIRATION = { value: 'noExpiration', title: 'No Expiration' };
 const END_OF_MONTH_EXPIRATION = { value: 'endOfMonth', title: 'End of Month' };
@@ -62,6 +64,7 @@ export default function StampSetup() {
   // For Form Data
   const [cardTitle, setCardTitle] = useState('');
   const [cardDescription, setCardDescription] = useState('');
+  const [termsAndConditions, setTermsAndConditions] = useState('');
   const [numberOfStamps, setNumberOfStamps] = useState(6);
   const [rewardStampIcon, setRewardStampIcon] = useState([]);
   const [rewardUnstampedIcon, setRewardUnstampedIcon] = useState([]);
@@ -79,6 +82,7 @@ export default function StampSetup() {
   // Store initial values to compare for unsaved changes
   const initialCardTitleRef = useRef('');
   const initialCardDescriptionRef = useRef('');
+  const initialTermsAndConditionsRef = useRef('');
   const initialNumberOfStampsRef = useRef(6);
   const initialRewardStampIconRef = useRef([]);
   const initialRewardUnstampedIconRef = useRef([]);
@@ -109,6 +113,7 @@ export default function StampSetup() {
           const hasData = data && 
             (data.cardTitle || 
              data.cardDescription || 
+             data.termsAndConditions ||
              data.numberOfStamps || 
              data.expirationType || 
              data.numberOfDaysToExpire ||
@@ -121,12 +126,14 @@ export default function StampSetup() {
           // Update state with fetched data
           const loadedCardTitle = data.cardTitle || '';
           const loadedCardDescription = data.cardDescription || '';
+          const loadedTermsAndConditions = data.termsAndConditions || '';
           const loadedNumberOfStamps = data.numberOfStamps || 6;
           const loadedExpirationType = data.expirationType || VALID_FOR_DAYS_EXPIRATION.value;
           const loadedNumberOfDaysToExpire = data.numberOfDaysToExpire || 30;
 
           setCardTitle(loadedCardTitle);
           setCardDescription(loadedCardDescription);
+          setTermsAndConditions(loadedTermsAndConditions);
           setNumberOfStamps(loadedNumberOfStamps);
           setExpirationType(loadedExpirationType);
           setNumberOfDaysToExpire(loadedNumberOfDaysToExpire);
@@ -134,6 +141,7 @@ export default function StampSetup() {
           // Store initial values for comparison
           initialCardTitleRef.current = loadedCardTitle;
           initialCardDescriptionRef.current = loadedCardDescription;
+          initialTermsAndConditionsRef.current = loadedTermsAndConditions;
           initialNumberOfStampsRef.current = loadedNumberOfStamps;
           initialExpirationTypeRef.current = loadedExpirationType;
           initialNumberOfDaysToExpireRef.current = loadedNumberOfDaysToExpire;
@@ -182,6 +190,7 @@ export default function StampSetup() {
           // Initialize with default values
           initialCardTitleRef.current = '';
           initialCardDescriptionRef.current = '';
+          initialTermsAndConditionsRef.current = '';
           initialNumberOfStampsRef.current = 6;
           initialRewardStampIconRef.current = [];
           initialRewardUnstampedIconRef.current = [];
@@ -216,6 +225,7 @@ export default function StampSetup() {
     const formFieldsChanged = (
       cardTitle !== initialCardTitleRef.current ||
       cardDescription !== initialCardDescriptionRef.current ||
+      termsAndConditions !== initialTermsAndConditionsRef.current ||
       numberOfStamps !== initialNumberOfStampsRef.current ||
       expirationType !== initialExpirationTypeRef.current ||
       numberOfDaysToExpire !== initialNumberOfDaysToExpireRef.current
@@ -250,7 +260,7 @@ export default function StampSetup() {
     
     const hasChanges = checkUnsavedChanges();
     setIsBtnDisabled(!hasChanges);
-  }, [cardTitle, cardDescription, numberOfStamps, expirationType, numberOfDaysToExpire, rewardStampIcon, rewardUnstampedIcon, cardSteps, isEdit]);
+  }, [cardTitle, cardDescription, termsAndConditions, numberOfStamps, expirationType, numberOfDaysToExpire, rewardStampIcon, rewardUnstampedIcon, cardSteps, isEdit]);
 
   const formSubmissionHandler = async (event) => {
     event.preventDefault();
@@ -261,6 +271,7 @@ export default function StampSetup() {
 
       formData.append('cardTitle', cardTitle);
       formData.append('cardDescription', cardDescription);
+      formData.append('termsAndConditions', termsAndConditions);
       formData.append('numberOfStamps', numberOfStamps);
       formData.append('expirationType', expirationType);
       formData.append('numberOfDaysToExpire', numberOfDaysToExpire);
@@ -307,6 +318,7 @@ export default function StampSetup() {
       // Update initial values after successful save
       initialCardTitleRef.current = cardTitle;
       initialCardDescriptionRef.current = cardDescription;
+      initialTermsAndConditionsRef.current = termsAndConditions;
       initialNumberOfStampsRef.current = numberOfStamps;
       initialExpirationTypeRef.current = expirationType;
       initialNumberOfDaysToExpireRef.current = numberOfDaysToExpire;
@@ -503,7 +515,7 @@ export default function StampSetup() {
       window.removeEventListener('popstate', handlePopState);
       document.removeEventListener('click', handleLinkClick, true);
     };
-  }, [cardTitle, cardDescription, numberOfStamps, expirationType, numberOfDaysToExpire, rewardStampIcon, rewardUnstampedIcon, cardSteps, isEdit]);
+  }, [cardTitle, cardDescription, termsAndConditions, numberOfStamps, expirationType, numberOfDaysToExpire, rewardStampIcon, rewardUnstampedIcon, cardSteps, isEdit]);
 
   // ==== Modify Selection ===
   const [currentStepStampedIcon, setCurrentStepStampedIcon] = useState([]);
@@ -748,23 +760,26 @@ export default function StampSetup() {
                       }}
                     />
 
-                    <FormTextField
-                      title='Number of stamps'
-                      subtitle='Total amount of stamps your stamp card should have. (Maximum of 16)'
-                      placeholder='10'
-                      type='number'
-                      id='Card Title'
-                      name='Card Title'
-                      InputProps={{ inputProps: { min: 1, max: 16 } }}
-                      helperText={''}
-                      error={false}
-                      value={numberOfStamps}
-                      disabled={!isEdit}
-                      onChange={(event) => {
-                        resetSaving();
-                        numberOfStampsHandler(event);
-                      }}
-                    />
+                    <div>
+                      <FieldHeader
+                        title='Terms and Conditions'
+                        description='(Optional) Additional terms and conditions for this stamp card. Supports markdown formatting (bold, lists, etc.).'
+                        type='h3'
+                      />
+                      <div className={styles.markdownEditor}>
+                        <MDEditor
+                          value={termsAndConditions || ''}
+                          onChange={(value) => { 
+                            if (!isEdit) return;
+                            resetSaving();
+                            setTermsAndConditions(value || '');
+                          }}
+                          preview='edit'
+                          hideToolbar={!isEdit}
+                          data-color-mode="light"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </ContentCard>
 
@@ -865,8 +880,28 @@ export default function StampSetup() {
                   <FieldHeader
                     title='Card Steps Setup'
                     description='Create the rewards that your customers will love. This will make to always come back!'
-                    type='h3'
+                    type='h2'
                   />
+                  
+                  <div className={styles.fieldsContainer}>
+                    <FormTextField
+                      title='Number of stamps'
+                      subtitle='Total amount of stamps your stamp card should have. (Maximum of 16)'
+                      placeholder='10'
+                      type='number'
+                      id='Number of stamps'
+                      name='Number of stamps'
+                      InputProps={{ inputProps: { min: 1, max: 16 } }}
+                      helperText={''}
+                      error={false}
+                      value={numberOfStamps}
+                      disabled={!isEdit}
+                      onChange={(event) => {
+                        resetSaving();
+                        numberOfStampsHandler(event);
+                      }}
+                    />
+                  </div>
                 </ContentCard>
 
                 <div className={styles.tableContainer}>
