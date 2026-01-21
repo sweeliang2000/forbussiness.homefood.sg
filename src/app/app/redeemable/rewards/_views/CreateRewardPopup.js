@@ -38,9 +38,10 @@ const customCommands = [
 
 const NEW_JOIN = { value: 'newJoin', title: 'New Join' }
 const STAMP_REWARD = { value: 'stampReward', title: 'Stamp Reward' }
+const SCAN_TO_WIN_REWARD = { value: 'scanToWinReward', title: 'Scan to Win Reward' }
 const REWARD_TYPES = [
     STAMP_REWARD,
-    // NEW_JOIN
+    SCAN_TO_WIN_REWARD
 ];
 const EXPIRY_TYPE = [
     { value: 'noExpiry', title: 'No Expiry' },
@@ -65,7 +66,8 @@ const CreateRewardPopup = ({
     onClose,
     selectedReward,
     onArchive,
-    onSubmit
+    onSubmit,
+    allowedRewardTypes = null // If provided, only show these reward types
 }) => {
     const [isRewardImageOpen, setIsRewardImageOpen] = useState(false);
     const [isRewardIdOpen, setRewardIdOpen] = useState(false);
@@ -83,9 +85,15 @@ const CreateRewardPopup = ({
     const contentRef = useRef(null);
     const hasErrorRef = useRef(false);
 
-    const [rewardData, setRewardData] = useState({
+    // Determine available reward types based on prop
+    const availableRewardTypes = allowedRewardTypes || REWARD_TYPES;
+    const defaultRewardType = allowedRewardTypes && allowedRewardTypes.length > 0 
+        ? allowedRewardTypes[0].value 
+        : 'stampReward';
+
+    const [rewardData, setRewardData] = useState(() => ({
         [REWARD_ID_KEY]: '',
-        [REWARD_TYPE_KEY]: 'stampReward',
+        [REWARD_TYPE_KEY]: defaultRewardType,
         [REWARD_NAME_KEY]: '',
         [REWARD_DESCRIPTION_KEY]: '',
         [REWARD_TERMS_KEY]: '',
@@ -93,7 +101,7 @@ const CreateRewardPopup = ({
         [REWARD_CUSTOM_ID_KEY]: '',
         [REWARD_TAGS_KEY]: '',
         [REWARD_IS_ACTIVATE]: false
-    });
+    }));
 
     const updateValue = (key, value) => {
         setRewardData((prevValue) => ({ ...prevValue, [key]: value }))
@@ -147,7 +155,7 @@ const CreateRewardPopup = ({
         if (!data) return null;
         return {
             [REWARD_ID_KEY]: data[REWARD_ID_KEY] || '',
-            [REWARD_TYPE_KEY]: data[REWARD_TYPE_KEY] || 'stampReward',
+            [REWARD_TYPE_KEY]: data[REWARD_TYPE_KEY] || (allowedRewardTypes && allowedRewardTypes.length > 0 ? allowedRewardTypes[0].value : 'stampReward'),
             [REWARD_NAME_KEY]: data[REWARD_NAME_KEY] || '',
             [REWARD_DESCRIPTION_KEY]: data[REWARD_DESCRIPTION_KEY] || '',
             [REWARD_TERMS_KEY]: data[REWARD_TERMS_KEY] === undefined ? '' : (data[REWARD_TERMS_KEY] || ''),
@@ -227,10 +235,15 @@ const CreateRewardPopup = ({
     useEffect(() => {
         if (!isOpen) return; // Only initialize when popup opens
 
+        // Recalculate default reward type when popup opens
+        const currentDefaultRewardType = allowedRewardTypes && allowedRewardTypes.length > 0 
+            ? allowedRewardTypes[0].value 
+            : 'stampReward';
+
         if (selectedReward !== null) {
             const loadedData = {
                 [REWARD_ID_KEY]: selectedReward.id || '',
-                [REWARD_TYPE_KEY]: selectedReward.type || 'stampReward',
+                [REWARD_TYPE_KEY]: selectedReward.type || currentDefaultRewardType,
                 [REWARD_NAME_KEY]: selectedReward.name || '',
                 [REWARD_DESCRIPTION_KEY]: selectedReward.description || '',
                 [REWARD_TERMS_KEY]: selectedReward.terms_and_conditions === undefined ? '' : selectedReward.terms_and_conditions,
@@ -266,7 +279,7 @@ const CreateRewardPopup = ({
         } else {
             const defaultData = {
                 [REWARD_ID_KEY]: '',
-                [REWARD_TYPE_KEY]: 'stampReward',
+                [REWARD_TYPE_KEY]: currentDefaultRewardType,
                 [REWARD_NAME_KEY]: '',
                 [REWARD_DESCRIPTION_KEY]: '',
                 [REWARD_TERMS_KEY]: '',
@@ -290,7 +303,7 @@ const CreateRewardPopup = ({
             initialIsRewardTagsOpenRef.current = false;
             initialIsRewardImageOpenRef.current = false;
         }
-    }, [selectedReward, isOpen]);
+    }, [selectedReward, isOpen, allowedRewardTypes]);
 
     // Automatically turn off toggles when values become empty
     useEffect(() => {
@@ -427,7 +440,7 @@ const CreateRewardPopup = ({
                     />
 
                     <FullWidthDropdown
-                        options={REWARD_TYPES}
+                        options={availableRewardTypes}
                         labelId='reward_type'
                         id='reward_type'
                         value={rewardData[REWARD_TYPE_KEY]}

@@ -4,7 +4,7 @@ import styles from './sidebar.module.css';
 import { LuClipboardList, LuLayoutDashboard, LuCreditCard } from 'react-icons/lu';
 import { AiOutlineMessage, AiOutlineLineChart } from 'react-icons/ai';
 import { BsGift } from 'react-icons/bs';
-import { FaRegStar } from "react-icons/fa6";
+import { RiQrScan2Line } from "react-icons/ri";
 import { RiBubbleChartLine } from "react-icons/ri";
 import { FaMobileAlt } from 'react-icons/fa';
 import { RiUserSettingsLine, RiNewspaperLine } from 'react-icons/ri';
@@ -30,6 +30,7 @@ export default function Sidebar({
 }) {
     const RELEASES_TAB = 'RELEASES_TAB';
     const STAMP_TAB = 'STAMP_TAB';
+    const SCAN_TO_WIN_TAB = 'SCAN_TO_WIN_TAB';
     const POINTS_TAB = 'POINTS_TAB';
     const REDEEMABLE_TAB = 'REDEEMABLE_TAB';
 
@@ -52,6 +53,8 @@ export default function Sidebar({
             setCurrentSelection(STAMP_TAB);
         } else if (currentSection === 'redeemable') {
             setCurrentSelection(REDEEMABLE_TAB);
+        } else if (currentSection === 'scan-to-win') {
+            setCurrentSelection(SCAN_TO_WIN_TAB);
         } else if (currentSection === 'points-management') {
             setCurrentSelection(POINTS_TAB);
         }
@@ -148,6 +151,18 @@ export default function Sidebar({
                         isExpand={currentSelection == STAMP_TAB}
                         icon={LuStamp}
                         onClick={() => { toggleMenus(STAMP_TAB) }}
+                    />
+                    
+                    <Submenu
+                        title={'Scan to Win'}
+                        submenus={[
+                            { href: '/app/scan-to-win', title: 'Configuration' },
+                            { href: '/app/scan-to-win/qr-code', title: 'QR Code' },
+                            { href: '/app/scan-to-win/today-status', title: 'Today Status' }
+                        ]}
+                        isExpand={currentSelection == SCAN_TO_WIN_TAB}
+                        icon={RiQrScan2Line}
+                        onClick={() => { toggleMenus(SCAN_TO_WIN_TAB) }}
                     />
 
                     {/* <Submenu

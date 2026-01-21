@@ -12,7 +12,8 @@ const AddNewReward = ({
     isOpen,
     setIsOpen,
     onSave,
-    currentReward
+    currentReward,
+    restrictToScanToWin = false
 }) => {
     const [selected, setSelected] = useState(null);
     const [rewards, setRewards] = useState([]);
@@ -55,7 +56,14 @@ const AddNewReward = ({
 
             console.log('transformedRewards', transformedRewards);
             
-            setRewards(transformedRewards);
+            // Filter rewards based on restrictToScanToWin prop
+            // If restrictToScanToWin is true, only show scanToWinReward type
+            // If restrictToScanToWin is false, only show stampReward type
+            const filteredRewards = restrictToScanToWin
+                ? transformedRewards.filter(reward => reward.type === 'scanToWinReward')
+                : transformedRewards.filter(reward => reward.type === 'stampReward');
+            
+            setRewards(filteredRewards);
         } catch (err) {
             const errorData = err?.response?.data;
             const message = errorData?.error?.message;
@@ -208,6 +216,11 @@ const AddNewReward = ({
                 selectedReward={selectedReward}
                 onArchive={null}
                 onSubmit={handleSubmitReward}
+                allowedRewardTypes={
+                    restrictToScanToWin 
+                        ? [{ value: 'scanToWinReward', title: 'Scan to Win Reward' }]
+                        : [{ value: 'stampReward', title: 'Stamp Reward' }]
+                }
             />
         </DialogPopup>
     )

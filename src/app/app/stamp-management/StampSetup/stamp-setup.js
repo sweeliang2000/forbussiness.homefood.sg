@@ -322,9 +322,31 @@ export default function StampSetup() {
 
       // Log FormData contents properly
       console.log("FormData contents:");
+      const formDataObject = {};
       for (const pair of formData.entries()) {
         console.log(pair[0] + ': ' + pair[1]);
+        // Build object representation for easier reading
+        if (pair[0] === 'defaultStampedIcon' || pair[0] === 'defaultUnStampedIcon') {
+          formDataObject[pair[0]] = `[File: ${pair[1]?.name || 'No name'}]`;
+        } else {
+          formDataObject[pair[0]] = pair[1];
+        }
       }
+      
+      // Log complete body object including Terms and Conditions
+      console.log("Complete request body to be sent to backend:", {
+        cardTitle: formDataObject.cardTitle,
+        cardDescription: formDataObject.cardDescription,
+        termsAndConditions: formDataObject.termsAndConditions,
+        numberOfStamps: formDataObject.numberOfStamps,
+        expirationType: formDataObject.expirationType,
+        numberOfDaysToExpire: formDataObject.numberOfDaysToExpire,
+        cardStepDetails: formDataObject.cardStepDetails,
+        defaultStampedIcon: formDataObject.defaultStampedIcon,
+        defaultUnStampedIcon: formDataObject.defaultUnStampedIcon,
+        isDefaultStampedIconDeleted: formDataObject.isDefaultStampedIconDeleted,
+        isDefaultUnStampedIconDeleted: formDataObject.isDefaultUnStampedIconDeleted,
+      });
 
       // Use POST for new data, PUT for updates
       const httpMethod = hasExistingData ? 'put' : 'post';
