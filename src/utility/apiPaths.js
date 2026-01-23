@@ -20,6 +20,11 @@ export const CREATE_REWARD = '/api/data/reward';
 export const UPDATE_REWARD = '/api/data/reward';
 export const DELETE_REWARD = '/api/data/reward';
 
+// Scan to Win QR Codes
+export const SCAN_TO_WIN_QR_CODES = '/api/data/scanToWinQRCodes';
+export const CREATE_SCAN_TO_WIN_QR_CODE = '/api/data/scanToWinQRCode';
+export const DELETE_SCAN_TO_WIN_QR_CODE = '/api/data/scanToWinQRCode';
+
 export const CHECKOUT_SESSION_STRIPE = '/api/subscription/create-checkout-session';
 export const SHOP_SUBSCRIPTION_STATUS = '/api/data/shopSubscriptionStatus';
 export const GET_LIST_OF_USERS = '/api/data/getListOfUsers';
