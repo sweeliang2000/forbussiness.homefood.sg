@@ -9,6 +9,9 @@ import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
+import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
+import DialogPopup from '@/components/DialogPopup/DialogPopup';
+import { Alert } from '@mui/material';
 import apiClient from '@/utility/api';
 import {
   SCAN_TO_WIN_QR_CODES,
@@ -16,7 +19,7 @@ import {
   DELETE_SCAN_TO_WIN_QR_CODE,
 } from '@/utility/apiPaths';
 
-const MAX_QR_CODES = 2;
+const MAX_QR_CODES = 4;
 
 const createDefaultQr = (index = 1) => ({
   id: null,
@@ -41,6 +44,17 @@ export default function ScanToWinQrCodePage() {
   // Track download refs
   const qrRefs = useRef({});
 
+  // Popup state
+  const [isNameDialogOpen, setIsNameDialogOpen] = useState(false);
+  const [qrCodeName, setQrCodeName] = useState('');
+  
+  // Delete confirmation state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+  const [deleteConfirmationError, setDeleteConfirmationError] = useState('');
+  const [qrToDelete, setQrToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const clearError = () => {
     setIsError(false);
     setErrorMessage('');
@@ -56,18 +70,27 @@ export default function ScanToWinQrCodePage() {
     const fetchQrCodes = async () => {
       try {
         setIsLoading(true);
-        // TODO: Replace with actual API call
-        // const response = await apiClient.get(SCAN_TO_WIN_QR_CODES);
-        // const data = response.data?.data || [];
-        const data = [];
+        const response = await apiClient.get('/api/data/qrCode');
+        const apiData = response.data?.data || [];
+        
+        // Map API response to component state structure
+        const mappedQrCodes = apiData.map((qr) => ({
+          id: qr.qr_code_id,
+          name: qr.qr_code_name,
+          url: buildQrUrl(qr.qr_code_id),
+          createdAt: qr.created_at,
+          qrCodeId: qr.qr_code_id,
+          shopId: qr.shop_id,
+        }));
 
-        setQrCodes(data);
+        setQrCodes(mappedQrCodes);
       } catch (error) {
         const message =
           error?.response?.data?.message ||
           error?.message ||
           'Failed to load QR codes';
         const code =
+          error?.response?.data?.statusCode ||
           error?.response?.data?.code ||
           error?.code ||
           'UNKNOWN';
@@ -94,44 +117,62 @@ export default function ScanToWinQrCodePage() {
     }
   };
 
-  const handleGenerate = async () => {
+  const handleGenerateClick = () => {
     clearError();
     if (qrCodes.length >= MAX_QR_CODES) {
       setError('You can only have up to 2 QR codes. Please delete one before creating another.');
       return;
     }
+    setQrCodeName('');
+    setIsNameDialogOpen(true);
+  };
 
-    const newId = Date.now().toString();
-    const createdAt = new Date().toISOString();
-    const name = `QR Code (${formatDate(createdAt)})`;
-    const url = buildQrUrl(newId);
+  const handleNameDialogSubmit = async (event) => {
+    event.preventDefault();
+    
+    if (!qrCodeName.trim()) {
+      setError('QR code name is required.');
+      return;
+    }
 
-    const newQr = {
-      ...createDefaultQr(qrCodes.length + 1),
-      id: newId,
-      name,
-      url,
-      createdAt,
-    };
+    setIsNameDialogOpen(false);
+    await handleGenerate(qrCodeName.trim());
+  };
 
+  const handleGenerate = async (name) => {
+    clearError();
+    
     try {
       setIsBtnLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await apiClient.post(CREATE_SCAN_TO_WIN_QR_CODE, {
-      //   name,
-      //   url,
-      // });
-      // const savedQr = response.data?.data || newQr;
-      const savedQr = newQr;
+      
+      // Call API to create QR code
+      const response = await apiClient.post('/api/data/qrCode', {
+        qr_code_name: name,
+      });
+      
+      // Get the QR code data from response
+      const qrCodeData = response.data?.data || response.data;
+      
+      // Map API response to component state structure
+      const savedQr = {
+        id: qrCodeData.qr_code_id,
+        name: qrCodeData.qr_code_name || name,
+        url: buildQrUrl(qrCodeData.qr_code_id),
+        createdAt: qrCodeData.created_at || new Date().toISOString(),
+        qrCodeId: qrCodeData.qr_code_id,
+        shopId: qrCodeData.shop_id,
+      };
 
       setQrCodes((prev) => [...prev, savedQr]);
       setIsSubmissionSuccess(true);
+      setQrCodeName('');
     } catch (error) {
       const message =
         error?.response?.data?.message ||
         error?.message ||
         'Failed to create QR code';
       const code =
+        error?.response?.data?.statusCode ||
         error?.response?.data?.code ||
         error?.code ||
         'UNKNOWN';
@@ -141,27 +182,54 @@ export default function ScanToWinQrCodePage() {
     }
   };
 
-  const handleDelete = async (qr) => {
-    const confirmed = window.confirm('Are you sure you want to delete this QR code?');
-    if (!confirmed) return;
+  const handleDelete = (qr) => {
+    setQrToDelete(qr);
+    setDeleteConfirmationText('');
+    setDeleteConfirmationError('');
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deleteConfirmationText.toLowerCase() !== 'confirm') {
+      setDeleteConfirmationError('Please type "confirm" to proceed');
+      return;
+    }
+
+    if (isDeleting || !qrToDelete) return;
+
+    setDeleteConfirmationError('');
+    setIsDeleting(true);
 
     try {
-      // TODO: Replace with actual API call
-      // await apiClient.delete(DELETE_SCAN_TO_WIN_QR_CODE, {
-      //   data: { id: qr.id },
-      // });
-      setQrCodes((prev) => prev.filter((code) => code.id !== qr.id));
+      await apiClient.delete('/api/data/qrCode', {
+        data: { qr_code_id: qrToDelete.qrCodeId || qrToDelete.id },
+      });
+      setQrCodes((prev) => prev.filter((code) => code.id !== qrToDelete.id));
+      setIsSubmissionSuccess(true);
+      setIsDeleteDialogOpen(false);
+      setQrToDelete(null);
+      setDeleteConfirmationText('');
     } catch (error) {
       const message =
         error?.response?.data?.message ||
         error?.message ||
         'Failed to delete QR code';
       const code =
+        error?.response?.data?.statusCode ||
         error?.response?.data?.code ||
         error?.code ||
         'UNKNOWN';
-      setError(`Failed to delete QR code. ${message} (Error code: ${code})`);
+      setDeleteConfirmationError(`Failed to delete QR code. ${message} (Error code: ${code})`);
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleDeleteDialogClose = () => {
+    setIsDeleteDialogOpen(false);
+    setQrToDelete(null);
+    setDeleteConfirmationText('');
+    setDeleteConfirmationError('');
   };
 
   const handleDownload = (qr) => {
@@ -222,12 +290,12 @@ export default function ScanToWinQrCodePage() {
             <div className={styles.titleRow}>
               <FieldHeader
                 title='QR Codes'
-                description='Create up to 2 QR codes. Download and share them with your customers.'
+                description='Create up to 4 QR codes. Download and share them with your customers.'
               />
               <button
                 type='button'
                 className={styles.addButton}
-                onClick={handleGenerate}
+                onClick={handleGenerateClick}
                 disabled={qrCodes.length >= MAX_QR_CODES || isBtnLoading}
               >
                 Generate QR Code
@@ -283,6 +351,82 @@ export default function ScanToWinQrCodePage() {
           </ContentCard>
         </>
       )}
+
+      <DialogPopup
+        title='Generate QR Code'
+        actionTitle='Generate'
+        isOpen={isNameDialogOpen}
+        setIsOpen={setIsNameDialogOpen}
+        onSubmit={handleNameDialogSubmit}
+        PaperProps={{
+          sx: {
+            width: '80%',
+            maxWidth: '540px',
+          },
+        }}
+      >
+        <div className={styles.dialogContent}>
+          <FormTextField
+            title='QR Code Name'
+            subtitle='This name is for your internal tracking only and will not be shown to users.'
+            placeholder='New Year Instant Win'
+            id='qr_code_name'
+            name='qr_code_name'
+            helperText=''
+            error={false}
+            value={qrCodeName}
+            onChange={(event) => setQrCodeName(event.target.value)}
+          />
+        </div>
+      </DialogPopup>
+
+      <DialogPopup
+        title='Delete QR Code'
+        actionTitle={isDeleting ? 'Deleting...' : 'Delete'}
+        isOpen={isDeleteDialogOpen}
+        setIsOpen={setIsDeleteDialogOpen}
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleConfirmDelete();
+        }}
+        onClose={handleDeleteDialogClose}
+        PaperProps={{
+          sx: {
+            width: '80%',
+            maxWidth: '540px',
+          },
+        }}
+      >
+        <div className={styles.dialogContent}>
+          {deleteConfirmationError && (
+            <Alert severity="error" sx={{ marginBottom: '16px' }}>
+              {deleteConfirmationError}
+            </Alert>
+          )}
+          
+          <p style={{ marginBottom: '16px' }}>
+            Are you sure you want to delete this QR code?
+          </p>
+          <p style={{ marginBottom: '16px', fontWeight: 'bold', color: '#d32f2f' }}>
+            Once deleted, this QR code cannot be used.
+          </p>
+          
+          <FormTextField
+            title='Type "confirm" to proceed'
+            subtitle=''
+            placeholder='Type "confirm" here'
+            id='delete_confirmation'
+            name='delete_confirmation'
+            helperText=''
+            error={!!deleteConfirmationError}
+            value={deleteConfirmationText}
+            onChange={(event) => {
+              setDeleteConfirmationText(event.target.value);
+              setDeleteConfirmationError('');
+            }}
+          />
+        </div>
+      </DialogPopup>
     </form>
   );
 }
