@@ -281,7 +281,11 @@ export default function Sidebar({
                     ) : (
                         <div>
                             <p className={styles.title}>{subscriptionPlan?.plan_name || 'Free'}</p>
-                            <p className={styles.cost}>{subscriptionPlan?.payment_type + ' Subscription' || 'No-Cost ($0/Month)'}</p>
+                            <p className={styles.cost}>
+                                {subscriptionPlan?.payment_type
+                                    ? `${subscriptionPlan.payment_type} Subscription`
+                                    : 'No-Cost ($0/Month)'}
+                            </p>
                         </div>
                     )}
 
