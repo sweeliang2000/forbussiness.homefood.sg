@@ -91,7 +91,6 @@ const AccountSetting = () => {
                 <ContentCard className={styles.content}>
                     <div>
                         <h2>Basic Account Information</h2>
-
                         <ChangePasswordCell />
                     </div>
                 </ContentCard>

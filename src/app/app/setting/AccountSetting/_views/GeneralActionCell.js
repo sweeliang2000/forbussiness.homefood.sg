@@ -12,7 +12,9 @@ const GeneralActionCell = ({
     <div className={`${styles.cell} ${last ? '' : styles.underline }`}>
         <div className={styles.left}>
             <h2 className={styles.title}>{title}</h2>
-            <p>{description}</p>
+            {description && (
+                <p className={styles.description}>{description}</p>
+            )}
         </div>
 
         <div>

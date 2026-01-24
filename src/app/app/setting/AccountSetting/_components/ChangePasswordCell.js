@@ -1,7 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { Skeleton } from '@mui/material';
 import GeneralActionCell from '../_views/GeneralActionCell';
 import { getUserDataFromCookie } from '@/utility/cookieUtils';
+import cellStyles from '../_views/GeneralActionCell.module.css';
 
 const ChangePasswordCell = () => {
     const [userData, setUserData] = useState(null);
@@ -15,21 +17,28 @@ const ChangePasswordCell = () => {
     }, []);
 
     if (isLoading) {
+        // Show a shimmer skeleton while account info is loading
         return (
-            <GeneralActionCell
-                title='Loading...'
-                buttonTitle={'Change Password'}
-                onClick={() => {}}
-                type="primary"
-                disabled={true}
-            />
+            <div className={cellStyles.cell}>
+                <div className={cellStyles.left}>
+                    <Skeleton variant="text" width={220} height={24} />
+                    <Skeleton variant="text" width={160} />
+                </div>
+                <div>
+                    <Skeleton variant="rounded" width={160} height={36} />
+                </div>
+            </div>
         );
     }
 
+    const email = userData?.email || userData?.user_id || 'Email not available';
+    const role = userData?.role || 'Role not available';
+    const shopId = userData?.shop_id || 'Shop ID not available';
+
     return (
         <GeneralActionCell
-            title={userData?.email || 'you@example.com'}
-            description={userData?.role || 'unknown role'}
+            title={email}
+            description={`Role: ${role} • Shop ID: ${shopId}`}
             buttonTitle={'Change Password'}
             onClick={() => {
                 window.open('https://billing.stripe.com/p/login/test', '_blank');
@@ -39,4 +48,4 @@ const ChangePasswordCell = () => {
     );
 }
 
-export default ChangePasswordCell; 
+export default ChangePasswordCell;  
