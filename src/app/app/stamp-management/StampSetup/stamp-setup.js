@@ -20,26 +20,10 @@ import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import MDEditor, { commands } from '@uiw/react-md-editor';
 import '@uiw/react-md-editor/markdown-editor.css';
 
-// Define custom commands: include bold, headings (title), and bullet points
-// Exclude: Link, Insert code, codeblock, comment, image, table, and open help
+// Define custom commands: include bold and bullet points only
+// Exclude: headings (title), link, insert code, codeblock, comment, image, table, and open help
 const customCommands = [
   commands.bold,
-  commands.divider,
-  commands.group(
-    [
-      commands.title1,
-      commands.title2,
-      commands.title3,
-      commands.title4,
-      commands.title5,
-      commands.title6,
-    ],
-    {
-      name: 'title',
-      groupName: 'title',
-      buttonProps: { 'aria-label': 'Title' },
-    }
-  ),
   commands.divider,
   commands.unorderedListCommand,
   commands.orderedListCommand,
@@ -822,7 +806,6 @@ export default function StampSetup() {
                             resetSaving();
                             setTermsAndConditions(value || '');
                           }}
-                          preview='edit'
                           hideToolbar={!isEdit}
                           data-color-mode="light"
                           commands={customCommands}

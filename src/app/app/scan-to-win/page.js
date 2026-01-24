@@ -13,6 +13,8 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditRewardChance from './_views/EditRewardChance';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
+import apiClient from '@/utility/api';
+import { REWARDS } from '@/utility/apiPaths';
 
 const DEFAULT_REWARD_CHANCE = {
   id: 1,
@@ -40,6 +42,9 @@ export default function ScanToWinPage() {
   // Form Data
   const [cardImage, setCardImage] = useState([]);
   const [rewardChances, setRewardChances] = useState([]);
+  
+  // Track if configuration exists (for POST vs PUT)
+  const [hasExistingConfig, setHasExistingConfig] = useState(false);
 
   // Store initial values to compare for unsaved changes
   const initialIsEnabledRef = useRef(false);
@@ -238,16 +243,20 @@ export default function ScanToWinPage() {
         }
       }
 
-      // TODO: Replace with actual API endpoint
-      // await apiClient.post('/api/scan-to-win', formData, {
-      //   headers: {
-      //     'Content-Type': 'multipart/form-data',
-      //   },
-      // });
+      // Use POST for first save, PUT for updates
+      const endpoint = '/api/data/qrcode/configuration';
+      const method = hasExistingConfig ? 'put' : 'post';
+      
+      await apiClient[method](endpoint, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       console.log('Form submitted successfully');
       setIsSubmissionSuccess(true);
       setIsBtnLoading(false);
+      setHasExistingConfig(true); // Mark as existing after first save
       
       // Update initial values after successful save
       initialIsEnabledRef.current = isEnabled;
@@ -269,42 +278,128 @@ export default function ScanToWinPage() {
     const fetchScanToWinData = async () => {
       try {
         setIsLoading(true);
-        // TODO: Replace with actual API endpoint
-        // const response = await apiClient.get('/api/scan-to-win');
-        // const data = response.data.data;
+        const response = await apiClient.get('/api/data/qrcode/configuration');
+        const apiData = response.data?.data;
 
-        // Mock data for now
-        const data = null;
+        if (apiData) {
+          setHasExistingConfig(true);
+          
+          // Parse isEnabled (might be string "true"/"false")
+          const enabled = apiData.isEnabled === 'true' || apiData.isEnabled === true;
+          setIsEnabled(enabled);
+          
+          // Handle cardImage if present
+          if (apiData.cardImage) {
+            setCardImage([{
+              name: apiData.cardImage,
+              file: null,
+              url: apiData.cardImage
+            }]);
+            initialCardImageRef.current = [{
+              name: apiData.cardImage,
+              file: null,
+              url: apiData.cardImage
+            }];
+          } else {
+            setCardImage([]);
+            initialCardImageRef.current = [];
+          }
+          
+          // Parse rewardChances (might be JSON string)
+          let parsedRewardChances = [];
+          if (apiData.rewardChances) {
+            try {
+              // Try parsing as JSON string first
+              if (typeof apiData.rewardChances === 'string') {
+                parsedRewardChances = JSON.parse(apiData.rewardChances);
+              } else {
+                parsedRewardChances = apiData.rewardChances;
+              }
+            } catch (e) {
+              console.error('Error parsing rewardChances:', e);
+              parsedRewardChances = [];
+            }
+          }
+          
+          // Fetch rewards to populate reward objects
+          if (parsedRewardChances.length > 0) {
+            try {
+              const rewardsResponse = await apiClient.get(REWARDS);
+              const rewardsData = rewardsResponse.data?.data;
+              const apiRewards = rewardsData?.rewards || [];
+              
+              // Transform API rewards to match expected structure
+              const transformedRewards = apiRewards.map(reward => ({
+                id: reward.reward_id,
+                type: reward.rewardType || 'scanToWinReward',
+                name: reward.rewardName || 'Unnamed Reward',
+                description: reward.description || 'No description available',
+                image: {
+                  url: reward.rewardImage || '/images/placeholder/reward_placeholder.png'
+                },
+                expiry: reward.expiryNumberOfDays?.toString() || '30',
+                custom_id: reward.customRewardId || '',
+                tags: reward.rewardTags || '',
+                isCheck: false,
+                isPublished: reward.isPublished === 'true' || reward.isPublished === true
+              }));
+              
+              // Filter to only scanToWinReward types
+              const scanToWinRewards = transformedRewards.filter(reward => reward.type === 'scanToWinReward');
+              
+              // Map rewardChances with reward objects
+              const rewardChancesWithRewards = parsedRewardChances.map(chance => {
+                const reward = scanToWinRewards.find(r => r.id === chance.rewardId);
+                return {
+                  id: chance.id,
+                  reward: reward || null,
+                  percentage: chance.percentage || 0,
+                  max: chance.max !== null && chance.max !== undefined ? chance.max : null
+                };
+              });
+              
+              setRewardChances(rewardChancesWithRewards);
+              initialRewardChancesRef.current = JSON.parse(JSON.stringify(rewardChancesWithRewards));
+            } catch (rewardError) {
+              console.error('Error fetching rewards:', rewardError);
+              // Set rewardChances without reward objects
+              const rewardChancesWithoutRewards = parsedRewardChances.map(chance => ({
+                id: chance.id,
+                reward: null,
+                percentage: chance.percentage || 0,
+                max: chance.max !== null && chance.max !== undefined ? chance.max : null
+              }));
+              setRewardChances(rewardChancesWithoutRewards);
+              initialRewardChancesRef.current = JSON.parse(JSON.stringify(rewardChancesWithoutRewards));
+            }
+          } else {
+            setRewardChances([]);
+            initialRewardChancesRef.current = [];
+          }
 
-        if (data) {
-          setIsEnabled(data.isEnabled || false);
-          setCardImage(data.cardImage ? [{
-            name: data.cardImage,
-            file: null,
-            url: data.cardImage
-          }] : []);
-          setRewardChances(data.rewardChances || []);
-
-          initialIsEnabledRef.current = data.isEnabled || false;
-          initialCardImageRef.current = data.cardImage ? [{
-            name: data.cardImage,
-            file: null,
-            url: data.cardImage
-          }] : [];
-          initialRewardChancesRef.current = JSON.parse(JSON.stringify(data.rewardChances || []));
+          initialIsEnabledRef.current = enabled;
         } else {
+          setHasExistingConfig(false);
           initialIsEnabledRef.current = false;
           initialCardImageRef.current = [];
-          initialRewardChancesRef.current = JSON.parse(JSON.stringify([]));
+          initialRewardChancesRef.current = [];
         }
       } catch (error) {
-        const errorData = error?.response?.data;
-        const message = errorData?.error?.message || errorData?.message || error?.message || 'Failed to load scan-to-win data';
-        const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
-        console.error(`Error fetching scan-to-win data: ${message} (Error code: ${code})`);
-        setIsError(true);
-        setErrorMessage(`Failed to load scan-to-win data. ${message} (Error code: ${code})`);
-        setIsLoadingErrorMessage(`Failed to load scan-to-win data. ${message} (Error code: ${code})`);
+        // If 404, config doesn't exist yet (first time setup)
+        if (error?.response?.status === 404) {
+          setHasExistingConfig(false);
+          initialIsEnabledRef.current = false;
+          initialCardImageRef.current = [];
+          initialRewardChancesRef.current = [];
+        } else {
+          const errorData = error?.response?.data;
+          const message = errorData?.error?.message || errorData?.message || error?.message || 'Failed to load scan-to-win data';
+          const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
+          console.error(`Error fetching scan-to-win data: ${message} (Error code: ${code})`);
+          setIsError(true);
+          setErrorMessage(`Failed to load scan-to-win data. ${message} (Error code: ${code})`);
+          setIsLoadingErrorMessage(`Failed to load scan-to-win data. ${message} (Error code: ${code})`);
+        }
       } finally {
         setIsLoading(false);
       }
