@@ -52,7 +52,8 @@ const REWARD_ID_KEY = 'id';
 const REWARD_TYPE_KEY = 'type';
 const REWARD_NAME_KEY = 'name';
 const REWARD_DESCRIPTION_KEY = 'description';
-const REWARD_TERMS_KEY = 'terms_and_conditions';
+// Use camelCase for consistency with other APIs (e.g. StampSetup)
+const REWARD_TERMS_KEY = 'termsAndConditions';
 const REWARD_IMAGE_KEY = 'image';
 const REWARD_EXPIRY_TYPE_KEY = 'expiry_type';
 const REWARD_EXPIRY_KEY = 'expiry';
@@ -158,7 +159,10 @@ const CreateRewardPopup = ({
             [REWARD_TYPE_KEY]: data[REWARD_TYPE_KEY] || (allowedRewardTypes && allowedRewardTypes.length > 0 ? allowedRewardTypes[0].value : 'stampReward'),
             [REWARD_NAME_KEY]: data[REWARD_NAME_KEY] || '',
             [REWARD_DESCRIPTION_KEY]: data[REWARD_DESCRIPTION_KEY] || '',
-            [REWARD_TERMS_KEY]: data[REWARD_TERMS_KEY] === undefined ? '' : (data[REWARD_TERMS_KEY] || ''),
+            // Support both camelCase and snake_case shapes if present
+            [REWARD_TERMS_KEY]: data[REWARD_TERMS_KEY] === undefined
+                ? (data.terms_and_conditions || '')
+                : (data[REWARD_TERMS_KEY] || ''),
             [REWARD_EXPIRY_TYPE_KEY]: data[REWARD_EXPIRY_TYPE_KEY] || 'expiryInDays',
             [REWARD_EXPIRY_KEY]: data[REWARD_EXPIRY_KEY] === undefined ? '' : (data[REWARD_EXPIRY_KEY] || ''),
             [REWARD_CUSTOM_ID_KEY]: data[REWARD_CUSTOM_ID_KEY] === undefined ? '' : (data[REWARD_CUSTOM_ID_KEY] || ''),
@@ -246,7 +250,11 @@ const CreateRewardPopup = ({
                 [REWARD_TYPE_KEY]: selectedReward.type || currentDefaultRewardType,
                 [REWARD_NAME_KEY]: selectedReward.name || '',
                 [REWARD_DESCRIPTION_KEY]: selectedReward.description || '',
-                [REWARD_TERMS_KEY]: selectedReward.terms_and_conditions === undefined ? '' : selectedReward.terms_and_conditions,
+                // Prefer camelCase, but gracefully fall back to snake_case if present
+                [REWARD_TERMS_KEY]:
+                    selectedReward.termsAndConditions !== undefined
+                        ? (selectedReward.termsAndConditions || '')
+                        : (selectedReward.terms_and_conditions || ''),
                 [REWARD_EXPIRY_TYPE_KEY]: selectedReward.expiry_type || 'expiryInDays',
                 [REWARD_EXPIRY_KEY]: selectedReward.expiry === undefined ? '' : selectedReward.expiry,
                 [REWARD_CUSTOM_ID_KEY]: selectedReward.custom_id === undefined ? '' : selectedReward.custom_id,

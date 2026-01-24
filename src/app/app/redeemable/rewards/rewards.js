@@ -37,6 +37,8 @@ const Rewards = () => {
                 type: reward.rewardType || 'stampReward',
                 name: reward.rewardName || 'Unnamed Reward',
                 description: reward.description || 'No description available',
+                // Include terms & conditions when fetching (support both API shapes)
+                termsAndConditions: reward.termsAndConditions || reward.terms_and_conditions || '',
                 image: {
                     url: reward.rewardImage || '/images/placeholder/reward_placeholder.png'
                 },
@@ -119,6 +121,8 @@ const Rewards = () => {
             submitFormData.append('rewardType', formData.type);
             submitFormData.append('rewardName', formData.name);
             submitFormData.append('description', formData.description);
+            // Send terms & conditions with reward create/update
+            submitFormData.append('termsAndConditions', formData.termsAndConditions || '');
             submitFormData.append('expiryType', formData.expiry_type || 'expiryInDays');
             submitFormData.append('expiryNumberOfDays', formData.expiry || '30');
             submitFormData.append('customRewardId', formData.custom_id || '');
