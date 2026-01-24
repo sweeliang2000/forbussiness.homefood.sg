@@ -108,6 +108,10 @@
     text-transform: none;
 }
 
+.downloadButton {
+    margin-right: auto;
+}
+
 .secondaryButton:hover {
     background-color: #e3f2fd;
 }

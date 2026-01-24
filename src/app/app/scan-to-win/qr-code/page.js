@@ -47,6 +47,7 @@ export default function ScanToWinQrCodePage() {
   // Popup state
   const [isNameDialogOpen, setIsNameDialogOpen] = useState(false);
   const [qrCodeName, setQrCodeName] = useState('');
+  const [qrToEdit, setQrToEdit] = useState(null);
   
   // Delete confirmation state
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -65,41 +66,42 @@ export default function ScanToWinQrCodePage() {
     setErrorMessage(message);
   };
 
+  // Fetch QR codes
+  const fetchQrCodes = async () => {
+    try {
+      setIsLoading(true);
+      const response = await apiClient.get('/api/data/qrCode');
+      const apiData = response.data?.data || [];
+      
+      // Map API response to component state structure
+      const mappedQrCodes = apiData.map((qr) => ({
+        id: qr.qr_code_id,
+        name: qr.qr_code_name,
+        url: buildQrUrl(qr.qr_code_id),
+        createdAt: qr.created_at,
+        qrCodeId: qr.qr_code_id,
+        shopId: qr.shop_id,
+      }));
+
+      setQrCodes(mappedQrCodes);
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Failed to load QR codes';
+      const code =
+        error?.response?.data?.statusCode ||
+        error?.response?.data?.code ||
+        error?.code ||
+        'UNKNOWN';
+      setIsLoadingErrorMessage(`Failed to load QR codes. ${message} (Error code: ${code})`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Fetch QR codes on load
   useEffect(() => {
-    const fetchQrCodes = async () => {
-      try {
-        setIsLoading(true);
-        const response = await apiClient.get('/api/data/qrCode');
-        const apiData = response.data?.data || [];
-        
-        // Map API response to component state structure
-        const mappedQrCodes = apiData.map((qr) => ({
-          id: qr.qr_code_id,
-          name: qr.qr_code_name,
-          url: buildQrUrl(qr.qr_code_id),
-          createdAt: qr.created_at,
-          qrCodeId: qr.qr_code_id,
-          shopId: qr.shop_id,
-        }));
-
-        setQrCodes(mappedQrCodes);
-      } catch (error) {
-        const message =
-          error?.response?.data?.message ||
-          error?.message ||
-          'Failed to load QR codes';
-        const code =
-          error?.response?.data?.statusCode ||
-          error?.response?.data?.code ||
-          error?.code ||
-          'UNKNOWN';
-        setIsLoadingErrorMessage(`Failed to load QR codes. ${message} (Error code: ${code})`);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchQrCodes();
   }, []);
 
@@ -119,10 +121,7 @@ export default function ScanToWinQrCodePage() {
 
   const handleGenerateClick = () => {
     clearError();
-    if (qrCodes.length >= MAX_QR_CODES) {
-      setError('You can only have up to 2 QR codes. Please delete one before creating another.');
-      return;
-    }
+    setQrToEdit(null);
     setQrCodeName('');
     setIsNameDialogOpen(true);
   };
@@ -135,13 +134,30 @@ export default function ScanToWinQrCodePage() {
       return;
     }
 
+    const trimmedName = qrCodeName.trim();
     setIsNameDialogOpen(false);
-    await handleGenerate(qrCodeName.trim());
+
+    if (qrToEdit) {
+      await handleRename(qrToEdit, trimmedName);
+    } else {
+      await handleGenerate(trimmedName);
+    }
+    
+    setQrToEdit(null);
   };
 
   const handleGenerate = async (name) => {
     clearError();
     
+    // If we already know we've reached the max number of QR codes,
+    // show a friendly error immediately without hitting the API.
+    if (qrCodes.length >= MAX_QR_CODES) {
+      setError(
+        `Max number of QR can be generated is ${MAX_QR_CODES}. Please delete unused one.`
+      );
+      return;
+    }
+
     try {
       setIsBtnLoading(true);
       
@@ -167,16 +183,61 @@ export default function ScanToWinQrCodePage() {
       setIsSubmissionSuccess(true);
       setQrCodeName('');
     } catch (error) {
+      const status = error?.response?.status;
+      const backendMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error?.message;
+
+      // Show a friendly message when max QR limit is hit (backend returns 400 / bad request)
+      if (status === 400 || error?.code === 'ERR_BAD_REQUEST') {
+        setError(
+          backendMessage ||
+            `Max number of QR can be generated is ${MAX_QR_CODES}. Please delete unused one.`
+        );
+      } else {
+        const message =
+          backendMessage ||
+          error?.message ||
+          'Failed to create QR code';
+        const code =
+          error?.response?.data?.statusCode ||
+          error?.response?.data?.code ||
+          error?.code ||
+          'UNKNOWN';
+        setError(`Failed to create QR code. ${message} (Error code: ${code})`);
+      }
+    } finally {
+      setIsBtnLoading(false);
+    }
+  };
+
+  const handleRename = async (qr, name) => {
+    clearError();
+    
+    try {
+      setIsBtnLoading(true);
+      
+      // Call API to update QR code name
+      await apiClient.put('/api/data/qrCode', {
+        qr_code_id: qr.qrCodeId || qr.id,
+        qr_code_name: name,
+      });
+
+      // Refresh list after successful update
+      await fetchQrCodes();
+      setIsSubmissionSuccess(true);
+      setQrCodeName('');
+    } catch (error) {
       const message =
         error?.response?.data?.message ||
         error?.message ||
-        'Failed to create QR code';
+        'Failed to update QR code';
       const code =
         error?.response?.data?.statusCode ||
         error?.response?.data?.code ||
         error?.code ||
         'UNKNOWN';
-      setError(`Failed to create QR code. ${message} (Error code: ${code})`);
+      setError(`Failed to update QR code. ${message} (Error code: ${code})`);
     } finally {
       setIsBtnLoading(false);
     }
@@ -187,6 +248,13 @@ export default function ScanToWinQrCodePage() {
     setDeleteConfirmationText('');
     setDeleteConfirmationError('');
     setIsDeleteDialogOpen(true);
+  };
+
+  const handleEditName = (qr) => {
+    clearError();
+    setQrToEdit(qr);
+    setQrCodeName(qr.name || '');
+    setIsNameDialogOpen(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -278,6 +346,7 @@ export default function ScanToWinQrCodePage() {
         isError={isError}
         isDisabled={isBtnLoading}
         errorMessage={errorMessage}
+        showButton={false}
       />
 
       {isLoading ? (
@@ -290,13 +359,13 @@ export default function ScanToWinQrCodePage() {
             <div className={styles.titleRow}>
               <FieldHeader
                 title='QR Codes'
-                description='Create up to 4 QR codes. Download and share them with your customers.'
+                description={`Create up to ${MAX_QR_CODES} QR codes. Download and share them with your customers.`}
               />
               <button
                 type='button'
                 className={styles.addButton}
                 onClick={handleGenerateClick}
-                disabled={qrCodes.length >= MAX_QR_CODES || isBtnLoading}
+                disabled={isBtnLoading}
               >
                 Generate QR Code
               </button>
@@ -331,10 +400,17 @@ export default function ScanToWinQrCodePage() {
                     <div className={styles.qrActions}>
                       <button
                         type='button'
-                        className={styles.secondaryButton}
+                        className={`${styles.secondaryButton} ${styles.downloadButton}`}
                         onClick={() => handleDownload(qr)}
                       >
                         Download
+                      </button>
+                      <button
+                        type='button'
+                        className={styles.secondaryButton}
+                        onClick={() => handleEditName(qr)}
+                      >
+                        Edit Name
                       </button>
                       <button
                         type='button'
@@ -353,8 +429,8 @@ export default function ScanToWinQrCodePage() {
       )}
 
       <DialogPopup
-        title='Generate QR Code'
-        actionTitle='Generate'
+        title={qrToEdit ? 'Update QR Code Name' : 'Generate QR Code'}
+        actionTitle={qrToEdit ? 'Update' : 'Generate'}
         isOpen={isNameDialogOpen}
         setIsOpen={setIsNameDialogOpen}
         onSubmit={handleNameDialogSubmit}
