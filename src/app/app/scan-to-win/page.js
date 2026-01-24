@@ -288,17 +288,18 @@ export default function ScanToWinPage() {
           const enabled = apiData.isEnabled === 'true' || apiData.isEnabled === true;
           setIsEnabled(enabled);
           
-          // Handle cardImage if present
-          if (apiData.cardImage) {
+          // Handle card image for display using signed URL
+          // Backend now provides a pre-signed URL in `cardImage_signedUrl`
+          if (apiData.cardImage_signedUrl) {
             setCardImage([{
-              name: apiData.cardImage,
+              name: apiData.cardImage_signedUrl,
               file: null,
-              url: apiData.cardImage
+              url: apiData.cardImage_signedUrl,
             }]);
             initialCardImageRef.current = [{
-              name: apiData.cardImage,
+              name: apiData.cardImage_signedUrl,
               file: null,
-              url: apiData.cardImage
+              url: apiData.cardImage_signedUrl,
             }];
           } else {
             setCardImage([]);
