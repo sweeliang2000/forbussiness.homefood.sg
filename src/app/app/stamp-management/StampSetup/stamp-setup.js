@@ -9,7 +9,7 @@ import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
 import { DataGrid } from '@mui/x-data-grid';
-import { IconButton, Menu, MenuItem } from '@mui/material';
+import { IconButton, Menu, MenuItem, Switch } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { clamp } from '@/utility/numbers';
 import EditStampStep from './_views/EditStampStep';
@@ -70,6 +70,9 @@ export default function StampSetup() {
   const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
   const [isEdit, setIsEdit] = useState(true);
 
+  // Toggle state
+  const [isEnabled, setIsEnabled] = useState(false);
+
   // For Form Data
   const [cardTitle, setCardTitle] = useState('');
   const [cardDescription, setCardDescription] = useState('');
@@ -89,6 +92,7 @@ export default function StampSetup() {
   const [isDefaultUnStampedIconDeleted, setIsDefaultUnStampedIconDeleted] = useState(false);
 
   // Store initial values to compare for unsaved changes
+  const initialIsEnabledRef = useRef(false);
   const initialCardTitleRef = useRef('');
   const initialCardDescriptionRef = useRef('');
   const initialTermsAndConditionsRef = useRef('');
@@ -112,11 +116,15 @@ export default function StampSetup() {
         console.log('Stamp management data:', data);
 
         if (data) {
-          const data = response.data.data;
 
           // Extract isEdit from API response
           const isEditValue = data.isEdit;
           setIsEdit(isEditValue !== undefined ? isEditValue : true);
+
+          // Parse isEnabled (might be string "true"/"false")
+          const enabled = data.isEnabled === 'true' || data.isEnabled === true;
+          setIsEnabled(enabled);
+          initialIsEnabledRef.current = enabled;
 
           // Check if we have existing data (not empty, null, or empty array)
           const hasData = data && 
@@ -197,6 +205,7 @@ export default function StampSetup() {
           initialCardStepsRef.current = JSON.parse(JSON.stringify(loadedCardSteps));
         } else {
           // Initialize with default values
+          initialIsEnabledRef.current = false;
           initialCardTitleRef.current = '';
           initialCardDescriptionRef.current = '';
           initialTermsAndConditionsRef.current = '';
@@ -230,6 +239,9 @@ export default function StampSetup() {
   const checkUnsavedChanges = () => {
     if (!isEdit) return false; // No unsaved changes if not in edit mode
     
+    // Check isEnabled
+    const isEnabledChanged = isEnabled !== initialIsEnabledRef.current;
+    
     // Check form fields
     const formFieldsChanged = (
       cardTitle !== initialCardTitleRef.current ||
@@ -257,7 +269,7 @@ export default function StampSetup() {
     // Check card steps
     const cardStepsChanged = JSON.stringify(cardSteps) !== JSON.stringify(initialCardStepsRef.current);
     
-    return formFieldsChanged || stampIconChanged || unstampedIconChanged || cardStepsChanged;
+    return isEnabledChanged || formFieldsChanged || stampIconChanged || unstampedIconChanged || cardStepsChanged;
   };
 
   // Update button disabled state based on unsaved changes
@@ -269,7 +281,7 @@ export default function StampSetup() {
     
     const hasChanges = checkUnsavedChanges();
     setIsBtnDisabled(!hasChanges);
-  }, [cardTitle, cardDescription, termsAndConditions, numberOfStamps, expirationType, numberOfDaysToExpire, rewardStampIcon, rewardUnstampedIcon, cardSteps, isEdit]);
+  }, [isEnabled, cardTitle, cardDescription, termsAndConditions, numberOfStamps, expirationType, numberOfDaysToExpire, rewardStampIcon, rewardUnstampedIcon, cardSteps, isEdit]);
 
   const formSubmissionHandler = async (event) => {
     event.preventDefault();
@@ -278,6 +290,7 @@ export default function StampSetup() {
     try {
       const formData = new FormData();
 
+      formData.append('isEnabled', isEnabled.toString());
       formData.append('cardTitle', cardTitle);
       formData.append('cardDescription', cardDescription);
       formData.append('termsAndConditions', termsAndConditions);
@@ -319,6 +332,7 @@ export default function StampSetup() {
       
       // Log complete body object including Terms and Conditions
       console.log("Complete request body to be sent to backend:", {
+        isEnabled: formDataObject.isEnabled,
         cardTitle: formDataObject.cardTitle,
         cardDescription: formDataObject.cardDescription,
         termsAndConditions: formDataObject.termsAndConditions,
@@ -347,6 +361,7 @@ export default function StampSetup() {
       setIsBtnLoading(false);
       
       // Update initial values after successful save
+      initialIsEnabledRef.current = isEnabled;
       initialCardTitleRef.current = cardTitle;
       initialCardDescriptionRef.current = cardDescription;
       initialTermsAndConditionsRef.current = termsAndConditions;
@@ -546,7 +561,7 @@ export default function StampSetup() {
       window.removeEventListener('popstate', handlePopState);
       document.removeEventListener('click', handleLinkClick, true);
     };
-  }, [cardTitle, cardDescription, termsAndConditions, numberOfStamps, expirationType, numberOfDaysToExpire, rewardStampIcon, rewardUnstampedIcon, cardSteps, isEdit]);
+  }, [isEnabled, cardTitle, cardDescription, termsAndConditions, numberOfStamps, expirationType, numberOfDaysToExpire, rewardStampIcon, rewardUnstampedIcon, cardSteps, isEdit]);
 
   // ==== Modify Selection ===
   const [currentStepStampedIcon, setCurrentStepStampedIcon] = useState([]);
@@ -754,9 +769,26 @@ export default function StampSetup() {
               <ErrorPage /> :
               <>
                 <ContentCard>
-                  <FieldHeader
-                    title='Card Setup'
-                  />
+                  <div className={styles.toggleContainer}>
+                    <h2 className={styles.toggleLabel}>Enable Stamp System</h2>
+                    <Switch
+                      checked={isEnabled}
+                      onChange={(event) => {
+                        resetSaving();
+                        setIsEnabled(event.target.checked);
+                      }}
+                      disabled={!isEdit}
+                      className={styles.toggleSwitch}
+                    />
+                  </div>
+                </ContentCard>
+
+                {isEnabled && (
+                  <>
+                    <ContentCard>
+                      <FieldHeader
+                        title='Card Setup'
+                      />
 
                   <div className={styles.fieldsContainer}>
                     <FormTextField
@@ -951,6 +983,8 @@ export default function StampSetup() {
                     pagination
                   />
                 </div>
+                  </>
+                )}
               </>
         }
       </form>

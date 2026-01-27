@@ -27,6 +27,7 @@ const TerminalPage = () => {
     const [rewardsRefreshKey, setRewardsRefreshKey] = useState(0);
     const [customerUserId, setCustomerUserId] = useState(null);
     const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+    const [isStampEnabled, setIsStampEnabled] = useState(false);
 
     const handlePhoneNumberSubmit = async (phone) => {
         setPhoneNumber(phone);
@@ -125,6 +126,97 @@ const TerminalPage = () => {
 
         checkAuthentication();
     }, [router]);
+
+    // Check if stamp functionality is enabled
+    useEffect(() => {
+        if (isCheckingAuth) return; // Wait for auth check to complete
+
+        const checkStampEnabled = async () => {
+            console.log('🚀 Starting checkStampEnabled...');
+            try {
+                console.log('📡 Fetching from: http://localhost:8080/api/mobile/stampDataIsEnabled');
+                const response = await fetch('http://localhost:8080/api/mobile/stampDataIsEnabled', {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies for authentication
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                console.log('📥 Response status:', response.status, 'ok:', response.ok);
+                
+                if (response.status === 404) {
+                    // 404 means stamps are not enabled
+                    console.log('❌ Stamp functionality is disabled (404)');
+                    setIsStampEnabled(false);
+                } else if (response.ok) {
+                    // Parse the JSON response
+                    const result = await response.json();
+                    console.log('📦 Full API response:', JSON.stringify(result, null, 2));
+                    console.log('📦 Parsed result:', result);
+                    
+                    // Check if data.isEnabled is "true" (it's a string in the response)
+                    const checkDetails = {
+                        success: result.success,
+                        hasData: !!result.data,
+                        dataKeys: result.data ? Object.keys(result.data) : [],
+                        isEnabled: result.data?.isEnabled,
+                        isEnabledType: typeof result.data?.isEnabled,
+                        isEnabledEqualsTrue: result.data?.isEnabled === "true",
+                        isEnabledEqualsTrueStrict: result.data?.isEnabled === "true",
+                        isEnabledTruthy: !!result.data?.isEnabled,
+                        fullCondition: result.success && result.data && result.data.isEnabled === "true"
+                    };
+                    console.log('🔍 Checking isEnabled - Full details:', checkDetails);
+                    
+                    // Step by step condition check
+                    const step1 = result.success;
+                    const step2 = !!result.data;
+                    const step3 = result.data?.isEnabled === "true";
+                    console.log('🔍 Condition steps:', {
+                        step1_success: step1,
+                        step2_hasData: step2,
+                        step3_isEnabledEqualsTrue: step3,
+                        final: step1 && step2 && step3
+                    });
+                    
+                    if (result.success && result.data && result.data.isEnabled === "true") {
+                        console.log('✅✅✅ ALL CONDITIONS MET - Setting isStampEnabled to TRUE');
+                        console.log('📝 Calling setIsStampEnabled(true)');
+                        setIsStampEnabled(true);
+                        console.log('✅ setIsStampEnabled(true) called');
+                    } else {
+                        console.log('❌❌❌ CONDITIONS NOT MET - Setting isStampEnabled to FALSE', {
+                            success: result.success,
+                            hasData: !!result.data,
+                            isEnabled: result.data?.isEnabled,
+                            isEnabledEqualsTrue: result.data?.isEnabled === "true"
+                        });
+                        setIsStampEnabled(false);
+                    }
+                } else {
+                    // Other errors - default to disabled for safety
+                    console.warn('⚠️ Unexpected response when checking stamp enabled:', response.status);
+                    setIsStampEnabled(false);
+                }
+            } catch (err) {
+                console.error('💥 Error checking stamp enabled status:', err);
+                console.error('💥 Error details:', {
+                    message: err.message,
+                    stack: err.stack
+                });
+                // On error, default to disabled
+                setIsStampEnabled(false);
+            }
+        };
+
+        checkStampEnabled();
+    }, [isCheckingAuth]);
+
+    // Debug: Log whenever isStampEnabled changes
+    useEffect(() => {
+        console.log('🔄🔄🔄 isStampEnabled state changed to:', isStampEnabled, 'type:', typeof isStampEnabled, 'boolean value:', !!isStampEnabled);
+        console.trace('Stack trace for isStampEnabled change');
+    }, [isStampEnabled]);
 
     // Fetch shop details when component mounts (only after auth check passes)
     useEffect(() => {
@@ -287,22 +379,33 @@ const TerminalPage = () => {
 
             {/* Right Side */}
             {phoneNumber ? (
-                <TerminalControlPanel 
-                    phoneNumber={phoneNumber}
-                    shopId={shopId}
-                    shopName={shopName}
-                    customerUserId={customerUserId}
-                    expirationType={expirationType}
-                    numberOfDaysToExpire={numberOfDaysToExpire}
-                    onSuccess={handleChangeCustomer}
-                    performedBy={performedBy}
-                    performedByName={performedByName}
-                    selectedReward={selectedReward}
-                    onRewardRedeemed={() => {
-                        setSelectedReward(null);
-                        setRewardsRefreshKey(prev => prev + 1);
-                    }}
-                />
+                <>
+                    {console.log('🔍🔍🔍 Passing isStampEnabled to TerminalControlPanel:', {
+                        isStampEnabled,
+                        type: typeof isStampEnabled,
+                        booleanValue: !!isStampEnabled,
+                        stringValue: String(isStampEnabled),
+                        strictTrue: isStampEnabled === true,
+                        truthy: !!isStampEnabled
+                    })}
+                    <TerminalControlPanel 
+                        phoneNumber={phoneNumber}
+                        shopId={shopId}
+                        shopName={shopName}
+                        customerUserId={customerUserId}
+                        expirationType={expirationType}
+                        numberOfDaysToExpire={numberOfDaysToExpire}
+                        onSuccess={handleChangeCustomer}
+                        performedBy={performedBy}
+                        performedByName={performedByName}
+                        selectedReward={selectedReward}
+                        onRewardRedeemed={() => {
+                            setSelectedReward(null);
+                            setRewardsRefreshKey(prev => prev + 1);
+                        }}
+                        isStampEnabled={isStampEnabled}
+                    />
+                </>
             ) : (
                 <CustomerPhoneNumberControlPanel onPhoneNumberSubmit={handlePhoneNumberSubmit} />
             )}

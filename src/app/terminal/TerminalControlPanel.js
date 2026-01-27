@@ -9,7 +9,17 @@ const MODE_STAMP_INCREMENT = 'stamp';
 // const MODE_MONEY_SPEND = 'money'; // Disabled for now
 const STAMPS_PER_DOLLAR = 5;
 
-const TerminalControlPanel = ({ phoneNumber, shopId, shopName, customerUserId, expirationType, numberOfDaysToExpire, onSuccess, performedBy, performedByName, selectedReward, onRewardRedeemed }) => {
+const TerminalControlPanel = ({ phoneNumber, shopId, shopName, customerUserId, expirationType, numberOfDaysToExpire, onSuccess, performedBy, performedByName, selectedReward, onRewardRedeemed, isStampEnabled = false }) => {
+    console.log('🔍🔍🔍 TerminalControlPanel rendered with isStampEnabled:', {
+        isStampEnabled,
+        type: typeof isStampEnabled,
+        booleanValue: !!isStampEnabled,
+        stringValue: String(isStampEnabled),
+        strictTrue: isStampEnabled === true,
+        truthy: !!isStampEnabled,
+        willShowPanel: !!isStampEnabled
+    });
+    
     const [mode, setMode] = useState(MODE_STAMP_INCREMENT);
     const [value, setValue] = useState('0');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -145,20 +155,19 @@ const TerminalControlPanel = ({ phoneNumber, shopId, shopName, customerUserId, e
             // Only update stamps if stampChange is not 0
             if (stampChange !== 0) {
                 const requestBody = {
-                    shop_id: shopId,
                     phone_number: phoneNumber,
+                    shop_id: shopId,
                     stamp_change: stampChange,
-                    expirationType: expirationType,
-                    numberOfDaysToExpire: numberOfDaysToExpire,
-                    performed_by: performedBy,
-                    performed_by_name: performedByName,
+                    performed_by_user_id: performedBy,
+                    performed_by_email: performedByName,
                     notes: notes.trim() || null
                 };
 
-                console.log('Sending request:', requestBody);
+                console.log('Sending request to backend API:', requestBody);
 
-                const response = await fetch('/api/terminal/stamps', {
+                const response = await fetch('http://localhost:8080/api/mobile/processStampTransaction', {
                     method: 'POST',
+                    credentials: 'include', // Include cookies for authentication
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -172,7 +181,12 @@ const TerminalControlPanel = ({ phoneNumber, shopId, shopName, customerUserId, e
 
                 if (!response.ok) {
                     console.error('Error updating stamps:', stampResult);
-                    setSuccessMessage(`Error: ${stampResult.error || 'Failed to update stamps'}`);
+                    // Handle error response - show both error and details if available
+                    let errorMessage = stampResult.error || 'Failed to update stamps';
+                    if (stampResult.details) {
+                        errorMessage += `\n${stampResult.details}`;
+                    }
+                    setSuccessMessage(`Error: ${errorMessage}`);
                     setShowSuccessAlert(true);
                     setIsSubmitting(false);
                     return;
@@ -182,7 +196,15 @@ const TerminalControlPanel = ({ phoneNumber, shopId, shopName, customerUserId, e
                 stampUpdateSuccess = true;
 
                 // Send notification if stamps were actually changed
-                const actualChange = stampResult.actualChange !== undefined ? stampResult.actualChange : (stampResult.action === 'created' ? stampChange : 0);
+                // Check if we have transaction data from the new API structure
+                let actualChange = 0;
+                if (stampResult.transaction) {
+                    actualChange = stampResult.transaction.actualChange || 0;
+                } else {
+                    // Fallback to old API structure
+                    actualChange = stampResult.actualChange !== undefined ? stampResult.actualChange : stampChange;
+                }
+                
                 if (actualChange !== 0 && customerUserId) {
                     try {
                         let title, body;
@@ -285,18 +307,47 @@ const TerminalControlPanel = ({ phoneNumber, shopId, shopName, customerUserId, e
             // Show success alert on screen
             let message = '';
             if (stampChange !== 0 && stampResult) {
-                if (stampResult.wasLimited) {
-                    if (stampResult.actualChange === 0) {
-                        // Cannot redeem - would go below 0
-                        message = `Cannot decrease stamps below 0. Customer has insufficient stamps.`;
+                // Handle response from backend API
+                // Check if we have transaction data from the new API structure
+                if (stampResult.transaction) {
+                    const transaction = stampResult.transaction;
+                    const actualChange = Math.abs(transaction.actualChange || 0);
+                    const requestedChange = Math.abs(transaction.requestedChange || 0);
+                    
+                    if (transaction.transactionType === 'stamp_deduction') {
+                        // Stamps deducted
+                        if (actualChange === 0) {
+                            message = `Cannot decrease stamps below 0. Customer has insufficient stamps.`;
+                        } else if (actualChange < requestedChange) {
+                            // Partial deduction
+                            message = `${actualChange} stamp${actualChange !== 1 ? 's' : ''} deducted. Cannot decrease below 0 (requested: ${requestedChange}).`;
+                        } else {
+                            // Full deduction
+                            message = `${actualChange} stamp${actualChange !== 1 ? 's' : ''} deducted successfully!`;
+                        }
+                    } else if (transaction.transactionType === 'stamp_collection') {
+                        // Stamps added
+                        message = `${actualChange} stamp${actualChange !== 1 ? 's' : ''} given successfully!`;
                     } else {
-                        // Partial redemption
-                        message = `Stamps decreased by ${Math.abs(stampResult.actualChange)}. Cannot decrease below 0 (requested: ${Math.abs(stampChange)}).`;
+                        // Fallback
+                        message = 'Stamps updated successfully!';
                     }
-                } else if (stampChange < 0) {
-                    message = `${Math.abs(stampResult.actualChange)} stamp${Math.abs(stampResult.actualChange) !== 1 ? 's' : ''} redeemed successfully!`;
                 } else {
-                    message = 'Stamps given successfully!';
+                    // Fallback to old API structure
+                    if (stampResult.wasLimited) {
+                        if (stampResult.actualChange === 0) {
+                            // Cannot redeem - would go below 0
+                            message = `Cannot decrease stamps below 0. Customer has insufficient stamps.`;
+                        } else {
+                            // Partial redemption
+                            message = `Stamps decreased by ${Math.abs(stampResult.actualChange)}. Cannot decrease below 0 (requested: ${Math.abs(stampChange)}).`;
+                        }
+                    } else if (stampChange < 0) {
+                        const actualChange = stampResult.actualChange !== undefined ? stampResult.actualChange : Math.abs(stampChange);
+                        message = `${actualChange} stamp${actualChange !== 1 ? 's' : ''} redeemed successfully!`;
+                    } else {
+                        message = 'Stamps given successfully!';
+                    }
                 }
             }
             
@@ -324,7 +375,12 @@ const TerminalControlPanel = ({ phoneNumber, shopId, shopName, customerUserId, e
                 message: error.message,
                 stack: error.stack
             });
-            setSuccessMessage(`Failed to update stamps: ${error.message}`);
+            // Handle network errors or other exceptions
+            let errorMessage = `Failed to update stamps: ${error.message}`;
+            if (error.message.includes('fetch')) {
+                errorMessage = 'Failed to connect to backend server. Please check your connection.';
+            }
+            setSuccessMessage(errorMessage);
             setShowSuccessAlert(true);
         } finally {
             setIsSubmitting(false);
@@ -392,92 +448,130 @@ const TerminalControlPanel = ({ phoneNumber, shopId, shopName, customerUserId, e
             )}
             <div className={styles.rightContent}>
                 {/* Mode Selector - Only Stamp Increment available */}
-                <div className={styles.modeSelector}>
-                    <ToggleButtonGroup
-                        value={MODE_STAMP_INCREMENT}
-                        exclusive
-                        aria-label="mode selection"
-                        fullWidth
-                    >
-                        <ToggleButton value={MODE_STAMP_INCREMENT} aria-label="stamp increment">
-                            Stamp Increment
-                        </ToggleButton>
-                    </ToggleButtonGroup>
-                </div>
+
+                    <div className={styles.modeSelector}>
+                        <ToggleButtonGroup
+                            value={MODE_STAMP_INCREMENT}
+                            exclusive
+                            aria-label="mode selection"
+                            fullWidth
+                        >
+                            <ToggleButton value={MODE_STAMP_INCREMENT} aria-label="stamp increment">
+                                { isStampEnabled ? 'Stamp Management' : 'Reward Management'}
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+                    </div>
+
 
                 {/* Number Display with +/- Controls */}
-                <div className={styles.numberDisplay}>
-                    {mode === MODE_STAMP_INCREMENT && (
-                        <button
-                            className={styles.iconButton}
-                            onClick={handleDecrement}
-                            aria-label="decrement"
-                        >
-                            <IoRemove />
-                        </button>
-                    )}
-                    <TextField
-                        className={styles.numberInput}
-                        variant="outlined"
-                        value={value}
-                        onChange={handleTextFieldChange}
-                        inputProps={{
-                            style: {
-                                textAlign: 'center',
-                                fontSize: '2.5rem',
-                                fontWeight: 600,
-                                padding: '1rem',
-                            },
-                            inputMode: 'numeric',
-                        }}
-                    />
-                    {mode === MODE_STAMP_INCREMENT && (
-                        <button
-                            className={styles.iconButton}
-                            onClick={handleIncrement}
-                            aria-label="increment"
-                        >
-                            <IoAdd />
-                        </button>
-                    )}
-                </div>
+                {(() => {
+                    console.log('🔍🔍🔍 Rendering Number Display check:', {
+                        isStampEnabled,
+                        type: typeof isStampEnabled,
+                        booleanValue: !!isStampEnabled,
+                        strictTrue: isStampEnabled === true,
+                        willRender: !!isStampEnabled
+                    });
+                    return null;
+                })()}
+                {isStampEnabled && (
+                    <div className={styles.numberDisplay}>
+                        {mode === MODE_STAMP_INCREMENT && (
+                            <button
+                                className={styles.iconButton}
+                                onClick={handleDecrement}
+                                aria-label="decrement"
+                            >
+                                <IoRemove />
+                            </button>
+                        )}
+                        <TextField
+                            className={styles.numberInput}
+                            variant="outlined"
+                            value={value}
+                            onChange={handleTextFieldChange}
+                            inputProps={{
+                                style: {
+                                    textAlign: 'center',
+                                    fontSize: '2.5rem',
+                                    fontWeight: 600,
+                                    padding: '1rem',
+                                },
+                                inputMode: 'numeric',
+                            }}
+                        />
+                        {mode === MODE_STAMP_INCREMENT && (
+                            <button
+                                className={styles.iconButton}
+                                onClick={handleIncrement}
+                                aria-label="increment"
+                            >
+                                <IoAdd />
+                            </button>
+                        )}
+                    </div>
+                )}
 
                 {/* Number Pad */}
-                <div className={styles.numberPad}>
-                    <div className={styles.numberPadRow}>
-                        <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('7')}>7</button>
-                        <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('8')}>8</button>
-                        <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('9')}>9</button>
+                {(() => {
+                    console.log('🔍🔍🔍 Rendering Number Pad check:', {
+                        isStampEnabled,
+                        type: typeof isStampEnabled,
+                        booleanValue: !!isStampEnabled,
+                        strictTrue: isStampEnabled === true,
+                        willRender: !!isStampEnabled
+                    });
+                    return null;
+                })()}
+                {isStampEnabled && (
+                    <div className={styles.numberPad}>
+                        <div className={styles.numberPadRow}>
+                            <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('7')}>7</button>
+                            <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('8')}>8</button>
+                            <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('9')}>9</button>
+                        </div>
+                        <div className={styles.numberPadRow}>
+                            <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('4')}>4</button>
+                            <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('5')}>5</button>
+                            <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('6')}>6</button>
+                        </div>
+                        <div className={styles.numberPadRow}>
+                            <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('1')}>1</button>
+                            <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('2')}>2</button>
+                            <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('3')}>3</button>
+                        </div>
+                        <div className={styles.numberPadRow}>
+                            <button className={`${styles.numberPadButton} ${styles.operatorButton}`} onClick={handleClear}>C</button>
+                            <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('0')}>0</button>
+                            {/* Money mode disabled - always show backspace */}
+                            <button className={`${styles.numberPadButton} ${styles.operatorButton}`} onClick={handleBackspace}>
+                                <IoBackspace />
+                            </button>
+                        </div>
                     </div>
-                    <div className={styles.numberPadRow}>
-                        <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('4')}>4</button>
-                        <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('5')}>5</button>
-                        <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('6')}>6</button>
-                    </div>
-                    <div className={styles.numberPadRow}>
-                        <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('1')}>1</button>
-                        <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('2')}>2</button>
-                        <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('3')}>3</button>
-                    </div>
-                    <div className={styles.numberPadRow}>
-                        <button className={`${styles.numberPadButton} ${styles.operatorButton}`} onClick={handleClear}>C</button>
-                        <button className={styles.numberPadButton} onClick={() => handleNumberPadClick('0')}>0</button>
-                        {/* Money mode disabled - always show backspace */}
-                        <button className={`${styles.numberPadButton} ${styles.operatorButton}`} onClick={handleBackspace}>
-                            <IoBackspace />
-                        </button>
-                    </div>
-                </div>
+                )}
 
                 {/* Display Section */}
-                <div className={styles.moneyDisplay}>
-                    <div className={styles.stampsInfo}>
-                        <span className={styles.label}>
-                            {stampChange >= 0 ? 'Stamps to Add:' : 'Stamps to Remove:'}
-                        </span>
-                        <span className={styles.stamps}>{Math.abs(stampChange)}</span>
+                {(() => {
+                    console.log('🔍🔍🔍 Rendering Display Section check:', {
+                        isStampEnabled,
+                        type: typeof isStampEnabled,
+                        booleanValue: !!isStampEnabled,
+                        strictTrue: isStampEnabled === true,
+                        willRender: !!isStampEnabled
+                    });
+                    return null;
+                })()}
+                {isStampEnabled && (
+                    <div className={styles.moneyDisplay}>
+                        <div className={styles.stampsInfo}>
+                            <span className={styles.label}>
+                                {stampChange >= 0 ? 'Stamps to Add:' : 'Stamps to Remove:'}
+                            </span>
+                            <span className={styles.stamps}>{Math.abs(stampChange)}</span>
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Selected Reward Display */}
                 {selectedReward && (

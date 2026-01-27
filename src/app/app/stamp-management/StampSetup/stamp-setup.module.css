@@ -47,6 +47,23 @@
     color: red;
 }
 
+.toggleContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+}
+
+.toggleLabel {
+    font-size: 1.25rem;
+    margin: 0;
+    font-weight: 500;
+}
+
+.toggleSwitch {
+    padding: 4px !important;
+}
+
 .markdownEditor {
     margin-top: 8px;
 }
