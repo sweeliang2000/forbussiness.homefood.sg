@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Button, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { IoAdd, IoRemove, IoBackspace } from 'react-icons/io5';
 import { BASE_URL_BACKEND } from '../../../config/config';
+import apiClient from '@/utility/api';
 import styles from './TerminalControlPanel.module.css';
 
 const MODE_STAMP_INCREMENT = 'stamp';
@@ -231,63 +232,44 @@ const TerminalControlPanel = ({ phoneNumber, shopId, customerUserId, onSuccess, 
             if (selectedReward && selectedReward.id) {
                 try {
                     console.log('Updating selected reward status to Redeemed:', selectedReward.id);
-                    const rewardResponse = await fetch('/api/terminal/user-rewards', {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            reward_id: selectedReward.id
-                        })
+                    const rewardResponse = await apiClient.patch('/api/mobile/userRewards', {
+                        reward_id: [selectedReward.id]
                     });
 
-                    const rewardResult = await rewardResponse.json();
+                    const rewardResult = rewardResponse.data;
+                    console.log('Reward status updated to Redeemed successfully:', rewardResult);
                     
-                    if (!rewardResponse.ok) {
-                        console.error('Error updating reward status:', rewardResult);
-                        // Update error message if reward redemption failed
-                        if (stampUpdateSuccess) {
-                            setSuccessMessage(`Stamps updated, but failed to redeem reward: ${rewardResult.error || 'Unknown error'}`);
-                        } else {
-                            setSuccessMessage(`Failed to redeem reward: ${rewardResult.error || 'Unknown error'}`);
+                    // Send notification for reward redemption
+                    if (customerUserId && selectedReward) {
+                        try {
+                            const title = 'Reward Redeem';
+                            const rewardName = selectedReward.reward_name || 'reward';
+                            const body = `You have used ${rewardName}`;
+                            
+                            await sendNotification(customerUserId, title, body, {
+                                type: 'reward_redeemed',
+                                rewardId: selectedReward.id,
+                                rewardName: rewardName,
+                                shopId: shopId,
+                                url: 'collbine://home/rewards'
+                            });
+                        } catch (notifError) {
+                            console.error('Error sending reward redemption notification:', notifError);
                         }
-                        setShowSuccessAlert(true);
-                        setIsSubmitting(false);
-                        return;
-                    } else {
-                        console.log('Reward status updated to Redeemed successfully:', rewardResult);
-                        
-                        // Send notification for reward redemption
-                        if (customerUserId && selectedReward) {
-                            try {
-                                const title = 'Reward Redeem';
-                                const rewardName = selectedReward.reward_name || 'reward';
-                                const body = `You have used ${rewardName}`;
-                                
-                                await sendNotification(customerUserId, title, body, {
-                                    type: 'reward_redeemed',
-                                    rewardId: selectedReward.id,
-                                    rewardName: rewardName,
-                                    shopId: shopId,
-                                    url: 'collbine://home/rewards'
-                                });
-                            } catch (notifError) {
-                                console.error('Error sending reward redemption notification:', notifError);
-                            }
-                        }
-                        
-                        // Clear selected reward and refresh rewards list
-                        if (onRewardRedeemed) {
-                            onRewardRedeemed();
-                        }
+                    }
+                    
+                    // Clear selected reward and refresh rewards list
+                    if (onRewardRedeemed) {
+                        onRewardRedeemed();
                     }
                 } catch (rewardError) {
                     console.error('Error updating reward status:', rewardError);
+                    const errorMessage = rewardError.response?.data?.error || rewardError.message || 'Unknown error';
                     // Update error message if reward redemption failed
                     if (stampUpdateSuccess) {
-                        setSuccessMessage(`Stamps updated, but failed to redeem reward: ${rewardError.message}`);
+                        setSuccessMessage(`Stamps updated, but failed to redeem reward: ${errorMessage}`);
                     } else {
-                        setSuccessMessage(`Failed to redeem reward: ${rewardError.message}`);
+                        setSuccessMessage(`Failed to redeem reward: ${errorMessage}`);
                     }
                     setShowSuccessAlert(true);
                     setIsSubmitting(false);
