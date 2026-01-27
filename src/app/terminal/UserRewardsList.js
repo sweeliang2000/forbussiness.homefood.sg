@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material';
 import { IoCloseSharp } from 'react-icons/io5';
 import { FaCheck } from 'react-icons/fa6';
+import apiClient from '@/utility/api';
 import styles from './UserRewardsList.module.css';
 
 const UserRewardsList = ({ phoneNumber, shopId, onRewardSelect }) => {
@@ -30,19 +31,15 @@ const UserRewardsList = ({ phoneNumber, shopId, onRewardSelect }) => {
                     params.append('shop_id', shopId);
                 }
                 
-                const response = await fetch(`/api/terminal/user-rewards?${params.toString()}`);
+                const response = await apiClient.get(`/api/mobile/userRewards?${params.toString()}`);
+                const data = response.data;
                 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || 'Failed to fetch rewards');
-                }
-                
-                const data = await response.json();
                 console.log('UserRewardsList - Received rewards data:', { count: data?.length, data: data });
                 setRewards(data || []);
             } catch (err) {
                 console.error('Error fetching user rewards:', err);
-                setError(err.message);
+                const errorMessage = err?.response?.data?.error || err?.response?.data?.message || err.message || 'Failed to fetch rewards';
+                setError(errorMessage);
             } finally {
                 setLoading(false);
             }

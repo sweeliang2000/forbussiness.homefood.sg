@@ -7,7 +7,6 @@ import UserRewardsList from './UserRewardsList';
 import { getUserDataFromCookie } from '@/utility/cookieUtils';
 import apiClient from '@/utility/api';
 import { REFRESH_USER_COOKIE } from '@/utility/apiPaths';
-import { BASE_URL_BACKEND } from '../../../config/config';
 // Removed direct Supabase client import - using API route instead
 import styles from './page.module.css';
 
@@ -39,61 +38,40 @@ const TerminalPage = () => {
 
         try {
             // Call backend API for user profile
-            const response = await fetch(`${BASE_URL_BACKEND}/api/mobile/userProfile?phone=${encodeURIComponent(phone)}`, {
-                method: 'GET',
-                credentials: 'include', // Include cookies for authentication
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
+            const response = await apiClient.get(`/api/mobile/userProfile?phone=${encodeURIComponent(phone)}`);
+            const result = response.data;
             
-            if (response.status === 404) {
-                // Customer not found
+            console.log('Customer profile response:', result);
+            
+            // New API structure: { data: { name, birthday, phone_number } }
+            const customerData = result.data || result;
+            
+            // Check if name and birthday are null - treat as not found
+            if (customerData.name === null && customerData.birthday === null) {
                 setError('not_found');
                 setCustomerName('');
                 setCustomerBirthday('');
-            } else if (!response.ok) {
-                // Other error (401, 500, etc.)
-                const errorData = await response.json().catch(() => ({}));
-                console.error('API error:', errorData);
-                if (response.status === 401) {
-                    setError('unauthorized');
-                } else {
-                    setError('error');
-                }
-                setCustomerName('');
-                setCustomerBirthday('');
             } else {
-                // Success - parse the new response structure
-                const result = await response.json();
-                console.log('Customer profile response:', result);
-                
-                // New API structure: { data: { name, birthday, phone_number } }
-                const customerData = result.data || result;
-                
-                // Check if name and birthday are null - treat as not found
-                if (customerData.name === null && customerData.birthday === null) {
-                    setError('not_found');
-                    setCustomerName('');
-                    setCustomerBirthday('');
-                } else {
-                    setCustomerName(customerData.name || '');
-                    setCustomerBirthday(customerData.birthday || '');
-                    // Use phone_number as userId since it's the primary key
-                    setCustomerUserId(customerData.phone_number || phone || null);
-                    setError(null);
-                }
+                setCustomerName(customerData.name || '');
+                setCustomerBirthday(customerData.birthday || '');
+                // Use phone_number as userId since it's the primary key
+                setCustomerUserId(customerData.phone_number || phone || null);
+                setError(null);
             }
         } catch (err) {
             console.error('Error fetching customer:', err);
             console.error('Error details:', {
                 message: err.message,
-                status: err.status,
-                code: err.code,
+                status: err?.response?.status,
+                code: err?.code,
                 details: err
             });
-            // Check if it's a 401 unauthorized error
-            if (err.message?.includes('401') || err.status === 401 || err.message?.includes('Unauthorized')) {
+            
+            // Handle axios error structure
+            if (err?.response?.status === 404) {
+                // Customer not found
+                setError('not_found');
+            } else if (err?.response?.status === 401) {
                 setError('unauthorized');
             } else {
                 setError('error');
@@ -153,76 +131,65 @@ const TerminalPage = () => {
         const checkStampEnabled = async () => {
             console.log('🚀 Starting checkStampEnabled...');
             try {
-                console.log('📡 Fetching from:', `${BASE_URL_BACKEND}/api/mobile/stampDataIsEnabled`);
-                const response = await fetch(`${BASE_URL_BACKEND}/api/mobile/stampDataIsEnabled`, {
-                    method: 'GET',
-                    credentials: 'include', // Include cookies for authentication
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-                console.log('📥 Response status:', response.status, 'ok:', response.ok);
+                const response = await apiClient.get('/api/mobile/stampDataIsEnabled');
+                const result = response.data;
                 
-                if (response.status === 404) {
-                    // 404 means stamps are not enabled
-                    console.log('❌ Stamp functionality is disabled (404)');
-                    setIsStampEnabled(false);
-                } else if (response.ok) {
-                    // Parse the JSON response
-                    const result = await response.json();
-                    console.log('📦 Full API response:', JSON.stringify(result, null, 2));
-                    console.log('📦 Parsed result:', result);
-                    
-                    // Check if data.isEnabled is "true" (it's a string in the response)
-                    const checkDetails = {
+                console.log('📦 Full API response:', JSON.stringify(result, null, 2));
+                console.log('📦 Parsed result:', result);
+                
+                // Check if data.isEnabled is "true" (it's a string in the response)
+                const checkDetails = {
+                    success: result.success,
+                    hasData: !!result.data,
+                    dataKeys: result.data ? Object.keys(result.data) : [],
+                    isEnabled: result.data?.isEnabled,
+                    isEnabledType: typeof result.data?.isEnabled,
+                    isEnabledEqualsTrue: result.data?.isEnabled === "true",
+                    isEnabledEqualsTrueStrict: result.data?.isEnabled === "true",
+                    isEnabledTruthy: !!result.data?.isEnabled,
+                    fullCondition: result.success && result.data && result.data.isEnabled === "true"
+                };
+                console.log('🔍 Checking isEnabled - Full details:', checkDetails);
+                
+                // Step by step condition check
+                const step1 = result.success;
+                const step2 = !!result.data;
+                const step3 = result.data?.isEnabled === "true";
+                console.log('🔍 Condition steps:', {
+                    step1_success: step1,
+                    step2_hasData: step2,
+                    step3_isEnabledEqualsTrue: step3,
+                    final: step1 && step2 && step3
+                });
+                
+                if (result.success && result.data && result.data.isEnabled === "true") {
+                    console.log('✅✅✅ ALL CONDITIONS MET - Setting isStampEnabled to TRUE');
+                    console.log('📝 Calling setIsStampEnabled(true)');
+                    setIsStampEnabled(true);
+                    console.log('✅ setIsStampEnabled(true) called');
+                } else {
+                    console.log('❌❌❌ CONDITIONS NOT MET - Setting isStampEnabled to FALSE', {
                         success: result.success,
                         hasData: !!result.data,
-                        dataKeys: result.data ? Object.keys(result.data) : [],
                         isEnabled: result.data?.isEnabled,
-                        isEnabledType: typeof result.data?.isEnabled,
-                        isEnabledEqualsTrue: result.data?.isEnabled === "true",
-                        isEnabledEqualsTrueStrict: result.data?.isEnabled === "true",
-                        isEnabledTruthy: !!result.data?.isEnabled,
-                        fullCondition: result.success && result.data && result.data.isEnabled === "true"
-                    };
-                    console.log('🔍 Checking isEnabled - Full details:', checkDetails);
-                    
-                    // Step by step condition check
-                    const step1 = result.success;
-                    const step2 = !!result.data;
-                    const step3 = result.data?.isEnabled === "true";
-                    console.log('🔍 Condition steps:', {
-                        step1_success: step1,
-                        step2_hasData: step2,
-                        step3_isEnabledEqualsTrue: step3,
-                        final: step1 && step2 && step3
+                        isEnabledEqualsTrue: result.data?.isEnabled === "true"
                     });
-                    
-                    if (result.success && result.data && result.data.isEnabled === "true") {
-                        console.log('✅✅✅ ALL CONDITIONS MET - Setting isStampEnabled to TRUE');
-                        console.log('📝 Calling setIsStampEnabled(true)');
-                        setIsStampEnabled(true);
-                        console.log('✅ setIsStampEnabled(true) called');
-                    } else {
-                        console.log('❌❌❌ CONDITIONS NOT MET - Setting isStampEnabled to FALSE', {
-                            success: result.success,
-                            hasData: !!result.data,
-                            isEnabled: result.data?.isEnabled,
-                            isEnabledEqualsTrue: result.data?.isEnabled === "true"
-                        });
-                        setIsStampEnabled(false);
-                    }
-                } else {
-                    // Other errors - default to disabled for safety
-                    console.warn('⚠️ Unexpected response when checking stamp enabled:', response.status);
                     setIsStampEnabled(false);
                 }
             } catch (err) {
                 console.error('💥 Error checking stamp enabled status:', err);
                 console.error('💥 Error details:', {
                     message: err.message,
+                    status: err?.response?.status,
                     stack: err.stack
                 });
+                
+                // 404 means stamps are not enabled
+                if (err?.response?.status === 404) {
+                    console.log('❌ Stamp functionality is disabled (404)');
+                } else {
+                    console.warn('⚠️ Unexpected error when checking stamp enabled:', err?.response?.status);
+                }
                 // On error, default to disabled
                 setIsStampEnabled(false);
             }
@@ -259,15 +226,8 @@ const TerminalPage = () => {
                 setPerformedByName(userEmail);
 
                 // Fetch shop details from API
-                const response = await fetch(`/api/terminal/shop-details?shop_id=${encodeURIComponent(shopIdFromCookie)}`);
-                
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    console.error('Error fetching shop details:', errorData);
-                    return;
-                }
-
-                const shopData = await response.json();
+                const response = await apiClient.get(`/api/terminal/shop-details?shop_id=${encodeURIComponent(shopIdFromCookie)}`);
+                const shopData = response.data;
                 
                 // Store expiration info and shop name
                 setExpirationType(shopData.expirationType);
