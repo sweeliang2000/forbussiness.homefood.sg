@@ -9,7 +9,7 @@ const MODE_STAMP_INCREMENT = 'stamp';
 // const MODE_MONEY_SPEND = 'money'; // Disabled for now
 const STAMPS_PER_DOLLAR = 5;
 
-const TerminalControlPanel = ({ phoneNumber, shopId, shopName, customerUserId, expirationType, numberOfDaysToExpire, onSuccess, performedBy, performedByName, selectedReward, onRewardRedeemed, isStampEnabled = false }) => {
+const TerminalControlPanel = ({ phoneNumber, shopId, customerUserId, onSuccess, performedBy, performedByName, selectedReward, onRewardRedeemed, isStampEnabled = false }) => {
     console.log('🔍🔍🔍 TerminalControlPanel rendered with isStampEnabled:', {
         isStampEnabled,
         type: typeof isStampEnabled,
@@ -129,16 +129,6 @@ const TerminalControlPanel = ({ phoneNumber, shopId, shopName, customerUserId, e
         const numValue = parseFloat(value) || 0;
         const stampChange = Math.floor(numValue);
 
-        console.log('Confirm pressed:', {
-            value,
-            numValue,
-            stampChange,
-            phoneNumber,
-            shopId,
-            expirationType,
-            numberOfDaysToExpire
-        });
-
         if (!phoneNumber || !shopId) {
             console.error('Missing required data:', { phoneNumber, shopId });
             setSuccessMessage('Missing phone number or shop ID. Please try again.');
@@ -205,33 +195,34 @@ const TerminalControlPanel = ({ phoneNumber, shopId, shopName, customerUserId, e
                     actualChange = stampResult.actualChange !== undefined ? stampResult.actualChange : stampChange;
                 }
                 
-                if (actualChange !== 0 && customerUserId) {
-                    try {
-                        let title, body;
-                        if (actualChange > 0) {
-                            // Stamps given
-                            title = shopName ? `Stamp Rewarded From ${shopName}` : 'Stamp Rewarded';
-                            body = actualChange === 1 
-                                ? `You have gained 1 stamp` 
-                                : `You have gained ${actualChange} stamps`;
-                        } else {
-                            // Stamps removed
-                            title = shopName ? `Stamp Removed From ${shopName}` : 'Stamp Removed';
-                            body = Math.abs(actualChange) === 1 
-                                ? `1 stamp had been removed` 
-                                : `${Math.abs(actualChange)} stamps had been removed`;
-                        }
+                // This is to send push notification to the user
+                // if (actualChange !== 0 && customerUserId) {
+                //     try {
+                //         let title, body;
+                //         if (actualChange > 0) {
+                //             // Stamps given
+                //             title = shopName ? `Stamp Rewarded From ${shopName}` : 'Stamp Rewarded';
+                //             body = actualChange === 1 
+                //                 ? `You have gained 1 stamp` 
+                //                 : `You have gained ${actualChange} stamps`;
+                //         } else {
+                //             // Stamps removed
+                //             title = shopName ? `Stamp Removed From ${shopName}` : 'Stamp Removed';
+                //             body = Math.abs(actualChange) === 1 
+                //                 ? `1 stamp had been removed` 
+                //                 : `${Math.abs(actualChange)} stamps had been removed`;
+                //         }
                         
-                        await sendNotification(customerUserId, title, body, {
-                            type: actualChange > 0 ? 'stamp_given' : 'stamp_removed',
-                            stampChange: actualChange,
-                            shopId: shopId,
-                            url: 'collbine://home/rewards'
-                        });
-                    } catch (notifError) {
-                        console.error('Error sending stamp notification:', notifError);
-                    }
-                }
+                //         await sendNotification(customerUserId, title, body, {
+                //             type: actualChange > 0 ? 'stamp_given' : 'stamp_removed',
+                //             stampChange: actualChange,
+                //             shopId: shopId,
+                //             url: 'collbine://home/rewards'
+                //         });
+                //     } catch (notifError) {
+                //         console.error('Error sending stamp notification:', notifError);
+                //     }
+                // }
             } else {
                 console.log('Skipping stamp update - stampChange is 0');
             }

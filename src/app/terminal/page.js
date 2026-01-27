@@ -225,22 +225,6 @@ const TerminalPage = () => {
                 setPerformedBy(userId);
                 setPerformedByName(userEmail);
 
-                // Fetch shop details from API
-                const response = await apiClient.get(`/api/terminal/shop-details?shop_id=${encodeURIComponent(shopIdFromCookie)}`);
-                const shopData = response.data;
-                
-                // Store expiration info and shop name
-                setExpirationType(shopData.expirationType);
-                setNumberOfDaysToExpire(shopData.numberOfDaysToExpire);
-                setShopName(shopData.shopName || null);
-
-                // Console.log the information
-                console.log('Shop Details:', {
-                    shop_id: shopData.shop_id,
-                    expirationType: shopData.expirationType,
-                    numberOfDaysToExpire: shopData.numberOfDaysToExpire,
-                    fullStampData: shopData.stampData
-                });
             } catch (err) {
                 console.error('Error fetching shop details:', err);
             }
@@ -372,8 +356,6 @@ const TerminalPage = () => {
                         shopId={shopId}
                         shopName={shopName}
                         customerUserId={customerUserId}
-                        expirationType={expirationType}
-                        numberOfDaysToExpire={numberOfDaysToExpire}
                         onSuccess={handleChangeCustomer}
                         performedBy={performedBy}
                         performedByName={performedByName}
