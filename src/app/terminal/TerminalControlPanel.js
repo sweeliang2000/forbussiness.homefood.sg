@@ -165,7 +165,7 @@ const TerminalControlPanel = ({ phoneNumber, shopId, shopName, customerUserId, e
 
                 console.log('Sending request to backend API:', requestBody);
 
-                const response = await fetch('http://localhost:8080/api/mobile/processStampTransaction', {
+                const response = await fetch(`${BASE_URL_BACKEND}/api/mobile/processStampTransaction`, {
                     method: 'POST',
                     credentials: 'include', // Include cookies for authentication
                     headers: {

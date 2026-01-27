@@ -7,6 +7,7 @@ import UserRewardsList from './UserRewardsList';
 import { getUserDataFromCookie } from '@/utility/cookieUtils';
 import apiClient from '@/utility/api';
 import { REFRESH_USER_COOKIE } from '@/utility/apiPaths';
+import { BASE_URL_BACKEND } from '../../../config/config';
 // Removed direct Supabase client import - using API route instead
 import styles from './page.module.css';
 
@@ -37,8 +38,14 @@ const TerminalPage = () => {
         setCustomerBirthday('');
 
         try {
-            // Call API route instead of direct Supabase client
-            const response = await fetch(`/api/terminal/customer?phone=${encodeURIComponent(phone)}`);
+            // Call backend API for user profile
+            const response = await fetch(`${BASE_URL_BACKEND}/api/mobile/userProfile?phone=${encodeURIComponent(phone)}`, {
+                method: 'GET',
+                credentials: 'include', // Include cookies for authentication
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
             
             if (response.status === 404) {
                 // Customer not found
@@ -57,13 +64,25 @@ const TerminalPage = () => {
                 setCustomerName('');
                 setCustomerBirthday('');
             } else {
-                // Success
-                const customerData = await response.json();
-                setCustomerName(customerData.name || '');
-                setCustomerBirthday(customerData.birthday || '');
-                // Use phone_number as userId since it's the primary key
-                setCustomerUserId(customerData.phone_number || null);
-                setError(null);
+                // Success - parse the new response structure
+                const result = await response.json();
+                console.log('Customer profile response:', result);
+                
+                // New API structure: { data: { name, birthday, phone_number } }
+                const customerData = result.data || result;
+                
+                // Check if name and birthday are null - treat as not found
+                if (customerData.name === null && customerData.birthday === null) {
+                    setError('not_found');
+                    setCustomerName('');
+                    setCustomerBirthday('');
+                } else {
+                    setCustomerName(customerData.name || '');
+                    setCustomerBirthday(customerData.birthday || '');
+                    // Use phone_number as userId since it's the primary key
+                    setCustomerUserId(customerData.phone_number || phone || null);
+                    setError(null);
+                }
             }
         } catch (err) {
             console.error('Error fetching customer:', err);
@@ -134,8 +153,8 @@ const TerminalPage = () => {
         const checkStampEnabled = async () => {
             console.log('🚀 Starting checkStampEnabled...');
             try {
-                console.log('📡 Fetching from: http://localhost:8080/api/mobile/stampDataIsEnabled');
-                const response = await fetch('http://localhost:8080/api/mobile/stampDataIsEnabled', {
+                console.log('📡 Fetching from:', `${BASE_URL_BACKEND}/api/mobile/stampDataIsEnabled`);
+                const response = await fetch(`${BASE_URL_BACKEND}/api/mobile/stampDataIsEnabled`, {
                     method: 'GET',
                     credentials: 'include', // Include cookies for authentication
                     headers: {
@@ -325,7 +344,7 @@ const TerminalPage = () => {
                                     </div>
                                 ) : (
                                     <>
-                                        <p className={styles.customerName}>{customerName || 'N/A'}</p>
+                                        <p className={styles.customerName}>{customerName || 'Not Found'}</p>
                                         <p className={styles.customerPhone}>{phoneNumber}</p>
                                         {customerBirthday && (
                                             <p className={styles.customerBirthday}>
