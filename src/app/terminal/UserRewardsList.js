@@ -30,7 +30,7 @@ const UserRewardsList = ({ phoneNumber, shopId, onRewardSelect }) => {
                 if (shopId) {
                     params.append('shop_id', shopId);
                 }
-                
+                console.log(`/api/mobile/userRewards?${params.toString()}`)
                 const response = await apiClient.get(`/api/mobile/userRewards?${params.toString()}`);
                 const data = response.data;
                 
