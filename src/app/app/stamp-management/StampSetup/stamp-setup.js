@@ -570,13 +570,14 @@ export default function StampSetup() {
   const modifyStampSaveHandler = () => {
     console.log('Current Modified Row:', selectedRowId);
 
-    setCardSteps(preValue => {
-      console.log(preValue)
-      preValue[selectedRowId - 1].stampedIcon = currentStepStampedIcon === rewardStampIcon || currentStepStampedIcon.length === 0 ? 'default' : currentStepStampedIcon;
-      preValue[selectedRowId - 1].unStampedIcon = currentStepUnstampIcon === rewardUnstampedIcon || currentStepStampedIcon.length === 0 ? 'default' : currentStepUnstampIcon;
-      preValue[selectedRowId - 1].reward = currentReward;
-      return preValue
-    });
+    const newStampedIcon = currentStepStampedIcon === rewardStampIcon || currentStepStampedIcon.length === 0 ? 'default' : currentStepStampedIcon;
+    const newUnstampedIcon = currentStepUnstampIcon === rewardUnstampedIcon || currentStepUnstampIcon.length === 0 ? 'default' : currentStepUnstampIcon;
+
+    setCardSteps(preValue => preValue.map((step, index) =>
+      index === selectedRowId - 1
+        ? { ...step, stampedIcon: newStampedIcon, unStampedIcon: newUnstampedIcon, reward: currentReward }
+        : { ...step }
+    ));
 
     setCurrentReward(null);
     resetSaving();
