@@ -180,6 +180,8 @@ export default function Sidebar({
                         title={'Redeemable'}
                         submenus={[
                             { href: '/app/redeemable/rewards', title: 'All Rewards' },
+                            { href: '/app/redeemable/rewards?reward_type=stampReward', title: 'Rewards For Stamp System' },
+                            { href: '/app/redeemable/rewards?reward_type=scanToWinReward', title: 'Rewards For Scan to Win' }
                             // { href: '/app/redeemable/new-join-rewards', title: 'New Join Rewards' },
                         ]}
                         isExpand={currentSelection == REDEEMABLE_TAB}

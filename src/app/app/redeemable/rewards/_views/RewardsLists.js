@@ -7,7 +7,9 @@ const RewardsLists = ({
     rewards,
     loading,
     error,
-    onCardSelected
+    onCardSelected,
+    hasRewards = false,
+    hasActiveFilters = false
 }) => {
     if (loading) {
         return (
@@ -26,9 +28,12 @@ const RewardsLists = ({
     }
 
     if (rewards.length === 0) {
+        const emptyMessage = hasRewards && hasActiveFilters
+            ? 'No rewards match your filters. Try changing the status.'
+            : 'No reward available. Start creating';
         return (
             <ContentCard className={styles.messageContainer}>
-                <div>No reward available. Start creating</div>
+                <div>{emptyMessage}</div>
             </ContentCard>
         );
     }

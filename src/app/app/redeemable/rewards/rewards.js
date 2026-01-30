@@ -3,14 +3,18 @@ import { ContentCard } from '@/components/ContentCard/ContentCard';
 import styles from './rewards.module.css';
 import RewardsHeader from './_views/RewardsHeader';
 import CreateRewardPopup from './_views/CreateRewardPopup';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import RewardsLists from './_views/RewardsLists';
 import AlertModal from '@/components/AlertModal/AlertModal';
-import RewardCard from './_views/RewardCard';
 import apiClient from '@/utility/api';
 import { REWARDS, CREATE_REWARD, UPDATE_REWARD, DELETE_REWARD } from '@/utility/apiPaths';
 
+const VALID_REWARD_TYPES = ['stampReward', 'scanToWinReward'];
+
 const Rewards = () => {
+    const searchParams = useSearchParams();
+    const rewardTypeFromUrl = searchParams.get('reward_type');
     const [isCreateNewRewardOpen, setIsCreateNewRewardOpen] = useState(false);
     const [selectedReward, setSelectedReward] = useState(null);
     const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
@@ -21,24 +25,57 @@ const Rewards = () => {
     const fetchRewards = async () => {
         try {
             setLoading(true);
-            const response = await apiClient.get(REWARDS);
+            const params =
+                rewardTypeFromUrl && VALID_REWARD_TYPES.includes(rewardTypeFromUrl)
+                    ? { reward_type: rewardTypeFromUrl }
+                    : {};
+            const response = await apiClient.get(REWARDS, { params });
             console.log('Rewards response:', response.data);
-            const data = response.data.data
+            const data = response.data.data;
             const apiRewards = data.rewards;
-            const currently_selected = data.currently_selected;  
-            
-            // Filter currently_selected to only get items with rewards and extract the reward IDs
-            const selectedRewards = currently_selected
-                ?.filter(item => item.reward)
-                ?.map(item => item.reward.id) || [];
-            
+            const currently_stamp = data.currently_stamp || [];
+            const currently_scanReward = data.currently_scanReward;
+            const live_in_used_stamp = data.live_in_used_stamp || [];
+            const live_in_used_scan = data.live_in_used_scan || [];
+
+            // Currently selected: from stamp (items with .reward) and from scan (parsed JSON rewardId)
+            const selectedFromStamp = currently_stamp
+                .filter(item => item.reward)
+                .map(item => item.reward.id);
+            const selectedFromScan = (() => {
+                try {
+                    const parsed = typeof currently_scanReward === 'string'
+                        ? JSON.parse(currently_scanReward || '[]')
+                        : (currently_scanReward || []);
+                    return Array.isArray(parsed) ? parsed.map(c => c.rewardId).filter(Boolean) : [];
+                } catch {
+                    return [];
+                }
+            })();
+            const selectedRewardIds = [...new Set([...selectedFromStamp, ...selectedFromScan])];
+
+            // Live in use: from stamp (items with .reward) and from scan (rewardChances.rewardId)
+            const liveFromStamp = live_in_used_stamp
+                .filter(item => item.reward)
+                .map(item => item.reward.id);
+            const liveFromScan = live_in_used_scan.flatMap(item => {
+                try {
+                    const chances = typeof item.rewardChances === 'string'
+                        ? JSON.parse(item.rewardChances || '[]')
+                        : (item.rewardChances || []);
+                    return Array.isArray(chances) ? chances.map(c => c.rewardId).filter(Boolean) : [];
+                } catch {
+                    return [];
+                }
+            });
+            const liveInUseRewardIds = [...new Set([...liveFromStamp, ...liveFromScan])];
+
             // Transform API response to match expected structure
             const transformedRewards = (apiRewards || []).map(reward => ({
                 id: reward.reward_id,
                 type: reward.rewardType || 'stampReward',
                 name: reward.rewardName || 'Unnamed Reward',
                 description: reward.description || 'No description available',
-                // Include terms & conditions when fetching (support both API shapes)
                 termsAndConditions: reward.termsAndConditions || reward.terms_and_conditions || '',
                 image: {
                     url: reward.rewardImage || '/images/placeholder/reward_placeholder.png'
@@ -46,8 +83,8 @@ const Rewards = () => {
                 expiry: reward.expiryNumberOfDays?.toString() || '30',
                 custom_id: reward.customRewardId || '',
                 tags: reward.rewardTags || '',
-                isCheck: selectedRewards.includes(reward.reward_id),
-                isPublished: reward.isPublished === 'true' || reward.isPublished === true
+                isCheck: selectedRewardIds.includes(reward.reward_id),
+                isPublished: liveInUseRewardIds.includes(reward.reward_id)
             }));
 
             console.log('Transformed rewards:', transformedRewards);
@@ -66,7 +103,7 @@ const Rewards = () => {
 
     useEffect(() => {
         fetchRewards();
-    }, []);
+    }, [rewardTypeFromUrl]);
 
     const onCardSelected = (reward) => {
         setSelectedReward(reward)
@@ -231,7 +268,7 @@ const Rewards = () => {
                 rewards={rewards}
                 loading={loading}
                 error={error}
-                onCardSelected={onCardSelected} 
+                onCardSelected={onCardSelected}
             />
         </div>
     )

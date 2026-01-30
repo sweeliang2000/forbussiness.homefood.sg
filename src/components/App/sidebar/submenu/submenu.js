@@ -1,6 +1,6 @@
 import styles from './submenu.module.css';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { FaChevronDown } from 'react-icons/fa6';
 
 export const Submenu = ({
@@ -11,7 +11,9 @@ export const Submenu = ({
     icon: Icon,
 }) => {
 
-    const pathSegments = usePathname();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const fullPath = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
 
     return (
         <li>
@@ -23,7 +25,7 @@ export const Submenu = ({
             <ul className={`${styles.submenu} ${isExpand && styles.show}`}>
                 <div className={styles.submenuContainer}>
                     {submenus.map((submenu, index) => (
-                        <li key={index} className={pathSegments == submenu.href ? styles.active : ''}>
+                        <li key={index} className={fullPath === submenu.href ? styles.active : ''}>
                             <Link 
                                 href={submenu.href} 
                                 className={styles.link}>
