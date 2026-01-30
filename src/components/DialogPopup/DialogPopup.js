@@ -61,11 +61,14 @@ const DialogPopup = ({
                         {
                             onDelete && (
                                 <Button
-                                    type='submit'
+                                    type='button'
                                     variant='text'
                                     color="error"
                                     className={styles.button}
-                                    onClick={onDelete}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onDelete();
+                                    }}
                                 >
                                     { deleteText === undefined ? 'Delete' : deleteText }
                                 </Button>

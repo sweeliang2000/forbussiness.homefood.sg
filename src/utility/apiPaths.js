@@ -19,6 +19,7 @@ export const REWARDS = '/api/data/rewards';
 export const CREATE_REWARD = '/api/data/reward';
 export const UPDATE_REWARD = '/api/data/reward';
 export const DELETE_REWARD = '/api/data/reward';
+export const ARCHIVE_REWARD = '/api/data/reward/archive';
 
 // Scan to Win QR Codes
 export const SCAN_TO_WIN_QR_CODES = '/api/data/scanToWinQRCodes';

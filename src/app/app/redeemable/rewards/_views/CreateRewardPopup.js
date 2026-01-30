@@ -52,7 +52,9 @@ const CreateRewardPopup = ({
     selectedReward,
     onArchive,
     onSubmit,
-    allowedRewardTypes = null // If provided, only show these reward types
+    allowedRewardTypes = null, // If provided, only show these reward types
+    archiveError = null,
+    onClearArchiveError
 }) => {
     const [isRewardImageOpen, setIsRewardImageOpen] = useState(false);
     const [isRewardIdOpen, setRewardIdOpen] = useState(false);
@@ -343,9 +345,9 @@ const CreateRewardPopup = ({
         };
     }, [isOpen, rewardData, rewardImage, isRewardIdOpen, isRewardTagsOpen, isRewardImageOpen]);
 
-    // Scroll to top when error message appears
+    // Scroll to top when error message or archive error appears
     useEffect(() => {
-        if (errorMessage && contentRef.current) {
+        if ((errorMessage || archiveError) && contentRef.current) {
             // Small delay to ensure DOM is updated
             setTimeout(() => {
                 // Find the scrollable parent container by traversing up the DOM
@@ -389,7 +391,7 @@ const CreateRewardPopup = ({
                 }
             }, 150);
         }
-    }, [errorMessage]);
+    }, [errorMessage, archiveError]);
 
     // Clear error message when popup closes or when user starts typing
     useEffect(() => {
@@ -418,9 +420,19 @@ const CreateRewardPopup = ({
             onSubmit={handleSubmit}
         >
             <div className={styles.content} ref={contentRef}>
-                {errorMessage && (
+                {(errorMessage || archiveError) && (
                     <div className={styles.errorMessage} ref={errorMessageRef}>
-                        {errorMessage}
+                        {errorMessage || archiveError}
+                        {archiveError && onClearArchiveError && (
+                            <button
+                                type="button"
+                                className={styles.errorDismiss}
+                                onClick={onClearArchiveError}
+                                aria-label="Dismiss"
+                            >
+                                ×
+                            </button>
+                        )}
                     </div>
                 )}
                 <section>
@@ -456,6 +468,7 @@ const CreateRewardPopup = ({
                             hasErrorRef.current = false;
                             setErrorMessage('');
                         }
+                        if (archiveError && onClearArchiveError) onClearArchiveError();
                     }}
                 />
 
@@ -475,6 +488,7 @@ const CreateRewardPopup = ({
                                     hasErrorRef.current = false;
                                     setErrorMessage('');
                                 }
+                                if (archiveError && onClearArchiveError) onClearArchiveError();
                             }}
                             preview='edit'
                             hideToolbar={true}

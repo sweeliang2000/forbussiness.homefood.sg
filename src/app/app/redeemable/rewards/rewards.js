@@ -8,7 +8,7 @@ import { useSearchParams } from 'next/navigation';
 import RewardsLists from './_views/RewardsLists';
 import AlertModal from '@/components/AlertModal/AlertModal';
 import apiClient from '@/utility/api';
-import { REWARDS, CREATE_REWARD, UPDATE_REWARD, DELETE_REWARD } from '@/utility/apiPaths';
+import { REWARDS, CREATE_REWARD, UPDATE_REWARD, DELETE_REWARD, ARCHIVE_REWARD } from '@/utility/apiPaths';
 
 const VALID_REWARD_TYPES = ['stampReward', 'scanToWinReward'];
 
@@ -18,6 +18,7 @@ const Rewards = () => {
     const [isCreateNewRewardOpen, setIsCreateNewRewardOpen] = useState(false);
     const [selectedReward, setSelectedReward] = useState(null);
     const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
+    const [archiveError, setArchiveError] = useState(null);
     const [rewards, setRewards] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -115,36 +116,38 @@ const Rewards = () => {
     }
 
     const handleArchiveConfirm = async () => {
+        setArchiveError(null);
         try {
             if (selectedReward && selectedReward.id) {
-                console.log('Deleting reward:', selectedReward);
-                
-                // Make DELETE request to remove the reward
-                const response = await apiClient.delete(DELETE_REWARD, {
-                    data: {
-                        reward_id: selectedReward.id
-                    }
+                const response = await apiClient.put(ARCHIVE_REWARD, {
+                    reward_id: selectedReward.id
                 });
-                
+
                 if (response.status === 200 || response.status === 204) {
-                    console.log('Reward deleted successfully');
-                    // Refresh the rewards list after successful deletion
                     await fetchRewards();
+                    setIsArchiveModalOpen(false);
+                    setIsCreateNewRewardOpen(false);
+                    setSelectedReward(null);
                 } else {
-                    console.error('Failed to delete reward:', response);
+                    const errorData = response.data;
+                    const msg = errorData?.error && errorData?.details
+                        ? `${errorData.error} ${errorData.details}`
+                        : errorData?.error || 'Failed to archive reward.';
+                    setArchiveError(msg);
+                    setIsArchiveModalOpen(false);
                 }
             }
         } catch (err) {
             const errorData = err?.response?.data;
-            const message = errorData?.error?.message;
-            const code = errorData?.error?.statusCode;
-            console.error(`Error deleting reward: ${message} (Error code: ${code})`);
-            // You might want to show an error message to the user here
-        } finally {
+            const errorMsg = errorData?.error;
+            const details = errorData?.details;
+            const displayMsg = errorMsg && details
+                ? `${errorMsg} ${details}`
+                : errorMsg || err?.message || 'Unable to archive reward.';
+            setArchiveError(displayMsg);
             setIsArchiveModalOpen(false);
-            setIsCreateNewRewardOpen(false);
         }
-    }
+    };
 
     const handleSubmitReward = async (formData) => {
         try {
@@ -224,17 +227,22 @@ const Rewards = () => {
 
             <CreateRewardPopup
                 isOpen={isCreateNewRewardOpen}
-                setIsOpen={setIsCreateNewRewardOpen}
+                setIsOpen={(open) => {
+                    if (!open) setArchiveError(null);
+                    setIsCreateNewRewardOpen(open);
+                }}
                 selectedReward={selectedReward}
                 onArchive={selectedReward ? onArchive : null}
                 onSubmit={handleSubmitReward}
+                archiveError={archiveError}
+                onClearArchiveError={() => setArchiveError(null)}
             />
 
             <AlertModal
                 open={isArchiveModalOpen}
                 onClose={() => setIsArchiveModalOpen(false)}
                 title="Archive Reward"
-                description="Archiving will fully remove this reward from customer view only after it has been published to the app. Are you sure you want to archive this reward?"
+                description="Once archived, you will not be able to restore this reward. If your customers are still holding this reward, they will still be able to use it. Are you sure you want to archive?"
                 onAction={handleArchiveConfirm}
                 actionButtonText="Archive"
                 type="error"
