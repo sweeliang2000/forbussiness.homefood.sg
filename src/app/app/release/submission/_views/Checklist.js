@@ -18,9 +18,9 @@ const Checklists = ({ checklistStatus }) => {
             />
 
             <ChecklistCell
-                title='Stamp System'
-                description={'Ensure that your reward system are setup correctly.'}
-                isCompleted={checklistStatus?.stampHasAllRequiredField || false}
+                title='Stamp system and/or Scan to Win'
+                description={'Ensure that your reward system (stamp or QR/scan to win) is set up correctly.'}
+                isCompleted={checklistStatus?.thirdRequirementMet || false}
             />
         </div>
     )

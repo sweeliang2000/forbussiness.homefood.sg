@@ -22,6 +22,7 @@ const Rewards = () => {
         try {
             setLoading(true);
             const response = await apiClient.get(REWARDS);
+            console.log('Rewards response:', response.data);
             const data = response.data.data
             const apiRewards = data.rewards;
             const currently_selected = data.currently_selected;  

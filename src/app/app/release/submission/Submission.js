@@ -51,6 +51,8 @@ const SubmissionView = () => {
         businessHasAllRequiredField: false,
         customerHasAllRequiredField: false,
         stampHasAllRequiredField: false,
+        qrCodeHasAllRequiredField: false,
+        thirdRequirementMet: false,
     });
 
     const [enteredValues, setEnteredValues] = useState({
@@ -264,6 +266,8 @@ const SubmissionView = () => {
                         businessHasAllRequiredField: checklistData.data.businessHasAllRequiredField || false,
                         customerHasAllRequiredField: checklistData.data.customerHasAllRequiredField || false,
                         stampHasAllRequiredField: checklistData.data.stampHasAllRequiredField || false,
+                        qrCodeHasAllRequiredField: checklistData.data.qrCodeHasAllRequiredField || false,
+                        thirdRequirementMet: checklistData.data.thirdRequirementMet || false,
                     });
                 }
 

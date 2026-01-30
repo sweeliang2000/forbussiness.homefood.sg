@@ -26,6 +26,8 @@ export default function Content() {
     businessHasAllRequiredField: false,
     customerHasAllRequiredField: false,
     stampHasAllRequiredField: false,
+    qrCodeHasAllRequiredField: false,
+    thirdRequirementMet: false,
   });
   const [isLoadingChecklist, setIsLoadingChecklist] = useState(true);
 
@@ -39,6 +41,8 @@ export default function Content() {
             businessHasAllRequiredField: checklistData.data.businessHasAllRequiredField || false,
             customerHasAllRequiredField: checklistData.data.customerHasAllRequiredField || false,
             stampHasAllRequiredField: checklistData.data.stampHasAllRequiredField || false,
+            qrCodeHasAllRequiredField: checklistData.data.qrCodeHasAllRequiredField || false,
+            thirdRequirementMet: checklistData.data.thirdRequirementMet || false,
           });
         }
       } catch (error) {
@@ -54,7 +58,7 @@ export default function Content() {
   const allChecklistCompleted = 
     checklistStatus.businessHasAllRequiredField &&
     checklistStatus.customerHasAllRequiredField &&
-    checklistStatus.stampHasAllRequiredField;
+    checklistStatus.thirdRequirementMet;
 
   return (
     <div className={styles.container}>
@@ -141,9 +145,9 @@ export default function Content() {
                   editLink="/app/customer-facing-business-details"
                 />
                 <ChecklistCell
-                  title="Stamp System"
-                  description="Ensure your reward system is properly configured."
-                  isCompleted={checklistStatus.stampHasAllRequiredField}
+                  title="Stamp system and/or Scan to Win"
+                  description="Ensure your reward system (stamp or QR/scan to win) is properly configured."
+                  isCompleted={checklistStatus.thirdRequirementMet}
                   editLink="/app/stamp-management"
                 />
               </div>
