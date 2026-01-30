@@ -1,16 +1,16 @@
+import { Suspense } from 'react';
 import styles from './submenu.module.css';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { FaChevronDown } from 'react-icons/fa6';
 
-export const Submenu = ({
+function SubmenuContent({
     title,
     submenus,
     isExpand,
     onClick,
     icon: Icon,
-}) => {
-
+}) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const fullPath = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
@@ -36,5 +36,25 @@ export const Submenu = ({
                 </div>
             </ul>
         </li>
+    );
+}
+
+function SubmenuFallback({ title, icon: Icon }) {
+    return (
+        <li>
+            <button className={styles.dropdownBtn} type="button">
+                {Icon && <Icon className={styles.icon} />}
+                <span>{title}</span>
+                <FaChevronDown className={styles.downicon} />
+            </button>
+        </li>
+    );
+}
+
+export function Submenu(props) {
+    return (
+        <Suspense fallback={<SubmenuFallback title={props.title} icon={props.icon} />}>
+            <SubmenuContent {...props} />
+        </Suspense>
     );
 }
