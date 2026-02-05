@@ -222,12 +222,12 @@ export default function Sidebar({
                         </Link>
                     </li>
 
-                    <li className={section == 'ratings' ? styles.active : ''}>
+                    {/* <li className={section == 'ratings' ? styles.active : ''}>
                         <Link href='/app/ratings'>
                         <RiBubbleChartLine className={styles.icon} />
                             <span>Customers and Retentions</span>
                         </Link>
-                    </li>
+                    </li> */}
 
                     {/* <li className={section == 'ratings' ? styles.active : ''}>
                         <Link href='/app/ratings'>
