@@ -198,10 +198,28 @@ export default function ScanToWinPage() {
         formData.append('cardImage', cardImage[0].file);
       }
 
-      // Prepare reward chances data with all required fields
+      // Serialize full reward object for no-SQL backend (no joins); send all reward info per chance
+      const serializeReward = (reward) => {
+        if (!reward) return null;
+        return {
+          id: reward.id,
+          rewardType: reward.type ?? 'scanToWinReward',
+          rewardName: reward.name ?? '',
+          description: reward.description ?? '',
+          termsAndConditions: reward.termsAndConditions ?? '',
+          rewardImage: typeof reward.image === 'string' ? reward.image : (reward.image?.url ?? ''),
+          expiryNumberOfDays: reward.expiry != null ? String(reward.expiry) : '30',
+          customRewardId: reward.custom_id ?? '',
+          rewardTags: reward.tags ?? '',
+          isPublished: reward.isPublished === true || reward.isPublished === 'true',
+        };
+      };
+
+      // Prepare reward chances with full reward embedded (backend stores as-is, no joins)
       const rewardChancesData = rewardChances.map(chance => ({
         id: chance.id,
         rewardId: chance.reward ? chance.reward.id : null,
+        reward: serializeReward(chance.reward),
         percentage: parseFloat(chance.percentage) || 0,
         max: chance.max !== null && chance.max !== undefined ? parseInt(chance.max) : null
       }));
@@ -254,6 +272,7 @@ export default function ScanToWinPage() {
       });
 
       console.log('Form submitted successfully');
+      console.log('Data sent:', dataToSend);
       setIsSubmissionSuccess(true);
       setIsBtnLoading(false);
       setHasExistingConfig(true); // Mark as existing after first save
