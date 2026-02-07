@@ -158,7 +158,7 @@ export default function Sidebar({
                         submenus={[
                             { href: '/app/scan-to-win', title: 'Configuration' },
                             { href: '/app/scan-to-win/qr-code', title: 'QR Code' },
-                            { href: '/app/scan-to-win/today-status', title: 'Today Status' }
+                            { href: '/app/scan-to-win/collection-status', title: 'Collection Status' }
                         ]}
                         isExpand={currentSelection == SCAN_TO_WIN_TAB}
                         icon={RiQrScan2Line}

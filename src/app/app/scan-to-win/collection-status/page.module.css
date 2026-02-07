@@ -1,0 +1,105 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  min-width: 0;
+}
+
+.dateCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.dateCardContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.dateCardContent .note {
+  text-align: left;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+}
+
+.datePicker {
+  width: 100%;
+  max-width: 240px;
+}
+
+.note {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.chartSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  min-width: 0;
+}
+
+.chartWrap {
+  width: 100%;
+  min-width: 0;
+  min-height: 400px;
+  overflow: visible;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.legendItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 200px;
+  max-width: 100%;
+}
+
+.legendColor {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  margin-top: 2px;
+}
+
+.legendText {
+  font-size: 0.875rem;
+  color: #333;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.emptyState {
+  padding: 48px 24px;
+  text-align: center;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px dashed #e0e0e0;
+}
+
+.emptyText {
+  margin: 0;
+  font-size: 1rem;
+  color: #666;
+}
