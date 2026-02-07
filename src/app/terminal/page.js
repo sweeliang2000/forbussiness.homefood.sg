@@ -250,12 +250,30 @@ const TerminalPage = () => {
     // Show loading state while checking authentication
     if (isCheckingAuth) {
         return (
-            <div className={styles.container}>
-                <div className={styles.authLoadingWrap}>
-                    <div className={styles.shimmerCard}>
+            <div className={`${styles.container} ${styles.shimmerPage}`}>
+                <div className={styles.shimmerLeft}>
+                    <div className={styles.shimmerBlock}>
+                        <div className={styles.shimmerLine} />
+                        <div className={styles.shimmerLine} style={{ width: '60%' }} />
+                        <div className={styles.shimmerLine} style={{ width: '40%' }} />
+                    </div>
+                    <div className={styles.shimmerBlock}>
+                        <div className={styles.shimmerLine} />
+                        <div className={styles.shimmerLine} />
+                        <div className={styles.shimmerLine} style={{ width: '80%' }} />
+                        <div className={styles.shimmerLine} style={{ width: '50%' }} />
+                    </div>
+                    <div className={styles.shimmerBlock}>
                         <div className={styles.shimmerLine} />
                         <div className={styles.shimmerLine} style={{ width: '70%' }} />
-                        <div className={styles.shimmerLine} style={{ width: '50%' }} />
+                        <div className={styles.shimmerLine} style={{ width: '90%' }} />
+                    </div>
+                </div>
+                <div className={styles.shimmerRight}>
+                    <div className={styles.shimmerPanel}>
+                        <div className={styles.shimmerLine} style={{ height: 48, borderRadius: 24 }} />
+                        <div className={styles.shimmerLine} style={{ width: '70%', marginTop: 24 }} />
+                        <div className={styles.shimmerLine} style={{ width: '50%', marginTop: 12 }} />
                     </div>
                 </div>
             </div>
@@ -333,6 +351,13 @@ const TerminalPage = () => {
                     </div>
                 ) : (
                     <div className={styles.welcomeSection}>
+                        <button
+                            type="button"
+                            className={styles.exitButton}
+                            onClick={() => router.push('/app')}
+                        >
+                            Exit
+                        </button>
                         <p className={styles.welcomeMessage}>
                             Enter a customer phone number to view their loyalty information, manage stamps, and process rewards.
                         </p>

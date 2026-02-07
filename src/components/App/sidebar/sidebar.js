@@ -91,7 +91,7 @@ export default function Sidebar({
                     </li>
 
                     <li>
-                        <Link href='/app/terminal'>
+                        <Link href='/terminal'>
                             <PiCashRegister className={styles.icon} />
                             <span>Loyalty Terminal</span>
                         </Link>

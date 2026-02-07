@@ -501,7 +501,7 @@ const CustomerFacingBusinessPage = () => {
                                 />
 
                                 <FormTextField
-                                    title="Website*"
+                                    title="Website"
                                     id={WEBSITE}
                                     name={WEBSITE}
                                     helperText={helperText.website}

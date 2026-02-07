@@ -5,23 +5,45 @@
     gap: 2rem;
 }
 
-.authLoadingWrap {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
+.shimmerPage {
     min-height: 100vh;
 }
 
-.shimmerCard {
-    width: 320px;
-    padding: 2rem;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+.shimmerLeft {
+    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 2rem;
+    padding: 0 0.5rem 0 0;
+}
+
+.shimmerBlock {
+    padding: 1.5rem 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.shimmerRight {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: flex-start;
+}
+
+.shimmerPanel {
+    width: 100%;
+    max-width: 420px;
+    padding: 2.5rem 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
 }
 
 .shimmerLine {
@@ -60,6 +82,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
     padding: 1.5rem;
     background: white;
     border-radius: 12px;
@@ -67,10 +90,31 @@
     margin-bottom: 2rem;
 }
 
+.exitButton {
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #495057;
+    background: transparent;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.exitButton:hover {
+    background: #f8f9fa;
+    color: #212529;
+    border-color: #adb5bd;
+}
+
 .customerInfo {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex: 1;
+    min-width: 0;
 }
 
 .customerDetails {
@@ -149,11 +193,24 @@
 }
 
 .welcomeSection {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
     padding: 2rem;
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     margin-bottom: 2rem;
+}
+
+.welcomeSection .exitButton {
+    flex-shrink: 0;
+}
+
+.welcomeSection .welcomeMessage {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
 }
 
 .welcomeMessage {
@@ -168,6 +225,14 @@
     .container {
         flex-direction: column;
         padding: 1rem;
+    }
+
+    .shimmerRight {
+        width: 100%;
+    }
+
+    .shimmerPanel {
+        max-width: none;
     }
 
     .customerNavbar {

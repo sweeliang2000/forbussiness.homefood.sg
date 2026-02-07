@@ -419,7 +419,7 @@ export default function StampSetup() {
 
               <div className={styles.addressFields}>
                 <TextField
-                  label='Unit Number'
+                  label='Unit Number*'
                   variant='outlined'
                   placeholder='#05-23'
                   fullWidth
@@ -447,7 +447,7 @@ export default function StampSetup() {
                 />
 
                 <TextField
-                  label='Street Address'
+                  label='Street Address*'
                   variant='outlined'
                   placeholder='10 Anson Road'
                   fullWidth
@@ -461,7 +461,7 @@ export default function StampSetup() {
                 />
 
                 <TextField
-                  label='Postal Code'
+                  label='Postal Code*'
                   variant='outlined'
                   placeholder='079903'
                   fullWidth
