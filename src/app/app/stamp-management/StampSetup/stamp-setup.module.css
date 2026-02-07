@@ -101,6 +101,50 @@
     text-decoration: none;
 }
 
+.onboardingPromptCard {
+    padding: 2.5rem;
+}
+
+.onboardingPrompt {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 480px;
+}
+
+.onboardingPromptTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: #1a1a1a;
+}
+
+.onboardingPromptText {
+    font-size: 1rem;
+    color: #555;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.onboardingPromptButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    padding: 10px 20px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #fff;
+    background: #1976d2;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+
+.onboardingPromptButton:hover {
+    background: #1565c0;
+}
+
 @media only screen and (max-width: 820px) {
     .header {
         top: 62px;

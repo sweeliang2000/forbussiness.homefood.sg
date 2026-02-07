@@ -1,0 +1,122 @@
+.headerContainer {
+    background-color: white;
+}
+
+.headerContainer .header {
+    display: flex;
+    align-items: center;
+    padding: 48px var(--side-spacing, 24px);
+    gap: 48px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.header .headerContent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
+}
+
+.header .description {
+    color: rgb(140, 139, 154);
+    margin-bottom: 12px;
+}
+
+.header .headerContent h1 {
+    font-size: 40px;
+    margin-bottom: 16px;
+}
+
+.imageContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.imageContainer .image {
+    border-radius: 12px;
+}
+
+.detailsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 var(--side-spacing, 24px) 48px;
+    margin-top: 24px;
+}
+
+.iframe {
+    width: 560px;
+    height: 315px;
+    flex-shrink: 0;
+}
+
+.content {
+    display: flex;
+    align-items: flex-start;
+    gap: 40px;
+    padding: 24px;
+}
+
+.rows {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0;
+    min-width: 0;
+}
+
+.contentRow {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    border-bottom: 1px solid rgb(218, 218, 240);
+    padding: 12px;
+    cursor: pointer;
+}
+
+.contentRow:hover {
+    background-color: aliceblue;
+}
+
+.content h2 {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.rowText {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.contentRow p {
+    font-weight: bold;
+}
+
+.contentRow label {
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.iconContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-color: 2px solid black;
+}
+
+.iconContainer .icon {
+    font-size: 32px;
+}
+
+.button {
+    text-transform: none;
+}

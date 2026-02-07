@@ -5,17 +5,19 @@ import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import { HeaderSection } from "@/components/HeaderSection/HeaderSection";
 import Link from "next/link";
 import { MuiColorInput } from 'mui-color-input'
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import StampCard from '@/components/StampCard/StampCard';
 import { Button, Slider } from '@mui/material';
 import { CARD_DESIGN_SETTING, STAMP_MANAGEMENT } from '@/utility/apiPaths';
 import apiClient from '@/utility/api';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
+import DigitalStampRewardSystemOnboarding from '@/components/DigitalStampRewardSystemOnboarding/DigitalStampRewardSystemOnboarding';
 
 const CardDesign = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
+    const [stampIsEnabled, setStampIsEnabled] = useState(false);
 
 
     const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
@@ -125,23 +127,20 @@ const CardDesign = () => {
         }
     };
 
-    useEffect(() => {
+    const fetchAllData = useCallback(async () => {
         setIsLoading(true);
+        try {
+            const [cardDesignResponse, stampManagementResponse] = await Promise.allSettled([
+                apiClient.get(CARD_DESIGN_SETTING),
+                apiClient.get(STAMP_MANAGEMENT)
+            ]);
 
-        const fetchAllData = async () => {
-            try {
-                // Fetch both card design and stamp management data in parallel
-                const [cardDesignResponse, stampManagementResponse] = await Promise.allSettled([
-                    apiClient.get(CARD_DESIGN_SETTING),
-                    apiClient.get(STAMP_MANAGEMENT)
-                ]);
+            // Handle card design data
+            if (cardDesignResponse.status === 'fulfilled') {
+                const cardDesignData = cardDesignResponse.value.data;
+                console.log(cardDesignData);
 
-                // Handle card design data
-                if (cardDesignResponse.status === 'fulfilled') {
-                    const cardDesignData = cardDesignResponse.value.data;
-                    console.log(cardDesignData)
-
-                    if (cardDesignData && cardDesignData.data) {
+                if (cardDesignData && cardDesignData.data) {
                         const isEditValue = cardDesignData.data.isEdit;
                         setIsEdit(isEditValue !== undefined ? isEditValue : true);
                         
@@ -187,11 +186,13 @@ const CardDesign = () => {
                     console.warn('Failed to fetch card design data:', cardDesignResponse.reason);
                 }
 
-                // Handle stamp management data
-                if (stampManagementResponse.status === 'fulfilled') {
-                    const stampData = stampManagementResponse.value.data.data;
-                    console.log(stampData)
-                    if (stampData) {
+            // Handle stamp management data
+            if (stampManagementResponse.status === 'fulfilled') {
+                const stampData = stampManagementResponse.value.data?.data;
+                const enabled = stampData?.isEnabled === 'true' || stampData?.isEnabled === true;
+                setStampIsEnabled(!!enabled);
+                console.log(stampData);
+                if (stampData) {
                         setCardTitle(stampData.cardTitle || '');
                         setCardDescription(stampData.cardDescription || '');
                         setNumberOfStamps(stampData.numberOfStamps || 6);
@@ -231,33 +232,35 @@ const CardDesign = () => {
                         setSpendAmount(10); // Default spend amount
                         setExpiryDate('31 Dec 2023'); // Default expiry date
                     }
-                } else {
-                    console.warn('Failed to fetch stamp management data:', stampManagementResponse.reason);
-                }
+            } else {
+                console.warn('Failed to fetch stamp management data:', stampManagementResponse.reason);
+                setStampIsEnabled(false);
+            }
 
-                // Only show error if both requests failed
-                if (cardDesignResponse.status === 'rejected' && stampManagementResponse.status === 'rejected') {
-                    const error = cardDesignResponse.reason || stampManagementResponse.reason;
-                    const errorData = error?.response?.data;
-                    const message = errorData?.error?.message || errorData?.message || error?.message || 'Failed to load data';
-                    const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
-                    showError(`An error had occurred. ${message} (Error code: ${code})`);
-                    setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
-                }
-
-                setIsLoading(false);
-            } catch (error) {
-                const message = error?.response?.data?.message || error.message;
-                const code = error?.response?.data?.code || error.code;
-                setIsLoading(false);
-                setIsBtnLoading(false);
+            // Only show error if both requests failed
+            if (cardDesignResponse.status === 'rejected' && stampManagementResponse.status === 'rejected') {
+                const error = cardDesignResponse.reason || stampManagementResponse.reason;
+                const errorData = error?.response?.data;
+                const message = errorData?.error?.message || errorData?.message || error?.message || 'Failed to load data';
+                const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
                 showError(`An error had occurred. ${message} (Error code: ${code})`);
                 setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
             }
-        };
 
-        fetchAllData();
+            setIsLoading(false);
+        } catch (error) {
+            const message = error?.response?.data?.message || error.message;
+            const code = error?.response?.data?.code || error?.code;
+            setIsLoading(false);
+            setIsBtnLoading(false);
+            showError(`An error had occurred. ${message} (Error code: ${code})`);
+            setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchAllData();
+    }, [fetchAllData]);
 
     // Check if there are unsaved changes
     const checkUnsavedChanges = () => {
@@ -366,35 +369,41 @@ const CardDesign = () => {
         };
     }, [cardBackground, cardTitleColor, cardFooterColor, cardNoStampBorderColor, cardStampBackground, cardNoStampBackgroundColor, cardStampCollectedBorderColor, checkmarkColor, isEdit]);
 
+    const showOnboarding = !isLoading && isLoadingErrorMessage === null && !stampIsEnabled;
+
     return (
         <form
             className={styles.form}
             onSubmit={formSubmissionHandler}
         >
-            <HeaderSection
-                className={styles.header}
-                title='Card Preview'
-                description={
-                    <p>
-                        Create and design your stamp card and the rewards to be given when
-                        customers hit a certain goal. <Link href='/'>Find out more.</Link>
-                    </p>
-
-                }
-                loading={isBtnLoading}
-                isSuccess={isSubmissionSuccess}
-                setShowError={setIsError}
-                isError={isError}
-                isDisabled={isBtnDisabled || !isEdit}
-                errorMessage={errorMessage}
-                infoMessage={!isEdit ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.' : null}
-            />
+            {!showOnboarding && (
+                <HeaderSection
+                    className={styles.header}
+                    title='Card Preview'
+                    description={
+                        <p>
+                            Create and design your stamp card and the rewards to be given when
+                            customers hit a certain goal. <Link href='/'>Find out more.</Link>
+                        </p>
+                    }
+                    loading={isBtnLoading}
+                    isSuccess={isSubmissionSuccess}
+                    setShowError={setIsError}
+                    isError={isError}
+                    isDisabled={isBtnDisabled || !isEdit}
+                    errorMessage={errorMessage}
+                    infoMessage={!isEdit ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.' : null}
+                />
+            )}
 
             {
                 isLoading ?
                     <LoadingPage /> :
                     isLoadingErrorMessage !== null ?
                         <ErrorPage /> :
+                        showOnboarding ? (
+                            <DigitalStampRewardSystemOnboarding />
+                        ) : (
                         <div className={styles.contentContainer}>
                             <ContentCard className={styles.cardContainer}>
                                 <StampCard
@@ -619,6 +628,7 @@ const CardDesign = () => {
                                 </Button>
                             </ContentCard>
                         </div>
+                        )
             }
         </form>
     )

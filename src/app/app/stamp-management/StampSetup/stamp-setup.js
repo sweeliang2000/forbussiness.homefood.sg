@@ -13,6 +13,7 @@ import { IconButton, Menu, MenuItem, Switch } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { clamp } from '@/utility/numbers';
 import EditStampStep from './_views/EditStampStep';
+import StampOnBoarding from '../StampOnboarding/StampOnboarding';
 import apiClient from '@/utility/api';
 import { STAMP_MANAGEMENT } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
@@ -746,43 +747,34 @@ export default function StampSetup() {
         className={styles.form}
         onSubmit={formSubmissionHandler}
       >
-        <HeaderSection
-          className={styles.header}
-          title='Stamp Management'
-          description={
-            <p>
-              Create and design your stamp card and the rewards to be given when
-              customers hit a certain goal. <Link href='/'>Find out more.</Link>
-            </p>
-          }
-          loading={isBtnLoading}
-          isSuccess={isSubmissionSuccess}
-          isError={isError}
-          isDisabled={isBtnDisabled || !isEdit}
-          errorMessage={errorMessage}
-          infoMessage={!isEdit ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.' : null}
-        />
+        {!(isLoading === false && isLoadingErrorMessage === null && !isEnabled) && (
+          <HeaderSection
+            className={styles.header}
+            title='Stamp Management'
+            description={
+              <p>
+                Create and design your stamp card and the rewards to be given when
+                customers hit a certain goal. <Link href='/'>Find out more.</Link>
+              </p>
+            }
+            loading={isBtnLoading}
+            isSuccess={isSubmissionSuccess}
+            isError={isError}
+            isDisabled={isBtnDisabled || !isEdit}
+            errorMessage={errorMessage}
+            infoMessage={!isEdit ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.' : null}
+          />
+        )}
 
         {
           isLoading ?
             <LoadingPage /> :
             isLoadingErrorMessage !== null ?
               <ErrorPage /> :
+              !isEnabled ? (
+                <StampOnBoarding />
+              ) : (
               <>
-                <ContentCard>
-                  <div className={styles.toggleContainer}>
-                    <h2 className={styles.toggleLabel}>Enable Stamp System</h2>
-                    <Switch
-                      checked={isEnabled}
-                      onChange={(event) => {
-                        resetSaving();
-                        setIsEnabled(event.target.checked);
-                      }}
-                      disabled={!isEdit}
-                      className={styles.toggleSwitch}
-                    />
-                  </div>
-                </ContentCard>
 
                 {isEnabled && (
                   <>
@@ -987,6 +979,7 @@ export default function StampSetup() {
                   </>
                 )}
               </>
+              )
         }
       </form>
 
