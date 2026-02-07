@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import QRCode from 'react-qr-code';
 import styles from './page.module.css';
@@ -18,6 +18,7 @@ import {
   CREATE_SCAN_TO_WIN_QR_CODE,
   DELETE_SCAN_TO_WIN_QR_CODE,
 } from '@/utility/apiPaths';
+import ScanToWinOnboarding from '../ScanToWinOnboarding/ScanToWinOnboarding';
 
 const MAX_QR_CODES = 4;
 
@@ -37,6 +38,10 @@ export default function ScanToWinQrCodePage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
   const [isBtnLoading, setIsBtnLoading] = useState(false);
+
+  // Scan-to-win config: when no config, show onboarding
+  const [hasExistingScanToWinConfig, setHasExistingScanToWinConfig] = useState(false);
+  const [isEnabling, setIsEnabling] = useState(false);
 
   // Data
   const [qrCodes, setQrCodes] = useState([]);
@@ -67,13 +72,11 @@ export default function ScanToWinQrCodePage() {
   };
 
   // Fetch QR codes
-  const fetchQrCodes = async () => {
+  const fetchQrCodes = useCallback(async () => {
     try {
-      setIsLoading(true);
       const response = await apiClient.get('/api/data/qrCode');
       const apiData = response.data?.data || [];
-      
-      // Map API response to component state structure
+
       const mappedQrCodes = apiData.map((qr) => ({
         id: qr.qr_code_id,
         name: qr.qr_code_name,
@@ -95,15 +98,66 @@ export default function ScanToWinQrCodePage() {
         error?.code ||
         'UNKNOWN';
       setIsLoadingErrorMessage(`Failed to load QR codes. ${message} (Error code: ${code})`);
+    }
+  }, []);
+
+  // Check scan-to-win config and optionally fetch QR codes
+  const fetchInitialData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setIsLoadingErrorMessage(null);
+      let configExists = false;
+      try {
+        const configRes = await apiClient.get('/api/data/qrcode/configuration');
+        configExists = !!(configRes?.data?.data);
+      } catch (configErr) {
+        if (configErr?.response?.status !== 404) throw configErr;
+      }
+      setHasExistingScanToWinConfig(configExists);
+      if (configExists) {
+        await fetchQrCodes();
+      }
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Failed to load data';
+      const code =
+        error?.response?.data?.statusCode ||
+        error?.response?.data?.code ||
+        error?.code ||
+        'UNKNOWN';
+      setIsLoadingErrorMessage(`${message} (Error code: ${code})`);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fetchQrCodes]);
 
-  // Fetch QR codes on load
   useEffect(() => {
-    fetchQrCodes();
-  }, []);
+    fetchInitialData();
+  }, [fetchInitialData]);
+
+  const handleGetStarted = async () => {
+    setIsEnabling(true);
+    clearError();
+    try {
+      const formData = new FormData();
+      formData.append('isEnabled', 'true');
+      formData.append('rewardChances', '[]');
+
+      await apiClient.post('/api/data/qrcode/configuration', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setHasExistingScanToWinConfig(true);
+      await fetchQrCodes();
+    } catch (err) {
+      const errorData = err?.response?.data;
+      const msg = errorData?.error?.message || errorData?.message || err?.message || 'Failed to enable Scan to Win';
+      setError(msg);
+    } finally {
+      setIsEnabling(false);
+    }
+  };
 
   // Generate QR code URL (deep link to app)
   const buildQrUrl = (id) => {
@@ -330,29 +384,38 @@ export default function ScanToWinQrCodePage() {
     image.src = url;
   };
 
+  const showOnboarding = !hasExistingScanToWinConfig && !isLoading && isLoadingErrorMessage === null;
+
   return (
     <form className={styles.form}>
-      <HeaderSection
-        className={styles.header}
-        title='QR Code Management'
-        description={
-          <p>
-            Generate and manage QR codes for your Scan to Win program. QR codes open your app when scanned by customers.
-            <Link href='/'> Find out more.</Link>
-          </p>
-        }
-        loading={isBtnLoading}
-        isSuccess={isSubmissionSuccess}
-        isError={isError}
-        isDisabled={isBtnLoading}
-        errorMessage={errorMessage}
-        showButton={false}
-      />
+      {!showOnboarding && (
+        <HeaderSection
+          className={styles.header}
+          title='QR Code Management'
+          description={
+            <p>
+              Generate and manage QR codes for your Scan to Win program. QR codes open your app when scanned by customers.
+              <Link href='/'> Find out more.</Link>
+            </p>
+          }
+          loading={isBtnLoading}
+          isSuccess={isSubmissionSuccess}
+          isError={isError}
+          isDisabled={isBtnLoading}
+          errorMessage={errorMessage}
+          showButton={false}
+        />
+      )}
 
       {isLoading ? (
         <LoadingPage />
       ) : isLoadingErrorMessage !== null ? (
         <ErrorPage />
+      ) : showOnboarding ? (
+        <ScanToWinOnboarding
+          onGetStarted={handleGetStarted}
+          isEnabling={isEnabling}
+        />
       ) : (
         <>
           <ContentCard>

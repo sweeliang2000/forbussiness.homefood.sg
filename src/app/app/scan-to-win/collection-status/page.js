@@ -21,6 +21,7 @@ import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import apiClient from '@/utility/api';
 import { REWARDS } from '@/utility/apiPaths';
+import ScanToWinOnboarding from '../ScanToWinOnboarding/ScanToWinOnboarding';
 import styles from './page.module.css';
 
 const SKIP_KEYS = new Set(['shop_id', 'claim_date', 'data']);
@@ -98,6 +99,10 @@ export default function CollectionStatusPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
 
+  const [configLoading, setConfigLoading] = useState(true);
+  const [hasExistingScanToWinConfig, setHasExistingScanToWinConfig] = useState(false);
+  const [isEnabling, setIsEnabling] = useState(false);
+
   const fetchDailyCounts = useCallback(async (dateStr) => {
     setLoadError(null);
     setNoDataMessage(false);
@@ -132,11 +137,65 @@ export default function CollectionStatusPage() {
   };
 
   useEffect(() => {
-    fetchDailyCounts(selectedDate);
+    let cancelled = false;
+    (async () => {
+      try {
+        const configRes = await apiClient.get('/api/data/qrcode/configuration');
+        if (!cancelled) setHasExistingScanToWinConfig(!!(configRes?.data?.data));
+      } catch (err) {
+        if (!cancelled && err?.response?.status === 404) setHasExistingScanToWinConfig(false);
+        else if (!cancelled) setLoadError(err?.response?.data?.message ?? err?.message ?? 'Failed to load');
+      } finally {
+        if (!cancelled) setConfigLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
-  if (loadError) {
+  useEffect(() => {
+    if (!hasExistingScanToWinConfig) return;
+    fetchDailyCounts(selectedDate);
+  }, [hasExistingScanToWinConfig, selectedDate, fetchDailyCounts]);
+
+  const handleGetStarted = async () => {
+    setIsEnabling(true);
+    setLoadError(null);
+    try {
+      const formData = new FormData();
+      formData.append('isEnabled', 'true');
+      formData.append('rewardChances', '[]');
+
+      await apiClient.post('/api/data/qrcode/configuration', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setHasExistingScanToWinConfig(true);
+      await fetchDailyCounts(selectedDate);
+    } catch (err) {
+      const errorData = err?.response?.data;
+      const msg = errorData?.error?.message || errorData?.message || err?.message || 'Failed to enable Scan to Win';
+      setLoadError(msg);
+    } finally {
+      setIsEnabling(false);
+    }
+  };
+
+  const showOnboarding = !configLoading && !hasExistingScanToWinConfig && !loadError;
+
+  if (configLoading) {
+    return <LoadingPage />;
+  }
+  if (loadError && !showOnboarding) {
     return <ErrorPage message={loadError} />;
+  }
+  if (showOnboarding) {
+    return (
+      <div className={styles.root}>
+        <ScanToWinOnboarding
+          onGetStarted={handleGetStarted}
+          isEnabling={isEnabling}
+        />
+      </div>
+    );
   }
 
   const numSpacers = Math.max(0, 6 - chartData.length);

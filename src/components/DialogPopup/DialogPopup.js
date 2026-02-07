@@ -8,6 +8,7 @@ const DialogPopup = ({
     isOpen,
     setIsOpen,
     actionTitle,
+    actionDisabled,
     onAction,
     children,
     onSubmit,
@@ -88,6 +89,7 @@ const DialogPopup = ({
                             type='submit'
                             variant='contained'
                             className={styles.button}
+                            disabled={actionDisabled}
                         >
                             {actionTitle === undefined ? 'Save' : actionTitle}
                         </Button>
