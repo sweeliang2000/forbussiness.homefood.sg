@@ -52,12 +52,6 @@ export default function TerminalGatePage() {
 
   return (
     <div className={styles.root}>
-      <HeaderSection
-        title="Loyalty Terminal"
-        description="Access the terminal to process loyalty transactions."
-        showButton={false}
-      />
-
       <div className={styles.cardWrap}>
         <ContentCard className={styles.card}>
         <div className={styles.hero}>

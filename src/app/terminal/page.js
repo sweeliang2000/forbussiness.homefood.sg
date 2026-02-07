@@ -92,12 +92,26 @@ const TerminalPage = () => {
         setSelectedReward(null);
     };
 
-    // Check authentication when component mounts
+    // Check authentication and live shop when component mounts
     useEffect(() => {
-        const checkAuthentication = async () => {
+        const checkAuthenticationAndLiveShop = async () => {
             try {
                 await apiClient.get(REFRESH_USER_COOKIE);
                 console.log('[TERMINAL] User is authenticated');
+
+                // Check if shop is live before allowing terminal access
+                try {
+                    const liveResponse = await apiClient.get('/api/data/liveShopDetails/exists');
+                    const isShopLive = liveResponse.data?.data?.isShopLive === true;
+                    if (!isShopLive) {
+                        router.replace('/app/terminal');
+                        return;
+                    }
+                } catch (liveErr) {
+                    router.replace('/app/terminal');
+                    return;
+                }
+
                 setIsCheckingAuth(false);
             } catch (error) {
                 // If user not found (404), redirect to login
@@ -121,7 +135,7 @@ const TerminalPage = () => {
             }
         };
 
-        checkAuthentication();
+        checkAuthenticationAndLiveShop();
     }, [router]);
 
     // Check if stamp functionality is enabled
@@ -237,15 +251,12 @@ const TerminalPage = () => {
     if (isCheckingAuth) {
         return (
             <div className={styles.container}>
-                <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center', 
-                    height: '100vh',
-                    flexDirection: 'column',
-                    gap: '1rem'
-                }}>
-                    <p>Checking authentication...</p>
+                <div className={styles.authLoadingWrap}>
+                    <div className={styles.shimmerCard}>
+                        <div className={styles.shimmerLine} />
+                        <div className={styles.shimmerLine} style={{ width: '70%' }} />
+                        <div className={styles.shimmerLine} style={{ width: '50%' }} />
+                    </div>
                 </div>
             </div>
         );
