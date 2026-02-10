@@ -1,0 +1,186 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.dateCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.dateCardContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.dateRow {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.datePicker {
+  min-width: 180px;
+}
+
+/* Keep both date fields same height so they align; reserve space for one helper line */
+.dateRow :global(.MuiFormControl-root) {
+  min-height: 56px;
+}
+
+.applyButton {
+  white-space: nowrap;
+}
+
+.note {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.noteUpdate {
+  margin: 4px 0 0 0;
+  font-size: 0.875rem;
+  color: #666;
+  font-style: italic;
+}
+
+.dateErrorText {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--error-color, #d32f2f);
+}
+
+.errorCard {
+  padding: 16px 20px !important;
+}
+
+/* Customer Statistics - same pattern as app/page.js */
+.statsSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.statsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--on-primary);
+  margin: 0;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.statCard {
+  padding: 24px !important;
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  color: var(--on-primary-light2);
+  margin: 0;
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--on-primary);
+  margin: 0;
+  font-family: var(--font-raleway);
+}
+
+/* Charts card */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+}
+
+.chartsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  min-width: 0;
+}
+
+.chartBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.chartTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--on-primary);
+  margin: 0;
+}
+
+.chartWrap {
+  width: 100%;
+  min-width: 0;
+  min-height: 280px;
+}
+
+.emptyState {
+  padding: 48px 24px;
+  text-align: center;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px dashed #e0e0e0;
+}
+
+.emptyText {
+  margin: 0;
+  font-size: 1rem;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .dateRow {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .datePicker {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}

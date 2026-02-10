@@ -157,7 +157,7 @@ export default function Content() {
       </div>
 
       {/* Customer Stats Section */}
-      <div className={styles.statsSection}>
+      {/* <div className={styles.statsSection}>
         <div className={styles.statsHeader}>
           <h2 className={styles.sectionTitle}>Customer Statistics</h2>
           <Link href="/app" className={styles.viewMoreLink}>View More</Link>
@@ -184,7 +184,7 @@ export default function Content() {
             </div>
           </ContentCard>
         </div>
-      </div>
+      </div> */}
 
       {/* Bottom Section */}
       <div className={styles.bottomSection}>

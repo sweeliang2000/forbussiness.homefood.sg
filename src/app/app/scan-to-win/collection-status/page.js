@@ -55,41 +55,74 @@ function YAxisTick({ x, y, payload }) {
   );
 }
 
-/** Distinct colors for bars (and legend). */
+/** Distinct colors for bars — one per reward/product. */
 const BAR_COLORS = [
   '#1976d2', '#2e7d32', '#ed6c02', '#9c27b0', '#0288d1',
   '#388e3c', '#d32f2f', '#7b1fa2', '#00796b', '#f57c00',
   '#5d4037', '#455a64', '#c2185b', '#0097a7', '#689f38',
 ];
 
-/**
- * Build chart data from API response.
- * Ignores shop_id, claim_date. For keys like "uuid|Reward Name", uses the part after "|".
- * For keys that are just "uuid", uses rewardIdToName lookup so labels show full reward names.
- */
-function buildChartData(rawData, rewardIdToName = {}) {
-  if (!rawData || rawData.data === null) return [];
-  const items = [];
-  let index = 0;
-  for (const [key, value] of Object.entries(rawData)) {
+/** Same hue as hex, with opacity (0–1). Used for stacked "Redeemed" segment. */
+function hexToRgba(hex, alpha) {
+  if (!hex || hex === 'transparent') return 'transparent';
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+/** Parse reward key "uuid|Reward Name" to display name; fallback to rewardIdToName or key. */
+function getRewardName(key, rewardIdToName = {}) {
+  if (key.includes('|')) return key.split('|').slice(1).join('|').trim();
+  return rewardIdToName[key] || key;
+}
+
+/** Build a map of reward key -> count from API data object (e.g. data from qrRewardDailyCounts or qrRewardRedeemedCount). */
+function parseCountMap(dataObj) {
+  if (!dataObj || dataObj === null) return {};
+  const map = {};
+  for (const [key, value] of Object.entries(dataObj)) {
     if (SKIP_KEYS.has(key) || value == null) continue;
     const count = Number(value);
-    if (Number.isNaN(count)) continue;
-    const name = key.includes('|')
-      ? key.split('|').slice(1).join('|').trim()
-      : (rewardIdToName[key] || key);
+    if (!Number.isNaN(count)) map[key] = count;
+  }
+  return map;
+}
+
+/**
+ * Build merged chart data for stacked bar: collected + redeemed per reward.
+ * collectedData and redeemedData are the inner "data" objects from each API (key -> count).
+ */
+function buildMergedChartData(collectedData, redeemedData, rewardIdToName = {}) {
+  const collectedMap = parseCountMap(collectedData);
+  const redeemedMap = parseCountMap(redeemedData);
+  const allKeys = new Set([...Object.keys(collectedMap), ...Object.keys(redeemedMap)]);
+  if (allKeys.size === 0) return [];
+
+  const items = [];
+  for (const key of allKeys) {
+    const name = getRewardName(key, rewardIdToName);
     const label = getShortLabel(name);
-    const fill = BAR_COLORS[index % BAR_COLORS.length];
-    items.push({ name, count, label, fill });
-    index += 1;
+    const collected = collectedMap[key] ?? 0;
+    const redeemed = redeemedMap[key] ?? 0; // missing in redeemed response => 0
+    // Use a single blue color for all rewards; Redeemed uses same blue with lower opacity.
+    const fill = '#1976d2';
+    items.push({
+      name,
+      label,
+      collected,
+      redeemed,
+      fill, // full opacity for Collected
+      fillRedeemed: hexToRgba(fill, 0.5), // same hue, lighter for Redeemed
+      count: collected + redeemed, // total for ordering/display
+    });
   }
   return items;
 }
 
-function hasNoData(rawData) {
-  if (!rawData) return true;
-  if (rawData.data === null) return true;
-  return buildChartData(rawData, {}).length === 0;
+function hasNoData(collectedData, redeemedData) {
+  const merged = buildMergedChartData(collectedData ?? {}, redeemedData ?? {}, {});
+  return merged.length === 0;
 }
 
 export default function CollectionStatusPage() {
@@ -108,18 +141,20 @@ export default function CollectionStatusPage() {
     setNoDataMessage(false);
     setIsLoading(true);
     try {
-      const [countsResponse, rewardsResponse] = await Promise.all([
+      const [countsResponse, redeemedResponse, rewardsResponse] = await Promise.all([
         apiClient.get('/api/data/qrRewardDailyCounts', { params: { date: dateStr } }),
+        apiClient.get('/api/mobile/qrRewardRedeemedCount', { params: { date: dateStr } }),
         apiClient.get(REWARDS, { params: { reward_type: 'scanToWinReward' } }),
       ]);
-      const payload = countsResponse.data?.data ?? {};
+      const collectedPayload = countsResponse.data?.data ?? {};
+      const redeemedPayload = redeemedResponse.data?.data ?? null; // API returns data: null when none
       const apiRewards = rewardsResponse.data?.data?.rewards ?? [];
       const rewardIdToName = Object.fromEntries(
         apiRewards.map((r) => [r.reward_id, r.rewardName || r.reward_id || 'Unnamed reward'])
       );
-      const data = buildChartData(payload, rewardIdToName);
+      const data = buildMergedChartData(collectedPayload, redeemedPayload ?? {}, rewardIdToName);
       setChartData(data);
-      setNoDataMessage(hasNoData(payload));
+      setNoDataMessage(hasNoData(collectedPayload, redeemedPayload));
     } catch (err) {
       const message = err?.response?.data?.message ?? err?.message ?? 'Failed to load collection status';
       setLoadError(message);
@@ -202,16 +237,20 @@ export default function CollectionStatusPage() {
   const chartDisplayData =
     numSpacers > 0
       ? [
-          ...Array.from({ length: numSpacers }, () => ({ label: ' ', name: '', count: 0, fill: 'transparent' })),
+          ...Array.from({ length: numSpacers }, () => ({ label: ' ', name: '', collected: 0, redeemed: 0, fill: 'transparent', fillRedeemed: 'transparent' })),
           ...chartData,
         ]
       : chartData;
+
+  // Legend sample: first reward color for Collected (solid) and Redeemed (same hue, 50% opacity)
+  const sampleFill = chartData[0]?.fill ?? BAR_COLORS[0];
+  const sampleFillRedeemed = chartData[0] ? hexToRgba(chartData[0].fill, 0.5) : hexToRgba(BAR_COLORS[0], 0.5);
 
   return (
     <div className={styles.root}>
       <HeaderSection
         title="Collection Status"
-        description="View daily QR reward collection counts by date."
+        description="View daily QR reward collection and redemption counts by date."
         showButton={false}
       />
 
@@ -233,7 +272,7 @@ export default function CollectionStatusPage() {
             />
           </LocalizationProvider>
           <p className={styles.note}>
-            Only rewards with collections on this date are shown.
+            Only rewards with collections or redemptions on this date are shown.
           </p>
         </div>
       </ContentCard>
@@ -244,7 +283,7 @@ export default function CollectionStatusPage() {
         ) : noDataMessage ? (
           <div className={styles.emptyState}>
             <p className={styles.emptyText}>
-              No QR code scanned on this date and no reward collected.
+              No QR code scanned and no reward collected or redeemed on this date.
             </p>
           </div>
         ) : (
@@ -254,12 +293,11 @@ export default function CollectionStatusPage() {
                 <BarChart
                   layout="vertical"
                   data={chartDisplayData}
-                  margin={{ top: 16, right: 24, left: 0, bottom: 24 }}
+                  margin={{ top: 16, right: 24, left: 12, bottom: 24 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" horizontal={false} />
                   <XAxis
                     type="number"
-                    dataKey="count"
                     tick={{ fill: '#666', fontSize: 12 }}
                     axisLine={{ stroke: '#ccc' }}
                     tickLine={{ stroke: '#ccc' }}
@@ -282,27 +320,33 @@ export default function CollectionStatusPage() {
                       borderRadius: '8px',
                       boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                     }}
-                    formatter={(value) => [value, 'Collected']}
                     labelFormatter={(_, payload) => {
                       const item = payload?.[0]?.payload;
                       return item?.name ?? '';
                     }}
                   />
-                  <Bar dataKey="count" barSize={28} radius={[0, 4, 4, 0]} name="Collected">
+                  <Bar dataKey="collected" stackId="stack" name="Collected" barSize={28} radius={[0, 0, 0, 0]}>
                     {chartDisplayData.map((entry, index) => (
-                      <Cell key={index} fill={entry.fill} />
+                      <Cell key={`c-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                  <Bar dataKey="redeemed" stackId="stack" name="Redeemed" barSize={28} radius={[0, 4, 4, 0]}>
+                    {chartDisplayData.map((entry, index) => (
+                      <Cell key={`r-${index}`} fill={entry.fillRedeemed} />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
             <div className={styles.legend}>
-              {chartData.map((entry) => (
-                <div key={entry.label} className={styles.legendItem}>
-                  <span className={styles.legendColor} style={{ backgroundColor: entry.fill }} />
-                  <span className={styles.legendText}>{entry.name}</span>
-                </div>
-              ))}
+              <div className={styles.legendItem}>
+                <span className={styles.legendColor} style={{ backgroundColor: sampleFill }} />
+                <span className={styles.legendText}>Collected</span>
+              </div>
+              <div className={styles.legendItem}>
+                <span className={styles.legendColor} style={{ backgroundColor: sampleFillRedeemed }} />
+                <span className={styles.legendText}>Redeemed</span>
+              </div>
             </div>
           </div>
         )}

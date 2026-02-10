@@ -208,15 +208,15 @@ export default function Sidebar({
                         </li>
                     }
 
-                    <li className={section == 'ratings' ? styles.active : ''}>
+                    {/* <li className={section == 'ratings' ? styles.active : ''}>
                         <Link href='/app/ratings'>
                         <LuLayoutDashboard className={styles.icon} />
                             <span>Overview</span>
                         </Link>
-                    </li>
+                    </li> */}
 
-                    <li className={section == 'ratings' ? styles.active : ''}>
-                        <Link href='/app/ratings'>
+                    <li className={section == 'analytics' ? styles.active : ''}>
+                        <Link href='/app/analytics'>
                         <AiOutlineLineChart className={styles.icon} />
                             <span>Activity</span>
                         </Link>

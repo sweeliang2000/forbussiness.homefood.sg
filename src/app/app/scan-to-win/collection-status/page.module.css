@@ -60,11 +60,20 @@
 .legend {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 12px 24px;
   padding: 16px;
   background: #fafafa;
   border-radius: 8px;
   border: 1px solid #eee;
+}
+
+.legendNote {
+  width: 100%;
+  margin: 0;
+  font-size: 0.8rem;
+  color: #666;
+  line-height: 1.4;
 }
 
 .legendItem {
