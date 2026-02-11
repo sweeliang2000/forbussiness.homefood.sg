@@ -181,26 +181,36 @@ export default function StampSetup() {
           setRewardUnstampedIcon(loadedUnstampedIcon);
           initialRewardUnstampedIconRef.current = JSON.parse(JSON.stringify(loadedUnstampedIcon));
 
-          // Handle card steps if they exist
-          let loadedCardSteps = Array.from({ length: 6 }, (_, index) => ({
-            ...DEFAULT_STAMP_STEP,
-            id: index + 1
-          }));
+          // Handle card steps: use loadedNumberOfStamps when API returns none or empty
+          const defaultStepsFromCount = (count) =>
+            Array.from({ length: count }, (_, index) => ({
+              ...DEFAULT_STAMP_STEP,
+              id: index + 1
+            }));
+
+          let loadedCardSteps = defaultStepsFromCount(loadedNumberOfStamps);
 
           if (data.cardStepDetails) {
             try {
-              // Parse the JSON string if it's a string, otherwise use it as is
               const parsedCardSteps = typeof data.cardStepDetails === 'string'
                 ? JSON.parse(data.cardStepDetails)
                 : data.cardStepDetails;
 
-              if (Array.isArray(parsedCardSteps)) {
+              if (Array.isArray(parsedCardSteps) && parsedCardSteps.length > 0) {
                 loadedCardSteps = parsedCardSteps;
                 setCardSteps(parsedCardSteps);
+              } else {
+                // Empty or invalid: generate steps from numberOfStamps with no reward
+                loadedCardSteps = defaultStepsFromCount(loadedNumberOfStamps);
+                setCardSteps(loadedCardSteps);
               }
             } catch (parseError) {
               console.error('Error parsing cardStepDetails:', parseError);
+              loadedCardSteps = defaultStepsFromCount(loadedNumberOfStamps);
+              setCardSteps(loadedCardSteps);
             }
+          } else {
+            setCardSteps(loadedCardSteps);
           }
 
           initialCardStepsRef.current = JSON.parse(JSON.stringify(loadedCardSteps));

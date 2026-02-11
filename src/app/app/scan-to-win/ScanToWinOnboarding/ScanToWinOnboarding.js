@@ -17,7 +17,10 @@ const ScanToWinOnboarding = ({ onGetStarted, isEnabling }) => {
                         <div>
                             <h1>Scan to Win</h1>
                             <p className={styles.description}>
-                                Let customers scan a QR code for a chance to win rewards. Set up your card image, assign reward chances by percentage, and control how many times each reward can be won.
+                                Attract new customers to your shop by offering QR-code Scan-to-Win rewards that 
+                                turn every visit into an exciting moment. Increase spending from returning customers 
+                                by setting reward probabilities, limiting redemptions, and unlocking better rewards at 
+                                higher spend or visit milestones.
                             </p>
                         </div>
                         <LoadingButton
@@ -33,7 +36,7 @@ const ScanToWinOnboarding = ({ onGetStarted, isEnabling }) => {
                     </div>
                     <div className={styles.imageContainer}>
                         <Image
-                            src="/images/app/stamp-on-boarding.webp"
+                            src="/images/app/scan-to-win-boarding.png"
                             width={300}
                             height={300}
                             alt=""

@@ -30,12 +30,45 @@
     margin-bottom: 16px;
 }
 
+.stepsHeader {
+    margin-bottom: 16px;
+}
+
+.stepsTitleRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.addButton {
+    padding: 8px 16px;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.addButton:hover:not(:disabled) {
+    background-color: #1565c0;
+}
+
+.addButton:disabled {
+    background-color: #e0e0e0;
+    color: #9e9e9e;
+    cursor: not-allowed;
+}
+
 .tableContainer {
     overflow-x: scroll;
     background-color: white;
     max-width: var(--max-width);
     margin:  0 auto;
     width: 100%;
+    margin-top: 16px;
 }
 
 .dragdropBannerImage {

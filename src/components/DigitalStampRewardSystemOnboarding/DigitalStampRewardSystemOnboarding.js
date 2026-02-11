@@ -53,7 +53,9 @@ const DigitalStampRewardSystemOnboarding = () => {
                         <div>
                             <h1>Digital Stamp Reward System</h1>
                             <p className={styles.description}>
-                                Get a digital stamp card solution for your shop with customisable stamps, rewards type (e.g., free upsize at 5 stamps, free drink at 10) and your card expiry rules.
+                                Get a digital stamp card solution for your shop with fully customisable stamps, 
+                                reward tiers (e.g. free upsize at 5 stamps, free drink at 10), and flexible card 
+                                expiry rules — designed to keep customers coming back.
                             </p>
                             <div>
                                 <MuiLink href='/' component={Link}><FaRegLightbulb /> Learn more</MuiLink>
@@ -72,7 +74,7 @@ const DigitalStampRewardSystemOnboarding = () => {
                     </div>
                     <div className={styles.imageContainer}>
                         <Image
-                            src='/images/app/stamp-on-boarding.webp'
+                            src='/images/app/stamp-on-boarding.png'
                             width={300}
                             height={300}
                             alt=''
