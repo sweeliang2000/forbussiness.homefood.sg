@@ -39,6 +39,8 @@ const InvitationBanner = ({
                 shop_id: shop_id
             };
             
+            console.log('payload', payload);
+
             const response = await apiClient.post(ACCEPT_INVITATION, payload);
             
             if (response.data.success) {

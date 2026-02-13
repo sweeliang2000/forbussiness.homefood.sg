@@ -8,8 +8,7 @@ import { ADD_USER, LIST_LOCATIONS, UPDATE_USER_ROLE } from '@/utility/apiPaths';
 const roles = [
     { value: 'Owner', title: 'Owner' },
     { value: 'Manager', title: 'Manager' },
-    { value: 'Operator', title: 'Operator' },
-    { value: 'Viewer', title: 'Viewer' },
+    { value: 'Operator', title: 'Operator' }
 ];
 
 const defaultLocation = { value: 'all', title: 'All Locations', location_id: 'all' };
