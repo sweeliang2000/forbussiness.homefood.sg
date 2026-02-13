@@ -65,6 +65,11 @@ const StampCard = ({
           const isCollected = stampIndex < collectedStamps;
           const isPrize = isPrizeStep(stampIndex);
           
+          const prizeSrc = isPrize
+            ? (isCollected ? (stamped_url && stamped_url.trim() !== '' ? stamped_url : '/images/stamps/stampped-prize.png') : (unstamped_url && unstamped_url.trim() !== '' ? unstamped_url : '/images/stamps/unstampped-prize.png'))
+            : '';
+          const isDefaultPrizeImage = prizeSrc.endsWith('unstampped-prize.png') || prizeSrc.endsWith('stampped-prize.png');
+
           rowStamps.push(
             <div 
               key={i} 
@@ -77,11 +82,11 @@ const StampCard = ({
               {isPrize ? (
                 <div className={styles.prizeImageContainer}>
                   <Image 
-                    src={isCollected ? (stamped_url && stamped_url.trim() !== '' ? stamped_url : "/images/stamps/stampped-prize.png") : (unstamped_url && unstamped_url.trim() !== '' ? unstamped_url : "/images/stamps/unstampped-prize.png")} 
+                    src={prizeSrc}
                     alt={isCollected ? "Stamped Prize" : "Unstamped Prize"}
                     width={100}
                     height={100}
-                    className={styles.prizeImage}
+                    className={`${styles.prizeImage} ${isDefaultPrizeImage ? styles.prizeImageDefault : ''}`}
                   />
                 </div>
               ) : isCollected && (

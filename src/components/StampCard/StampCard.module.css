@@ -89,6 +89,11 @@
   object-fit: cover;
 }
 
+.prizeImageDefault {
+  width: 60%;
+  height: 60%;
+}
+
 .stampCollected {
   /* Styles for collected stamps */
 }

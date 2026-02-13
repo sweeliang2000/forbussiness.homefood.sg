@@ -106,7 +106,7 @@ const InvitationBanner = ({
             <div className={styles.invitationBanner}>
                 <div className={styles.bannerContent}>
                     <div className={styles.bannerText}>
-                        <p>{invitedby} invited you to <span>{shopname}</span> shop as a <span>{role}</span>.</p>
+                        <p>{invitedby} invited you to become a <span>{role}</span> at his shop.</p>
                     </div>
                     <div className={styles.bannerActions}>
                         <Button
