@@ -50,6 +50,7 @@ const UsersAndPermissions = () => {
     const [invitations, setInvitations] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
+    const [isLoadingErrorStatus, setIsLoadingErrorStatus] = useState(null);
 
     // Fetch users data and invitation status on component mount
     useEffect(() => {
@@ -90,7 +91,9 @@ const UsersAndPermissions = () => {
                 console.error('Error fetching data:', err);
                 const message = err?.response?.data?.message || err.message;
                 const code = err?.response?.data?.code || err.code;
+                const statusCode = err?.response?.status;
                 setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
+                setIsLoadingErrorStatus(statusCode ?? null);
             } finally {
                 setIsLoading(false);
             }
@@ -285,7 +288,7 @@ const UsersAndPermissions = () => {
                 {isLoading ? 
                     <LoadingPage/> :
                     isLoadingErrorMessage !== null ? 
-                    <ErrorPage/> :
+                    <ErrorPage message={isLoadingErrorMessage} statusCode={isLoadingErrorStatus} /> :
                     <>
                         { invitedUsersRows.length > 0 &&                    
                             <section>

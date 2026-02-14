@@ -14,6 +14,7 @@ import dayjs from 'dayjs';
 const StatusView = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [errorStatus, setErrorStatus] = useState(null);
     const [releaseData, setReleaseData] = useState(null);
 
     useEffect(() => {
@@ -21,6 +22,7 @@ const StatusView = () => {
             try {
                 setIsLoading(true);
                 setError(null);
+                setErrorStatus(null);
                 const response = await apiClient.get(RELEASE_STATUS);
                 
                 if (response.data.success && response.data.data) {
@@ -31,7 +33,9 @@ const StatusView = () => {
             } catch (err) {
                 const errorData = err?.response?.data;
                 const message = errorData?.message || errorData?.error?.message || err?.message || 'Failed to load release status';
+                const statusCode = err?.response?.status;
                 setError(message);
+                setErrorStatus(statusCode ?? null);
                 console.error('Error fetching release status:', err);
             } finally {
                 setIsLoading(false);
@@ -56,7 +60,7 @@ const StatusView = () => {
     }
 
     if (error) {
-        return <ErrorPage message={error} />;
+        return <ErrorPage message={error} statusCode={errorStatus} />;
     }
 
     if (!releaseData) {

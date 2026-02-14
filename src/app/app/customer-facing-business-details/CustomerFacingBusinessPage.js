@@ -43,6 +43,7 @@ const CustomerFacingBusinessPage = () => {
     // For initial Loading Status
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
+    const [isLoadingErrorStatus, setIsLoadingErrorStatus] = useState(null);
 
     // For Header Status
     const [isError, setIsError] = useState(false);
@@ -300,9 +301,11 @@ const CustomerFacingBusinessPage = () => {
                 const errorData = error?.response?.data;
                 const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
                 const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
+                const statusCode = error?.response?.status;
                 setIsLoading(false);
                 setIsBtnLoading(false);
                 setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
+                setIsLoadingErrorStatus(statusCode ?? null);
             }
         };
 
@@ -465,7 +468,7 @@ const CustomerFacingBusinessPage = () => {
                     isLoading ?
                         <LoadingPage /> :
                         isLoadingErrorMessage !== null ?
-                            <ErrorPage /> :
+                            <ErrorPage message={isLoadingErrorMessage} statusCode={isLoadingErrorStatus} /> :
                             <ContentCard className={styles.content}>
                                 <FormTextField
                                     title='Display name*'

@@ -22,6 +22,7 @@ const POSTAL_CODE = 'postalCode';
 export default function StampSetup() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
+  const [isLoadingErrorStatus, setIsLoadingErrorStatus] = useState(null);
 
   const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -226,10 +227,12 @@ export default function StampSetup() {
       } catch (error) {
         const message = error?.response?.data?.message || error.message;
         const code = error?.response?.data?.code || error.code;
+        const statusCode = error?.response?.status;
         setIsLoading(false);
         setIsBtnLoading(false);
         setErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
         setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
+        setIsLoadingErrorStatus(statusCode ?? null);
       }
     };
 
@@ -372,7 +375,7 @@ export default function StampSetup() {
         isLoading ? 
         <LoadingPage/> :
         isLoadingErrorMessage !== null ? 
-        <ErrorPage/> :
+        <ErrorPage message={isLoadingErrorMessage} statusCode={isLoadingErrorStatus} /> :
         <>
           <ContentCard className={styles.content}>
             <div>

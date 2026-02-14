@@ -59,9 +59,11 @@ export default function AnalyticsPage() {
   const [stats, setStats] = useState({ totalUnique: 0, totalReturning: 0, totalNew: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+  const [loadErrorStatus, setLoadErrorStatus] = useState(null);
 
   const fetchTerminalLogs = useCallback(async (startStr, endStr) => {
     setLoadError(null);
+    setLoadErrorStatus(null);
     setIsLoading(true);
     try {
       const response = await apiClient.get('/api/mobile/terminalLogs/today', {
@@ -103,8 +105,10 @@ export default function AnalyticsPage() {
       setChartData(series);
       setStats(sumStats(list));
     } catch (err) {
-      const message = err?.response?.data?.message ?? err?.message ?? 'Failed to load activity data';
+      const statusCode = err?.response?.status;
+      const message = err?.response?.data?.message ?? err?.response?.data?.error?.message ?? err?.message ?? 'Failed to load activity data';
       setLoadError(message);
+      setLoadErrorStatus(statusCode ?? null);
       setChartData([]);
       setStats({ totalUnique: 0, totalReturning: 0, totalNew: 0 });
     } finally {
@@ -275,7 +279,7 @@ export default function AnalyticsPage() {
             {isLoading ? (
               <LoadingPage />
             ) : loadError ? (
-              <ErrorPage message={loadError} />
+              <ErrorPage message={loadError} statusCode={loadErrorStatus} />
             ) : chartData.length === 0 ? (
               <div className={styles.emptyState}>
                 <p className={styles.emptyText}>No terminal activity in the selected date range.</p>

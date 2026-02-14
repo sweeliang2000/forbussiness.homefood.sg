@@ -39,6 +39,7 @@ const SubmissionView = () => {
     const [value, setValue] = useState(defaultStartDate);
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
+    const [isLoadingErrorStatus, setIsLoadingErrorStatus] = useState(null);
     const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -328,9 +329,11 @@ const SubmissionView = () => {
                 const errorData = error?.response?.data;
                 const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
                 const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
+                const statusCode = error?.response?.status;
                 setIsLoading(false);
                 setIsBtnLoading(false);
                 setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code}). Please try to refresh the page.`);
+                setIsLoadingErrorStatus(statusCode ?? null);
             }
         };
 
@@ -456,7 +459,7 @@ const SubmissionView = () => {
                 isLoading ? 
                 <LoadingPage/> :
                 isLoadingErrorMessage !== null ? 
-                <ErrorPage message={isLoadingErrorMessage} /> :
+                <ErrorPage message={isLoadingErrorMessage} statusCode={isLoadingErrorStatus} /> :
                 <>
                     <ContentCard className={styles.content}>
                         <FieldHeader

@@ -28,6 +28,7 @@ export default function ScanToWinPage() {
   // For Initial Loading
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
+  const [isLoadingErrorStatus, setIsLoadingErrorStatus] = useState(null);
 
   // For Header Status
   const [isError, setIsError] = useState(false);
@@ -404,10 +405,12 @@ export default function ScanToWinPage() {
         const errorData = error?.response?.data;
         const message = errorData?.error?.message || errorData?.message || error?.message || 'Failed to load scan-to-win data';
         const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
+        const statusCode = error?.response?.status;
         console.error(`Error fetching scan-to-win data: ${message} (Error code: ${code})`);
         setIsError(true);
         setErrorMessage(`Failed to load scan-to-win data. ${message} (Error code: ${code})`);
         setIsLoadingErrorMessage(`Failed to load scan-to-win data. ${message} (Error code: ${code})`);
+        setIsLoadingErrorStatus(statusCode ?? null);
       }
     } finally {
       setIsLoading(false);
@@ -597,7 +600,7 @@ export default function ScanToWinPage() {
         {isLoading ? (
           <LoadingPage />
         ) : isLoadingErrorMessage !== null ? (
-          <ErrorPage />
+          <ErrorPage message={isLoadingErrorMessage} statusCode={isLoadingErrorStatus} />
         ) : showOnboarding ? (
           <ScanToWinOnboarding
             onGetStarted={handleGetStarted}

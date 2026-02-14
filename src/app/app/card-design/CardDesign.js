@@ -17,6 +17,7 @@ import DigitalStampRewardSystemOnboarding from '@/components/DigitalStampRewardS
 const CardDesign = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
+    const [isLoadingErrorStatus, setIsLoadingErrorStatus] = useState(null);
     const [stampIsEnabled, setStampIsEnabled] = useState(false);
 
 
@@ -243,18 +244,22 @@ const CardDesign = () => {
                 const errorData = error?.response?.data;
                 const message = errorData?.error?.message || errorData?.message || error?.message || 'Failed to load data';
                 const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
+                const statusCode = error?.response?.status;
                 showError(`An error had occurred. ${message} (Error code: ${code})`);
                 setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
+                setIsLoadingErrorStatus(statusCode ?? null);
             }
 
             setIsLoading(false);
         } catch (error) {
             const message = error?.response?.data?.message || error.message;
             const code = error?.response?.data?.code || error?.code;
+            const statusCode = error?.response?.status;
             setIsLoading(false);
             setIsBtnLoading(false);
             showError(`An error had occurred. ${message} (Error code: ${code})`);
             setIsLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
+            setIsLoadingErrorStatus(statusCode ?? null);
         }
     }, []);
 
@@ -400,7 +405,7 @@ const CardDesign = () => {
                 isLoading ?
                     <LoadingPage /> :
                     isLoadingErrorMessage !== null ?
-                        <ErrorPage /> :
+                        <ErrorPage message={isLoadingErrorMessage} statusCode={isLoadingErrorStatus} /> :
                         showOnboarding ? (
                             <DigitalStampRewardSystemOnboarding />
                         ) : (

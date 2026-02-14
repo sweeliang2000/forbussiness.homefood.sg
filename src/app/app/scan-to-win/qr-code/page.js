@@ -34,6 +34,7 @@ export default function ScanToWinQrCodePage() {
   // Loading / error
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
+  const [isLoadingErrorStatus, setIsLoadingErrorStatus] = useState(null);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
@@ -97,7 +98,9 @@ export default function ScanToWinQrCodePage() {
         error?.response?.data?.code ||
         error?.code ||
         'UNKNOWN';
+      const statusCode = error?.response?.status;
       setIsLoadingErrorMessage(`Failed to load QR codes. ${message} (Error code: ${code})`);
+      setIsLoadingErrorStatus(statusCode ?? null);
     }
   }, []);
 
@@ -106,6 +109,7 @@ export default function ScanToWinQrCodePage() {
     try {
       setIsLoading(true);
       setIsLoadingErrorMessage(null);
+      setIsLoadingErrorStatus(null);
       let configExists = false;
       try {
         const configRes = await apiClient.get('/api/data/qrcode/configuration');
@@ -127,7 +131,9 @@ export default function ScanToWinQrCodePage() {
         error?.response?.data?.code ||
         error?.code ||
         'UNKNOWN';
+      const statusCode = error?.response?.status;
       setIsLoadingErrorMessage(`${message} (Error code: ${code})`);
+      setIsLoadingErrorStatus(statusCode ?? null);
     } finally {
       setIsLoading(false);
     }
@@ -410,7 +416,7 @@ export default function ScanToWinQrCodePage() {
       {isLoading ? (
         <LoadingPage />
       ) : isLoadingErrorMessage !== null ? (
-        <ErrorPage />
+        <ErrorPage message={isLoadingErrorMessage} statusCode={isLoadingErrorStatus} />
       ) : showOnboarding ? (
         <ScanToWinOnboarding
           onGetStarted={handleGetStarted}

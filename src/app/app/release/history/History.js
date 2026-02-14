@@ -19,6 +19,7 @@ dayjs.extend(timezone);
 const HistoryView = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [errorStatus, setErrorStatus] = useState(null);
     const [releaseHistory, setReleaseHistory] = useState([]);
 
     useEffect(() => {
@@ -26,6 +27,7 @@ const HistoryView = () => {
             try {
                 setIsLoading(true);
                 setError(null);
+                setErrorStatus(null);
                 const response = await apiClient.get(RELEASED_HISTORY);
                 
                 if (response.data.success && response.data.data && response.data.data.history) {
@@ -36,7 +38,9 @@ const HistoryView = () => {
             } catch (err) {
                 const errorData = err?.response?.data;
                 const message = errorData?.message || errorData?.error?.message || err?.message || 'Failed to load release history';
+                const statusCode = err?.response?.status;
                 setError(message);
+                setErrorStatus(statusCode ?? null);
                 console.error('Error fetching release history:', err);
             } finally {
                 setIsLoading(false);
@@ -59,7 +63,7 @@ const HistoryView = () => {
     }
 
     if (error) {
-        return <ErrorPage message={error} />;
+        return <ErrorPage message={error} statusCode={errorStatus} />;
     }
 
     return (

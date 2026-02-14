@@ -62,6 +62,7 @@ export default function StampSetup() {
   // For Initial Loading
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
+  const [isLoadingErrorStatus, setIsLoadingErrorStatus] = useState(null);
 
   // For Header Status
   const [isError, setIsError] = useState(false);
@@ -234,10 +235,12 @@ export default function StampSetup() {
         const errorData = error?.response?.data;
         const message = errorData?.error?.message || errorData?.message || error?.message || 'Failed to load stamp management data';
         const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
+        const statusCode = error?.response?.status;
         console.error(`Error fetching stamp management data: ${message} (Error code: ${code})`);
         setIsError(true);
         setErrorMessage(`Failed to load stamp management data. ${message} (Error code: ${code})`);
         setIsLoadingErrorMessage(`Failed to load stamp management data. ${message} (Error code: ${code})`);
+        setIsLoadingErrorStatus(statusCode ?? null);
       } finally {
         setIsLoading(false);
       }
@@ -780,7 +783,7 @@ export default function StampSetup() {
           isLoading ?
             <LoadingPage /> :
             isLoadingErrorMessage !== null ?
-              <ErrorPage /> :
+              <ErrorPage message={isLoadingErrorMessage} statusCode={isLoadingErrorStatus} /> :
               !isEnabled ? (
                 <StampOnBoarding />
               ) : (

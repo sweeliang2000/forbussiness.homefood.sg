@@ -131,6 +131,7 @@ export default function CollectionStatusPage() {
   const [noDataMessage, setNoDataMessage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+  const [loadErrorStatus, setLoadErrorStatus] = useState(null);
 
   const [configLoading, setConfigLoading] = useState(true);
   const [hasExistingScanToWinConfig, setHasExistingScanToWinConfig] = useState(false);
@@ -138,6 +139,7 @@ export default function CollectionStatusPage() {
 
   const fetchDailyCounts = useCallback(async (dateStr) => {
     setLoadError(null);
+    setLoadErrorStatus(null);
     setNoDataMessage(false);
     setIsLoading(true);
     try {
@@ -157,7 +159,9 @@ export default function CollectionStatusPage() {
       setNoDataMessage(hasNoData(collectedPayload, redeemedPayload));
     } catch (err) {
       const message = err?.response?.data?.message ?? err?.message ?? 'Failed to load collection status';
+      const statusCode = err?.response?.status;
       setLoadError(message);
+      setLoadErrorStatus(statusCode ?? null);
       setChartData([]);
       setNoDataMessage(false);
     } finally {
@@ -179,7 +183,10 @@ export default function CollectionStatusPage() {
         if (!cancelled) setHasExistingScanToWinConfig(!!(configRes?.data?.data));
       } catch (err) {
         if (!cancelled && err?.response?.status === 404) setHasExistingScanToWinConfig(false);
-        else if (!cancelled) setLoadError(err?.response?.data?.message ?? err?.message ?? 'Failed to load');
+        else if (!cancelled) {
+          setLoadError(err?.response?.data?.message ?? err?.message ?? 'Failed to load');
+          setLoadErrorStatus(err?.response?.status ?? null);
+        }
       } finally {
         if (!cancelled) setConfigLoading(false);
       }
@@ -195,6 +202,7 @@ export default function CollectionStatusPage() {
   const handleGetStarted = async () => {
     setIsEnabling(true);
     setLoadError(null);
+    setLoadErrorStatus(null);
     try {
       const formData = new FormData();
       formData.append('isEnabled', 'true');
@@ -208,7 +216,9 @@ export default function CollectionStatusPage() {
     } catch (err) {
       const errorData = err?.response?.data;
       const msg = errorData?.error?.message || errorData?.message || err?.message || 'Failed to enable Scan to Win';
+      const statusCode = err?.response?.status;
       setLoadError(msg);
+      setLoadErrorStatus(statusCode ?? null);
     } finally {
       setIsEnabling(false);
     }
@@ -220,7 +230,7 @@ export default function CollectionStatusPage() {
     return <LoadingPage />;
   }
   if (loadError && !showOnboarding) {
-    return <ErrorPage message={loadError} />;
+    return <ErrorPage message={loadError} statusCode={loadErrorStatus} />;
   }
   if (showOnboarding) {
     return (
