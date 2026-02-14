@@ -26,7 +26,7 @@ const AddUsersDialog = ({
 
     const [email, setEmail] = useState('');
     const [selectedLocation, setSelectedLocation] = useState(defaultLocation);
-    const [selectedRole, setSelectedRole] = useState(roles[3].value);
+    const [selectedRole, setSelectedRole] = useState(roles[2].value);
     const [addUserLoading, setAddUserLoading] = useState(false);
     const [buttonDisabled, setButtonDisabled] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
@@ -37,6 +37,7 @@ const AddUsersDialog = ({
             try {
                 const response = await apiClient.get(LIST_LOCATIONS);
                 const data = response.data.data;
+                console.log('data', data);
 
                 const locationOptions = [
                     { value: 'all', title: 'All Locations', location_id: 'all'},
@@ -62,7 +63,7 @@ const AddUsersDialog = ({
     useEffect(() => {
         if (isEditMode && editingUser) {
             setEmail(editingUser.email || '');
-            setSelectedRole(editingUser.role || roles[3].value);
+            setSelectedRole(editingUser.role || roles[2].value);
             
             // Find the matching location
             const matchingLocation = locations.find(loc => 
@@ -76,7 +77,7 @@ const AddUsersDialog = ({
             // Reset form for add mode
             setEmail('');
             setSelectedLocation(defaultLocation);
-            setSelectedRole(roles[3].value);
+            setSelectedRole(roles[2].value);
         }
     }, [isEditMode, editingUser, locations]);
 
@@ -152,7 +153,7 @@ const AddUsersDialog = ({
                 // Reset form
                 setEmail('');
                 setSelectedLocation(defaultLocation);
-                setSelectedRole(roles[3].value);
+                setSelectedRole(roles[2].value);
                 setButtonDisabled(true);
             } catch (error) {
                 const errorData = error?.response?.data;
