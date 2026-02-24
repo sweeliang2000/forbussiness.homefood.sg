@@ -189,7 +189,10 @@ const CustomerFacingBusinessPage = () => {
             const errorData = error?.response?.data;
             const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
             const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
+            const displayMessage = `An error had occurred. ${message} (Error code: ${code}). Please try to save again.`;
             console.error(`Form submission error: ${message} (Error code: ${code})`);
+            setIsSubmissionSuccess(false);
+            showError(displayMessage);
         } finally {
             setIsBtnLoading(false);
         }
