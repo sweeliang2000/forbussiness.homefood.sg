@@ -15,7 +15,7 @@ import { LoadingButton } from '@mui/lab';
 import apiClient from '@/utility/api';
 import { STAMP_MANAGEMENT } from '@/utility/apiPaths';
 
-const DigitalStampRewardSystemOnboarding = () => {
+const DigitalStampRewardSystemOnboarding = ({ onSuccess }) => {
     const router = useRouter();
     const [isEnabling, setIsEnabling] = useState(false);
 
@@ -35,6 +35,8 @@ const DigitalStampRewardSystemOnboarding = () => {
             await apiClient.post(STAMP_MANAGEMENT, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
+            onSuccess?.();
+            router.refresh();
             router.push('/app/stamp-management');
         } catch (err) {
             const errorData = err?.response?.data;

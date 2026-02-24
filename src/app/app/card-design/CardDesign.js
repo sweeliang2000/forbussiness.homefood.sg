@@ -417,7 +417,9 @@ const CardDesign = () => {
                     isLoadingErrorMessage !== null ?
                         <ErrorPage message={isLoadingErrorMessage} statusCode={isLoadingErrorStatus} /> :
                         showOnboarding ? (
-                            <DigitalStampRewardSystemOnboarding />
+                            <DigitalStampRewardSystemOnboarding
+                                onSuccess={() => setStampIsEnabled(true)}
+                            />
                         ) : (
                         <div className={styles.contentContainer}>
                             <ContentCard className={styles.cardContainer}>

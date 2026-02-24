@@ -1,7 +1,7 @@
 import DigitalStampRewardSystemOnboarding from '@/components/DigitalStampRewardSystemOnboarding/DigitalStampRewardSystemOnboarding';
 
-const StampOnBoarding = () => {
-    return <DigitalStampRewardSystemOnboarding />;
+const StampOnBoarding = ({ onSuccess }) => {
+    return <DigitalStampRewardSystemOnboarding onSuccess={onSuccess} />;
 };
 
 export default StampOnBoarding;

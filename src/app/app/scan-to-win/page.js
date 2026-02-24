@@ -44,7 +44,7 @@ export default function ScanToWinPage() {
   // Form Data
   const [cardImage, setCardImage] = useState([]);
   const [rewardChances, setRewardChances] = useState([]);
-  
+
   // Track if configuration exists (for POST vs PUT)
   const [hasExistingConfig, setHasExistingConfig] = useState(false);
   const [isEnabling, setIsEnabling] = useState(false);
@@ -119,14 +119,14 @@ export default function ScanToWinPage() {
       // Update existing
       const existingIndex = rewardChances.findIndex(chance => chance.id === updatedChance.id);
       if (existingIndex >= 0) {
-        setRewardChances(prev => 
-          prev.map(chance => 
+        setRewardChances(prev =>
+          prev.map(chance =>
             chance.id === updatedChance.id ? updatedChance : chance
           )
         );
       }
     }
-    
+
     resetSaving();
     setIsEditRewardChanceOpen(false);
     setCurrentRewardChance(null);
@@ -142,13 +142,13 @@ export default function ScanToWinPage() {
     if (!isEdit) return false;
 
     const isEnabledChanged = isEnabled !== initialIsEnabledRef.current;
-    
+
     const normalizeImage = (img) => ({
       url: img?.url || '',
       name: img?.name || '',
       hasFile: !!img?.file
     });
-    const cardImageChanged = JSON.stringify(cardImage.map(normalizeImage)) !== 
+    const cardImageChanged = JSON.stringify(cardImage.map(normalizeImage)) !==
       JSON.stringify(initialCardImageRef.current.map(normalizeImage)) ||
       cardImage.length !== initialCardImageRef.current.length;
 
@@ -163,7 +163,7 @@ export default function ScanToWinPage() {
       setIsBtnDisabled(true);
       return;
     }
-    
+
     const hasChanges = checkUnsavedChanges();
     setIsBtnDisabled(!hasChanges);
   }, [isEnabled, cardImage, rewardChances, isEdit]);
@@ -175,7 +175,7 @@ export default function ScanToWinPage() {
 
   const formSubmissionHandler = async (event) => {
     event.preventDefault();
-    
+
     // Validate percentage totals 100%
     if (isEnabled && hasPercentageError) {
       setIsError(true);
@@ -196,7 +196,7 @@ export default function ScanToWinPage() {
     try {
       const formData = new FormData();
       formData.append('isEnabled', isEnabled.toString());
-      
+
       if (cardImage.length > 0 && cardImage[0]?.file) {
         formData.append('cardImage', cardImage[0].file);
       }
@@ -232,14 +232,14 @@ export default function ScanToWinPage() {
       // Log the data that will be sent to backend
       const dataToSend = {
         isEnabled: isEnabled,
-        cardImage: cardImage.length > 0 && cardImage[0]?.file 
+        cardImage: cardImage.length > 0 && cardImage[0]?.file
           ? { name: cardImage[0].file.name, type: cardImage[0].file.type, size: cardImage[0].file.size }
-          : cardImage.length > 0 && cardImage[0]?.url 
+          : cardImage.length > 0 && cardImage[0]?.url
             ? { url: cardImage[0].url }
             : null,
         rewardChances: rewardChancesData
       };
-      
+
       console.log('Data structure to be sent to backend:', JSON.stringify(dataToSend, null, 2));
       console.log('Reward Chances Details:');
       rewardChancesData.forEach((chance, index) => {
@@ -250,7 +250,7 @@ export default function ScanToWinPage() {
           max: chance.max
         });
       });
-      
+
       // Log FormData contents
       console.log('FormData contents:');
       for (const pair of formData.entries()) {
@@ -267,7 +267,7 @@ export default function ScanToWinPage() {
       // Use POST for first save, PUT for updates
       const endpoint = '/api/data/qrcode/configuration';
       const method = hasExistingConfig ? 'put' : 'post';
-      
+
       await apiClient[method](endpoint, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -279,7 +279,7 @@ export default function ScanToWinPage() {
       setIsSubmissionSuccess(true);
       setIsBtnLoading(false);
       setHasExistingConfig(true); // Mark as existing after first save
-      
+
       // Update initial values after successful save
       initialIsEnabledRef.current = isEnabled;
       initialCardImageRef.current = JSON.parse(JSON.stringify(cardImage));
@@ -481,7 +481,7 @@ export default function ScanToWinPage() {
         if (link && link.href) {
           const isInternalLink = link.href.startsWith(window.location.origin) || link.href.startsWith('/');
           const isAnchorLink = link.href.includes('#') && link.href.split('#')[0] === window.location.href.split('#')[0];
-          
+
           if (isInternalLink && !isAnchorLink) {
             const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave? Your changes will be lost.');
             if (!confirmed) {
@@ -570,7 +570,11 @@ export default function ScanToWinPage() {
     },
   ];
 
-  const showOnboarding = !hasExistingConfig && !isLoading && isLoadingErrorMessage === null;
+  const showOnboarding = false
+  console.log('showOnboarding', showOnboarding);
+  console.log('hasExistingConfig', hasExistingConfig);
+  console.log('isLoading', isLoading);
+  console.log('isLoadingErrorMessage', isLoadingErrorMessage);
 
   return (
     <>
@@ -601,91 +605,86 @@ export default function ScanToWinPage() {
           <LoadingPage />
         ) : isLoadingErrorMessage !== null ? (
           <ErrorPage message={isLoadingErrorMessage} statusCode={isLoadingErrorStatus} />
-        ) : showOnboarding ? (
+        ) : !isEnabled ? (
           <ScanToWinOnboarding
             onGetStarted={handleGetStarted}
             isEnabling={isEnabling}
           />
         ) : (
           <>
+            <ContentCard>
+              <FieldHeader
+                title='Scan to Win Setting'
+              />
 
-            {isEnabled && (
-              <>
-                <ContentCard>
+              <div className={styles.fieldsContainer}>
+                <div>
                   <FieldHeader
-                    title='Scan to Win Setting'
+                    title='Card Image (Optional)'
+                    description='Give a card image of your choose when user click before it review.'
+                    type='h3'
+                    className={styles.headerBtnMargin}
                   />
 
-                  <div className={styles.fieldsContainer}>
-                    <div>
-                      <FieldHeader
-                        title='Card Image (Optional)'
-                        description='Give a card image of your choose when user click before it review.'
-                        type='h3'
-                        className={styles.headerBtnMargin}
-                      />
+                  <DragDropImageUploader
+                    images={cardImage}
+                    setImages={setCardImage}
+                    noOfImages={1}
+                    resetSaving={resetSaving}
+                    width={200}
+                    height={200}
+                    imageClassName={styles.dragdropBannerImage}
+                    disabled={!isEdit}
+                  />
+                </div>
+              </div>
+            </ContentCard>
 
-                      <DragDropImageUploader
-                        images={cardImage}
-                        setImages={setCardImage}
-                        noOfImages={1}
-                        resetSaving={resetSaving}
-                        width={200}
-                        height={200}
-                        imageClassName={styles.dragdropBannerImage}
-                        disabled={!isEdit}
-                      />
-                    </div>
-                  </div>
-                </ContentCard>
-
-                <ContentCard>
-                  <div className={styles.rewardChancesHeader}>
-                    <div className={styles.rewardChancesTitleRow}>
-                      <div>
-                        <FieldHeader
-                          title='Reward chances'
-                        />
-                        {hasPercentageError && (
-                          <p className={styles.errorMessage}>
-                            Total percentage must equal 100%. Current Total: {totalPercentage}%
-                          </p>
-                        )}
-                        {hasMaxError && (
-                          <p className={styles.errorMessage}>
-                            At least one reward chance must not have a max value.
-                          </p>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        className={styles.addButton}
-                        onClick={handleAddNewChance}
-                        disabled={!isEdit}
-                      >
-                        Add Reward Chance
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className={styles.tableContainer}>
-                    <DataGrid
-                      rows={rewardChances}
-                      columns={columns}
-                      initialState={{ pagination: { paginationModel } }}
-                      disableColumnFilter
-                      disableColumnMenu
-                      disableRowSelectionOnClick
-                      pageSizeOptions={[20]}
-                      disableSelectionOnClick
-                      getRowHeight={() => 'auto'}
-                      style={{ width: '100%', borderRadius: 12 }}
-                      pagination
+            <ContentCard>
+              <div className={styles.rewardChancesHeader}>
+                <div className={styles.rewardChancesTitleRow}>
+                  <div>
+                    <FieldHeader
+                      title='Reward chances'
                     />
+                    {hasPercentageError && (
+                      <p className={styles.errorMessage}>
+                        Total percentage must equal 100%. Current Total: {totalPercentage}%
+                      </p>
+                    )}
+                    {hasMaxError && (
+                      <p className={styles.errorMessage}>
+                        At least one reward chance must not have a max value.
+                      </p>
+                    )}
                   </div>
-                </ContentCard>
-              </>
-            )}
+                  <button
+                    type="button"
+                    className={styles.addButton}
+                    onClick={handleAddNewChance}
+                    disabled={!isEdit}
+                  >
+                    Add Reward Chance
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.tableContainer}>
+                <DataGrid
+                  rows={rewardChances}
+                  columns={columns}
+                  initialState={{ pagination: { paginationModel } }}
+                  disableColumnFilter
+                  disableColumnMenu
+                  disableRowSelectionOnClick
+                  pageSizeOptions={[20]}
+                  disableSelectionOnClick
+                  getRowHeight={() => 'auto'}
+                  style={{ width: '100%', borderRadius: 12 }}
+                  pagination
+                />
+              </div>
+            </ContentCard>
           </>
         )}
       </form>

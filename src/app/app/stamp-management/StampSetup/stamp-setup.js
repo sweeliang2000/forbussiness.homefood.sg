@@ -4,7 +4,7 @@ import styles from './stamp-setup.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import Link from 'next/link';
-import { useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
@@ -108,9 +108,8 @@ export default function StampSetup() {
   // Track if we've pushed a history state for back button handling
   const historyStatePushedRef = useRef(false);
 
-  // Fetch stamp management data when component loads
-  useEffect(() => {
-    const fetchStampManagementData = async () => {
+  // Fetch stamp management data (used on load and after enabling from onboarding)
+  const fetchStampManagementData = useCallback(async () => {
       try {
         setIsLoading(true);
         const response = await apiClient.get(STAMP_MANAGEMENT);
@@ -244,10 +243,11 @@ export default function StampSetup() {
       } finally {
         setIsLoading(false);
       }
-    };
-
-    fetchStampManagementData();
   }, []);
+
+  useEffect(() => {
+    fetchStampManagementData();
+  }, [fetchStampManagementData]);
 
   // Check if there are unsaved changes
   const checkUnsavedChanges = () => {
@@ -789,7 +789,12 @@ export default function StampSetup() {
             isLoadingErrorMessage !== null ?
               <ErrorPage message={isLoadingErrorMessage} statusCode={isLoadingErrorStatus} /> :
               !isEnabled ? (
-                <StampOnBoarding />
+                <StampOnBoarding
+                  onSuccess={() => {
+                    setIsEnabled(true);
+                    fetchStampManagementData();
+                  }}
+                />
               ) : (
               <>
 
