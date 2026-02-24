@@ -127,7 +127,7 @@ const LoginContent = () => {
                     </p>
                 </div>
 
-                <div>
+                {/* <div>
                     <div className={styles.subTagLineContainer}>
                         <FaLevelDownAlt className={styles.faLevelDownLeft} />
                         <p className={styles.subTagLine}>Trusted by leading brands</p>
@@ -149,7 +149,7 @@ const LoginContent = () => {
                         />
                     </div>
 
-                </div>
+                </div> */}
             </section>
 
             {/* [RIGHT] Second Section: Sign-up Form */}

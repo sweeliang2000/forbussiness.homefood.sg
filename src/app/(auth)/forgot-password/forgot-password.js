@@ -167,7 +167,7 @@ const ForgotPassword = () => {
                     </p>
                 </div>
 
-                <div>
+                {/* <div>
                     <div className={styles.subTagLineContainer}>
                         <p className={styles.subTagLine}>Trusted by leading brands</p>
                         <FaLevelDownAlt className={styles.faLevelDown} />
@@ -188,7 +188,7 @@ const ForgotPassword = () => {
                         />
                     </div>
 
-                </div>
+                </div> */}
             </section>
 
             {/* [RIGHT] Second Section: Sign-up Form */}
