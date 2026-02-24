@@ -2,7 +2,7 @@
 import styles from './page.module.css';
 import Link from 'next/link';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
-import { FaMobileAlt, FaChartLine } from 'react-icons/fa';
+import { FaMobileAlt, FaChartLine, FaWhatsapp } from 'react-icons/fa';
 import { LuStamp } from 'react-icons/lu';
 import { PiCashRegister } from 'react-icons/pi';
 import { HiOutlineSpeakerphone, HiOutlineExclamationCircle } from 'react-icons/hi';
@@ -218,6 +218,15 @@ export default function Content() {
               Need help or found a problem? Contact us or report an issue.
             </p>
             <div className={styles.contactActions}>
+              <a
+                href="https://api.whatsapp.com/send/?phone=6588678978&text&type=phone_number&app_absent=0"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.contactButton}
+              >
+                <FaWhatsapp className={styles.contactButtonIcon} />
+                <span>WhatsApp</span>
+              </a>
               <Link href="/app/feedback" className={styles.contactButton}>
                 <MdOutlineEmail className={styles.contactButtonIcon} />
                 <span>Contact Us</span>
