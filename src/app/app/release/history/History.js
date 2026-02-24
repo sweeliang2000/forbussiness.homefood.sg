@@ -90,28 +90,40 @@ const HistoryView = () => {
                     />
                 </div>
 
-                <div className={styles.historyList}>
-                    {releaseHistory.length === 0 ? (
-                        <div className={styles.emptyState}>
-                            <p>No release history available.</p>
-                        </div>
-                    ) : (
-                        releaseHistory.map((release, index) => (
-                            <Link 
-                                key={release.datetime || index} 
-                                href={`/app/release/history/${index}`}
-                                className={styles.historyItem}
-                            >
-                                <div className={styles.historyItemContent}>
-                                    <div className={styles.dateInfo}>
-                                        <span className={styles.date}>{formatDateTime(release.datetime)}</span>
-                                    </div>
-                                </div>
-                                <span className={styles.viewMore}>View More &gt;</span>
-                            </Link>
-                        ))
-                    )}
-                </div>
+                {releaseHistory.length === 0 ? (
+                    <div className={styles.emptyState}>
+                        <p>No release history available.</p>
+                    </div>
+                ) : (
+                    <div className={styles.tableWrap}>
+                        <table className={styles.historyTable}>
+                            <thead>
+                                <tr>
+                                    <th className={styles.historyTh}>Released at</th>
+                                    <th className={styles.historyTh}>Stamp</th>
+                                    <th className={styles.historyTh}>Scan to Win</th>
+                                    <th className={styles.historyTh}>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {releaseHistory.map((release, index) => {
+                                    const hasStamp = Array.isArray(release.StampData) && release.StampData.length > 0 && release.StampData.some((s) => s.isEnabled === 'true' || s.isEnabled === true);
+                                    const hasScanToWin = Array.isArray(release.qr_configuration) && release.qr_configuration.length > 0 && release.qr_configuration.some((q) => q.isEnabled === 'true' || q.isEnabled === true);
+                                    return (
+                                        <tr key={release.datetime || index} className={styles.historyTr}>
+                                            <td className={styles.historyTd}>{formatDateTime(release.datetime)}</td>
+                                            <td className={styles.historyTd}>{hasStamp ? 'Yes' : '—'}</td>
+                                            <td className={styles.historyTd}>{hasScanToWin ? 'Yes' : '—'}</td>
+                                            <td className={styles.historyTd}>
+                                                <Link href={`/app/release/history/${index}`} className={styles.viewMoreLink}>View More &gt;</Link>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </ContentCard>
 
         </form>

@@ -25,30 +25,90 @@
     gap: 16px;
 }
 
-.informationCard {
-    margin-top: 10px;
-    padding-top: 24px;
-    border-top: 1px solid #e0e0e0;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+.tableContainer {
+    overflow-x: auto;
+    background-color: white;
+    max-width: var(--max-width, 100%);
+    width: 100%;
+    margin-top: 16px;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
-.infoRow {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+/* Wrap long values and preserve newlines (e.g. locations) */
+.cellValueWrap {
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.5;
+    max-width: 100%;
 }
 
-.infoLabel {
-    font-size: 14px;
-    font-weight: 500;
+/* DataGrid cells: wrap text and comfortable padding */
+.tableContainer :global([data-field]) {
+    padding: 12px 14px !important;
+    align-items: flex-start !important;
+    line-height: 1.5;
+}
+
+.tableContainer :global(.MuiDataGrid-cell) {
+    word-break: break-word;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+.tableContainer :global(.MuiDataGrid-columnHeaders) {
+    font-weight: 600;
+    color: #333;
+}
+
+.tableContainer :global(.MuiDataGrid-row:hover) {
+    background-color: #fafafa;
+}
+
+.sectionCard {
+    margin-bottom: 8px;
+}
+
+.stampStepsHeader {
+    margin-top: 28px;
+    margin-bottom: 4px;
+}
+
+.tableWrap {
+    overflow-x: auto;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.infoTable {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 240px;
+}
+
+.infoTr {
+    border-bottom: 1px solid #eee;
+}
+
+.infoTr:last-child {
+    border-bottom: none;
+}
+
+.infoTh {
+    text-align: left;
+    padding: 10px 14px 10px 0;
+    font-weight: 600;
     color: #666;
+    vertical-align: top;
+    width: 1%;
+    white-space: nowrap;
 }
 
-.infoValue {
+.infoTd {
+    padding: 10px 0;
     font-size: 16px;
     color: #333;
+    vertical-align: top;
 }
 
 .locationsList {
@@ -84,6 +144,22 @@
     object-fit: contain;
     border-radius: 8px;
     border: 1px solid #e5e5e5;
+}
+
+.thumbImage {
+    max-width: 120px;
+    max-height: 120px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 1px solid #e5e5e5;
+}
+
+.operatingHours {
+    font-size: 12px;
+    color: #666;
+    margin-top: 2px;
 }
 
 @media only screen and (max-width: 820px) {
