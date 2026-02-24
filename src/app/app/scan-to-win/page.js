@@ -571,10 +571,6 @@ export default function ScanToWinPage() {
   ];
 
   const showOnboarding = false
-  console.log('showOnboarding', showOnboarding);
-  console.log('hasExistingConfig', hasExistingConfig);
-  console.log('isLoading', isLoading);
-  console.log('isLoadingErrorMessage', isLoadingErrorMessage);
 
   return (
     <>
