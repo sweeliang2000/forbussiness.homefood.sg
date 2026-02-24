@@ -125,14 +125,21 @@ const CreateRewardPopup = ({
         
         // Call the parent's onSubmit function with the form data
         if (onSubmit) {
-            await onSubmit(formDataWithImage);
-            
-            // Update initial values after successful save (normalized)
-            initialRewardDataRef.current = normalizeRewardData(rewardData);
-            initialRewardImageRef.current = JSON.parse(JSON.stringify(rewardImage));
-            initialIsRewardIdOpenRef.current = isRewardIdOpen;
-            initialIsRewardTagsOpenRef.current = isRewardTagsOpen;
-            initialIsRewardImageOpenRef.current = isRewardImageOpen;
+            try {
+                await onSubmit(formDataWithImage);
+                // Update initial values after successful save (normalized)
+                initialRewardDataRef.current = normalizeRewardData(rewardData);
+                initialRewardImageRef.current = JSON.parse(JSON.stringify(rewardImage));
+                initialIsRewardIdOpenRef.current = isRewardIdOpen;
+                initialIsRewardTagsOpenRef.current = isRewardTagsOpen;
+                initialIsRewardImageOpenRef.current = isRewardImageOpen;
+            } catch (error) {
+                const errorData = error?.response?.data;
+                const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+                const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
+                const displayMessage = `An error had occurred. ${message} (Error code: ${code}). Please try again.`;
+                setErrorMessage(displayMessage);
+            }
         }
         console.log(rewardData)
     }

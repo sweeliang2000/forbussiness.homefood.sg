@@ -212,7 +212,7 @@ const Rewards = () => {
             const message = errorData?.error?.message;
             const code = errorData?.error?.statusCode;
             console.error(`Error ${selectedReward ? 'updating' : 'creating'} reward: ${message} (Error code: ${code})`);
-            // You might want to show an error message to the user here
+            throw err; // Rethrow so CreateRewardPopup can catch and display the error
         }
     };
 
