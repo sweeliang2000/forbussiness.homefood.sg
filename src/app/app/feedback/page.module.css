@@ -6,3 +6,30 @@
   align-items: center;
   justify-content: center;
 }
+
+.whatsappFloating {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #25d366;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  z-index: 1000;
+}
+
+.whatsappFloating:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 16px rgba(37, 211, 102, 0.5);
+}
+
+.whatsappFloatingIcon {
+  width: 32px;
+  height: 32px;
+}
