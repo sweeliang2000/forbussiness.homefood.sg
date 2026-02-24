@@ -197,11 +197,25 @@ const CardDesign = () => {
                         setCardTitle(stampData.cardTitle || '');
                         setCardDescription(stampData.cardDescription || '');
                         setNumberOfStamps(stampData.numberOfStamps || 6);
-                        setExpirationType(stampData.expirationType || 'validForDays');
+                        const expType = stampData.expirationType || 'validForDays';
+                        const daysToExpire = parseInt(stampData.numberOfDaysToExpire, 10) || 30;
+                        setExpirationType(expType);
                         setNumberOfDaysToExpire(stampData.numberOfDaysToExpire || 30);
                         setStamped_url(stampData.defaultStampedUrl_Presign || '');
                         setUnstamped_url(stampData.defaultUnStampedUrl_Presign || '');
-                        console.log(stampData.defaultUnStampedUrl_Presign)
+
+                        // Expiry display: from today + N days as "DD MMM YYYY", or "This card has no expiration."
+                        if (expType === 'noExpiration') {
+                            setExpiryDate('This card has no expiration.');
+                        } else if (expType === 'validForDays' && !Number.isNaN(daysToExpire)) {
+                            const expiry = new Date();
+                            expiry.setDate(expiry.getDate() + daysToExpire);
+                            const day = expiry.getDate();
+                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            setExpiryDate(`${day} ${months[expiry.getMonth()]} ${expiry.getFullYear()}`);
+                        } else {
+                            setExpiryDate('31 Dec 2023');
+                        }
 
                         // Parse cardStepDetails and extract prize steps
                         if (stampData.cardStepDetails) {
@@ -220,9 +234,6 @@ const CardDesign = () => {
                                 } else {
                                     setPrizeSteps([]);
                                 }
-                                
-                                console.log('Parsed cardStepDetails:', parsedCardSteps);
-                                console.log('Extracted prize steps:', prizeStepsFromData);
                             } catch (parseError) {
                                 console.error('Error parsing cardStepDetails:', parseError);
                             }
@@ -231,7 +242,6 @@ const CardDesign = () => {
                         // Update the preview values
                         setNumberOfStamp(stampData.numberOfStamps || 6);
                         setSpendAmount(10); // Default spend amount
-                        setExpiryDate('31 Dec 2023'); // Default expiry date
                     }
             } else {
                 console.warn('Failed to fetch stamp management data:', stampManagementResponse.reason);
@@ -412,8 +422,8 @@ const CardDesign = () => {
                         <div className={styles.contentContainer}>
                             <ContentCard className={styles.cardContainer}>
                                 <StampCard
-                                    title={cardTitle || "Get Free Spiacy Black Whole Leg"}
-                                    description={cardDescription || `Earn a stamp when you spend SGD $10.00`}
+                                    title={cardTitle || ""}
+                                    description={cardDescription || ""}
                                     totalStamps={numberOfStamp}
                                     collectedStamps={collectedStamps}
                                     expiryDate={expiryDate}

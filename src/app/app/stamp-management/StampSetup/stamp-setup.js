@@ -36,8 +36,8 @@ const END_OF_YEAR_EXPIRATION = { value: 'endOfYear', title: 'End of Year' };
 const VALID_FOR_DAYS_EXPIRATION = { value: 'validForDays', title: 'Valid for X Days' };
 const EXPIRATION_TYPE_OPTIONS = [
   NO_EXPIRATION,
-  END_OF_MONTH_EXPIRATION,
-  END_OF_YEAR_EXPIRATION,
+  // END_OF_MONTH_EXPIRATION,
+  // END_OF_YEAR_EXPIRATION,
   VALID_FOR_DAYS_EXPIRATION
 ];
 

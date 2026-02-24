@@ -121,7 +121,7 @@ const StampCard = ({
         <div className={styles.titleContainer}>
           <h2 className={styles.title} style={{ color: cardTitleColor }}>{title}</h2>
           <p className={styles.subtitle}>
-            {description || `Earn a stamp when you spend RM${spendAmount.toFixed(2)}`}
+            {description || ''}
           </p>
         </div>
         {rewardImage && (
@@ -139,7 +139,9 @@ const StampCard = ({
 
       <div className={styles.footer}>
         <p className={styles.expiryText} style={{ color: cardFooterColor }}>
-          Collect all stamps by {expiryDate}
+          {expiryDate && String(expiryDate).toLowerCase().includes('no expiration')
+            ? expiryDate
+            : `Collect all stamps by ${expiryDate}`}
         </p>
       </div>
     </div>
