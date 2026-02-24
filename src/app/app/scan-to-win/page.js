@@ -578,7 +578,7 @@ export default function ScanToWinPage() {
         className={styles.form}
         onSubmit={formSubmissionHandler}
       >
-        {!showOnboarding && (
+        {isEnabled && (
           <HeaderSection
             className={styles.header}
             title='Scan to Win'

@@ -126,13 +126,13 @@ const DigitalStampRewardSystemOnboarding = ({ onSuccess }) => {
                             </div>
                         </div>
                     </div>
-
+{/* 
                     <iframe
                         className={styles.iframe}
                         src='https://www.youtube.com/embed/6muziL6I_kQ?si=QOswW8SadP5E5eTS'
                         title='YouTube video player'
                         allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
-                    />
+                    /> */}
                 </ContentCard>
             </div>
         </>
