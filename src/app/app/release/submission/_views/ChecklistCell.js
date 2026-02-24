@@ -10,22 +10,14 @@ const ChecklistCell = ({
     isCompleted,
     editLink
 }) => {
-    const EditButton = editLink ? (
-        <Link href={editLink} style={{ textDecoration: 'none' }} onClick={(e) => e.stopPropagation()}>
-            <Button
-                variant='contained'
-                color='primary'
-                className={styles.editButton}
-            >
-                Edit
-            </Button>
-        </Link>
-    ) : (
+    // When the whole row is a link (editLink), don't wrap Edit in another Link to avoid nested <a>
+    const EditButton = (
         <Button
-            type='submit'
+            type={editLink ? 'button' : 'submit'}
             variant='contained'
             color='primary'
             className={styles.editButton}
+            component={editLink ? 'span' : undefined}
         >
             Edit
         </Button>
