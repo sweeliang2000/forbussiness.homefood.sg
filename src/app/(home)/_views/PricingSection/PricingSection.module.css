@@ -28,6 +28,54 @@
     margin: 0 auto;
 }
 
+.billingToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1.75rem;
+    padding: 0.25rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.02));
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    gap: 0.15rem;
+}
+
+.toggleOption {
+    position: relative;
+    border: none;
+    background: transparent;
+    color: var(--on-primary-light2);
+    padding: 0.45rem 1.2rem;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.15s ease,
+        box-shadow 0.2s ease;
+    white-space: nowrap;
+}
+
+.toggleOption:hover {
+    transform: translateY(-1px);
+}
+
+.toggleOption.active {
+    background: #ffffff;
+    color: var(--accent-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.toggleBadge {
+    font-size: 0.75rem;
+    margin-left: 0.35rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+}
+
 .pricingGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -103,6 +151,15 @@
 .period {
     font-size: 1rem;
     color: var(--on-primary-light2);
+}
+
+.savings {
+    width: 100%;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #12b981; /* emerald-style green */
+    margin-top: 0.25rem;
+    font-weight: 500;
 }
 
 .outletSelect {

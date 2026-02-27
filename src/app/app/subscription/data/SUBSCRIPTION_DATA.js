@@ -1,69 +1,98 @@
+// Base monthly price for 1 outlet
+const BASE_MONTHLY_PRICE = 79.99;
+
+// Helper to build a subscription plan with correct pricing
+const buildPlan = ({
+    name,
+    lookupKey,
+    monthlyMultiplier,
+    isYearly,
+    outletsLabel,
+    maxUsers,
+    description,
+}) => {
+    const monthlyPrice = BASE_MONTHLY_PRICE * monthlyMultiplier;
+    const price = isYearly ? monthlyPrice * 11 : monthlyPrice; // Yearly = 11 months charged (1 month free)
+
+    return {
+        name,
+        lookup_key: lookupKey,
+        price: Number(price.toFixed(2)),
+        interval: isYearly ? 'year' : 'month',
+        features: [
+            { name: outletsLabel, included: true },
+            { name: `Max of ${maxUsers} users`, included: true },
+            { name: "Scan to win", included: true },
+            { name: "Stamp Loyalty Card", included: true },
+            { name: "Console management access", included: true },
+            { name: "Analytics", included: true },
+            { name: "Priority Support", included: monthlyMultiplier > 1 },
+            { name: "Custom Integration Support", included: monthlyMultiplier >= 3 }
+        ],
+        description,
+    };
+};
+
 export const SUBSCRIPTION_DATA = [
     // ============================
-    // 1 OUTLET – FREE PLAN
+    // MONTHLY PLANS
     // ============================
-    {
-        name: "1 Outlet",
-        lookup_key: "plan_1_outlet_free",
-        price: 0,
-        features: [
-            { name: "1 Outlet", included: true },
-            { name: "Max of 3 users", included: true },
-            { name: "Release to app", included: true },
-            { name: "Console management access", included: true },
-            { name: "Loyalty System (e.g., stamp)", included: true },
-            { name: "Analytics", included: false },
-            { name: "Priority Support", included: false },
-            { name: "Custom Integration Support", included: false }
-        ],
-        description: "A perfect starter plan for new businesses trying out Collbine."
-    },
+    buildPlan({
+        name: "1 Outlet (Monthly)",
+        lookupKey: "1_outlets",
+        monthlyMultiplier: 1, // 79.99
+        isYearly: false,
+        outletsLabel: "1 Outlet",
+        maxUsers: 3,
+        description: "Perfect for single-outlet businesses getting started with Collbine.",
+    }),
+    buildPlan({
+        name: "2–3 Outlets (Monthly)",
+        lookupKey: "2-3_outlets",
+        monthlyMultiplier: 2, // 79.99 × 2 = 159.98
+        isYearly: false,
+        outletsLabel: "2–3 Outlets",
+        maxUsers: 9,
+        description: "For merchants managing 2–3 outlets with shared analytics and team access.",
+    }),
+    buildPlan({
+        name: "4–6 Outlets (Monthly)",
+        lookupKey: "4-6_outlets",
+        monthlyMultiplier: 3, // 79.99 × 3 = 239.97
+        isYearly: false,
+        outletsLabel: "4–6 Outlets",
+        maxUsers: 18,
+        description: "Designed for growing brands running 4–6 outlets with advanced needs.",
+    }),
 
     // ============================
-    // 1 OUTLET + ANALYTICS
+    // YEARLY PLANS (11 MONTHS CHARGED)
     // ============================
-    {
-        name: "1 Outlet with Analytics",
-        lookup_key: "plan_1_outlet",
-        price: 29.99,   // Analytics add-on
-        features: [
-            { name: "1 Outlet", included: true },
-            { name: "Max of 3 users", included: true },
-            { name: "Release to app", included: true },
-            { name: "Console management access", included: true },
-            { name: "Loyalty System (e.g., stamp)", included: true },
-            { name: "Analytics", included: true },
-            { name: "Priority Support", included: false },
-            { name: "Custom Integration Support", included: false }
-        ],
-        description: "Ideal for single-outlet merchants who need analytics to grow faster."
-    },
-
-    // ============================
-    // OUTLET PLANS 2 – 10
-    // ============================
-    ...Array.from({ length: 9 }, (_, i) => {
-        const outlets = i + 2;                   // 2 → 10
-        const price = (outlets - 1) * 59.99;     // Only 1 free
-
-        return {
-            name: `${outlets} Outlets`,
-            lookup_key: `plan_${outlets}_outlets`,
-            price: Number(price.toFixed(2)),
-            features: [
-                { name: `${outlets} Outlets`, included: true },
-                { name: `Max of ${outlets * 3} users`, included: true },
-                { name: "Release to app", included: true },
-                { name: "Console management access", included: true },
-                { name: "Loyalty System (e.g., stamp)", included: true },
-                { name: "Analytics", included: true },
-                { name: "Priority Support", included: outlets >= 2 },
-                { name: "Custom Integration Support", included: outlets >= 5 }
-            ],
-            description:
-                outlets < 5
-                    ? "Built for growing businesses managing multiple outlets with analytics and team access."
-                    : "Enterprise-ready plan designed for multi-branch businesses requiring integrations and scaling."
-        };
-    })
+    buildPlan({
+        name: "1 Outlet (Yearly)",
+        lookupKey: "1_outlets_yearly",
+        monthlyMultiplier: 1, // 79.99 × 11 = 879.89
+        isYearly: true,
+        outletsLabel: "1 Outlet",
+        maxUsers: 3,
+        description: "Save with a yearly plan for your single outlet (1 month free).",
+    }),
+    buildPlan({
+        name: "2–3 Outlets (Yearly)",
+        lookupKey: "2-3_outlets_yearly",
+        monthlyMultiplier: 2, // 159.98 × 11 = 1,759.78
+        isYearly: true,
+        outletsLabel: "2–3 Outlets",
+        maxUsers: 9,
+        description: "Best value for 2–3 outlets on annual billing (1 month free).",
+    }),
+    buildPlan({
+        name: "4–6 Outlets (Yearly)",
+        lookupKey: "4-6_outlets_yearly",
+        monthlyMultiplier: 3, // 239.97 × 11 = 2,639.67
+        isYearly: true,
+        outletsLabel: "4–6 Outlets",
+        maxUsers: 18,
+        description: "Enterprise-style savings for 4–6 outlets with yearly billing (1 month free).",
+    }),
 ];

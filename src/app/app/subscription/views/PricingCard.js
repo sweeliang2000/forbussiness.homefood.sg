@@ -8,6 +8,7 @@ import { IoCheckmark, IoClose } from 'react-icons/io5';
 const PricingCard = ({
   title,
   price,
+  yearlyTotal,
   description,
   features,
   isPopular = false,
@@ -44,8 +45,17 @@ const PricingCard = ({
             ? 'Custom' 
             : (typeof price === 'number' ? `SGD $${price}` : price)}
         </span>
-        {price !== 'Free' && price !== null && selectedPlanType !== 'others' && selectedPlanType !== 'custom' && <span className={styles.period}>/month</span>}
+        {price !== 'Free' && price !== null && selectedPlanType !== 'others' && selectedPlanType !== 'custom' && (
+          <>
+            <span className={styles.period}>/month</span>
+          </>
+        )}
       </div>
+      {yearlyTotal && selectedPlanType === 'year' && (
+        <div className={styles.savings}>
+          (Save SGD {(yearlyTotal / 11).toFixed(2)} /year)
+        </div>
+      )}
       
       <p className={styles.description}>{description}</p>
 

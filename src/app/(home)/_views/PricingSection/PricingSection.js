@@ -6,85 +6,86 @@ import Abutton from '@/components/Buttons/Abutton';
 import { SUBSCRIPTION_DATA } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
 
 const PricingSection = () => {
-  const [selectedOutletOption, setSelectedOutletOption] = useState('5'); // For the Multiple Outlets card dropdown
-
-  // Get plan data for a specific number of outlets
-  const getPlanByOutlets = (outlets) => {
-    if (outlets === 'custom') return null;
-    const outletNum = parseInt(outlets);
-    // Find the plan in SUBSCRIPTION_DATA (outlets 2-10 are at indices 2-10)
-    return SUBSCRIPTION_DATA.find(plan => {
-      const planOutlets = parseInt(plan.name.match(/\d+/)?.[0]);
-      return planOutlets === outletNum;
-    });
-  };
+  // Billing interval toggle – Yearly selected by default
+  const [billingInterval, setBillingInterval] = useState('year'); // 'month' | 'year'
+  // Multiple Outlets dropdown – default to 4–6 outlets
+  const [selectedMultipleOption, setSelectedMultipleOption] = useState('4-6'); // '4-6' | '7+'
 
   // Transform SUBSCRIPTION_DATA into the format for display
   const plans = useMemo(() => {
-    // Keep the free plan (index 0)
-    const freePlanData = SUBSCRIPTION_DATA[0];
-    const freePlan = {
-      title: freePlanData.name,
-      price: 'Free',
-      description: freePlanData.description,
-      features: freePlanData.features,
-      lookupKey: freePlanData.lookup_key,
+    const isYearly = billingInterval === 'year';
+
+    const findPlan = (baseKey) => {
+      const lookupKey = isYearly ? `${baseKey}_yearly` : baseKey;
+      return SUBSCRIPTION_DATA.find((plan) => plan.lookup_key === lookupKey) || null;
+    };
+
+    const oneOutletPlan = findPlan('1_outlets');
+    const twoThreePlan = findPlan('2-3_outlets');
+    const fourSixPlan = findPlan('4-6_outlets');
+
+    const oneOutletCard = oneOutletPlan && {
+      title: oneOutletPlan.name,
+      price: oneOutletPlan.price,
+      description: oneOutletPlan.description,
+      features: oneOutletPlan.features,
+      lookupKey: oneOutletPlan.lookup_key,
       isPopular: false,
-      originalPrice: freePlanData.price
+      isContactOnly: false,
     };
 
-    // Keep the 1 Outlet with Analytics plan (index 1)
-    const analyticsPlanData = SUBSCRIPTION_DATA[1];
-    const analyticsPlan = {
-      title: analyticsPlanData.name,
-      price: analyticsPlanData.price,
-      description: analyticsPlanData.description,
-      features: analyticsPlanData.features,
-      lookupKey: analyticsPlanData.lookup_key,
-      isPopular: true,
-      originalPrice: analyticsPlanData.price
+    const twoThreeCard = twoThreePlan && {
+      title: twoThreePlan.name,
+      price: twoThreePlan.price,
+      description: twoThreePlan.description,
+      features: twoThreePlan.features,
+      lookupKey: twoThreePlan.lookup_key,
+      isPopular: true, // Highlight 2–3 outlets
+      isContactOnly: false,
     };
 
-    // Create custom card with dropdown
-    const selectedPlan = getPlanByOutlets(selectedOutletOption);
-    const customCard = {
+    const isSevenPlus = selectedMultipleOption === '7+';
+    const multipleOutletsCard = {
       title: 'Multiple Outlets',
-      price: selectedOutletOption === 'custom' ? null : (selectedPlan ? selectedPlan.price : null),
-      description: selectedPlan ? selectedPlan.description : 'For businesses with multiple outlets. Contact us for custom pricing.',
-      features: selectedPlan ? selectedPlan.features : [
-        { name: 'Release to app', included: true },
-        { name: 'Number of Outlets / Shops based on your needs', included: true },
-        { name: 'Number of users based on your needs', included: true },
-        { name: 'Console management access', included: true },
-        { name: 'Loyalty System (e.g., stamp)', included: true },
-        { name: 'Analytics', included: true },
-        { name: 'Highest Priority Support', included: true },
-        { name: 'Custom Integration Support', included: true }
-      ],
-      lookupKey: selectedPlan ? selectedPlan.lookup_key : null,
+      price: isSevenPlus ? null : (fourSixPlan ? fourSixPlan.price : null),
+      description: isSevenPlus
+        ? 'Running more than 6 outlets? Contact us for custom enterprise pricing.'
+        : fourSixPlan
+          ? fourSixPlan.description
+          : 'For businesses with multiple outlets. Contact us for custom pricing.',
+      features: fourSixPlan
+        ? fourSixPlan.features
+        : [
+            { name: 'Scan to win', included: true },
+            { name: 'Number of Outlets / Shops based on your needs', included: true },
+            { name: 'Number of users based on your needs', included: true },
+            { name: 'Stamp Loyalty Card', included: true },
+            { name: 'Console management access', included: true },
+            { name: 'Analytics', included: true },
+            { name: 'Highest Priority Support', included: true },
+            { name: 'Custom Integration Support', included: true },
+          ],
+      lookupKey: isSevenPlus || !fourSixPlan ? null : fourSixPlan.lookup_key,
       isCustom: true,
-      selectedOutletOption: selectedOutletOption,
+      isContactOnly: isSevenPlus,
+      selectedMultipleOption,
       outletOptions: [
-        ...Array.from({ length: 9 }, (_, i) => {
-          const outlets = i + 2; // 2 to 10
-          return { value: String(outlets), label: `${outlets} Outlets` };
-        }),
-        { value: 'custom', label: 'Custom' }
-      ]
+        { value: '4-6', label: '4 to 6 Outlets' },
+        { value: '7+', label: '7 or more Outlets' },
+      ],
     };
 
-    return [freePlan, analyticsPlan, customCard];
-  }, [selectedOutletOption]);
+    return [oneOutletCard, twoThreeCard, multipleOutletsCard].filter(Boolean);
+  }, [billingInterval, selectedMultipleOption]);
 
-  const handleOutletOptionChange = (value) => {
-    setSelectedOutletOption(value);
+  const handleMultipleOptionChange = (value) => {
+    setSelectedMultipleOption(value);
   };
 
   const handleGetStarted = (plan) => {
-    // For landing page, redirect to signup or subscription page
-    if (plan.isCustom && plan.selectedOutletOption === 'custom') {
-      // TODO: Add contact us logic
-      console.log('Contact us for custom pricing');
+    if (plan.isContactOnly) {
+      // TODO: Add real contact flow (modal / contact page)
+      console.log('Contact us for custom multi-outlet pricing');
       return;
     }
     // Redirect to signup or subscription page
@@ -99,6 +100,22 @@ const PricingSection = () => {
           <p className={styles.sectionSubtitle}>
             Choose the plan that works best for your business
           </p>
+          <div className={styles.billingToggle}>
+            <button
+              type="button"
+              className={`${styles.toggleOption} ${billingInterval === 'month' ? styles.active : ''}`}
+              onClick={() => setBillingInterval('month')}
+            >
+              Monthly
+            </button>
+            <button
+              type="button"
+              className={`${styles.toggleOption} ${billingInterval === 'year' ? styles.active : ''}`}
+              onClick={() => setBillingInterval('year')}
+            >
+              Yearly
+            </button>
+          </div>
         </div>
         <div className={styles.pricingGrid}>
           {plans.map((plan, index) => (
@@ -113,29 +130,34 @@ const PricingSection = () => {
               <div className={styles.pricingHeader}>
                 <h3>{plan.title}</h3>
                 <div className={styles.price}>
-                  {plan.price === 'Free' ? (
-                    <>
-                      <span className={styles.amount}>Free</span>
-                    </>
-                  ) : plan.price === null ? (
+                  {plan.price === null ? (
                     <>
                       <span className={styles.amount}>Custom</span>
                     </>
                   ) : (
                     <>
                       <span className={styles.currency}>SGD $</span>
-                      <span className={styles.amount}>{plan.price}</span>
+                      <span className={styles.amount}>
+                        {billingInterval === 'year'
+                          ? (plan.price / 12).toFixed(2)
+                          : plan.price}
+                      </span>
                       <span className={styles.period}>/month</span>
                     </>
                   )}
                 </div>
+                {billingInterval === 'year' && plan.price !== null && (
+                  <div className={styles.savings}>
+                    (Save SGD {(plan.price / 11).toFixed(2)} /year)
+                  </div>
+                )}
               </div>
 
               {plan.isCustom && (
                 <select 
                   className={styles.outletSelect}
-                  value={plan.selectedOutletOption}
-                  onChange={(e) => handleOutletOptionChange(e.target.value)}
+                  value={plan.selectedMultipleOption}
+                  onChange={(e) => handleMultipleOptionChange(e.target.value)}
                 >
                   {plan.outletOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -156,17 +178,17 @@ const PricingSection = () => {
               </ul>
 
               <Abutton 
-                href={plan.isCustom && plan.selectedOutletOption === 'custom' ? '#' : '/app/subscription'}
+                href={plan.isContactOnly ? '#' : '/app/subscription'}
                 variant="primary" 
                 size="medium"
                 onClick={(e) => {
-                  if (plan.isCustom && plan.selectedOutletOption === 'custom') {
+                  if (plan.isContactOnly) {
                     e.preventDefault();
                     handleGetStarted(plan);
                   }
                 }}
               >
-                {plan.isCustom && plan.selectedOutletOption === 'custom' ? 'Contact Us' : 'Get Started'}
+                {plan.isContactOnly ? 'Contact Us' : 'Get Started'}
               </Abutton>
             </div>
           ))}
