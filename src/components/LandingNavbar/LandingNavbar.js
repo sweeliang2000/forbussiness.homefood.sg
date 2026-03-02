@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import styles from './LandingNavbar.module.css';
 import CollbineForBusiness from '@/components/CollbineForBusiness/CollbineForBusiness';
 import Abutton from '@/components/Buttons/Abutton';
@@ -100,9 +101,9 @@ const LandingNavbar = () => {
 
                 <div className={styles.navContainer}>
                     {/* Logo */}
-                    <a className={styles.logo} href="/">
+                    <Link className={styles.logo} href="/">
                         <CollbineForBusiness />
-                    </a>
+                    </Link>
 
                     {/* Desktop Menu */}
                     <div className={styles.desktopMenu}>
