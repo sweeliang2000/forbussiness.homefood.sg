@@ -14,6 +14,8 @@ import { EMAIL_CONTACT_ADDRESS } from '@/utility/constantString';
 import ChecklistCell from '@/app/app/release/submission/_views/ChecklistCell';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
+import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
+import { SUBSCRIPTION_DATA } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
 
 export default function Content() {
   const [customerStats] = useState({
@@ -30,6 +32,13 @@ export default function Content() {
     thirdRequirementMet: false,
   });
   const [isLoadingChecklist, setIsLoadingChecklist] = useState(true);
+  const [hasPurchased, setHasPurchased] = useState(false);
+
+  useEffect(() => {
+    const lookupKey = getSubscriptionLookupKey();
+    const matchesPlan = SUBSCRIPTION_DATA.some(plan => plan.lookup_key === lookupKey);
+    setHasPurchased(matchesPlan);
+  }, []);
 
   useEffect(() => {
     const fetchChecklistStatus = async () => {
@@ -63,14 +72,17 @@ export default function Content() {
   return (
     <div className={styles.container}>
       {/* Purchase Banner */}
-      <div className={styles.banner}>
-        <div className={styles.bannerContent}>
-          <HiOutlineExclamationCircle className={styles.bannerIcon} />
-          <p className={styles.bannerText}>
-            You will need to purchase in order for you to release to Collbine up.
-          </p>
+      {!hasPurchased && (
+        <div className={styles.banner}>
+          <div className={styles.bannerContent}>
+            <HiOutlineExclamationCircle className={styles.bannerIcon} />
+            <p className={styles.bannerText}>
+              You will need to purchase in order for you to release to Collbine up.{' '}
+              <Link href="/app/subscription" className={styles.bannerLink}>Upgrade now</Link>
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Quick Links and Release Checklist Section */}
       <div className={styles.quickLinksAndChecklistSection}>
