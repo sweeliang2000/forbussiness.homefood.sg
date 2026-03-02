@@ -20,6 +20,7 @@ import { CHECKLIST_STATUS, RELEASE_STATUS, RELEASE_CONTACT, SEND_FOR_REVIEW, CAN
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import AlertModal from '@/components/AlertModal/AlertModal';
+import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 
 
 
@@ -35,6 +36,7 @@ dayjs.extend(timezone);
 const defaultStartDate = dayjs().add(2, "day").startOf("day");
 
 const SubmissionView = () => {
+    const [isUserSubscribed, setIsUserSubscribed] = useState(false);
     const [isBtnLoading, setIsBtnLoading] = useState(true);
     const [value, setValue] = useState(defaultStartDate);
     const [isLoading, setIsLoading] = useState(true);
@@ -247,6 +249,9 @@ const SubmissionView = () => {
     };
 
     useEffect(() => {
+        const storedLookupKey = getSubscriptionLookupKey();
+        setIsUserSubscribed(!!storedLookupKey);
+
         setIsLoading(true);
         setIsBtnLoading(true);
 
@@ -447,7 +452,8 @@ const SubmissionView = () => {
                 isError={isRejected ? true : isError}
                 errorMessage={isRejected ? getRejectErrorMessage() : errorMessage}
                 successMessage={getReleasedSuccessMessage()}
-                isDisabled={isPending}
+                isDisabled={isPending || !isUserSubscribed}
+                warningMessage={!isUserSubscribed ? <>You need an active subscription to submit a release. <Link href="/app/subscription">Please upgrade your plan.</Link></> : null}
                 infoMessage={getInfoMessage()}
                 showCancelButton={isPending}
                 onCancel={handleCancel}

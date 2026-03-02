@@ -24,6 +24,7 @@ export const HeaderSection = ({
     onCancel,
     buttonText = 'Save',
     successButtonText = 'Saved',
+    warningMessage,
     ...props
 }) => {
     const [showSuccessAlert, setShowSuccessAlert] = useState(true);
@@ -66,6 +67,15 @@ export const HeaderSection = ({
                 </div>
             </div>
             <div className={styles.description}>{description}</div>
+
+            {warningMessage && (
+                <Alert
+                    className={styles.alert}
+                    severity="warning"
+                >
+                    {warningMessage}
+                </Alert>
+            )}
 
             {infoMessage && (
                 <Alert
