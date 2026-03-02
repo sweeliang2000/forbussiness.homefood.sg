@@ -51,7 +51,8 @@ const AccountSetting = () => {
 
     useEffect(() => {
         const storedLookupKey = getSubscriptionLookupKey();
-        if (storedLookupKey) {
+        console.log('Stored lookup key:', storedLookupKey.lookup_key);
+        if (storedLookupKey.lookup_key) {
             setIsUserSubscripted(true);
         } else {
             setIsUserSubscripted(false);
