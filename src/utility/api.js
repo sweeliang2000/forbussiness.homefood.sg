@@ -55,17 +55,9 @@ const SHOP_SUBSCRIPTION_STORAGE_KEY = 'shopSubscriptionStatus';
 // Function to get shop subscription status with local storage caching
 export const getShopSubscriptionStatus = async () => {
   try {
-    // First, try to get from local storage
-    const cachedData = localStorage.getItem(SHOP_SUBSCRIPTION_STORAGE_KEY);
-    if (cachedData) {
-      const parsedData = JSON.parse(cachedData);
-      console.log('Retrieved shop subscription status from local storage:', parsedData);
-      return parsedData;
-    }
-
     // If not in local storage, make API call
     const response = await apiClient.get(SHOP_SUBSCRIPTION_STATUS);
-    const data = response.data;
+    const data = response.data.data;
     
     // Handle the case where lookup_key might be empty
     const subscriptionData = {
@@ -82,6 +74,7 @@ export const getShopSubscriptionStatus = async () => {
     
     // If API call fails, try to return cached data if available
     const cachedData = localStorage.getItem(SHOP_SUBSCRIPTION_STORAGE_KEY);
+    
     if (cachedData) {
       console.log('API failed, returning cached data:', JSON.parse(cachedData));
       return JSON.parse(cachedData);

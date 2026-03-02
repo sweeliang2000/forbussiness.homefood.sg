@@ -17,7 +17,7 @@ import { Submenu } from './submenu/submenu';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import CollbineForBusiness from '../../CollbineForBusiness/CollbineForBusiness';
-import { loyaltyInformation } from '@/utility/loyaltyInformation';
+import { SUBSCRIPTION_DATA } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
 import Shimmer from '../../Shimmer/Shimmer';
 
 
@@ -39,7 +39,7 @@ export default function Sidebar({
     const section = pathSegments[2]
     const subSection = pathSegments[3];
 
-    const subscriptionPlan = loyaltyInformation[subscriptionStatus];
+    const subscriptionPlan = SUBSCRIPTION_DATA.find(plan => plan.lookup_key === subscriptionStatus);
 
     const [sidebarMinimised, setSidebarMinimised] = useState(false);
     const [currentSelection, setCurrentSelection] = useState(undefined);
@@ -282,18 +282,18 @@ export default function Sidebar({
                         </div>
                     ) : (
                         <div>
-                            <p className={styles.title}>{subscriptionPlan?.plan_name || 'Free'}</p>
+                            <p className={styles.title}>{subscriptionPlan?.name || 'Free'}</p>
                             <p className={styles.cost}>
-                                {subscriptionPlan?.payment_type
-                                    ? `${subscriptionPlan.payment_type} Subscription`
+                                {subscriptionPlan?.interval
+                                    ? `${subscriptionPlan.interval === 'year' ? 'Yearly' : 'Monthly'} Subscription`
                                     : 'No-Cost ($0/Month)'}
                             </p>
                         </div>
                     )}
 
-                    {!isLoadingSubscription && (!subscriptionPlan?.plan_name) &&
+                    {!isLoadingSubscription &&
                         <Link href="/app/subscription" className={styles.button}>
-                            Upgrade
+                            {subscriptionPlan?.name ? 'Manage' : 'Upgrade'}
                         </Link>
                     }
                 </div>
