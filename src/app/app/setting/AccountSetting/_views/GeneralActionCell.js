@@ -1,4 +1,4 @@
-import { Button } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 import styles from './GeneralActionCell.module.css';
 
 const GeneralActionCell = ({
@@ -7,6 +7,7 @@ const GeneralActionCell = ({
     buttonTitle,
     onClick,
     last,
+    loading = false,
     type = 'primary' // 'primary' or 'danger'
 }) => (
     <div className={`${styles.cell} ${last ? '' : styles.underline }`}>
@@ -18,13 +19,14 @@ const GeneralActionCell = ({
         </div>
 
         <div>
-            <Button
+            <LoadingButton
                 variant='contained'
                 className={`${styles.button} ${type === 'danger' ? styles.dangerButton : styles.primaryButton}`}
                 onClick={onClick}
+                loading={loading}
             >
                 {buttonTitle}
-            </Button>
+            </LoadingButton>
         </div>
     </div>
 );

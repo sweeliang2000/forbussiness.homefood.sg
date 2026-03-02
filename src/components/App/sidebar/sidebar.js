@@ -19,6 +19,8 @@ import { usePathname } from 'next/navigation';
 import CollbineForBusiness from '../../CollbineForBusiness/CollbineForBusiness';
 import { SUBSCRIPTION_DATA } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
 import Shimmer from '../../Shimmer/Shimmer';
+import apiClient from '@/utility/api';
+import { CREATE_PORTAL_SESSION } from '@/utility/apiPaths';
 
 
 export default function Sidebar({
@@ -43,6 +45,19 @@ export default function Sidebar({
 
     const [sidebarMinimised, setSidebarMinimised] = useState(false);
     const [currentSelection, setCurrentSelection] = useState(undefined);
+    const [isLoadingPortal, setIsLoadingPortal] = useState(false);
+
+    const handleManageSubscription = async () => {
+        setIsLoadingPortal(true);
+        try {
+            const response = await apiClient.post(CREATE_PORTAL_SESSION);
+            const portalUrl = response.data.data.url;
+            window.location.href = portalUrl;
+        } catch (error) {
+            console.error('Failed to create portal session:', error);
+            setIsLoadingPortal(false);
+        }
+    };
 
     // Auto-expand submenu based on current path
     useEffect(() => {
@@ -291,11 +306,21 @@ export default function Sidebar({
                         </div>
                     )}
 
-                    {!isLoadingSubscription &&
-                        <Link href="/app/subscription" className={styles.button}>
-                            {subscriptionPlan?.name ? 'Manage' : 'Upgrade'}
-                        </Link>
-                    }
+                    {!isLoadingSubscription && (
+                        subscriptionPlan?.name ? (
+                            <button
+                                onClick={handleManageSubscription}
+                                disabled={isLoadingPortal}
+                                className={styles.button}
+                            >
+                                {isLoadingPortal ? <span className={styles.spinner} /> : 'Manage'}
+                            </button>
+                        ) : (
+                            <Link href="/app/subscription" className={styles.button}>
+                                Upgrade
+                            </Link>
+                        )
+                    )}
                 </div>
             </aside>
             {!isClose && <div className={styles.overlay} onClick={onClose} />}

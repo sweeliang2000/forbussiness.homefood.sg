@@ -27,6 +27,7 @@ export const CREATE_SCAN_TO_WIN_QR_CODE = '/api/data/scanToWinQRCode';
 export const DELETE_SCAN_TO_WIN_QR_CODE = '/api/data/scanToWinQRCode';
 
 export const CHECKOUT_SESSION_STRIPE = '/api/subscription/create-checkout-session';
+export const CREATE_PORTAL_SESSION = '/api/subscription/create-portal-session';
 export const SHOP_SUBSCRIPTION_STATUS = '/api/data/shopSubscriptionStatus';
 export const GET_LIST_OF_USERS = '/api/data/getListOfUsers';
 export const DELETE_INVITED_USER = '/api/data/invitedUser';
