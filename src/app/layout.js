@@ -1,4 +1,5 @@
 import './globals.css';
+import AuthGuard from '@/components/AuthGuard/AuthGuard';
 
 export const metadata = {
   title: 'Collbine for Business | Customisable Loyalty Systems in Singapore',
@@ -47,7 +48,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang='en'>
       <body>
-          {children}
+        <AuthGuard>{children}</AuthGuard>
       </body>
     </html>
   );
