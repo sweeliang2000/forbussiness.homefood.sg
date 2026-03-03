@@ -1,0 +1,442 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+.pageTitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.sectionLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  text-transform: uppercase;
+  margin: 0 0 12px 0;
+}
+
+/* Current plan card */
+.currentPlanCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.currentPlanHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.currentPlanInfo h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.currentPlanInfo .planDescription {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0 0 8px 0;
+}
+
+.currentPlanInfo .planPrice {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.seeAllBenefits {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #2563eb;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+
+.seeAllBenefits:hover {
+  text-decoration: underline;
+}
+
+.seeAllBenefits svg {
+  transition: transform 0.2s ease;
+}
+
+.seeAllBenefits.expanded svg {
+  transform: rotate(180deg);
+}
+
+.benefitsList {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0 0;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+}
+
+.benefitsList li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-bottom: 8px;
+}
+
+.benefitsList li:last-child {
+  margin-bottom: 0;
+}
+
+.benefitsList .checkIcon {
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+/* Upgrade options */
+.upgradeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.upgradeCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.upgradeCard.recommended {
+  border-left: 4px solid #2563eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.recommendedBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #2563eb;
+}
+
+.upgradeCardHeader {
+  margin-bottom: 12px;
+}
+
+.upgradeCardHeader h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.upgradeCardHeader .planDescription {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin: 0 0 8px 0;
+}
+
+.upgradeCardHeader .planPrice {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.upgradeCardFooter {
+  margin-top: auto;
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upgradeButton {
+  padding: 10px 20px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.upgradeButton:hover {
+  background: #1d4ed8;
+}
+
+.upgradeButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.contactUsButton {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #fff;
+  color: #2563eb;
+  border: 1px solid #2563eb;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  text-align: center;
+  text-decoration: none;
+}
+
+.contactUsButton:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
+/* Tabbed box: left nav + content */
+.tabbedBox {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 320px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+@media (max-width: 768px) {
+  .tabbedBox {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tabNav {
+  display: flex;
+  flex-direction: column;
+  background: #f9fafb;
+  border-right: 1px solid #e5e7eb;
+  padding: 12px 0;
+}
+
+@media (max-width: 768px) {
+  .tabNav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 12px 16px;
+  }
+}
+
+.tabButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #4b5563;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tabButton:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.tabButtonActive {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.tabButtonActive:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.tabButtonDanger:hover,
+.tabButton.tabButtonActive.tabButtonDanger {
+  color: #dc2626;
+}
+
+.tabButton.tabButtonActive.tabButtonDanger {
+  background: #fef2f2;
+}
+
+.tabButton.tabButtonActive.tabButtonDanger:hover {
+  background: #fee2e2;
+}
+
+.tabIcon {
+  flex-shrink: 0;
+  color: inherit;
+  opacity: 0.9;
+}
+
+.tabPanelContent {
+  padding: 0;
+  min-height: 280px;
+  overflow: auto;
+}
+
+.planAndUpgradeWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 24px 28px 28px;
+}
+
+.contentSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.billingToggle {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  background: #eef2ff;
+  gap: 4px;
+}
+
+.billingToggleButton {
+  border-radius: 999px;
+  border: none;
+  padding: 4px 12px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  color: #4b5563;
+}
+
+.billingToggleButtonActive {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.contentSection .currentPlanCard {
+  margin: 0;
+}
+
+.noPlan {
+  padding: 24px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.9375rem;
+}
+
+.noPlan a {
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.emptyState {
+  padding: 32px 24px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.9375rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+/* Benefits popup */
+.benefitsDialogPaper {
+  border-radius: 12px;
+}
+
+.benefitsDialogTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.benefitsDialogClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 6px;
+}
+
+.benefitsDialogClose:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.benefitsDialogContent {
+  padding: 16px 24px 8px;
+}
+
+.benefitsDialogActions {
+  padding: 16px 24px 20px;
+}
+
+.benefitsListInPopup {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.benefitsListInPopup li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9375rem;
+  color: #4b5563;
+  margin-bottom: 10px;
+}
+
+.benefitsListInPopup li:last-child {
+  margin-bottom: 0;
+}
+
+.benefitsListInPopup .checkIcon {
+  color: #16a34a;
+  flex-shrink: 0;
+}
