@@ -105,7 +105,7 @@ export default function Sidebar({
     return (
         <>
             <aside className={`${styles.sidebar} ${sidebarMinimised ? styles.close : ''} ${className}`}>
-                <ul className={styles.top}>
+                <ul className={`${styles.top} ${cancelDate ? styles.topWithBanner : ''}`}>
                     <li className={styles.logoLi}>
                         <Link className={styles.logoLink} href='/'>
                             <CollbineForBusiness />

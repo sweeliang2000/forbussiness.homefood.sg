@@ -27,6 +27,10 @@
     padding-bottom: 94px;
 }
 
+.sidebar .top.topWithBanner {
+    padding-bottom: 180px;
+}
+
 .sidebar > ul > li:first-child {
     top: 0;
     position: sticky;
@@ -285,6 +289,10 @@
     .sidebar .top {
         padding-top: 16px;
         padding-bottom: 128px;
+    }
+
+    .sidebar .top.topWithBanner {
+        padding-bottom: 200px;
     }
 
     .logoLi {
