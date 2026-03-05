@@ -58,7 +58,7 @@ export const SUBSCRIPTION_DATA = [
     buildPlan({
         name: "4–6 Outlets (Monthly)",
         lookupKey: "4-6_outlets",
-        monthlyMultiplier: 3, // 79.99 × 3 = 239.97
+        monthlyMultiplier: 4, // 79.99 × 4 = 319.96
         isYearly: false,
         outletsLabel: "4–6 Outlets",
         maxUsers: 18,
@@ -89,7 +89,7 @@ export const SUBSCRIPTION_DATA = [
     buildPlan({
         name: "4–6 Outlets (Yearly)",
         lookupKey: "4-6_outlets_yearly",
-        monthlyMultiplier: 3, // 239.97 × 11 = 2,639.67
+        monthlyMultiplier: 4, // 319.96 × 11 = 3,519.56
         isYearly: true,
         outletsLabel: "4–6 Outlets",
         maxUsers: 18,

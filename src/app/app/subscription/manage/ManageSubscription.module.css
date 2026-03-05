@@ -440,3 +440,99 @@
   color: #16a34a;
   flex-shrink: 0;
 }
+
+/* Upgrade preview modal */
+.upgradePreviewContent {
+  padding: 20px 24px;
+}
+
+.previewRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 14px 0;
+}
+
+.previewRow + .previewRow {
+  border-top: 1px solid #e5e7eb;
+}
+
+.previewLabel {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.previewAmount {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.previewExplanation {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  line-height: 1.5;
+  margin: 0 0 4px 0;
+}
+
+.buttonLoadingContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Upgrade status states */
+.upgradeStatusCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 0;
+  gap: 12px;
+}
+
+.upgradeStatusText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.successIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upgradeErrorBanner {
+  width: 100%;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #991b1b;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.portalLink {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+
+.portalLink:hover {
+  text-decoration: underline;
+}

@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, CircularProgress } from '@mui/material';
 import { IoCloseSharp } from 'react-icons/io5';
 import styles from './ManageSubscription.module.css';
 import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import { SUBSCRIPTION_DATA } from '../data/SUBSCRIPTION_DATA';
-import apiClient from '@/utility/api';
-import { CHECKOUT_SESSION_STRIPE } from '@/utility/apiPaths';
+import apiClient, { getShopSubscriptionStatus } from '@/utility/api';
+import { UPGRADE_SUBSCRIPTION, UPGRADE_STATUS, PREVIEW_UPGRADE_SUBSCRIPTION, REFRESH_USER_COOKIE, CREATE_PORTAL_SESSION } from '@/utility/apiPaths';
+import { setSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import { FaChevronDown, FaCheck } from 'react-icons/fa';
+import DialogPopup from '@/components/DialogPopup/DialogPopup';
 
 const PLAN_TIER = { '1_outlets': 1, '2-3_outlets': 2, '4-6_outlets': 3 };
 
@@ -18,6 +20,7 @@ function getTier(lookupKey) {
   const base = lookupKey.replace('_yearly', '');
   return PLAN_TIER[base] ?? 0;
 }
+
 
 function BenefitsList({ features, className }) {
   if (!features?.length) return null;
@@ -43,6 +46,9 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
   const [upgradeLoading, setUpgradeLoading] = useState(null);
   const [billingInterval, setBillingInterval] = useState('year'); // 'month' | 'year'
   const [benefitsPopup, setBenefitsPopup] = useState(null); // { planName, features } or null
+  const [upgradePreview, setUpgradePreview] = useState(null); // { planName, lookupKey, data } or null
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [upgradeStatus, setUpgradeStatus] = useState(null); // null | 'processing' | 'paid' | 'failed' | 'timeout'
 
   useEffect(() => {
     const key = getSubscriptionLookupKey();
@@ -74,17 +80,93 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
       .filter(Boolean);
   }, [billingInterval, currentLookupKey, currentTier, isDowngrade]);
 
-  const handleUpgrade = async (lookupKey) => {
+  const handleUpgrade = async (lookupKey, planName, interval) => {
     if (upgradeLoading) return;
     setUpgradeLoading(lookupKey);
     try {
-      const response = await apiClient.post(CHECKOUT_SESSION_STRIPE, { lookup_key: lookupKey });
-      const url = response.data?.data?.url;
-      if (url) window.location.href = url;
+      const response = await apiClient.post(PREVIEW_UPGRADE_SUBSCRIPTION, { lookup_key: lookupKey });
+      const previewData = response.data?.data;
+      if (previewData) {
+        setUpgradePreview({ planName, lookupKey, interval, data: previewData });
+      }
     } catch (err) {
-      console.error('Failed to start checkout:', err);
+      console.error('Failed to preview upgrade:', err);
     } finally {
       setUpgradeLoading(null);
+    }
+  };
+
+  const pollUpgradeStatus = () => {
+    const POLL_INTERVAL = 2000;
+    const MAX_DURATION = 5 * 60 * 1000; // 5 minutes
+    const start = Date.now();
+
+    return new Promise((resolve) => {
+      const poll = async () => {
+        if (Date.now() - start > MAX_DURATION) {
+          resolve('timeout');
+          return;
+        }
+        try {
+          const res = await apiClient.get(UPGRADE_STATUS);
+          const status = res.data?.data?.status;
+          if (status === 'paid') { resolve('paid'); return; }
+          if (status === 'failed') { resolve('failed'); return; }
+        } catch {
+          // Keep polling on network errors
+        }
+        setTimeout(poll, POLL_INTERVAL);
+      };
+      poll();
+    });
+  };
+
+  const refreshAfterUpgrade = async () => {
+    await apiClient.get(REFRESH_USER_COOKIE);
+    const subscriptionData = await getShopSubscriptionStatus();
+    if (subscriptionData?.lookup_key) {
+      setSubscriptionLookupKey(subscriptionData.lookup_key);
+      setCurrentLookupKey(subscriptionData.lookup_key);
+    }
+  };
+
+  const handleConfirmUpgrade = async (e) => {
+    e?.preventDefault();
+    if (!upgradePreview || confirmLoading) return;
+    setConfirmLoading(true);
+    setUpgradeStatus('processing');
+    try {
+      await apiClient.post(UPGRADE_SUBSCRIPTION, { lookup_key: upgradePreview.lookupKey });
+
+      const result = await pollUpgradeStatus();
+      setUpgradeStatus(result);
+
+      if (result === 'paid') {
+        await refreshAfterUpgrade();
+      }
+    } catch (err) {
+      console.error('Failed to upgrade:', err);
+      setUpgradeStatus('failed');
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
+
+  const handleGoToPortal = async () => {
+    try {
+      const response = await apiClient.post(CREATE_PORTAL_SESSION);
+      const portalUrl = response.data?.data?.url;
+      if (portalUrl) window.location.href = portalUrl;
+    } catch (err) {
+      console.error('Failed to open billing portal:', err);
+    }
+  };
+
+  const closeUpgradePreview = (value) => {
+    if (confirmLoading) return;
+    if (value === false || value === undefined) {
+      setUpgradePreview(null);
+      setUpgradeStatus(null);
     }
   };
 
@@ -173,10 +255,15 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
                     <button
                       type="button"
                       className={styles.upgradeButton}
-                      onClick={() => handleUpgrade(plan.lookup_key)}
+                      onClick={() => handleUpgrade(plan.lookup_key, plan.name, plan.interval)}
                       disabled={upgradeLoading !== null}
                     >
-                      {upgradeLoading === plan.lookup_key ? 'Redirecting…' : isDowngrade ? 'Downgrade' : 'Upgrade'}
+                      {upgradeLoading === plan.lookup_key ? (
+                        <span className={styles.buttonLoadingContent}>
+                          <CircularProgress size={16} color="inherit" />
+                          Loading…
+                        </span>
+                      ) : isDowngrade ? 'Downgrade' : 'Upgrade'}
                     </button>
                   </div>
                 </div>
@@ -232,6 +319,104 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Upgrade preview modal */}
+      <DialogPopup
+        title={
+          upgradeStatus === 'paid'
+            ? 'Upgrade Successful'
+            : upgradeStatus === 'failed' || upgradeStatus === 'timeout'
+              ? 'Upgrade Failed'
+              : `Upgrade to ${upgradePreview?.planName ?? ''}`
+        }
+        actionTitle={
+          upgradeStatus === 'paid'
+            ? 'Done'
+            : upgradeStatus === 'failed' || upgradeStatus === 'timeout'
+              ? 'Close'
+              : confirmLoading
+                ? 'Processing…'
+                : 'Confirm Upgrade'
+        }
+        actionDisabled={confirmLoading}
+        isOpen={upgradePreview !== null}
+        setIsOpen={closeUpgradePreview}
+        onSubmit={
+          upgradeStatus === 'paid'
+            ? (e) => { e.preventDefault(); window.location.reload(); }
+            : upgradeStatus === 'failed' || upgradeStatus === 'timeout'
+              ? (e) => { e.preventDefault(); closeUpgradePreview(); }
+              : handleConfirmUpgrade
+        }
+        maxWidth="sm"
+      >
+        <div className={styles.upgradePreviewContent}>
+          {/* Default: show pricing preview */}
+          {!upgradeStatus && upgradePreview?.data && (
+            <>
+              <div className={styles.previewRow}>
+                <span className={styles.previewLabel}>Pay today</span>
+                <span className={styles.previewAmount}>
+                  SGD {upgradePreview.data.amount_due_today_formatted}
+                </span>
+              </div>
+
+              <div className={styles.previewRow}>
+                <span className={styles.previewLabel}>
+                  Then per {upgradePreview.interval === 'year' ? 'year' : 'month'}
+                </span>
+                <span className={styles.previewAmount}>
+                  SGD {upgradePreview.data.new_recurring_amount_formatted}
+                </span>
+              </div>
+
+              <p className={styles.previewExplanation}>
+                The amount due today includes prorated credits for your current plan and charges for the new plan.
+              </p>
+            </>
+          )}
+
+          {/* Processing: waiting for payment confirmation */}
+          {upgradeStatus === 'processing' && (
+            <div className={styles.upgradeStatusCenter}>
+              <CircularProgress size={40} />
+              <p className={styles.upgradeStatusText}>Processing your upgrade…</p>
+              <p className={styles.previewExplanation}>This may take a moment. Please do not close this window.</p>
+            </div>
+          )}
+
+          {/* Success */}
+          {upgradeStatus === 'paid' && (
+            <div className={styles.upgradeStatusCenter}>
+              <div className={styles.successIcon}>
+                <FaCheck size={28} />
+              </div>
+              <p className={styles.upgradeStatusText}>Your plan has been upgraded successfully!</p>
+              <p className={styles.previewExplanation}>
+                You are now on the <strong>{upgradePreview?.planName}</strong> plan.
+              </p>
+            </div>
+          )}
+
+          {/* Failed or timeout */}
+          {(upgradeStatus === 'failed' || upgradeStatus === 'timeout') && (
+            <div className={styles.upgradeStatusCenter}>
+              <div className={styles.upgradeErrorBanner}>
+                {upgradeStatus === 'timeout'
+                  ? 'Payment confirmation timed out. Your payment may still be processing.'
+                  : 'Payment failed. Please update your payment method and try again.'}
+              </div>
+              <button
+                type="button"
+                className={styles.portalLink}
+                onClick={handleGoToPortal}
+              >
+                Update payment method →
+              </button>
+            </div>
+          )}
+        </div>
+      </DialogPopup>
     </div>
   );
 }

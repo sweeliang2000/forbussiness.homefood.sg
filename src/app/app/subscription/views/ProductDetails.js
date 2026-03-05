@@ -32,7 +32,7 @@ export default function ProductDetails() {
       description: oneOutletPlan.description,
       features: oneOutletPlan.features,
       lookupKey: oneOutletPlan.lookup_key,
-      isPopular: false,
+      isPopular: true,
       isCustom: false,
       selectedPlanType: billingInterval,
     };
@@ -44,7 +44,7 @@ export default function ProductDetails() {
       description: twoThreePlan.description,
       features: twoThreePlan.features,
       lookupKey: twoThreePlan.lookup_key,
-      isPopular: true, // Highlight 2–3 outlets
+      isPopular: false,
       isCustom: false,
       selectedPlanType: billingInterval,
     };

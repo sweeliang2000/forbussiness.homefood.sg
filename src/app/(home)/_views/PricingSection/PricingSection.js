@@ -30,7 +30,7 @@ const PricingSection = () => {
       description: oneOutletPlan.description,
       features: oneOutletPlan.features,
       lookupKey: oneOutletPlan.lookup_key,
-      isPopular: false,
+      isPopular: true,
       isContactOnly: false,
     };
 
@@ -40,7 +40,7 @@ const PricingSection = () => {
       description: twoThreePlan.description,
       features: twoThreePlan.features,
       lookupKey: twoThreePlan.lookup_key,
-      isPopular: true, // Highlight 2–3 outlets
+      isPopular: false,
       isContactOnly: false,
     };
 
