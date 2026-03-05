@@ -308,8 +308,38 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
 
       {/* Upgrade / Downgrade options */}
       <section className={styles.contentSection}>
+        <p className={styles.sectionLabel}>{isDowngrade ? 'Downgrade options' : 'Upgrade options'}</p>
+
+        {(cancelDate || downgradeDate) ? (
+          <div className={styles.lockedBanner}>
+            {cancelDate ? (
+              <p>
+                Your subscription is set to cancel on <strong>{cancelDate}</strong>. To change your plan, please reactivate your subscription first.
+              </p>
+            ) : (
+              <p>
+                A plan change is already scheduled for <strong>{downgradeDate}</strong>. To make a different change, please cancel the pending downgrade first.
+              </p>
+            )}
+            {cancelDate ? (
+              <button type="button" className={styles.lockedBannerLink} onClick={handleGoToPortal}>
+                Reactivate subscription →
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={styles.lockedBannerLink}
+                onClick={handleCancelSchedule}
+                disabled={cancelScheduleLoading}
+              >
+                {cancelScheduleLoading ? 'Cancelling…' : 'Cancel pending downgrade →'}
+              </button>
+            )}
+          </div>
+        ) : (
+        <>
         <div className={styles.sectionHeaderRow}>
-          <p className={styles.sectionLabel}>{isDowngrade ? 'Downgrade options' : 'Upgrade options'}</p>
+          <span />
           <div className={styles.billingToggle} aria-label="Billing interval">
             <button
               type="button"
@@ -402,6 +432,8 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
           <div className={styles.emptyState}>
             {"You're already on the lowest tier plan. There are no downgrade options available."}
           </div>
+        )}
+        </>
         )}
       </section>
 
