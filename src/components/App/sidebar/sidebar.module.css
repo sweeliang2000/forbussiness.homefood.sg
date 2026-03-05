@@ -163,14 +163,51 @@
 .subscriptionContainer {
     position: fixed;
     bottom: 0;
-    gap: 0;
     width: 236px;
     background-color: white;
     display: flex;
+    flex-direction: column;
+    border-top: 2px solid rgb(225, 225, 225);
+}
+
+.subscriptionRow {
+    display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 24px; 
-    border-top: 2px solid rgb(225, 225, 225);
+    padding: 12px 24px;
+}
+
+.cancelStrip {
+    background: #fef2f2;
+    padding: 8px 24px;
+    border-top: 1px solid #fecaca;
+}
+
+.cancelStrip p {
+    font-size: 13px;
+    color: #991b1b;
+    margin: 0 0 4px 0;
+    line-height: 1.4;
+}
+
+.cancelStripButton {
+    background: none;
+    border: none;
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+}
+
+.cancelStripButton:hover {
+    text-decoration: underline;
+}
+
+.cancelStripButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .subscriptionContainer .title {

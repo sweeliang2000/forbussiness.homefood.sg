@@ -20,7 +20,7 @@ import CollbineForBusiness from '../../CollbineForBusiness/CollbineForBusiness';
 import { SUBSCRIPTION_DATA } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
 import Shimmer from '../../Shimmer/Shimmer';
 import apiClient from '@/utility/api';
-import { CREATE_PORTAL_SESSION } from '@/utility/apiPaths';
+import { CREATE_PORTAL_SESSION, SUBSCRIPTION_END_DATE } from '@/utility/apiPaths';
 
 
 export default function Sidebar({
@@ -46,6 +46,23 @@ export default function Sidebar({
     const [sidebarMinimised, setSidebarMinimised] = useState(false);
     const [currentSelection, setCurrentSelection] = useState(undefined);
     const [isLoadingPortal, setIsLoadingPortal] = useState(false);
+    const [cancelDate, setCancelDate] = useState(null);
+
+    useEffect(() => {
+        const fetchEndDate = async () => {
+            try {
+                const res = await apiClient.get(SUBSCRIPTION_END_DATE);
+                const data = res.data?.data;
+                if (data?.cancel_at_period_end && data?.service_ends_at_formatted) {
+                    const date = new Date(data.service_ends_at_formatted);
+                    setCancelDate(date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+                }
+            } catch {
+                // Silently ignore
+            }
+        };
+        if (subscriptionStatus) fetchEndDate();
+    }, [subscriptionStatus]);
 
     const handleManageSubscription = async () => {
         setIsLoadingPortal(true);
@@ -280,46 +297,57 @@ export default function Sidebar({
                     </li>
                 </ul>
                 <div className={styles.subscriptionContainer}>
-                    {isLoadingSubscription ? (
-                        <div className={styles.shimmerContainer}>
-                            <Shimmer
-                                width="120px"
-                                height="16px"
-                                className={styles.titleShimmer}
-                                responsive={true}
-                            />
-                            <Shimmer
-                                width="100px"
-                                height="12px"
-                                className={styles.costShimmer}
-                                responsive={false}
-                            />
-                        </div>
-                    ) : (
-                        <div>
-                            <p className={styles.title}>{subscriptionPlan?.name || 'Free'}</p>
-                            <p className={styles.cost}>
-                                {subscriptionPlan?.interval
-                                    ? `${subscriptionPlan.interval === 'year' ? 'Yearly' : 'Monthly'} Subscription`
-                                    : 'No-Cost ($0/Month)'}
-                            </p>
-                        </div>
-                    )}
+                    <div className={styles.subscriptionRow}>
+                        {isLoadingSubscription ? (
+                            <div className={styles.shimmerContainer}>
+                                <Shimmer
+                                    width="120px"
+                                    height="16px"
+                                    className={styles.titleShimmer}
+                                    responsive={true}
+                                />
+                                <Shimmer
+                                    width="100px"
+                                    height="12px"
+                                    className={styles.costShimmer}
+                                    responsive={false}
+                                />
+                            </div>
+                        ) : (
+                            <div>
+                                <p className={styles.title}>{subscriptionPlan?.name || 'Free'}</p>
+                                <p className={styles.cost}>
+                                    {subscriptionPlan?.interval
+                                        ? `${subscriptionPlan.interval === 'year' ? 'Yearly' : 'Monthly'} Subscription`
+                                        : 'No-Cost ($0/Month)'}
+                                </p>
+                            </div>
+                        )}
 
-                    {!isLoadingSubscription && (
-                        subscriptionPlan?.name ? (
+                        {!isLoadingSubscription && (
+                            subscriptionPlan?.name ? (
+                                <Link href="/app/subscription/manage" className={styles.button}>
+                                    Manage
+                                </Link>
+                            ) : (
+                                <Link href="/app/subscription" className={styles.button}>
+                                    Upgrade
+                                </Link>
+                            )
+                        )}
+                    </div>
+                    {cancelDate && (
+                        <div className={styles.cancelStrip}>
+                            <p>Your service will end on {cancelDate}.</p>
                             <button
+                                type="button"
+                                className={styles.cancelStripButton}
                                 onClick={handleManageSubscription}
                                 disabled={isLoadingPortal}
-                                className={styles.button}
                             >
-                                {isLoadingPortal ? <span className={styles.spinner} /> : 'Manage'}
+                                {isLoadingPortal ? 'Loading…' : "Don\u2019t cancel subscription"}
                             </button>
-                        ) : (
-                            <Link href="/app/subscription" className={styles.button}>
-                                Upgrade
-                            </Link>
-                        )
+                        </div>
                     )}
                 </div>
             </aside>
