@@ -537,6 +537,37 @@
   text-decoration: underline;
 }
 
+/* Downgrade confirm input */
+.confirmInputWrap {
+  margin-top: 16px;
+}
+
+.confirmInputLabel {
+  display: block;
+  font-size: 0.8125rem;
+  color: #4b5563;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.confirmInput {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: #1f2937;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.confirmInput:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
 /* Cancellation end-date banner */
 .cancelBanner {
   display: flex;

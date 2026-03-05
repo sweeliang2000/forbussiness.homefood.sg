@@ -8,7 +8,7 @@ import styles from './ManageSubscription.module.css';
 import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import { SUBSCRIPTION_DATA } from '../data/SUBSCRIPTION_DATA';
 import apiClient, { getShopSubscriptionStatus } from '@/utility/api';
-import { UPGRADE_SUBSCRIPTION, UPGRADE_STATUS, PREVIEW_UPGRADE_SUBSCRIPTION, REFRESH_USER_COOKIE, CREATE_PORTAL_SESSION, SUBSCRIPTION_END_DATE } from '@/utility/apiPaths';
+import { UPGRADE_SUBSCRIPTION, UPGRADE_STATUS, PREVIEW_UPGRADE_SUBSCRIPTION, DOWNGRADE_SUBSCRIPTION, CANCEL_SCHEDULE, REFRESH_USER_COOKIE, CREATE_PORTAL_SESSION, SUBSCRIPTION_END_DATE } from '@/utility/apiPaths';
 import { setSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import { FaChevronDown, FaCheck } from 'react-icons/fa';
 import DialogPopup from '@/components/DialogPopup/DialogPopup';
@@ -43,6 +43,11 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
   const [upgradeStatus, setUpgradeStatus] = useState(null); // null | 'processing' | 'paid' | 'failed' | 'timeout'
   const [cancelDate, setCancelDate] = useState(null); // formatted date string or null
   const [downgradeDate, setDowngradeDate] = useState(null); // formatted date string or null
+  const [downgradePreview, setDowngradePreview] = useState(null); // { planName, lookupKey, price, interval } or null
+  const [downgradeConfirmText, setDowngradeConfirmText] = useState('');
+  const [downgradeLoading, setDowngradeLoading] = useState(false);
+  const [downgradeResult, setDowngradeResult] = useState(null); // { effectiveDate } or null
+  const [cancelScheduleLoading, setCancelScheduleLoading] = useState(false);
 
   useEffect(() => {
     const key = getSubscriptionLookupKey();
@@ -178,6 +183,57 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
     }
   };
 
+  const handleCancelSchedule = async () => {
+    if (cancelScheduleLoading) return;
+    setCancelScheduleLoading(true);
+    try {
+      await apiClient.post(CANCEL_SCHEDULE);
+      setDowngradeDate(null);
+      window.location.reload();
+    } catch (err) {
+      console.error('Failed to cancel scheduled downgrade:', err);
+    } finally {
+      setCancelScheduleLoading(false);
+    }
+  };
+
+  const handleDowngrade = (lookupKey, planName, plan) => {
+    setDowngradePreview({ planName, lookupKey, price: plan.price, interval: plan.interval });
+    setDowngradeConfirmText('');
+    setDowngradeResult(null);
+  };
+
+  const handleConfirmDowngrade = async (e) => {
+    e?.preventDefault();
+    if (!downgradePreview || downgradeLoading) return;
+    if (downgradeConfirmText.trim().toLowerCase() !== 'confirm') return;
+    setDowngradeLoading(true);
+    try {
+      const response = await apiClient.post(DOWNGRADE_SUBSCRIPTION, { lookup_key: downgradePreview.lookupKey });
+      const data = response.data?.data;
+      if (data) {
+        const effectiveDate = new Date(data.effective_at * 1000).toLocaleDateString('en-US', {
+          year: 'numeric', month: 'long', day: 'numeric',
+        });
+        setDowngradeResult({ effectiveDate });
+        setDowngradeDate(effectiveDate);
+      }
+    } catch (err) {
+      console.error('Failed to downgrade:', err);
+    } finally {
+      setDowngradeLoading(false);
+    }
+  };
+
+  const closeDowngradeDialog = (value) => {
+    if (downgradeLoading) return;
+    if (value === false || value === undefined) {
+      setDowngradePreview(null);
+      setDowngradeResult(null);
+      setDowngradeConfirmText('');
+    }
+  };
+
   const closeUpgradePreview = (value) => {
     if (confirmLoading) return;
     if (value === false || value === undefined) {
@@ -231,8 +287,13 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
                   <p>
                     Your plan will be updated on <strong>{downgradeDate}</strong>.
                   </p>
-                  <button type="button" className={styles.downgradeBannerLink} onClick={handleGoToPortal}>
-                    Cancel downgrade →
+                  <button
+                    type="button"
+                    className={styles.downgradeBannerLink}
+                    onClick={handleCancelSchedule}
+                    disabled={cancelScheduleLoading}
+                  >
+                    {cancelScheduleLoading ? 'Cancelling…' : 'Cancel downgrade →'}
                   </button>
                 </div>
               )}
@@ -291,7 +352,10 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
                     <button
                       type="button"
                       className={styles.upgradeButton}
-                      onClick={() => handleUpgrade(plan.lookup_key, plan.name, plan.interval)}
+                      onClick={() => isDowngrade
+                        ? handleDowngrade(plan.lookup_key, plan.name, plan)
+                        : handleUpgrade(plan.lookup_key, plan.name, plan.interval)
+                      }
                       disabled={upgradeLoading !== null}
                     >
                       {upgradeLoading === plan.lookup_key ? (
@@ -458,6 +522,102 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
                 Update payment method →
               </button>
             </div>
+          )}
+        </div>
+      </DialogPopup>
+
+      {/* Downgrade confirmation / result modal */}
+      <DialogPopup
+        title={downgradeResult ? 'Downgrade Scheduled' : `Downgrade to ${downgradePreview?.planName ?? ''}`}
+        actionTitle={
+          downgradeResult
+            ? 'Done'
+            : downgradeLoading
+              ? 'Processing…'
+              : 'Confirm Downgrade'
+        }
+        actionDisabled={
+          downgradeResult
+            ? false
+            : downgradeLoading || downgradeConfirmText.trim().toLowerCase() !== 'confirm'
+        }
+        isOpen={downgradePreview !== null}
+        setIsOpen={closeDowngradeDialog}
+        onSubmit={
+          downgradeResult
+            ? (e) => { e.preventDefault(); window.location.reload(); }
+            : handleConfirmDowngrade
+        }
+        maxWidth="sm"
+      >
+        <div className={styles.upgradePreviewContent}>
+          {/* Step 1: Confirm downgrade */}
+          {!downgradeResult && downgradePreview && (
+            <>
+              <div className={styles.previewRow}>
+                <span className={styles.previewLabel}>New plan</span>
+                <span className={styles.previewAmount}>{downgradePreview.planName}</span>
+              </div>
+
+              <div className={styles.previewRow}>
+                <span className={styles.previewLabel}>New price</span>
+                <span className={styles.previewAmount}>
+                  SGD {downgradePreview.price.toFixed(2)} / {downgradePreview.interval === 'year' ? 'year' : 'month'}
+                </span>
+              </div>
+
+              <p className={styles.previewExplanation}>
+                Your current plan will remain active until the end of your billing period. After that, you will be moved to the new plan.
+              </p>
+
+              <div className={styles.confirmInputWrap}>
+                <label className={styles.confirmInputLabel} htmlFor="downgrade-confirm">
+                  Type <strong>confirm</strong> to proceed with the downgrade
+                </label>
+                <input
+                  id="downgrade-confirm"
+                  type="text"
+                  className={styles.confirmInput}
+                  placeholder="Type &quot;confirm&quot; here"
+                  value={downgradeConfirmText}
+                  onChange={(e) => setDowngradeConfirmText(e.target.value)}
+                  autoComplete="off"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Step 2: Success */}
+          {downgradeResult && downgradePreview && (
+            <>
+              <div className={styles.upgradeStatusCenter}>
+                <div className={styles.successIcon}>
+                  <FaCheck size={28} />
+                </div>
+                <p className={styles.upgradeStatusText}>Downgrade scheduled successfully</p>
+              </div>
+
+              <div className={styles.previewRow}>
+                <span className={styles.previewLabel}>New plan</span>
+                <span className={styles.previewAmount}>{downgradePreview.planName}</span>
+              </div>
+
+              <div className={styles.previewRow}>
+                <span className={styles.previewLabel}>New price</span>
+                <span className={styles.previewAmount}>
+                  SGD {downgradePreview.price.toFixed(2)} / {downgradePreview.interval === 'year' ? 'year' : 'month'}
+                </span>
+              </div>
+
+              <div className={styles.previewRow}>
+                <span className={styles.previewLabel}>Effective on</span>
+                <span className={styles.previewAmount}>{downgradeResult.effectiveDate}</span>
+              </div>
+
+              <p className={styles.previewExplanation}>
+                Your current plan will remain active until {downgradeResult.effectiveDate}. After that, you will automatically switch to the new plan.
+              </p>
+            </>
           )}
         </div>
       </DialogPopup>
