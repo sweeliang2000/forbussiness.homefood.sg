@@ -8,7 +8,7 @@ import styles from './ManageSubscription.module.css';
 import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import { SUBSCRIPTION_DATA } from '../data/SUBSCRIPTION_DATA';
 import apiClient, { getShopSubscriptionStatus } from '@/utility/api';
-import { UPGRADE_SUBSCRIPTION, UPGRADE_STATUS, PREVIEW_UPGRADE_SUBSCRIPTION, REFRESH_USER_COOKIE, CREATE_PORTAL_SESSION } from '@/utility/apiPaths';
+import { UPGRADE_SUBSCRIPTION, UPGRADE_STATUS, PREVIEW_UPGRADE_SUBSCRIPTION, REFRESH_USER_COOKIE, CREATE_PORTAL_SESSION, SUBSCRIPTION_END_DATE } from '@/utility/apiPaths';
 import { setSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import { FaChevronDown, FaCheck } from 'react-icons/fa';
 import DialogPopup from '@/components/DialogPopup/DialogPopup';
@@ -41,10 +41,25 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
   const [upgradePreview, setUpgradePreview] = useState(null); // { planName, lookupKey, data } or null
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [upgradeStatus, setUpgradeStatus] = useState(null); // null | 'processing' | 'paid' | 'failed' | 'timeout'
+  const [cancelDate, setCancelDate] = useState(null); // formatted date string or null
 
   useEffect(() => {
     const key = getSubscriptionLookupKey();
     setCurrentLookupKey(key);
+
+    const fetchEndDate = async () => {
+      try {
+        const res = await apiClient.get(SUBSCRIPTION_END_DATE);
+        const data = res.data?.data;
+        if (data?.cancel_at_period_end && data?.service_ends_at_formatted) {
+          const date = new Date(data.service_ends_at_formatted);
+          setCancelDate(date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+        }
+      } catch {
+        // Silently ignore — banner just won't show
+      }
+    };
+    fetchEndDate();
   }, []);
 
   const currentPlan = useMemo(() => {
@@ -196,6 +211,16 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
                   See all benefits <FaChevronDown size={12} />
                 </button>
               </div>
+              {cancelDate && (
+                <div className={styles.cancelBanner}>
+                  <p>
+                    Your service will end on <strong>{cancelDate}</strong>.
+                  </p>
+                  <button type="button" className={styles.cancelBannerLink} onClick={handleGoToPortal}>
+                    Don&rsquo;t cancel subscription →
+                  </button>
+                </div>
+              )}
             </>
           ) : (
             <div className={styles.noPlan}>

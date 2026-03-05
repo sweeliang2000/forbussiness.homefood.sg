@@ -30,6 +30,7 @@ export const CHECKOUT_SESSION_STRIPE = '/api/subscription/create-checkout-sessio
 export const PREVIEW_UPGRADE_SUBSCRIPTION = '/api/subscription/preview-upgrade';
 export const UPGRADE_SUBSCRIPTION = '/api/subscription/upgrade';
 export const UPGRADE_STATUS = '/api/subscription/upgrade-status';
+export const SUBSCRIPTION_END_DATE = '/api/subscription/end-date';
 export const CREATE_PORTAL_SESSION = '/api/subscription/create-portal-session';
 export const SHOP_SUBSCRIPTION_STATUS = '/api/data/shopSubscriptionStatus';
 export const GET_LIST_OF_USERS = '/api/data/getListOfUsers';
