@@ -51,12 +51,8 @@ const AccountSetting = () => {
 
     useEffect(() => {
         const storedLookupKey = getSubscriptionLookupKey();
-        console.log('Stored lookup key:', storedLookupKey.lookup_key);
-        if (storedLookupKey.lookup_key) {
-            setIsUserSubscripted(true);
-        } else {
-            setIsUserSubscripted(false);
-        }
+        console.log('Stored lookup key:', storedLookupKey);
+        setIsUserSubscripted(!!storedLookupKey);
     }, []);
 
     // Fetch invitation status on component mount
