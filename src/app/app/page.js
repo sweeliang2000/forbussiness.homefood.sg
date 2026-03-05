@@ -9,7 +9,7 @@ import { HiOutlineSpeakerphone, HiOutlineExclamationCircle } from 'react-icons/h
 import { MdOutlineNotificationsNone, MdOutlineEmail, MdOutlineReportProblem } from 'react-icons/md';
 import { useState, useEffect } from 'react';
 import apiClient from '@/utility/api';
-import { CHECKLIST_STATUS } from '@/utility/apiPaths';
+import { CHECKLIST_STATUS, SUBSCRIPTION_END_DATE, CREATE_PORTAL_SESSION, CANCEL_SCHEDULE } from '@/utility/apiPaths';
 import { EMAIL_CONTACT_ADDRESS } from '@/utility/constantString';
 import ChecklistCell from '@/app/app/release/submission/_views/ChecklistCell';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
@@ -33,11 +33,33 @@ export default function Content() {
   });
   const [isLoadingChecklist, setIsLoadingChecklist] = useState(true);
   const [hasPurchased, setHasPurchased] = useState(false);
+  const [cancelDate, setCancelDate] = useState(null);
+  const [downgradeDate, setDowngradeDate] = useState(null);
+  const [cancelScheduleLoading, setCancelScheduleLoading] = useState(false);
 
   useEffect(() => {
     const lookupKey = getSubscriptionLookupKey();
     const matchesPlan = SUBSCRIPTION_DATA.some(plan => plan.lookup_key === lookupKey);
     setHasPurchased(matchesPlan);
+
+    if (matchesPlan) {
+      const fetchEndDate = async () => {
+        try {
+          const res = await apiClient.get(SUBSCRIPTION_END_DATE);
+          const data = res.data?.data;
+          const formatDate = (iso) => new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+          if (data?.cancel_at_period_end && data?.service_ends_at_formatted) {
+            setCancelDate(formatDate(data.service_ends_at_formatted));
+          }
+          if (data?.scheduled_downgrade_effective_at_formatted) {
+            setDowngradeDate(formatDate(data.scheduled_downgrade_effective_at_formatted));
+          }
+        } catch {
+          // Silently ignore
+        }
+      };
+      fetchEndDate();
+    }
   }, []);
 
   useEffect(() => {
@@ -69,6 +91,30 @@ export default function Content() {
     checklistStatus.customerHasAllRequiredField &&
     checklistStatus.thirdRequirementMet;
 
+  const handleGoToPortal = async () => {
+    try {
+      const response = await apiClient.post(CREATE_PORTAL_SESSION);
+      const portalUrl = response.data?.data?.url;
+      if (portalUrl) window.location.href = portalUrl;
+    } catch (err) {
+      console.error('Failed to open billing portal:', err);
+    }
+  };
+
+  const handleCancelSchedule = async () => {
+    if (cancelScheduleLoading) return;
+    setCancelScheduleLoading(true);
+    try {
+      await apiClient.post(CANCEL_SCHEDULE);
+      setDowngradeDate(null);
+      window.location.reload();
+    } catch (err) {
+      console.error('Failed to cancel scheduled downgrade:', err);
+    } finally {
+      setCancelScheduleLoading(false);
+    }
+  };
+
   return (
     <div className={styles.container}>
       {/* Purchase Banner */}
@@ -81,6 +127,35 @@ export default function Content() {
               <Link href="/app/subscription" className={styles.bannerLink}>Upgrade now</Link>
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Cancel subscription banner */}
+      {cancelDate && (
+        <div className={styles.cancelBanner}>
+          <p className={styles.cancelBannerText}>
+            Your service will end on <strong>{cancelDate}</strong>.
+          </p>
+          <button type="button" className={styles.cancelBannerButton} onClick={handleGoToPortal}>
+            Don&rsquo;t cancel subscription
+          </button>
+        </div>
+      )}
+
+      {/* Scheduled downgrade banner */}
+      {downgradeDate && !cancelDate && (
+        <div className={styles.downgradeBanner}>
+          <p className={styles.downgradeBannerText}>
+            Your plan will be updated on <strong>{downgradeDate}</strong>.
+          </p>
+          <button
+            type="button"
+            className={styles.downgradeBannerButton}
+            onClick={handleCancelSchedule}
+            disabled={cancelScheduleLoading}
+          >
+            {cancelScheduleLoading ? 'Cancelling…' : 'Cancel downgrade'}
+          </button>
         </div>
       )}
 
