@@ -146,7 +146,7 @@ export default function Content() {
       {downgradeDate && !cancelDate && (
         <div className={styles.downgradeBanner}>
           <p className={styles.downgradeBannerText}>
-            Your plan will be updated on <strong>{downgradeDate}</strong>.
+            Your plan will be updated or downgraded on <strong>{downgradeDate}</strong>.
           </p>
           <button
             type="button"

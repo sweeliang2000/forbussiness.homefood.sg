@@ -275,7 +275,7 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
               {cancelDate && (
                 <div className={styles.cancelBanner}>
                   <p>
-                    Your service will end on <strong>{cancelDate}</strong>.
+                    Your subscription will end on <strong>{cancelDate}</strong>.
                   </p>
                   <button type="button" className={styles.cancelBannerLink} onClick={handleGoToPortal}>
                     Don&rsquo;t cancel subscription →
@@ -285,7 +285,7 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
               {downgradeDate && !cancelDate && (
                 <div className={styles.downgradeBanner}>
                   <p>
-                    Your plan will be updated on <strong>{downgradeDate}</strong>.
+                    Your plan will be updated or downgraded on <strong>{downgradeDate}</strong>.
                   </p>
                   <button
                     type="button"
