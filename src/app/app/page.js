@@ -134,7 +134,7 @@ export default function Content() {
       {cancelDate && (
         <div className={styles.cancelBanner}>
           <p className={styles.cancelBannerText}>
-            Your service will end on <strong>{cancelDate}</strong>.
+            Your subscription will end on <strong>{cancelDate}</strong>.
           </p>
           <button type="button" className={styles.cancelBannerButton} onClick={handleGoToPortal}>
             Don&rsquo;t cancel subscription

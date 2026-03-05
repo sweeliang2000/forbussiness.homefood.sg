@@ -338,7 +338,7 @@ export default function Sidebar({
                     </div>
                     {cancelDate && (
                         <div className={styles.cancelStrip}>
-                            <p>Your service will end on {cancelDate}.</p>
+                            <p>Your subscription will end on {cancelDate}.</p>
                             <button
                                 type="button"
                                 className={styles.cancelStripButton}
