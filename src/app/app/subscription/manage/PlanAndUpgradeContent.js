@@ -42,6 +42,7 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [upgradeStatus, setUpgradeStatus] = useState(null); // null | 'processing' | 'paid' | 'failed' | 'timeout'
   const [cancelDate, setCancelDate] = useState(null); // formatted date string or null
+  const [downgradeDate, setDowngradeDate] = useState(null); // formatted date string or null
 
   useEffect(() => {
     const key = getSubscriptionLookupKey();
@@ -51,12 +52,16 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
       try {
         const res = await apiClient.get(SUBSCRIPTION_END_DATE);
         const data = res.data?.data;
+        const formatDate = (iso) => new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
         if (data?.cancel_at_period_end && data?.service_ends_at_formatted) {
-          const date = new Date(data.service_ends_at_formatted);
-          setCancelDate(date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+          setCancelDate(formatDate(data.service_ends_at_formatted));
+        }
+        if (data?.scheduled_downgrade_effective_at_formatted) {
+          setDowngradeDate(formatDate(data.scheduled_downgrade_effective_at_formatted));
         }
       } catch {
-        // Silently ignore — banner just won't show
+        // Silently ignore — banners just won't show
       }
     };
     fetchEndDate();
@@ -218,6 +223,16 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
                   </p>
                   <button type="button" className={styles.cancelBannerLink} onClick={handleGoToPortal}>
                     Don&rsquo;t cancel subscription →
+                  </button>
+                </div>
+              )}
+              {downgradeDate && !cancelDate && (
+                <div className={styles.downgradeBanner}>
+                  <p>
+                    Your plan will be updated on <strong>{downgradeDate}</strong>.
+                  </p>
+                  <button type="button" className={styles.downgradeBannerLink} onClick={handleGoToPortal}>
+                    Cancel downgrade →
                   </button>
                 </div>
               )}
