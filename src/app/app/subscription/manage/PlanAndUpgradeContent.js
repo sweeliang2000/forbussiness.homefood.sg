@@ -13,14 +13,6 @@ import { setSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import { FaChevronDown, FaCheck } from 'react-icons/fa';
 import DialogPopup from '@/components/DialogPopup/DialogPopup';
 
-const PLAN_TIER = { '1_outlets': 1, '2-3_outlets': 2, '4-6_outlets': 3 };
-
-function getTier(lookupKey) {
-  if (!lookupKey) return 0;
-  const base = lookupKey.replace('_yearly', '');
-  return PLAN_TIER[base] ?? 0;
-}
-
 
 function BenefitsList({ features, className }) {
   if (!features?.length) return null;
@@ -60,7 +52,7 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
     return SUBSCRIPTION_DATA.find((p) => p.lookup_key === currentLookupKey) || null;
   }, [currentLookupKey]);
 
-  const currentTier = useMemo(() => getTier(currentLookupKey), [currentLookupKey]);
+  const currentPrice = currentPlan?.price ?? 0;
 
   const visiblePlans = useMemo(() => {
     const isYearly = billingInterval === 'year';
@@ -72,13 +64,17 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
         const plan = SUBSCRIPTION_DATA.find((p) => p.lookup_key === lookupKey);
         if (!plan) return null;
         if (currentLookupKey && plan.lookup_key === currentLookupKey) return null;
-        const tier = getTier(plan.lookup_key);
-        if (isDowngrade && tier >= currentTier) return null;
-        if (!isDowngrade && tier <= currentTier) return null;
+
+        if (isDowngrade) {
+          if (plan.price >= currentPrice) return null;
+        } else {
+          if (plan.price <= currentPrice) return null;
+        }
+
         return plan;
       })
       .filter(Boolean);
-  }, [billingInterval, currentLookupKey, currentTier, isDowngrade]);
+  }, [billingInterval, currentLookupKey, currentPrice, isDowngrade]);
 
   const handleUpgrade = async (lookupKey, planName, interval) => {
     if (upgradeLoading) return;
@@ -268,6 +264,14 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
                   </div>
                 </div>
             ))}
+            {!isDowngrade && visiblePlans.length === 0 && (
+              <div className={styles.infoCard}>
+                <p>
+                  Looking to switch to a monthly plan? Monthly plans are priced lower than your current plan.
+                  Visit <Link href="/app/subscription/manage/downgrade">Downgrade Subscription</Link> to view available monthly options.
+                </p>
+              </div>
+            )}
             {!isDowngrade && (
               <div className={styles.upgradeCard}>
                 <div className={styles.upgradeCardHeader}>

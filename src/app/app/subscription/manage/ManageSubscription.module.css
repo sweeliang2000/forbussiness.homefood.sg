@@ -536,3 +536,24 @@
 .portalLink:hover {
   text-decoration: underline;
 }
+
+/* Info card for no upgrade options */
+.infoCard {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 20px 24px;
+}
+
+.infoCard p {
+  font-size: 0.875rem;
+  color: #1e40af;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.infoCard a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: underline;
+}
