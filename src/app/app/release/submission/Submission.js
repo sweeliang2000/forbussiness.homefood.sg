@@ -216,10 +216,9 @@ const SubmissionView = () => {
         clearError();
 
         try {
-            // Build payload - always use "immediate" as release_type
-            // The presence of release_datetime indicates scheduled release
+            // Build payload - use the publishing type selected by the user (immediate or schedule)
             const payload = {
-                release_type: 'immediate',
+                release_type: enteredValues.publishingType || 'immediate',
                 contact_details_name: enteredValues.name.trim(),
                 contact_details_role: enteredValues.role.trim(),
                 contact_details_email: enteredValues.email.trim(),
