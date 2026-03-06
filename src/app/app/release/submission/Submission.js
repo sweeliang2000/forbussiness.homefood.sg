@@ -61,7 +61,7 @@ const SubmissionView = () => {
     });
 
     const [enteredValues, setEnteredValues] = useState({
-        [PUBLISHING_TYPE]: 'auto',
+        [PUBLISHING_TYPE]: 'immediate',
         [NAME]: '',
         [ROLE]: '',
         [EMAIL]: '',
@@ -165,7 +165,7 @@ const SubmissionView = () => {
         }
 
         // Validate scheduled release datetime
-        if (enteredValues.publishingType === 'scheduled') {
+        if (enteredValues.publishingType === 'schedule') {
             if (!value || !value.isValid()) {
                 setDatetimeError(true);
                 const datetimeErrorMsg = 'Please select a date and time for scheduled release';
@@ -230,8 +230,8 @@ const SubmissionView = () => {
                 payload.contact_details_phone_number = enteredValues.phoneNumber.trim();
             }
 
-            // Add release_datetime if scheduled (in GST +8)
-            if (enteredValues.publishingType === 'scheduled' && value && value.isValid()) {
+            // Add release_datetime if schedule (in GST +8)
+            if (enteredValues.publishingType === 'schedule' && value && value.isValid()) {
                 // Convert to Asia/Singapore timezone (GST +8) and format as ISO string
                 const gstDateTime = value.tz('Asia/Singapore').format('YYYY-MM-DDTHH:mm:ss[+08:00]');
                 payload.release_datetime = gstDateTime;
@@ -304,12 +304,11 @@ const SubmissionView = () => {
                     const contactData = releaseContactResponse.data.data;
                     console.log('contactData:', contactData);
                     // Determine publishing type based on release_type and release_datetime
-                    let publishingType = 'auto'; // default
+                    let publishingType = 'immediate'; // default
                     if (contactData.release_datetime) {
-                        publishingType = 'scheduled';
+                        publishingType = 'schedule';
                     } else if (contactData.release_type === 'immediate') {
-                        // Could be 'auto' or 'manually', default to 'auto'
-                        publishingType = 'auto';
+                        publishingType = 'immediate';
                     }
                     
                     // Populate all form fields in a single update
@@ -503,9 +502,9 @@ const SubmissionView = () => {
 
                 <FullWidthDropdown
                     options={[
-                        { value: 'auto', title: 'Automatically release this version. (Once approved, it will be live on Collbine app immediately)' },
+                        { value: 'immediate', title: 'Automatically release this version. (Once approved, it will be live on Collbine app immediately)' },
                         // { value: 'manually', title: 'Manually release this version' },
-                        { value: 'scheduled', title: 'Schedule release this version for a later date' }
+                        { value: 'schedule', title: 'Schedule release this version for a later date' }
                     ]}
                     labelId='manage_publishing'
                     id='manage_publishing'
@@ -514,13 +513,13 @@ const SubmissionView = () => {
                     onChange={(event) => {
                         inputChangeHandler(PUBLISHING_TYPE, event.target.value);
                         // Clear datetime error when switching away from scheduled
-                        if (event.target.value !== 'scheduled') {
+                        if (event.target.value !== 'schedule') {
                             setDatetimeError(false);
                         }
                     }}
                 />
                 {
-                    enteredValues.publishingType === 'scheduled' &&
+                    enteredValues.publishingType === 'schedule' &&
                     <>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker
