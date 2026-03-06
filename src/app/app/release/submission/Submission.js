@@ -21,6 +21,8 @@ import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import AlertModal from '@/components/AlertModal/AlertModal';
 import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
+import { HiOutlineExclamationCircle } from 'react-icons/hi';
+import { SUBSCRIPTION_DATA } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
 
 
 
@@ -250,7 +252,8 @@ const SubmissionView = () => {
 
     useEffect(() => {
         const storedLookupKey = getSubscriptionLookupKey();
-        setIsUserSubscribed(!!storedLookupKey);
+        const matchesPlan = SUBSCRIPTION_DATA.some(plan => plan.lookup_key === storedLookupKey);
+        setIsUserSubscribed(matchesPlan);
 
         setIsLoading(true);
         setIsBtnLoading(true);
@@ -460,6 +463,18 @@ const SubmissionView = () => {
                 buttonText='Send'
                 successButtonText='Sent'
             />
+
+            {!isUserSubscribed && (
+                <div className={styles.banner}>
+                    <div className={styles.bannerContent}>
+                        <HiOutlineExclamationCircle className={styles.bannerIcon} />
+                        <p className={styles.bannerText}>
+                            You will need to purchase in order for you to release to Collbine up.{` `}
+                            <Link href="/app/subscription" className={styles.bannerLink}>Upgrade now</Link>
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {
                 isLoading ? 
