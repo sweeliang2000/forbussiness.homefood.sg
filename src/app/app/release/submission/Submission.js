@@ -488,8 +488,8 @@ const SubmissionView = () => {
 
                 <FullWidthDropdown
                     options={[
-                        { value: 'auto', title: 'Automatically release this version' },
-                        { value: 'manually', title: 'Manually release this version' },
+                        { value: 'auto', title: 'Automatically release this version. (Once approved, it will be live on Collbine app immediately)' },
+                        // { value: 'manually', title: 'Manually release this version' },
                         { value: 'scheduled', title: 'Schedule release this version for a later date' }
                     ]}
                     labelId='manage_publishing'
