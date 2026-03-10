@@ -367,7 +367,7 @@ const SubmissionView = () => {
         const dateText = formattedDate || 'the scheduled date';
         return (
             <>
-                Your release has been approved. It will be released on {dateText}. If you wish to change the date, cancel and re-send for approval. For any enquiry email support@collbine.com
+                Your release has been approved. It will be released on {dateText}. If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, email support@collbine.com
             </>
         );
     };

@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { useEffect, useState, useRef } from 'react';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import apiClient from '@/utility/api';
-import { OFFICIAL_BUSINESS_INFORMATION } from '@/utility/apiPaths';
+import { OFFICIAL_BUSINESS_INFORMATION, RELEASE_STATUS } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 
@@ -31,6 +31,7 @@ export default function StampSetup() {
   const [isBtnDisabled, setIsBtnDisabled] = useState(true);
   const [isUpdate, setIsUpdate] = useState(false);
   const [isEdit, setIsEdit] = useState(true);
+  const [releaseStatus, setReleaseStatus] = useState(null);
 
   const [enteredValues, setEnteredValues] = useState({
     [BUSINESS_NAME]: '',
@@ -240,6 +241,23 @@ export default function StampSetup() {
   
   }, []);
 
+  // Fetch release status to determine messaging when not editable
+  useEffect(() => {
+    const fetchReleaseStatus = async () => {
+      try {
+        const response = await apiClient.get(RELEASE_STATUS);
+        const data = response.data;
+        if (data && data.data && data.data.status) {
+          setReleaseStatus(data.data.status);
+        }
+      } catch {
+        // Silently ignore errors for release status; it is not critical for this page
+      }
+    };
+
+    fetchReleaseStatus();
+  }, []);
+
   // Update button disabled state based on unsaved changes
   useEffect(() => {
     if (!isEdit) {
@@ -363,12 +381,27 @@ export default function StampSetup() {
           </p>
         }
         loading={isBtnLoading}
-        isSuccess={isSubmissionSuccess}
+        isSuccess={isSubmissionSuccess || releaseStatus === 'approved_scheduled'}
         setShowError={setIsError}
         isError={isError}
         isDisabled={isBtnDisabled || !isEdit}
         errorMessage={errorMessage}
-        infoMessage={!isEdit ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.' : null}
+        successMessage={
+          !isEdit && releaseStatus === 'approved_scheduled'
+            ? (
+              <>
+                Your release has been approved. It will be released on the date you stated on{' '}
+                <Link href="/app/release/submission">Release Submission Page</Link>.
+                {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@collbine.com.
+              </>
+            )
+            : null
+        }
+        infoMessage={
+          !isEdit && releaseStatus !== 'approved_scheduled'
+            ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.'
+            : null
+        }
       />
 
       {
@@ -402,7 +435,6 @@ export default function StampSetup() {
                 title='Unique Entity Number (UEN)*'
                 subtitle='The Unique Entity Number (UEN) is a 9- or 10-digit number issued by the Accounting and Corporate Regulatory Authority (ACRA) for registered businesses in Singapore.'
                 placeholder='McDonalds'
-                type='number'
                 id={UEN}
                 name={UEN}
                 helperText={helperText.uen}
