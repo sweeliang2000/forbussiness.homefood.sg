@@ -51,6 +51,13 @@
     margin-top: 12px;
 }
 
+/* Cancel Release popup content (matches redeemable DialogPopup design) */
+.cancelReleaseContent {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+}
+
 /* Purchase Banner (mirrors main app dashboard) */
 .banner {
     background: linear-gradient(135deg, #0E46A3 0%, #0d3d91 100%);

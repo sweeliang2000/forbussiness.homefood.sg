@@ -21,6 +21,7 @@ export const HeaderSection = ({
     showButton = true,
     infoMessage,
     showCancelButton = false,
+    cancelButtonText = 'Cancel Review',
     onCancel,
     buttonText = 'Save',
     successButtonText = 'Saved',
@@ -47,7 +48,7 @@ export const HeaderSection = ({
                             onClick={onCancel}
                             style={{ textTransform: 'none' }}
                         >
-                            Cancel Review
+                            {cancelButtonText}
                         </Button>
                     )}
                     {showButton && (

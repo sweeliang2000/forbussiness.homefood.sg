@@ -16,6 +16,7 @@ const AlertModal = ({
   onAction,
   actionButtonText = 'Confirm',
   showActionButton = true,
+  actionDisabled = false,
   type = 'primary', // 'error' or 'primary'
   sx,
 }) => {
@@ -59,6 +60,7 @@ const AlertModal = ({
               variant="contained"
               color={type}
               className={styles.button}
+              disabled={actionDisabled}
             >
               {actionButtonText}
             </Button>
