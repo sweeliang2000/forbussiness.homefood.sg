@@ -15,7 +15,7 @@ import { clamp } from '@/utility/numbers';
 import EditStampStep from './_views/EditStampStep';
 import StampOnBoarding from '../StampOnboarding/StampOnboarding';
 import apiClient from '@/utility/api';
-import { STAMP_MANAGEMENT } from '@/utility/apiPaths';
+import { STAMP_MANAGEMENT, RELEASE_STATUS } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import MDEditor, { commands } from '@uiw/react-md-editor';
@@ -71,6 +71,7 @@ export default function StampSetup() {
   const [isBtnDisabled, setIsBtnDisabled] = useState(true);
   const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
   const [isEdit, setIsEdit] = useState(true);
+  const [releaseStatus, setReleaseStatus] = useState(null);
 
   // Toggle state
   const [isEnabled, setIsEnabled] = useState(false);
@@ -248,6 +249,23 @@ export default function StampSetup() {
   useEffect(() => {
     fetchStampManagementData();
   }, [fetchStampManagementData]);
+
+  // Fetch release status to determine messaging when not editable
+  useEffect(() => {
+    const fetchReleaseStatus = async () => {
+      try {
+        const response = await apiClient.get(RELEASE_STATUS);
+        const data = response.data;
+        if (data && data.data && data.data.status) {
+          setReleaseStatus(data.data.status);
+        }
+      } catch {
+        // Silently ignore errors for release status; it is not critical for this page
+      }
+    };
+
+    fetchReleaseStatus();
+  }, []);
 
   // Check if there are unsaved changes
   const checkUnsavedChanges = () => {
@@ -775,11 +793,26 @@ export default function StampSetup() {
               </p>
             }
             loading={isBtnLoading}
-            isSuccess={isSubmissionSuccess}
+            isSuccess={isSubmissionSuccess || releaseStatus === 'approved_scheduled'}
             isError={isError}
             isDisabled={isBtnDisabled || !isEdit}
             errorMessage={errorMessage}
-            infoMessage={!isEdit ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.' : null}
+            successMessage={
+              !isEdit && releaseStatus === 'approved_scheduled'
+                ? (
+                    <>
+                      Your release has been approved. It will be released on the date you stated on{' '}
+                      <Link href="/app/release/submission">Release Submission Page</Link>.
+                      {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@collbine.com.
+                    </>
+                  )
+                : null
+            }
+            infoMessage={
+              !isEdit && releaseStatus !== 'approved_scheduled'
+                ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.'
+                : null
+            }
           />
         )}
 
