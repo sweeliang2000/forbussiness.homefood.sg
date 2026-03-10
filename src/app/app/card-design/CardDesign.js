@@ -8,7 +8,7 @@ import { MuiColorInput } from 'mui-color-input'
 import { useEffect, useState, useRef, useCallback } from 'react';
 import StampCard from '@/components/StampCard/StampCard';
 import { Button, Slider } from '@mui/material';
-import { CARD_DESIGN_SETTING, STAMP_MANAGEMENT } from '@/utility/apiPaths';
+import { CARD_DESIGN_SETTING, STAMP_MANAGEMENT, RELEASE_STATUS } from '@/utility/apiPaths';
 import apiClient from '@/utility/api';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
@@ -27,6 +27,7 @@ const CardDesign = () => {
     const [isBtnLoading, setIsBtnLoading] = useState(false);
     const [isBtnDisabled, setIsBtnDisabled] = useState(true);
     const [isEdit, setIsEdit] = useState(true);
+    const [releaseStatus, setReleaseStatus] = useState(null);
 
     const [cardBackground, setCardBackgroundColor] = useState('#ffffff')
     const [cardTitleColor, setCardTitleColor] = useState('#000000')
@@ -277,6 +278,23 @@ const CardDesign = () => {
         fetchAllData();
     }, [fetchAllData]);
 
+    // Fetch release status to determine messaging when not editable
+    useEffect(() => {
+        const fetchReleaseStatus = async () => {
+            try {
+                const response = await apiClient.get(RELEASE_STATUS);
+                const data = response.data;
+                if (data && data.data && data.data.status) {
+                    setReleaseStatus(data.data.status);
+                }
+            } catch {
+                // Silently ignore errors for release status; it is not critical for this page
+            }
+        };
+
+        fetchReleaseStatus();
+    }, []);
+
     // Check if there are unsaved changes
     const checkUnsavedChanges = () => {
         if (!isEdit) return false; // No unsaved changes if not in edit mode
@@ -402,12 +420,27 @@ const CardDesign = () => {
                         </p>
                     }
                     loading={isBtnLoading}
-                    isSuccess={isSubmissionSuccess}
+                    isSuccess={isSubmissionSuccess || releaseStatus === 'approved_scheduled'}
                     setShowError={setIsError}
                     isError={isError}
                     isDisabled={isBtnDisabled || !isEdit}
                     errorMessage={errorMessage}
-                    infoMessage={!isEdit ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.' : null}
+                    successMessage={
+                        !isEdit && releaseStatus === 'approved_scheduled'
+                            ? (
+                                <>
+                                    Your release has been approved. It will be released on the date you stated on{' '}
+                                    <Link href="/app/release/submission">Release Submission Page</Link>.
+                                    {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@collbine.com.
+                                </>
+                            )
+                            : null
+                    }
+                    infoMessage={
+                        !isEdit && releaseStatus !== 'approved_scheduled'
+                            ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.'
+                            : null
+                    }
                 />
             )}
 

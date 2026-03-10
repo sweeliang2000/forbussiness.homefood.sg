@@ -8,7 +8,7 @@ import { useSearchParams } from 'next/navigation';
 import RewardsLists from './_views/RewardsLists';
 import AlertModal from '@/components/AlertModal/AlertModal';
 import apiClient from '@/utility/api';
-import { REWARDS, CREATE_REWARD, UPDATE_REWARD, DELETE_REWARD, ARCHIVE_REWARD } from '@/utility/apiPaths';
+import { REWARDS, CREATE_REWARD, UPDATE_REWARD, DELETE_REWARD, ARCHIVE_REWARD, RELEASE_STATUS } from '@/utility/apiPaths';
 
 const VALID_REWARD_TYPES = ['stampReward', 'scanToWinReward'];
 
@@ -22,6 +22,8 @@ const Rewards = () => {
     const [rewards, setRewards] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isEdit, setIsEdit] = useState(true);
+    const [releaseStatus, setReleaseStatus] = useState(null);
 
     const fetchRewards = async () => {
         try {
@@ -33,6 +35,8 @@ const Rewards = () => {
             const response = await apiClient.get(REWARDS, { params });
             console.log('Rewards response:', response.data);
             const data = response.data.data;
+            const isEditValue = data.isEdit;
+            setIsEdit(isEditValue !== undefined ? isEditValue : true);
             const apiRewards = data.rewards;
             const currently_stamp = data.currently_stamp || [];
             const currently_scanReward = data.currently_scanReward;
@@ -105,6 +109,23 @@ const Rewards = () => {
     useEffect(() => {
         fetchRewards();
     }, [rewardTypeFromUrl]);
+
+    // Fetch release status to determine messaging when not editable
+    useEffect(() => {
+        const fetchReleaseStatus = async () => {
+            try {
+                const response = await apiClient.get(RELEASE_STATUS);
+                const data = response.data;
+                if (data && data.data && data.data.status) {
+                    setReleaseStatus(data.data.status);
+                }
+            } catch {
+                // Silently ignore errors for release status; it is not critical for this page
+            }
+        };
+
+        fetchReleaseStatus();
+    }, []);
 
     const onCardSelected = (reward) => {
         setSelectedReward(reward)
@@ -223,6 +244,8 @@ const Rewards = () => {
                     setSelectedReward(null)
                     setIsCreateNewRewardOpen(true)
                 }}
+                isEdit={isEdit}
+                releaseStatus={releaseStatus}
             />
 
             <CreateRewardPopup
