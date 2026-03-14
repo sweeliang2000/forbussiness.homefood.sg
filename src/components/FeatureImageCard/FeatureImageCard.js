@@ -18,7 +18,7 @@ const FeatureImageCard = ({ image, title, description, imageWidth = 420, imageHe
                 )}
                 <div className={styles.textContent}>
                     {title && <h3 className={styles.title}>{title}</h3>}
-                    {description && <p className={styles.description}>{description}</p>}
+                    {description && <p className={styles.description} dangerouslySetInnerHTML={{ __html: description }} />}
                 </div>
             </div>
         </div>

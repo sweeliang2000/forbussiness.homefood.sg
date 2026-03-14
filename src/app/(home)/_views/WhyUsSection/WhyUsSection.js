@@ -8,21 +8,21 @@ const WhyUsSection = () => {
     const features = [
         {
             image: "/images/pages/landing/hero/card_image.png",
-            title: "Customizable Loyalty Systems",
-            description: "Create unique reward programs tailored to your business needs with flexible point systems and rewards.",
+            title: "Discover",
+            description: "Make your loyalty and offers easy to find. When customers know where to look, they come back.",
             icon: "🎯"
         },
         {
             image: "/images/pages/landing/hero/card_image.png",
-            title: "Customer Engagement",
-            description: "Keep customers coming back with engaging stamp cards, points, and personalized rewards.",
-            icon: "💝"
+            title: "Scan to Win",
+            description: "Random rewards work like a blind box. Customers want to come back to see what they get next.",
+            icon: "🎁"
         },
         {
             image: "/images/pages/landing/hero/card_image.png",
-            title: "Easy Management",
-            description: "Manage your loyalty program effortlessly with our intuitive dashboard and analytics.",
-            icon: "📊"
+            title: "Centralised Loyalty Card",
+            description: "One place for stamps and rewards. <strong>No forgotten reward systems, no lost cards.</strong>",
+            icon: "📋"
         }
     ];
 
@@ -33,9 +33,9 @@ const WhyUsSection = () => {
                     <Badge variant="blue">Why Choose Collbine?</Badge>
 
                     <div className={styles.sectionContent}>
-                        <h2 className={styles.sectionTitle}>Discover. Collect. Redeem. Repeat.</h2>
+                        <h2 className={styles.sectionTitle}>No More Forgotten Reward Systems.</h2>
                         <p className={styles.sectionSubtitle}>
-                            Most loyalty systems are forgotten because customers have nowhere to find them. We help make your loyalty system discoverable — so customers always come back.
+                            Discover. Scan to win with random rewards that bring customers back. One centralised loyalty card so stamps and rewards are never lost.
                         </p>
                     </div>
                 </div>
@@ -71,7 +71,7 @@ const WhyUsSection = () => {
                         </div>
                     </div>
                     <div className={styles.stickyNote}>
-                        <span>No more forgotten loyalty programs.</span>
+                        <span>No more forgotten reward systems.</span>
                     </div>
                 </div>
             </div>
