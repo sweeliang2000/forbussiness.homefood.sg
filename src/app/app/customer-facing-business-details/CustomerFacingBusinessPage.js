@@ -380,6 +380,7 @@ const CustomerFacingBusinessPage = () => {
         
         const hasChanges = checkUnsavedChanges();
         setIsBtnDisabled(!hasChanges);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- checkUnsavedChanges derived from deps; omit to avoid re-running every keystroke
     }, [enteredValues, thumbnailImages, bannerImages, locations, isEdit]);
 
     // Handle browser refresh/close/back button warning
@@ -460,6 +461,7 @@ const CustomerFacingBusinessPage = () => {
             window.removeEventListener('popstate', handlePopState);
             document.removeEventListener('click', handleLinkClick, true);
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- checkUnsavedChanges derived from deps; omit to avoid re-running every keystroke
     }, [enteredValues, thumbnailImages, bannerImages, locations, isEdit]);
 
     return (

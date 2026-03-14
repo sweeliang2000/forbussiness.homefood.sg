@@ -3,7 +3,7 @@ import { ContentCard } from '@/components/ContentCard/ContentCard';
 import styles from './rewards.module.css';
 import RewardsHeader from './_views/RewardsHeader';
 import CreateRewardPopup from './_views/CreateRewardPopup';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import RewardsLists from './_views/RewardsLists';
 import AlertModal from '@/components/AlertModal/AlertModal';
@@ -25,7 +25,7 @@ const Rewards = () => {
     const [isEdit, setIsEdit] = useState(true);
     const [releaseStatus, setReleaseStatus] = useState(null);
 
-    const fetchRewards = async () => {
+    const fetchRewards = useCallback(async () => {
         try {
             setLoading(true);
             const params =
@@ -104,11 +104,11 @@ const Rewards = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [rewardTypeFromUrl]);
 
     useEffect(() => {
         fetchRewards();
-    }, [rewardTypeFromUrl]);
+    }, [fetchRewards]);
 
     // Fetch release status to determine messaging when not editable
     useEffect(() => {

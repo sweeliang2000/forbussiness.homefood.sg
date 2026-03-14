@@ -10,7 +10,7 @@ const StatementSection = () => {
                         <Badge variant="blue">Proved by Experts</Badge>
                         <h2>Loyalty Keeps Customers Coming Back. Promotions Drive Discovery and Spending.</h2>
                         <p>
-                            Nearly 47% of shoppers buy more or try new brands when redeeming promotions, showing how incentives influence purchase behaviour. That's why effective retail strategies combine promotions that attract customers with loyalty systems that keep them returning. <strong>Collbine does both: scan-to-win to bring them in and drive spend, and loyalty to turn visitors into regulars.</strong>
+                            Nearly 47% of shoppers buy more or try new brands when redeeming promotions, showing how incentives influence purchase behaviour. That&apos;s why effective retail strategies combine promotions that attract customers with loyalty systems that keep them returning. <strong>Collbine does both: scan-to-win to bring them in and drive spend, and loyalty to turn visitors into regulars.</strong>
                         </p>
                     </div>
 

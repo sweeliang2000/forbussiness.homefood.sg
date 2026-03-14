@@ -3,7 +3,7 @@ import styles from './AddNewReward.module.css';
 import RewardCard from '@/app/app/redeemable/rewards/_views/RewardCard';
 import DialogPopup from '@/components/DialogPopup/DialogPopup';
 import CreateRewardPopup from '@/app/app/redeemable/rewards/_views/CreateRewardPopup';
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import apiClient from '@/utility/api';
 import { REWARDS, CREATE_REWARD } from '@/utility/apiPaths';
 import { Button } from '@mui/material';
@@ -22,7 +22,7 @@ const AddNewReward = ({
     const [isCreateRewardOpen, setIsCreateRewardOpen] = useState(false);
     const [selectedReward, setSelectedReward] = useState(null);
 
-    const fetchRewards = async () => {
+    const fetchRewards = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -75,7 +75,7 @@ const AddNewReward = ({
         } finally {
             setLoading(false);
         }
-    };
+    }, [restrictToScanToWin]);
 
     useEffect(() => {
         if (isOpen) {
@@ -85,7 +85,7 @@ const AddNewReward = ({
                 setSelected(null);
             }
         }
-    }, [isOpen, currentReward]);
+    }, [isOpen, currentReward, fetchRewards]);
 
     // Set selected reward when rewards are loaded and currentReward is provided
     useEffect(() => {

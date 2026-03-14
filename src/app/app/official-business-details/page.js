@@ -267,6 +267,7 @@ export default function StampSetup() {
     
     const hasChanges = hasUnsavedChanges();
     setIsBtnDisabled(!hasChanges);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- hasUnsavedChanges derived from enteredValues/isEdit; omit to avoid re-running every keystroke
   }, [enteredValues, isEdit]);
 
   // Handle browser refresh/close/back button warning

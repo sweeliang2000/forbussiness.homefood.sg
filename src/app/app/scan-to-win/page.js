@@ -167,6 +167,7 @@ export default function ScanToWinPage() {
 
     const hasChanges = checkUnsavedChanges();
     setIsBtnDisabled(!hasChanges);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- checkUnsavedChanges derived from deps; omit to avoid re-running every keystroke
   }, [isEnabled, cardImage, rewardChances, isEdit]);
 
   const clearError = () => {
@@ -525,6 +526,7 @@ export default function ScanToWinPage() {
       window.removeEventListener('popstate', handlePopState);
       document.removeEventListener('click', handleLinkClick, true);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- checkUnsavedChanges derived from deps; omit to avoid re-running every keystroke
   }, [isEnabled, cardImage, rewardChances, isEdit]);
 
   const columns = [

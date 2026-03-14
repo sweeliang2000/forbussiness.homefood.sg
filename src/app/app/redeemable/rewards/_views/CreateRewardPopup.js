@@ -304,22 +304,27 @@ const CreateRewardPopup = ({
             initialIsRewardTagsOpenRef.current = false;
             initialIsRewardImageOpenRef.current = false;
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync when selectedReward/isOpen/allowedRewardTypes change; normalizeRewardData is used inside
     }, [selectedReward, isOpen, allowedRewardTypes]);
+
+    // Extract for dependency array (avoids complex expression warning)
+    const rewardCustomId = rewardData[REWARD_CUSTOM_ID_KEY];
+    const rewardTags = rewardData[REWARD_TAGS_KEY];
 
     // Automatically turn off toggles when values become empty
     useEffect(() => {
         if (!isOpen) return;
 
         // Turn off Reward ID toggle if value is empty
-        if (isRewardIdOpen && (!rewardData[REWARD_CUSTOM_ID_KEY] || rewardData[REWARD_CUSTOM_ID_KEY].trim() === '')) {
+        if (isRewardIdOpen && (!rewardCustomId || rewardCustomId.trim() === '')) {
             setRewardIdOpen(false);
         }
 
         // Turn off Tags toggle if value is empty
-        if (isRewardTagsOpen && (!rewardData[REWARD_TAGS_KEY] || rewardData[REWARD_TAGS_KEY].trim() === '')) {
+        if (isRewardTagsOpen && (!rewardTags || rewardTags.trim() === '')) {
             setIsRewardTagOpen(false);
         }
-    }, [rewardData[REWARD_CUSTOM_ID_KEY], rewardData[REWARD_TAGS_KEY], isOpen, isRewardIdOpen, isRewardTagsOpen]);
+    }, [rewardCustomId, rewardTags, isOpen, isRewardIdOpen, isRewardTagsOpen]);
 
     // Handle browser refresh/close/back button warning when popup is open
     useEffect(() => {
@@ -350,6 +355,7 @@ const CreateRewardPopup = ({
             window.removeEventListener('beforeunload', handleBeforeUnload);
             window.removeEventListener('popstate', handlePopState);
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- checkUnsavedChanges is stable in practice; listing all its deps would re-run this effect every keystroke
     }, [isOpen, rewardData, rewardImage, isRewardIdOpen, isRewardTagsOpen, isRewardImageOpen]);
 
     // Scroll to top when error message or archive error appears

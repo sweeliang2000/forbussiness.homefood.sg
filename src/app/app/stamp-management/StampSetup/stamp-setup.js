@@ -313,6 +313,7 @@ export default function StampSetup() {
     
     const hasChanges = checkUnsavedChanges();
     setIsBtnDisabled(!hasChanges);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- checkUnsavedChanges derived from deps; omit to avoid re-running every keystroke
   }, [isEnabled, cardTitle, cardDescription, termsAndConditions, numberOfStamps, expirationType, numberOfDaysToExpire, rewardStampIcon, rewardUnstampedIcon, cardSteps, isEdit]);
 
   const formSubmissionHandler = async (event) => {
@@ -597,6 +598,7 @@ export default function StampSetup() {
       window.removeEventListener('popstate', handlePopState);
       document.removeEventListener('click', handleLinkClick, true);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- checkUnsavedChanges derived from deps; omit to avoid re-running every keystroke
   }, [isEnabled, cardTitle, cardDescription, termsAndConditions, numberOfStamps, expirationType, numberOfDaysToExpire, rewardStampIcon, rewardUnstampedIcon, cardSteps, isEdit]);
 
   // ==== Modify Selection ===

@@ -124,13 +124,19 @@ const StampCard = ({
             {description || ''}
           </p>
         </div>
-        {rewardImage && (
-          <img 
-            src={rewardImage} 
-            alt="Reward"
-            className={styles.rewardImage}
-          />
-        )}
+        {(() => {
+          const rewardImageSrc = typeof rewardImage === 'string' ? rewardImage : (rewardImage?.url ?? '');
+          return rewardImageSrc ? (
+            <Image
+              src={rewardImageSrc}
+              alt="Reward"
+              className={styles.rewardImage}
+              width={80}
+              height={80}
+              unoptimized
+            />
+          ) : null;
+        })()}
       </div>
 
       <div className={styles.stampContainer}>

@@ -320,6 +320,7 @@ const CardDesign = () => {
         
         const hasChanges = checkUnsavedChanges();
         setIsBtnDisabled(!hasChanges);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- checkUnsavedChanges derived from deps; omit to avoid re-running every keystroke
     }, [cardBackground, cardTitleColor, cardFooterColor, cardNoStampBorderColor, cardStampBackground, cardNoStampBackgroundColor, cardStampCollectedBorderColor, checkmarkColor, isEdit]);
 
     // Handle browser refresh/close/back button warning
@@ -400,6 +401,7 @@ const CardDesign = () => {
             window.removeEventListener('popstate', handlePopState);
             document.removeEventListener('click', handleLinkClick, true);
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- checkUnsavedChanges derived from deps; omit to avoid re-running every keystroke
     }, [cardBackground, cardTitleColor, cardFooterColor, cardNoStampBorderColor, cardStampBackground, cardNoStampBackgroundColor, cardStampCollectedBorderColor, checkmarkColor, isEdit]);
 
     const showOnboarding = !isLoading && isLoadingErrorMessage === null && !stampIsEnabled;
