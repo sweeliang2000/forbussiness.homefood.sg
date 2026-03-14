@@ -327,6 +327,16 @@
         padding: 0;
     }
 
+    .chartWrapper {
+        min-height: 220px;
+        flex: 1 1 220px;
+    }
+
+    .chartResponsive {
+        min-height: 220px;
+        height: 220px;
+    }
+
     .chartHeader {
         margin-bottom: 12px;
     }
@@ -387,5 +397,15 @@
 
     .chartTitle {
         font-size: 14px;
+    }
+
+    .chartWrapper {
+        min-height: 200px;
+        flex: 1 1 200px;
+    }
+
+    .chartResponsive {
+        min-height: 200px;
+        height: 200px;
     }
 }
