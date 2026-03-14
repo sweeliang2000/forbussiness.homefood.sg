@@ -28,7 +28,7 @@ const HeroSection = () => {
                         whileInView={{ y: 0, opacity: 1 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6, delay: 0.1 }}>
-                        Turn Customers Into Loyal Fans. <br/>Boost Your Sales.
+                        Scan to Win. Bring Them In. <br/>Keep Them Coming Back.
                     </motion.h1>
                     <motion.p 
                         className={styles.heroSubtitle}
@@ -36,8 +36,7 @@ const HeroSection = () => {
                         whileInView={{ y: 0, opacity: 1 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: 0.2 }}>
-                        Launch your own loyalty program in minutes. Reward customers, 
-                        keep them coming back, and grow your sales — <b>free for your first outlet</b>.
+                        Show a QR code at your shop. The first thing people see: they can scan to win something. Sure win. That brings them in to spend, and the right reward can make them spend more. Together with your loyalty program, they stay. <b>Free Roll Up Banner for Yearly Subscription.</b>
                     </motion.p>
                 </div>
                 <motion.div 
