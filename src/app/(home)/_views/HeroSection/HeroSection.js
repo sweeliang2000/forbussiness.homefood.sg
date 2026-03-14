@@ -65,7 +65,7 @@ const HeroSection = () => {
                 className={styles.heroRightContainer}>
                 <div className={styles.div1}>
                     <Image
-                        src="/images/pages/landing/hero/collbine_app.png"
+                        src="/images/pages/landing/hero/collbine-scan-to-win-poster.png"
                         alt="Collbine App"
                         fill
                         className={styles.div1Image}
