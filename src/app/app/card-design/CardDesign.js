@@ -458,6 +458,7 @@ const CardDesign = () => {
                         ) : (
                         <div className={styles.contentContainer}>
                             <ContentCard className={styles.cardContainer}>
+                                <div className={styles.cardPreviewWrapper}>
                                 <StampCard
                                     title={cardTitle || ""}
                                     description={cardDescription || ""}
@@ -477,6 +478,7 @@ const CardDesign = () => {
                                     stamped_url={stamped_url}
                                     unstamped_url={unstamped_url}
                                 />
+                                </div>
 
                                 <p className={styles.cardDescription}><Link href='/app/stamp-management'>Modify</Link> number of stamp and stamp icon is at <Link href='/app/stamp-management'>Stamp Management</Link>.</p>
                             </ContentCard>
