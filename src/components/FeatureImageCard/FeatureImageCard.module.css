@@ -20,12 +20,14 @@
 .imageContainer {
     display: flex;
     justify-content: center;
+    height: 280px;
 }
 
 .image {
-    width: 100%;
+    width: 68%;
     height: 100%;
     object-fit: cover;
+    object-position: 60% -10%;
 }
 
 .textContent {
@@ -48,3 +50,20 @@
     margin: 0;
 }
 
+@media only screen and (max-width: 768px) {
+    .image {
+        width: 40%;
+    }
+}
+
+@media only screen and (max-width: 580px) {
+    .image {
+        width: 60%;
+    }
+}
+
+@media only screen and (max-width: 520px) {
+    .image {
+        width: 78%;
+    }
+}

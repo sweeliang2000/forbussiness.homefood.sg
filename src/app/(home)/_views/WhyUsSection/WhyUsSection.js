@@ -7,19 +7,19 @@ import { FaLightbulb } from 'react-icons/fa';
 const WhyUsSection = () => {
     const features = [
         {
-            image: "/images/pages/landing/hero/card_image.png",
+            image: "/images/pages/why/discover.png",
             title: "Discover",
             description: "Make your loyalty and offers easy to find. When customers know where to look, they come back.",
             icon: "🎯"
         },
         {
-            image: "/images/pages/landing/hero/card_image.png",
+            image: "/images/pages/why/scan-to-win.png",
             title: "Scan to Win",
             description: "Random rewards work like a blind box. Customers want to come back to see what they get next.",
             icon: "🎁"
         },
         {
-            image: "/images/pages/landing/hero/card_image.png",
+            image: "/images/pages/why/centralised-loyalty-card.png",
             title: "Centralised Loyalty Card",
             description: "One place for stamps and rewards. <strong>No forgotten reward systems, no lost cards.</strong>",
             icon: "📋"
