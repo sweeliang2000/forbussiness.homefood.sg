@@ -48,6 +48,7 @@ const WhyUsSection = () => {
                             description={feature.description}
                             imageWidth={420}
                             imageHeight={320}
+                            isImageNarrow={true}
                         />
                     ))}
                 </div>
