@@ -1,29 +1,60 @@
 'use client';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import styles from './FAQSection.module.css';
 import { FaChevronDown } from 'react-icons/fa6';
 
 const FAQSection = () => {
     const [openIndex, setOpenIndex] = useState(null);
+    const [showAll, setShowAll] = useState(false);
 
     const faqs = [
         {
-            question: "Is Collbine free?",
-            answer: "Yes, Collbine offers a free plan to get you started. You can explore our features and see how it works for your business. For advanced features and higher customer limits, check out our <a href='#pricing'>pricing plans</a>."
+            question: "Is Collbine free to use?",
+            answer: "Collbine is free to set up. When you’re ready to release your business for customers to use, you’ll need an active subscription. See <a href='#pricing'>pricing plans</a> for details."
         },
         {
-            question: "Can I have point systems or membership?",
-            answer: "Absolutely! Collbine supports both point systems and membership programs. You can customize your loyalty program to match your business needs. <a href='/app'>Learn more</a> about setting up your reward system."
+            question: "What is Scan to Win?",
+            answer: "Scan to Win is a customer campaign where customers scan your QR to win rewards. The purpose is to drive more visits, increase customer engagement, and help new customers discover your business through a simple scan."
         },
         {
-            question: "How can I release?",
-            answer: "To release your business on Collbine, you'll need to complete the checklist requirements including official business details, customer-facing details, and stamp system setup. Once ready, you can <a href='/app/release/submission'>submit for review</a>. It typically takes 1-2 working days for approval."
+            question: "Do you provide Scan to Win banner service?",
+            answer: "Yes. We can help design and provide a Scan to Win banner for your store. <a href='/contact'>Contact us</a> to arrange it. For 1-year subscriptions, your first Scan to Win banner is free."
         },
         {
-            question: "What features does Collbine offer?",
-            answer: "Collbine provides a comprehensive loyalty platform including stamp cards, point systems, membership programs, and advanced analytics. You can <a href='#features'>explore all features</a> or <a href='/signup'>start a free trial</a> to see them in action."
+            question: "What campaigns can I run with Collbine?",
+            answer: "You can run <strong>Stamp Cards</strong> and <strong>Scan to Win</strong>.<br /><br /><strong>Stamp Cards</strong> reward repeat visits (e.g., “Buy 9, get 1 free”).<br /><strong>Scan to Win</strong> drives engagement and new customer discovery through a quick QR scan and prize mechanic."
+        },
+        {
+            question: "How long does setup take?",
+            answer: "Most businesses can create their program and publish their business page the same day. If your account needs review before going live, you can <a href='/app/release/submission'>submit for review</a> — approval typically takes within 1 working day."
+        },
+        {
+            question: "Do I need new hardware or a POS integration?",
+            answer: "No — you can start without new hardware. Collbine is designed to work alongside your existing checkout process. If you have special integration needs, our team can help you plan the best setup."
+        },
+        {
+            question: "How do customers collect stamps?",
+            answer: "Customers collect stamps through a simple, fast flow at checkout (for example via QR or code-based confirmation, depending on your setup). You control the rules, so it stays secure and consistent."
+        },
+        {
+            question: "Can I cancel or change plans anytime?",
+            answer: "Yes — you can upgrade, downgrade, or cancel anytime. Your plan changes take effect based on your billing cycle, and you’ll always be able to view your current plan in your account."
+        },
+        {
+            question: "What analytics do I get?",
+            answer: "You’ll see performance metrics like customer growth, repeat visits, and reward redemptions. For deeper insights and higher limits, check the <a href='#pricing'>plan comparison</a>."
+        },
+        {
+            question: "Is my business and customer data secure?",
+            answer: "We take security seriously and follow best practices to protect your data. If you need documentation for compliance or internal review, contact us and we’ll share the relevant details."
         }
     ];
+
+    const initialVisibleCount = 5;
+    const visibleFaqs = useMemo(() => {
+        if (showAll) return faqs;
+        return faqs.slice(0, initialVisibleCount);
+    }, [showAll, faqs]);
 
     const toggleFAQ = (index) => {
         setOpenIndex(openIndex === index ? null : index);
@@ -39,7 +70,7 @@ const FAQSection = () => {
                 </div>
 
                 <div className={styles.faqRightColumn}>
-                    {faqs.map((faq, index) => (
+                    {visibleFaqs.map((faq, index) => (
                         <div key={index} className={styles.faqItem}>
                             <button
                                 className={styles.faqQuestion}
@@ -56,11 +87,29 @@ const FAQSection = () => {
                                     dangerouslySetInnerHTML={{ __html: faq.answer }}
                                 />
                             )}
-                            {index < faqs.length - 1 && (
+                            {index < visibleFaqs.length - 1 && (
                                 <div className={styles.faqDivider} />
                             )}
                         </div>
                     ))}
+
+                    {faqs.length > initialVisibleCount && (
+                        <button
+                            type="button"
+                            className={styles.showMoreButton}
+                            onClick={() => {
+                                setShowAll((prev) => {
+                                    const next = !prev;
+                                    if (!next && openIndex != null && openIndex >= initialVisibleCount) {
+                                        setOpenIndex(null);
+                                    }
+                                    return next;
+                                });
+                            }}
+                        >
+                            {showAll ? 'Show less' : 'Show more'}
+                        </button>
+                    )}
                 </div>
             </div>
         </section>
