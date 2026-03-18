@@ -45,22 +45,24 @@ const FeaturesSection = () => {
                     <div className={styles.featureItemStepsContent}>
                         <div className={styles.featureItemStepsContentItem1}>
                             <Badge variant="blue" className={styles.smallBadge}>How Collbine Works?</Badge>
-                            <h3>Issue stamps in seconds with just a phone number</h3>
-                            <p className={styles.featureItemStepsContentItem1Description}>Easily reward customers by entering their phone number. Stamps are saved automatically, even if they haven&rsquo;t created an account yet.</p>
+                            <h3>Redeem rewards in seconds at your terminal</h3>
+                            <p className={styles.featureItemStepsContentItem1Description}>
+                                No apps to open or QR codes to scan. Find the customer by phone number, apply rewards, and when it&rsquo;s time to redeem, simply select the reward on your terminal and confirm.
+                            </p>
 
                             <div className={styles.featureItemStepsContentItem1Step}>
-                                <p>1. Enter Customer Phone Number</p>
-                                <p>Key in the customer&rsquo;s phone number into your merchant system.</p>
+                                <p>1. Find the Customer</p>
+                                <p>Enter their phone number on your Collbine terminal to pull up their rewards instantly.</p>
                             </div>
 
                             <div className={styles.featureItemStepsContentItem1Step}>
-                                <p>2. Customer Collects Stamps Automatically</p>
-                                <p>The system automatically adds stamps to their account — even if they haven&rsquo;t signed up yet. Once they create an account, their past stamps are instantly linked.</p>
+                                <p>2. Select the Reward</p>
+                                <p>Browse the customer&rsquo;s available rewards on your terminal and select the one they want to redeem.</p>
                             </div>
 
                             <div className={styles.featureItemStepsContentItem1Step}>
-                                <p>3. Customer Redeems Rewards</p>
-                                <p>When customers collect enough stamps, they can redeem rewards directly from your shop or app.</p>
+                                <p>3. Confirm &amp; Notify</p>
+                                <p>Confirm the redemption at checkout and we&rsquo;ll instantly send the customer a notification with their updated reward status.</p>
                             </div>
 
                             <Abutton 
@@ -75,7 +77,7 @@ const FeaturesSection = () => {
 
                         <div className={styles.featureItemStepsContentItem2}>
                             <Image
-                                src="/images/pages/landing/hero/card_image.png"
+                                src="/images/pages/features/terminal.png"
                                 alt="Feature illustration"
                                 width={520}
                                 height={420}

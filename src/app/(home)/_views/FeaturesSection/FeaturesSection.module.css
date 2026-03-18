@@ -138,9 +138,13 @@
 }
 
 .featureImage {
-    height: 100%;
     width: 100%;
     height: auto;
+    display: block;
+    border: 4px solid var(--border-color);
+    border-radius: 18px;
+    box-sizing: border-box;
+    margin-right: 24px;
 }
 
 /* Tablet Responsive */
@@ -190,6 +194,7 @@
     .featureImage {
         max-height: 300px;
         object-fit: contain;
+        margin-right: 0;
     }
 }
 
