@@ -11,6 +11,7 @@ export default function ProductDetails() {
   const [currentPlan, setCurrentPlan] = useState(null); // Will be set based on user's current subscription
   const [billingInterval, setBillingInterval] = useState('year'); // 'month' | 'year'
   const [selectedMultipleOption, setSelectedMultipleOption] = useState('4-6'); // '4-6' | '7+'
+  const [promoCode, setPromoCode] = useState('');
 
   // Transform SUBSCRIPTION_DATA into the format expected by PricingCard
   const plans = useMemo(() => {
@@ -126,6 +127,18 @@ export default function ProductDetails() {
     }
   };
 
+  const handleApplyPromo = async (e) => {
+    e.preventDefault();
+    const code = promoCode.trim();
+    if (!code) return;
+
+    try {
+      await fetch(`/api/promo?code=${encodeURIComponent(code)}`, { method: 'GET' });
+    } catch {
+      // no-op for now
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -163,6 +176,23 @@ export default function ProductDetails() {
           />
         ))}
       </div>
+
+      <form className={styles.promoCodeRow} onSubmit={handleApplyPromo}>
+        <div className={styles.promoCodeControls}>
+          <input
+            id="promo-code"
+            className={styles.promoCodeInput}
+            type="text"
+            value={promoCode}
+            onChange={(e) => setPromoCode(e.target.value)}
+            placeholder="Enter promo code"
+            autoComplete="off"
+          />
+          <button className={styles.promoCodeButton} type="submit">
+            Enter
+          </button>
+        </div>
+      </form>
     </div>
   );
-} 
+}

@@ -69,6 +69,84 @@
   margin-top: 2rem;
 }
 
+.promoCodeRow {
+  margin: 48px auto 0;
+  max-width: 360px;
+  width: 100%;
+}
+
+.promoCodeControls {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  position: relative;
+}
+
+.promoCodeControls::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(17, 24, 39, 0.15);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.promoCodeInput {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 14px;
+  border: none;
+  background: transparent;
+  color: #111827;
+  font-size: 0.95rem;
+  border-radius: 999px 0 0 999px;
+}
+
+.promoCodeInput::placeholder {
+  color: #9CA3AF;
+}
+
+.promoCodeInput:focus {
+  outline: none;
+}
+
+.promoCodeButton {
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 0 999px 999px 0;
+  border: none;
+  border-left: 1px solid rgba(17, 24, 39, 0.12);
+  background: #2563EB;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.promoCodeButton:hover {
+  transform: translateY(-1px);
+}
+
+.promoCodeButton:active {
+  transform: translateY(0);
+  opacity: 0.9;
+}
+
+.promoCodeControls:focus-within {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18), 0 8px 18px rgba(0, 0, 0, 0.06);
+}
+
+.promoCodeControls:focus-within::before {
+  border-color: #2563EB;
+}
+
 .savings {
   width: 100%;
   text-align: center;
@@ -91,4 +169,5 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-} 
+
+}
