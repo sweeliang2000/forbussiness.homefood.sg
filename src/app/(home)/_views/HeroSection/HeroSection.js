@@ -46,7 +46,7 @@ const HeroSection = () => {
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: 0.3 }}>
                     <Abutton 
-                        href='/' 
+                        href='/#contact' 
                         variant="outline" 
                         size="medium">
                         Book a consultation

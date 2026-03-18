@@ -35,7 +35,7 @@ const LandingPage = () => {
                     <div className={styles.footerContent}>
                         <div className={styles.footerSection}>
                             <h4>Collbine for Business</h4>
-                            <p>Empowering Singapore merchants with smart loyalty solutions.</p>
+                            <p>Scan-to-win loyalty that brings customers into your shop and boosts spend.</p>
                         </div>
                         <div className={styles.footerSection}>
                             <h4>Product</h4>
