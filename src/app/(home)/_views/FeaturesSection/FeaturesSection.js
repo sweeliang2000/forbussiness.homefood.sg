@@ -8,19 +8,19 @@ import styles from "./FeaturesSection.module.css";
 const FeaturesSection = () => {
     const features = [
         {
-            image: "/images/pages/landing/hero/card_image.png",
+            image: "/images/pages/features/card.png",
             title: "Customisable Card Designs",
             description: "Create unique reward programs tailored to your business needs with flexible point systems and rewards.",
         },
         {
-            image: "/images/pages/landing/hero/card_image.png",
-            title: "Customisable Rewards",
-            description: "Keep customers coming back with engaging stamp cards, points, and personalized rewards.",
+            image: "/images/pages/features/banner.png",
+            title: "Scan-to-Win Banner Rewards",
+            description: "Grab attention with a scan-to-win banner and surprise “blind box” rewards—customers scan, reveal, and come back for more.",
         },
         {
-            image: "/images/pages/landing/hero/card_image.png",
-            title: "Advance Analytics",
-            description: "Manage your loyalty program effortlessly with our intuitive dashboard and analytics.",
+            image: "/images/pages/features/reward-card.png",
+            title: "Custom Designs, Controlled Rewards",
+            description: "Customise the look and the offer rules—set limits like a maximum quantity per reward so you stay in control of every giveaway.",
         }
     ];
 
@@ -96,6 +96,7 @@ const FeaturesSection = () => {
                             description={feature.description}
                             imageWidth={420}
                             imageHeight={320}
+                            isImageNarrow={true}
                         />
                     ))}
                 </div>
