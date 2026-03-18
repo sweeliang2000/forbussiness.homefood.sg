@@ -27,7 +27,7 @@ const WhyUsSection = () => {
     ];
 
     return (
-        <section id="features" className={styles.whyUsSection}>
+        <section id="why" className={styles.whyUsSection}>
             <div className={styles.sectionContainer}>
                 <div className={styles.sectionHeader}>
                     <Badge variant="blue">Why Choose Collbine?</Badge>

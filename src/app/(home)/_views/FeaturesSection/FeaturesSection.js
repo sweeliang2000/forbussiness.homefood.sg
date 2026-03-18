@@ -25,7 +25,7 @@ const FeaturesSection = () => {
     ];
 
     return (
-        <section className={styles.featuresSection}>
+        <section className={styles.featuresSection} id="features">
 
             <div className={styles.sectionContainer}>
                 <div className={styles.sectionHeader}>
