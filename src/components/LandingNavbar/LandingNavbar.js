@@ -14,11 +14,11 @@ import { getNotificationConfig } from '@/utility/firebaseClient';
 import { getDismissedNotification, setDismissedNotification, shouldShowNotification } from '@/utility/notificationStorage';
 
 const menuItems = [
-    { label: 'Why Collbine', href: '#home' },
+    { label: 'Why Collbine', href: '#why' },
     { label: 'Features', href: '#features' },
     { label: 'Pricing', href: '#pricing' },
     { label: 'FAQ', href: '#faq' },
-    { label: 'Get Started', href: '#about' },
+    { label: 'Get Started', href: 'https://guide.collbine.com/', external: true },
     { label: 'Contact', href: '#contact' }
 ];
 
@@ -108,7 +108,13 @@ const LandingNavbar = () => {
                     {/* Desktop Menu */}
                     <div className={styles.desktopMenu}>
                         {menuItems.map((item, index) => (
-                            <a key={index} href={item.href} className={styles.navLink}>
+                            <a
+                                key={index}
+                                href={item.href}
+                                className={styles.navLink}
+                                target={item.external ? "_blank" : undefined}
+                                rel={item.external ? "noopener noreferrer" : undefined}
+                            >
                                 {item.label}
                             </a>
                         ))}
@@ -148,6 +154,8 @@ const LandingNavbar = () => {
                             key={index}
                             href={item.href}
                             className={styles.mobileNavLink}
+                            target={item.external ? "_blank" : undefined}
+                            rel={item.external ? "noopener noreferrer" : undefined}
                             onClick={() => setIsMenuOpen(false)}
                         >
                             <span>{item.label}</span>
