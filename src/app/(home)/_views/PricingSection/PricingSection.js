@@ -116,6 +116,15 @@ const PricingSection = () => {
               Yearly
             </button>
           </div>
+          <div
+            className={`${styles.promoBanner} ${billingInterval === 'month' ? styles.promoBannerMonthly : ''}`}
+            role="note"
+            aria-label="Promotion"
+          >
+            <span className={styles.promoBannerText}>
+              Get free Scan to Win Banner for 1 year subsscription for the first time.
+            </span>
+          </div>
         </div>
         <div className={styles.pricingGrid}>
           {plans.map((plan, index) => (

@@ -76,6 +76,38 @@
     background: rgba(255, 255, 255, 0.18);
 }
 
+.promoBanner {
+    margin: 14px auto 0;
+    max-width: 760px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(18, 185, 129, 0.35);
+    background: linear-gradient(
+        135deg,
+        rgba(18, 185, 129, 0.12),
+        rgba(18, 185, 129, 0.04)
+    );
+    color: var(--on-primary);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+.promoBannerText {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--on-primary);
+    line-height: 1.35;
+}
+
+.promoBannerMonthly {
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    background: linear-gradient(
+        135deg,
+        rgba(239, 68, 68, 0.12),
+        rgba(239, 68, 68, 0.04)
+    );
+}
+
 .pricingGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -234,6 +266,12 @@
 
     .pricingCard.popular {
         transform: scale(1);
+    }
+
+    .promoBanner {
+        border-radius: 16px;
+        padding: 12px 14px;
+        max-width: 100%;
     }
 }
 
