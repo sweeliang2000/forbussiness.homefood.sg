@@ -24,7 +24,7 @@ const ContactSection = () => {
                         
                         <div className={styles.contactItem}>
                             <h4>Phone:</h4>
-                            <p>+65 1234 5678</p>
+                            <p>+65 8867 8978</p>
                             <p style={{ fontSize: '0.9rem', fontWeight: 'normal', marginTop: '0.25rem', color: 'var(--on-primary-light2)' }}>
                                 Available Monday to Friday, 9 AM - 6 PM GMT+8
                             </p>
