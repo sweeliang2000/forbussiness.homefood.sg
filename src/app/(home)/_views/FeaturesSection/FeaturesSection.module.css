@@ -267,6 +267,13 @@
         grid-template-columns: 1fr;
     }
 
+    /* Undo tablet-only centering/capped width for the last card */
+    .featuresGrid > :nth-child(3):last-child {
+        grid-column: auto;
+        justify-self: stretch;
+        max-width: none;
+    }
+
     .featuresContainer {
         gap: 32px;
     }
