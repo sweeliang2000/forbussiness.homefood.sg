@@ -63,7 +63,7 @@ const WhyUsSection = () => {
                             <p>
                                 Your customers already have their stamps — remind them to return, redeem, and boost your sales.
                             </p>
-                            <span className={styles.tagline}>(Free for your first merchants)</span>
+                            <span className={styles.tagline}>(Get free scan to win banner for your first merchants)</span>
                         </div>
                         <div className={styles.ctaButton}>
                             <Abutton href="/signup" variant="primary" size="medium">
