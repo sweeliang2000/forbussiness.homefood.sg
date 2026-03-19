@@ -122,7 +122,10 @@ const PricingSection = () => {
             aria-label="Promotion"
           >
             <span className={styles.promoBannerText}>
-              Get free Scan to Win Banner for 1 year subsscription for the first time.
+              Get free Scan to Win Banner for 1 year subscription for the first time.{' '}
+              <a className={styles.promoBannerLink} href="/#contact">
+                Contact us to redeem
+              </a>.
             </span>
           </div>
         </div>

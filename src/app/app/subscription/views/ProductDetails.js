@@ -221,9 +221,19 @@ export default function ProductDetails() {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>Grow Customer Loyalty Without Building an App</h1>
-        <p className={styles.subtitle}>
-          Get started for free. Upgrade anytime when you&apos;re ready. All prices are in SGD.
-        </p>
+        <div
+          className={`${styles.promoBanner} ${billingInterval === 'month' ? styles.promoBannerMonthly : ''}`}
+          role="note"
+          aria-label="Promotion"
+        >
+          <span className={styles.promoBannerText}>
+            Get free Scan to Win Banner for 1 year subscription for the first time.{' '}
+            <a className={styles.promoBannerLink} href="/#contact">
+              Contact us to redeem
+            </a>
+            .
+          </span>
+        </div>
         <div className={styles.billingToggle}>
           <button
             type="button"

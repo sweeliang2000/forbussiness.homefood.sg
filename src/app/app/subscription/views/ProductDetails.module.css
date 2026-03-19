@@ -34,6 +34,47 @@
   gap: 0.15rem;
 }
 
+.promoBanner {
+  margin: 40px auto 32px;
+  max-width: 760px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(18, 185, 129, 0.35);
+  background: linear-gradient(
+    135deg,
+    rgba(18, 185, 129, 0.12),
+    rgba(18, 185, 129, 0.04)
+  );
+  color: #111827;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+.promoBannerText {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.promoBannerLink {
+  color: #2563eb;
+  text-decoration: underline;
+  font-weight: 700;
+}
+
+.promoBannerLink:hover {
+  filter: brightness(1.05);
+}
+
+.promoBannerMonthly {
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.12),
+    rgba(239, 68, 68, 0.04)
+  );
+}
+
 .toggleOption {
   position: relative;
   border: none;
