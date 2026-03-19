@@ -38,3 +38,15 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 ## Packages Installed
 - React Icons: https://www.npmjs.com/package/react-icons
 - Mui material @emotion/react @emotion/styled
+
+## Sitemap (next-sitemap + Search Console)
+This project uses `next-sitemap` to generate `sitemap.xml` during `next build` (via the `postbuild` script).
+
+Setup
+1. Set `NEXT_PUBLIC_SITE_URL` to your production domain (example: `https://yourdomain.com`) before running `npm run build`.
+2. Build the project (`npm run build`). After the build, `next-sitemap` generates `public/sitemap.xml` (served at `/sitemap.xml`).
+3. In Google Search Console, submit the sitemap URL: `https://yourdomain.com/sitemap.xml`.
+
+When new paths are created
+- For new static routes (new folders/files under `src/app` without dynamic params), run a build and redeploy—`next-sitemap` will pick them up automatically.
+- For new dynamic routes (folders like `[param]`, e.g. `.../release/history/[history_id]`), you must update `next-sitemap.config.js` to provide `additionalPaths` (so sitemap includes the real parameter values), then run a build and redeploy.
