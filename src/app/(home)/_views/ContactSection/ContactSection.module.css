@@ -81,6 +81,13 @@
     margin-top: 1rem;
 }
 
+.submitError {
+    margin-top: 12px;
+    color: #dc2626; /* red-600 */
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
 @media (max-width: 968px) {
     .container {
         grid-template-columns: 1fr;

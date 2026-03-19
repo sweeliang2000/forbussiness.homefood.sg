@@ -1,0 +1,64 @@
+.paper {
+  border-radius: 24px !important;
+  padding: 22px 22px 18px 22px;
+  text-align: center;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.12);
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+}
+
+.iconWrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: rgba(37, 99, 235, 0.12);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon {
+  color: var(--accent-color, #2563EB) !important;
+  font-size: 34px !important;
+}
+
+.closeIcon {
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-size: 18px;
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+.title {
+  margin: 14px 0 0 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--on-primary);
+}
+
+.message {
+  margin: 12px 0 0 0;
+  color: var(--on-primary-light2);
+  font-weight: 600;
+}
+
+.messageSecondary {
+  margin: 8px 0 0 0;
+  color: var(--on-primary);
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+  justify-content: center;
+}
+
