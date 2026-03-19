@@ -5,13 +5,25 @@ import styles from './ProductDetails.module.css';
 import PricingCard from './PricingCard';
 import { SUBSCRIPTION_DATA } from '../data/SUBSCRIPTION_DATA';
 import apiClient from '@/utility/api';
-import { CHECKOUT_SESSION_STRIPE } from '@/utility/apiPaths';
+import { CHECKOUT_SESSION_STRIPE, REDEMPTION_CODE } from '@/utility/apiPaths';
 
 export default function ProductDetails() {
   const [currentPlan, setCurrentPlan] = useState(null); // Will be set based on user's current subscription
   const [billingInterval, setBillingInterval] = useState('year'); // 'month' | 'year'
   const [selectedMultipleOption, setSelectedMultipleOption] = useState('4-6'); // '4-6' | '7+'
   const [promoCode, setPromoCode] = useState('');
+  const [promoTrialPeriodDays, setPromoTrialPeriodDays] = useState(null);
+  // Default requested for now; will be used when promo is applied.
+  const [promoLookupKey, setPromoLookupKey] = useState('1_outlets');
+  const [promoError, setPromoError] = useState(null);
+
+  const normalizeLookupKeyFromBackend = (lookupKey) => {
+    // Backend seems to sometimes return singular "outlet" keys, e.g. "1_outlet_yearly"
+    // while frontend plans use plural "outlets", e.g. "1_outlets_yearly".
+    return lookupKey
+      ?.replace(/_outlet_/, '_outlets_')
+      ?.replace(/_outlet$/, '_outlets');
+  };
 
   // Transform SUBSCRIPTION_DATA into the format expected by PricingCard
   const plans = useMemo(() => {
@@ -85,7 +97,7 @@ export default function ProductDetails() {
     return [oneOutletCard, twoThreeCard, multipleOutletsCard].filter(Boolean);
   }, [billingInterval, selectedMultipleOption]);
 
-  const handlePlanSelect = async (plan) => {
+  const handlePlanSelect = async (plan, promoOverride = null) => {
     // Handle custom option - show contact us
     if (plan.isCustom && plan.selectedPlanType === 'custom') {
       console.log('Contact us for custom multi-outlet pricing');
@@ -96,11 +108,20 @@ export default function ProductDetails() {
     try {
       const lookupKey = plan.lookupKey;
       console.log(`Selected plan: ${plan.title} ${lookupKey}`);
-      const response = await apiClient.post(CHECKOUT_SESSION_STRIPE, {
-        "lookup_key": lookupKey
-      });
 
-      console.log('response', response);
+      const trialPeriodDaysToUse = promoOverride?.trialPeriodDays ?? promoTrialPeriodDays;
+      const lookupKeyToUse = promoOverride?.lookupKey ?? promoLookupKey;
+
+      const checkoutLookupKey = trialPeriodDaysToUse !== null ? lookupKeyToUse : lookupKey;
+
+      const payload = {
+        lookup_key: checkoutLookupKey,
+        ...(trialPeriodDaysToUse !== null ? { trial_period_days: trialPeriodDaysToUse } : {}),
+      };
+
+      const response = await apiClient.post(CHECKOUT_SESSION_STRIPE, payload);
+
+      // console.log('response', response);
       
       // Redirect to Stripe Checkout
       if (response.data?.data?.url) {
@@ -111,7 +132,13 @@ export default function ProductDetails() {
       const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
       const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
       console.error(`Error creating checkout session: ${message} (Error code: ${code})`);
-      // TODO: Add proper error handling UI
+
+      // If this checkout was triggered by applying a promo code,
+      // surface the backend error directly under the promo input.
+      if (promoOverride) {
+        setPromoTrialPeriodDays(null);
+        setPromoError(message);
+      }
     }
 
     // Todo: setup the current plan if user already purchased before
@@ -132,10 +159,43 @@ export default function ProductDetails() {
     const code = promoCode.trim();
     if (!code) return;
 
+    setPromoError(null);
+    setPromoTrialPeriodDays(null);
+
     try {
-      await fetch(`/api/promo?code=${encodeURIComponent(code)}`, { method: 'GET' });
-    } catch {
-      // no-op for now
+      // Your backend is expected to resolve the promo code into the redemption
+      // context used by this endpoint. For now we pass the input directly.
+      const redemptionId = code;
+      const redemptionRes = await apiClient.get(REDEMPTION_CODE, {
+        params: { redemption_id: redemptionId },
+      });
+
+      const trialDaysFromRedemptionCode =
+        redemptionRes?.data?.data?.trial_days ?? redemptionRes?.data?.trial_days;
+      if (trialDaysFromRedemptionCode === undefined || trialDaysFromRedemptionCode === null) {
+        setPromoError(redemptionRes?.data?.message || 'No redemption code found');
+        return;
+      }
+
+      const lookupKeyFromRedemptionCode =
+        redemptionRes?.data?.data?.lookup_key ?? redemptionRes?.data?.lookup_key;
+
+      const normalizedLookupKey = normalizeLookupKeyFromBackend(lookupKeyFromRedemptionCode);
+
+      setPromoTrialPeriodDays(Number(trialDaysFromRedemptionCode));
+      setPromoLookupKey(normalizedLookupKey || '1_outlets');
+
+      // If promo redeemed successfully, immediately proceed to checkout using
+      // backend-provided lookup_key + trial_days.
+      if (plans?.length) {
+        await handlePlanSelect(plans[0], {
+          lookupKey: normalizedLookupKey || '1_outlets',
+          trialPeriodDays: Number(trialDaysFromRedemptionCode),
+        });
+      }
+    } catch (err) {
+      setPromoTrialPeriodDays(null);
+      setPromoError(err?.message || 'Failed to apply promo code');
     }
   };
 
@@ -192,6 +252,7 @@ export default function ProductDetails() {
             Enter
           </button>
         </div>
+        {promoError ? <p className={styles.promoCodeError}>{promoError}</p> : null}
       </form>
     </div>
   );

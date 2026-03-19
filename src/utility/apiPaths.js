@@ -35,6 +35,7 @@ export const CANCEL_SCHEDULE = '/api/subscription/cancel-schedule';
 export const SUBSCRIPTION_END_DATE = '/api/subscription/end-date';
 export const CREATE_PORTAL_SESSION = '/api/subscription/create-portal-session';
 export const SHOP_SUBSCRIPTION_STATUS = '/api/data/shopSubscriptionStatus';
+export const REDEMPTION_CODE = '/api/data/redemption-code';
 export const GET_LIST_OF_USERS = '/api/data/getListOfUsers';
 export const DELETE_INVITED_USER = '/api/data/invitedUser';
 export const DELETE_USER_FROM_SHOP = '/api/data/userFromShop';
