@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://forbusiness.collbine.com
+
+# Sitemaps
+Sitemap: https://forbusiness.collbine.com/sitemap.xml
