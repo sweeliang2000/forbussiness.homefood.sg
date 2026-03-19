@@ -12,6 +12,8 @@ import Notification from '@/components/Notification';
 import { motion } from 'motion/react';
 import { getNotificationConfig } from '@/utility/firebaseClient';
 import { getDismissedNotification, setDismissedNotification, shouldShowNotification } from '@/utility/notificationStorage';
+import apiClient from '@/utility/api';
+import { REFRESH_USER_COOKIE } from '@/utility/apiPaths';
 
 const menuItems = [
     { label: 'Why Collbine', href: '#why' },
@@ -24,11 +26,14 @@ const menuItems = [
 
 const login = { label: 'Login', href: '/login' };
 const signup = { label: 'Sign up for free', href: '/signup' };
+const consoleCta = { label: 'Console', href: '/app' };
 
 const LandingNavbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isNotificationVisible, setIsNotificationVisible] = useState(false);
     const [notificationConfig, setNotificationConfig] = useState(null);
+    // null = unknown yet (avoid showing wrong CTAs while we check)
+    const [isLoggedIn, setIsLoggedIn] = useState(null);
 
     // Fetch notification config from Remote Config on mount
     useEffect(() => {
@@ -72,6 +77,26 @@ const LandingNavbar = () => {
         };
 
         fetchNotificationConfig();
+    }, []);
+
+    // Check auth on mount so we can show "Console" instead of Login/Signup when authenticated.
+    useEffect(() => {
+        let isCancelled = false;
+
+        const checkAuth = async () => {
+            try {
+                await apiClient.get(REFRESH_USER_COOKIE);
+                if (!isCancelled) setIsLoggedIn(true);
+            } catch (_) {
+                if (!isCancelled) setIsLoggedIn(false);
+            }
+        };
+
+        checkAuth();
+
+        return () => {
+            isCancelled = true;
+        };
     }, []);
 
     const toggleMenu = () => {
@@ -122,12 +147,20 @@ const LandingNavbar = () => {
 
                     {/* CTA Buttons */}
                     <div className={styles.ctaButtons}>
-                        <Abutton href={login.href} variant="ghost" size="medium">
-                            { login.label }
-                        </Abutton>
-                        <Abutton href={signup.href} variant="primary" size="medium">
-                            { signup.label }
-                        </Abutton>
+                        {isLoggedIn === true ? (
+                            <Abutton href={consoleCta.href} variant="primary" size="medium">
+                                {consoleCta.label}
+                            </Abutton>
+                        ) : isLoggedIn === false ? (
+                            <>
+                                <Abutton href={login.href} variant="ghost" size="medium">
+                                    {login.label}
+                                </Abutton>
+                                <Abutton href={signup.href} variant="primary" size="medium">
+                                    {signup.label}
+                                </Abutton>
+                            </>
+                        ) : null}
                     </div>
 
                     {/* Mobile Menu Toggle */}
@@ -164,12 +197,20 @@ const LandingNavbar = () => {
                     ))}
 
                     <div className={styles.mobileCtaButtons}>
-                        <Abutton href={login.href} variant="secondary" size="medium">
-                            { login.label }
-                        </Abutton>
-                        <Abutton href={signup.href} variant="primary" size="medium">
-                            { signup.label }
-                        </Abutton>
+                        {isLoggedIn === true ? (
+                            <Abutton href={consoleCta.href} variant="primary" size="medium">
+                                {consoleCta.label}
+                            </Abutton>
+                        ) : isLoggedIn === false ? (
+                            <>
+                                <Abutton href={login.href} variant="secondary" size="medium">
+                                    {login.label}
+                                </Abutton>
+                                <Abutton href={signup.href} variant="primary" size="medium">
+                                    {signup.label}
+                                </Abutton>
+                            </>
+                        ) : null}
                     </div>
 
                     <div className={styles.socialMediaIcons}>
