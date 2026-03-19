@@ -6,6 +6,7 @@ import PricingCard from './PricingCard';
 import { SUBSCRIPTION_DATA } from '../data/SUBSCRIPTION_DATA';
 import apiClient from '@/utility/api';
 import { CHECKOUT_SESSION_STRIPE, REDEMPTION_CODE } from '@/utility/apiPaths';
+import { LoadingButton } from '@mui/lab';
 
 export default function ProductDetails() {
   const [currentPlan, setCurrentPlan] = useState(null); // Will be set based on user's current subscription
@@ -16,6 +17,7 @@ export default function ProductDetails() {
   // Default requested for now; will be used when promo is applied.
   const [promoLookupKey, setPromoLookupKey] = useState('1_outlets');
   const [promoError, setPromoError] = useState(null);
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
   const normalizeLookupKeyFromBackend = (lookupKey) => {
     // Backend seems to sometimes return singular "outlet" keys, e.g. "1_outlet_yearly"
@@ -102,7 +104,7 @@ export default function ProductDetails() {
     if (plan.isCustom && plan.selectedPlanType === 'custom') {
       console.log('Contact us for custom multi-outlet pricing');
       // TODO: Add contact us logic here (e.g., open modal, redirect to contact page, etc.)
-      return;
+      return false;
     }
 
     try {
@@ -126,7 +128,13 @@ export default function ProductDetails() {
       // Redirect to Stripe Checkout
       if (response.data?.data?.url) {
         window.location.href = response.data.data.url;
+        return true;
       }
+      // No redirect URL means checkout session creation didn't succeed.
+      if (promoOverride) {
+        setPromoError('Unable to create checkout session');
+      }
+      return false;
     } catch (error) {
       const errorData = error?.response?.data;
       const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
@@ -139,6 +147,7 @@ export default function ProductDetails() {
         setPromoTrialPeriodDays(null);
         setPromoError(message);
       }
+      return false;
     }
 
     // Todo: setup the current plan if user already purchased before
@@ -159,6 +168,7 @@ export default function ProductDetails() {
     const code = promoCode.trim();
     if (!code) return;
 
+    setIsApplyingPromo(true);
     setPromoError(null);
     setPromoTrialPeriodDays(null);
 
@@ -174,6 +184,7 @@ export default function ProductDetails() {
         redemptionRes?.data?.data?.trial_days ?? redemptionRes?.data?.trial_days;
       if (trialDaysFromRedemptionCode === undefined || trialDaysFromRedemptionCode === null) {
         setPromoError(redemptionRes?.data?.message || 'No redemption code found');
+        setIsApplyingPromo(false);
         return;
       }
 
@@ -188,14 +199,21 @@ export default function ProductDetails() {
       // If promo redeemed successfully, immediately proceed to checkout using
       // backend-provided lookup_key + trial_days.
       if (plans?.length) {
-        await handlePlanSelect(plans[0], {
+        const redirected = await handlePlanSelect(plans[0], {
           lookupKey: normalizedLookupKey || '1_outlets',
           trialPeriodDays: Number(trialDaysFromRedemptionCode),
         });
+
+        // If checkout was not redirected (typically due to an error),
+        // stop the button loading state.
+        if (!redirected) setIsApplyingPromo(false);
+      } else {
+        setIsApplyingPromo(false);
       }
     } catch (err) {
       setPromoTrialPeriodDays(null);
       setPromoError(err?.message || 'Failed to apply promo code');
+      setIsApplyingPromo(false);
     }
   };
 
@@ -247,10 +265,18 @@ export default function ProductDetails() {
             onChange={(e) => setPromoCode(e.target.value)}
             placeholder="Enter promo code"
             autoComplete="off"
+            disabled={isApplyingPromo}
           />
-          <button className={styles.promoCodeButton} type="submit">
-            Enter
-          </button>
+          <LoadingButton
+            className={styles.promoCodeButton}
+            type="submit"
+            loading={isApplyingPromo}
+            loadingPosition="start"
+            disabled={isApplyingPromo}
+            variant="contained"
+          >
+            {isApplyingPromo ? '' : 'Enter'}
+          </LoadingButton>
         </div>
         {promoError ? <p className={styles.promoCodeError}>{promoError}</p> : null}
       </form>

@@ -104,7 +104,7 @@
   background: transparent;
   color: #111827;
   font-size: 0.95rem;
-  border-radius: 999px 0 0 999px;
+  border-radius: 999px;
 }
 
 .promoCodeInput::placeholder {
@@ -118,13 +118,20 @@
 .promoCodeButton {
   height: 44px;
   padding: 0 16px;
-  border-radius: 999px;
-  border: none;
-  border-left: 1px solid rgba(17, 24, 39, 0.12);
-  background: #2563EB;
-  color: #ffffff;
+  border-radius: 999px !important;
+  border-top-left-radius: 999px !important;
+  border-bottom-left-radius: 999px !important;
+  border-top-right-radius: 999px !important;
+  border-bottom-right-radius: 999px !important;
+  border: none !important;
+  border-left: 1px solid rgba(17, 24, 39, 0.12) !important;
+  background: #2563EB !important;
+  color: #ffffff !important;
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 700 !important;
+  min-width: 0 !important;
+  box-shadow: none !important;
+  text-transform: none !important;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
   white-space: nowrap;
@@ -132,11 +139,13 @@
 
 .promoCodeButton:hover {
   transform: translateY(-1px);
+  background: #2563EB !important;
 }
 
 .promoCodeButton:active {
   transform: translateY(0);
   opacity: 0.9;
+  background: #2563EB !important;
 }
 
 .promoCodeControls:focus-within {
