@@ -2,8 +2,8 @@ import './globals.css';
 import AuthGuard from '@/components/AuthGuard/AuthGuard';
 
 export const metadata = {
-  title: 'Collbine for Business | Customisable Loyalty Systems in Singapore',
-  description: 'Collbine offers a loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop\'s needs.',
+  title: 'Collbine for Business | Customisable Rewards Systems in Singapore',
+  description: 'Collbine offers scan to win and loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop\'s needs.',
   keywords: ['loyalty program', 'customer rewards', 'merchant solutions', 'Singapore business', 'CRM', 'customer engagement', 'points system', 'digital loyalty'],
   author: 'Collbine Team',
   icons: {
@@ -20,8 +20,8 @@ export const metadata = {
     shortcut: '/favicon.ico',
   },
   openGraph: {
-    title: 'Collbine for Business | Customisable Loyalty Systems in Singapore',
-    description: 'Collbine offers a loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop\'s needs.',
+    title: 'Collbine for Business | Customisable Rewards Systems in Singapore',
+    description: 'Collbine offers scan to win and loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop\'s needs.',
     url: 'https://www.collbine.com',
     siteName: 'Collbine for Business',
     images: [
@@ -38,8 +38,8 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     site: '@Collbine',
-    title: 'Collbine for Business | Customisable Loyalty Systems in Singapore',
-    description: 'Collbine offers a loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program.',
+    title: 'Collbine for Business | Customisable Rewards Systems in Singapore',
+    description: 'Collbine offers scan to win and loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program.',
     images: ['/android-chrome-512x512.png'],
   },
 };

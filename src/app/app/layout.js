@@ -10,11 +10,6 @@ import apiClient from '@/utility/api';
 import { REFRESH_USER_COOKIE } from '@/utility/apiPaths';
 import { useRouter, usePathname } from 'next/navigation';
 
-// export const metadata = {
-//   title: 'Collbine for Business | Customisable Loyalty Systems in Singapore',
-//   description: 'Collbine offers a loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop's needs.',
-// };
-
 export default function RootLayout({ children }) {
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
