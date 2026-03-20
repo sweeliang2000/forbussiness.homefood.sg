@@ -1,3 +1,5 @@
+'use client';
+
 import styles from './HeaderSection.module.css';
 import { ContentCard } from '../ContentCard/ContentCard';
 import { Button } from '@mui/material'
@@ -10,22 +12,22 @@ import { useState } from 'react';
 export const HeaderSection = ({
     title,
     description,
-    className,
-    isSuccess,
-    isError,
-    setShowError,
-    isDisabled,
-    errorMessage,
-    successMessage,
-    setShowSuccess,
+    className = '',
+    isSuccess = false,
+    isError = false,
+    setShowError = () => {},
+    isDisabled = false,
+    errorMessage = '',
+    successMessage = '',
+    setShowSuccess = undefined,
     showButton = true,
-    infoMessage,
+    infoMessage = '',
     showCancelButton = false,
     cancelButtonText = 'Cancel Review',
-    onCancel,
+    onCancel = () => {},
     buttonText = 'Save',
     successButtonText = 'Saved',
-    warningMessage,
+    warningMessage = '',
     ...props
 }) => {
     const [showSuccessAlert, setShowSuccessAlert] = useState(true);
