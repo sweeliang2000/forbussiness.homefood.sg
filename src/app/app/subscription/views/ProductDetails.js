@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import styles from './ProductDetails.module.css';
 import PricingCard from './PricingCard';
 import { SUBSCRIPTION_DATA } from '../data/SUBSCRIPTION_DATA';
@@ -228,9 +229,9 @@ export default function ProductDetails() {
         >
           <span className={styles.promoBannerText}>
             Get free Scan to Win Banner for 1 year subscription for the first time.{' '}
-            <a className={styles.promoBannerLink} href="/#contact">
+            <Link className={styles.promoBannerLink} href="/#contact">
               Contact us to redeem
-            </a>
+            </Link>
             .
           </span>
         </div>

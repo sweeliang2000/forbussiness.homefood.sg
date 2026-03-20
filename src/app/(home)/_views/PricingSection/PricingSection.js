@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import styles from './PricingSection.module.css';
 import Abutton from '@/components/Buttons/Abutton';
 import { SUBSCRIPTION_DATA } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
@@ -123,9 +124,9 @@ const PricingSection = () => {
           >
             <span className={styles.promoBannerText}>
               Get free Scan to Win Banner for 1 year subscription for the first time.{' '}
-              <a className={styles.promoBannerLink} href="/#contact">
+              <Link className={styles.promoBannerLink} href="/#contact">
                 Contact us to redeem
-              </a>.
+              </Link>.
             </span>
           </div>
         </div>
