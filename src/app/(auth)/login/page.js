@@ -1,31 +1,45 @@
 import Login from './login';
 
-// Meta Data Explanation:
-// 1. title: Optimized for SEO with action-oriented phrases.
-// 2. description: Clear value proposition and targeting of Singapore merchants.
-// 3. keywords: Helps in ranking for relevant search terms
-// 4. Open Graph (og) Metadata: Enhances sharing previews on platforms like Facebook and LinkedIn.
-// 5. Twitter Metadata: Optimized for Twitter card previews.
-// 6. Image URL: Placeholder added for future branding consistency.
+/** @type {import('next').Metadata} */
 export const metadata = {
-    title: 'Login to Your Business Account | Collbine for Business - Loyalty Program in Singapore',
-    description: 'Login to Collbine for Business to manage your loyalty program. Access your dashboard to track customer engagement, manage rewards, and grow your business in Singapore.',
-    keywords: 'Collbine login, business loyalty program login, rewards system Singapore, merchant dashboard, customer engagement tools, loyalty program management',
-    author: 'Collbine Team',
-    og: {
-        title: 'Login to Your Business Account | Collbine for Business',
-        description: 'Access your Collbine for Business dashboard to manage your loyalty program, track customer engagement, and grow your business with flexible rewards.',
-        type: 'website',
-        url: 'https://www.collbine.com/login',
-        image: 'https://www.collbine.com/images/example.png',
-    },
-    twitter: {
-        card: 'summary_large_image',
-        site: '@Collbine',
-        title: 'Login to Your Business Account | Collbine for Business',
-        description: 'Login to Collbine for Business and manage your loyalty program dashboard. Track customer engagement and grow your business with tailored rewards.',
-        image: 'https://www.collbine.com/images/example.png',
-    },
+  title: 'Login | Collbine for Business',
+  description:
+    'Access your Collbine for Business login to manage your loyalty program, track customer engagement, and grow rewards in Singapore from one platform.',
+  keywords: [
+    'Collbine for Business login',
+    'business account login',
+    'Singapore loyalty program',
+    'merchant dashboard',
+    'rewards management',
+    'customer engagement tools',
+    'loyalty program management',
+  ],
+  openGraph: {
+    title: 'Login | Collbine for Business',
+    description:
+      'Access your Collbine for Business login to manage your loyalty program, track customer engagement, and grow rewards in Singapore from one platform.',
+    url: 'https://forbusiness.collbine.com/login',
+    siteName: 'Collbine for Business',
+    images: [
+      {
+        url: 'https://forbusiness.collbine.com/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Login | Collbine for Business',
+      },
+    ],
+    type: 'website',
+    locale: 'en_SG',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Login | Collbine for Business',
+    description:
+      'Access your Collbine for Business login to manage your loyalty program, track customer engagement, and grow rewards in Singapore from one platform.',
+    images: ['https://forbusiness.collbine.com/og-image.png'],
+  },
+  robots: { index: true, follow: true },
+  alternates: { canonical: 'https://forbusiness.collbine.com/login' },
 };
 
 const Page = () => {
