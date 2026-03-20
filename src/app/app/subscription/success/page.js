@@ -1,87 +1,48 @@
-'use client';
+import SuccessClient from './SuccessClient';
 
-import { useRouter } from 'next/navigation';
-import styles from './page.module.css';
-import { Button } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
-import { ContentCard } from '@/components/ContentCard/ContentCard';
+/** @type {import('next').Metadata} */
+export const metadata = {
+  title: 'Subscription Success | Collbine for Business',
+  description:
+    'Subscription successful on Collbine for Business. Your payment was processed. Return to your settings or manage billing anytime from the dashboard.',
+  keywords: [
+    'Collbine for Business',
+    'subscription success',
+    'payment successful',
+    'manage billing',
+    'business dashboard',
+    'loyalty terminal',
+  ],
+  openGraph: {
+    title: 'Subscription Success | Collbine for Business',
+    description:
+      'Subscription successful on Collbine for Business. Your payment was processed. Return to your settings or manage billing anytime from the dashboard.',
+    url: 'https://forbusiness.collbine.com/app/subscription/success',
+    siteName: 'Collbine for Business',
+    images: [
+      {
+        url: 'https://forbusiness.collbine.com/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Subscription successful on Collbine for Business',
+      },
+    ],
+    type: 'website',
+    locale: 'en_SG',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Subscription Success | Collbine for Business',
+    description:
+      'Subscription successful on Collbine for Business. Your payment was processed. Return to your settings or manage billing anytime from the dashboard.',
+    images: ['https://forbusiness.collbine.com/og-image.png'],
+  },
+  robots: { index: true, follow: true },
+  alternates: {
+    canonical: 'https://forbusiness.collbine.com/app/subscription/success',
+  },
+};
 
 export default function Success() {
-  const router = useRouter();
-
-  const handleBackToSettings = () => {
-    router.push('/app/setting');
-  };
-
-  const handleManageBilling = async () => {
-    try {
-      const response = await fetch('/api/create-portal-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ session_id: sessionId }),
-      });
-
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch (error) {
-      console.error('Error creating portal session:', error);
-    }
-  };
-
-  return (
-    <div className={styles.container}>
-      <section className={styles.successSection}>
-        <ContentCard className={styles.successBox}>
-          <h1 className={styles.successTitle}>PAYMENT SUCCESSFUL!</h1>
-          <p className={styles.successDescription}>
-            Click the button below to return to your settings.
-          </p>
-
-          <div className={styles.successIcon}>
-            <CheckCircleIcon sx={{ fontSize: 100, color: '#2DD4BF' }} />
-          </div>
-          
-          <div className={styles.buttonContainer}>
-            <Button 
-              variant="outlined"
-              size="large"
-              onClick={handleBackToSettings}
-              startIcon={<KeyboardBackspaceIcon />}
-              sx={{
-                borderRadius: '9999px',
-                padding: '10px 24px',
-                borderColor: '#4F46E5',
-                color: '#4F46E5',
-                '&:hover': {
-                  borderColor: '#4338CA',
-                  backgroundColor: 'transparent',
-                  color: '#4338CA',
-                }
-              }}
-            >
-              Back to setting
-            </Button>
-            <Button 
-              variant="contained"
-              size="large"
-              onClick={handleManageBilling}
-              sx={{
-                backgroundColor: '#4F46E5',
-                '&:hover': {
-                  backgroundColor: '#4338CA',
-                },
-                borderRadius: '9999px',
-                padding: '10px 24px'
-              }}
-            >
-              Manage your billing
-            </Button>
-          </div>
-        </ContentCard>
-      </section>
-    </div>
-  );
+  return <SuccessClient />;
 } 
