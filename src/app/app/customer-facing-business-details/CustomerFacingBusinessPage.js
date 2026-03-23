@@ -621,8 +621,8 @@ const CustomerFacingBusinessPage = () => {
                                         setImages={setBannerImages}
                                         noOfImages={1}
                                         resetSaving={resetSaving}
-                                        width={640}
-                                        height={360}
+                                        width={480}
+                                        height={270}
                                         imageClassName={styles.dragdropBannerImage}
                                         disabled={!isEdit}
                                     />
