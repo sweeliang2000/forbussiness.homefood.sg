@@ -593,7 +593,7 @@ const CustomerFacingBusinessPage = () => {
                                 <div className={styles.fieldContainer}>
                                     <FieldHeader
                                         title='Thumbnail / Featured Image'
-                                        description='Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                                        description='Aspect ratio: 1:1. Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
                                         type='h3'
                                     />
 
@@ -612,7 +612,7 @@ const CustomerFacingBusinessPage = () => {
                                 <div className={styles.fieldContainer}>
                                     <FieldHeader
                                         title='Banner Image'
-                                        description='Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                                        description='Aspect ratio: 16:9. Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
                                         type='h3'
                                     />
 
@@ -622,7 +622,7 @@ const CustomerFacingBusinessPage = () => {
                                         noOfImages={1}
                                         resetSaving={resetSaving}
                                         width={792}
-                                        height={198}
+                                        height={792 * 9 / 16}
                                         imageClassName={styles.dragdropBannerImage}
                                         disabled={!isEdit}
                                     />
