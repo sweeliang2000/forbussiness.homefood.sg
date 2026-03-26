@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import styles from './MenuBuilder.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
-import { Button, Checkbox, FormControlLabel, IconButton, Menu, MenuItem, Radio, RadioGroup, Select, Switch, TextField, Typography } from '@mui/material';
+import { Button, Checkbox, Dialog, FormControlLabel, IconButton, Menu, MenuItem, Radio, RadioGroup, Select, Switch, TextField, Typography } from '@mui/material';
+import AddCircleOutlineRoundedIcon from '@mui/icons-material/AddCircleOutlineRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import DialogPopup from '@/components/DialogPopup/DialogPopup';
@@ -212,8 +213,41 @@ export default function MenuBuilder() {
   // Preview selection state.
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [selectedGroupOptionQtys, setSelectedGroupOptionQtys] = useState({});
+  const [isPreviewAddOpen, setIsPreviewAddOpen] = useState(false);
+  const [cartItems, setCartItems] = useState([]); // { id, itemId, itemName, mode, selections, pricingTotal }
+  const [isCartDeleteOpen, setIsCartDeleteOpen] = useState(false);
+  const [cartDeleteTargetItemId, setCartDeleteTargetItemId] = useState(null);
 
   const selectedItem = useMemo(() => items.find((i) => i.id === selectedItemId) ?? null, [items, selectedItemId]);
+  const previewCartQtyByItemId = useMemo(() => {
+    const map = {};
+    for (const ci of cartItems) {
+      map[ci.itemId] = (map[ci.itemId] ?? 0) + 1;
+    }
+    return map;
+  }, [cartItems]);
+  const closePreviewAdd = () => setIsPreviewAddOpen(false);
+
+  const openPreviewAdd = (item) => {
+    setSelectedItemId(item.id);
+    setSelectedGroupOptionQtys(buildDefaultGroupSelections(item));
+    setIsPreviewAddOpen(true);
+  };
+
+  const openCartDeletePopup = (itemId) => {
+    setCartDeleteTargetItemId(itemId);
+    setIsCartDeleteOpen(true);
+  };
+
+  const removeOneCartItemByItemId = (itemId) => {
+    setCartItems((prev) => {
+      const idx = prev.findIndex((x) => x.itemId === itemId);
+      if (idx < 0) return prev;
+      const copy = [...prev];
+      copy.splice(idx, 1);
+      return copy;
+    });
+  };
 
   useEffect(() => {
     // If the shop doesn't accept a mode, force the preview mode to the accepted one.
@@ -226,6 +260,10 @@ export default function MenuBuilder() {
     // "what customer can order".
     setSelectedItemId(null);
     setSelectedGroupOptionQtys({});
+    setIsPreviewAddOpen(false);
+    setCartItems([]);
+    setIsCartDeleteOpen(false);
+    setCartDeleteTargetItemId(null);
   }, [customerMode]);
 
   useEffect(() => {
@@ -432,25 +470,17 @@ export default function MenuBuilder() {
         fee = fixed;
         feeBreakdown = { type: PRICING_OVERRIDE_TYPES.FIXED_PRICE, fixedPrice: fixed, fee };
       } else {
-        // Global: Service then GST sequentially.
-        const serviceEnabled = !!storePricing.serviceEnabled;
-        const gstEnabled = !!storePricing.gstEnabled;
-
-        const servicePercent = normalizeNumber(storePricing.servicePercent);
-        const gstPercent = normalizeNumber(storePricing.gstPercent);
-
-        const serviceAmount = serviceEnabled ? baseForFees * (servicePercent / 100) : 0;
-        const intermediate = baseForFees + serviceAmount;
-        const gstAmount = gstEnabled ? intermediate * (gstPercent / 100) : 0;
-        fee = serviceAmount + gstAmount;
+        // GLOBAL: remove Service & GST from calculation for this preview.
+        // (Spice level MUST pick additional prices will also not get any Service/GST uplift.)
+        fee = 0;
         feeBreakdown = {
           type: PRICING_OVERRIDE_TYPES.GLOBAL,
-          serviceEnabled,
-          servicePercent,
-          serviceAmount,
-          gstEnabled,
-          gstPercent,
-          gstAmount,
+          serviceEnabled: false,
+          servicePercent: normalizeNumber(storePricing.servicePercent),
+          serviceAmount: 0,
+          gstEnabled: false,
+          gstPercent: normalizeNumber(storePricing.gstPercent),
+          gstAmount: 0,
         };
       }
 
@@ -481,6 +511,19 @@ export default function MenuBuilder() {
     if (customerMode === 'dine-in') return selectedItem.availableDineIn;
     return selectedItem.availableTakeaway || selectedItem.availableDineIn;
   }, [selectedItem, customerMode]);
+
+  const isPreviewSelectionValid = useMemo(() => {
+    if (!selectedItem) return false;
+    const sel = selectedGroupOptionQtys ?? {};
+    for (const g of (selectedItem.optionGroups ?? [])) {
+      if (!g.required) continue;
+      const requiredPick = normalizeNumber(g.pick ?? 0) > 0 ? normalizeNumber(g.pick ?? 0) : 1;
+      const gSel = sel[g.id] ?? {};
+      const count = Object.values(gSel).reduce((s, q) => s + (q > 0 ? 1 : 0), 0);
+      if (count !== requiredPick) return false;
+    }
+    return true;
+  }, [selectedItem, selectedGroupOptionQtys]);
 
   const renderPricingBreakdown = (pricing, mode) => {
     if (!pricing) return null;
@@ -802,12 +845,9 @@ export default function MenuBuilder() {
                         const isDisabled =
                           !!item.soldOut ||
                           (customerMode === 'takeaway' ? !isAvailableTakeaway : !isAvailableDineIn);
-                        const isSelected = selectedItemId === item.id;
 
                         const baseForFees = computeBaseForFees({ item, fulfilmentMode: customerMode });
-                        const displayedTotal = isSelected
-                          ? previewPricing?.total ?? baseForFees
-                          : baseForFees;
+                        const displayedTotal = baseForFees;
 
                         return (
                           <div key={item.id} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -833,134 +873,49 @@ export default function MenuBuilder() {
                               <div className={styles.row} style={{ gap: 10 }}>
                                 {item.featured ? <span className={styles.recommendedBadge}>Recommended</span> : null}
                                 {item.soldOut ? <span className={styles.soldOutBadge}>Sold out</span> : null}
-                                <Button
-                                  size="small"
-                                  variant={isSelected ? 'contained' : 'outlined'}
-                                  disabled={isDisabled}
-                                  onClick={() => {
-                                    setSelectedItemId(item.id);
-                                    setSelectedGroupOptionQtys(buildDefaultGroupSelections(item));
-                                  }}
-                                >
-                                  {isSelected ? 'Selected' : 'Customize'}
-                                </Button>
+                                {(previewCartQtyByItemId[item.id] ?? 0) > 0 ? (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <Button
+                                      size="small"
+                                      variant="outlined"
+                                      disabled={(previewCartQtyByItemId[item.id] ?? 0) === 0}
+                                      onClick={() => {
+                                        const qty = previewCartQtyByItemId[item.id] ?? 0;
+                                        if (qty >= 2) {
+                                          openCartDeletePopup(item.id);
+                                          return;
+                                        }
+                                        removeOneCartItemByItemId(item.id);
+                                      }}
+                                      style={{ minWidth: 28, padding: '2px 6px' }}
+                                    >
+                                      −
+                                    </Button>
+                                    <Typography variant="body2" style={{ minWidth: 18, textAlign: 'center', fontWeight: 800 }}>
+                                      {previewCartQtyByItemId[item.id] ?? 0}
+                                    </Typography>
+                                    <Button
+                                      size="small"
+                                      variant="outlined"
+                                      disabled={isDisabled}
+                                      onClick={() => openPreviewAdd(item)}
+                                      style={{ minWidth: 28, padding: '2px 6px' }}
+                                    >
+                                      +
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <IconButton
+                                    size="small"
+                                    disabled={isDisabled}
+                                    onClick={() => openPreviewAdd(item)}
+                                    title="Add"
+                                  >
+                                    <AddCircleOutlineRoundedIcon />
+                                  </IconButton>
+                                )}
                               </div>
                             </div>
-
-                            {isSelected && canOrderSelectedItem ? (
-                              <div>
-                                {(item.optionGroups ?? []).map((g) => {
-                                  const pick = normalizeNumber(g.pick ?? 0);
-                                  const required = !!g.required;
-                                  const gSel = selectedGroupOptionQtys[g.id] ?? {};
-                                  const selectedCount = Object.values(gSel).reduce((s, q) => s + (q > 0 ? 1 : 0), 0);
-                                  const canSelectMore = pick === 0 || selectedCount < pick;
-
-                                  const header = required
-                                    ? `${g.name} (Pick ${pick || 1}) MUST`
-                                    : `${g.name} (Optional${pick > 0 ? ` • Pick up to ${pick}` : ''})`;
-
-                                  return (
-                                    <div key={g.id} style={{ marginBottom: 12 }}>
-                                      <Typography variant="caption" className={styles.muted} style={{ fontWeight: 800 }}>
-                                        {header}
-                                      </Typography>
-
-                                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 6 }}>
-                                        {(g.options ?? []).map((o) => {
-                                          const qty = gSel[o.id] ?? 0;
-                                          const maxQty = Math.max(1, normalizeNumber(o.maxQty ?? 1));
-
-                                          // For MUST groups, treat as selection (qty 0/1).
-                                          const isMust = required && pick > 0;
-                                          if (isMust) {
-                                            const checked = qty > 0;
-                                            const disableCheck = !checked && !canSelectMore;
-                                            return (
-                                              <FormControlLabel
-                                                key={o.id}
-                                                control={
-                                                  <Checkbox
-                                                    checked={checked}
-                                                    disabled={disableCheck}
-                                                    onChange={(e) => {
-                                                      setSelectedGroupOptionQtys((prev) => {
-                                                        const prevG = prev[g.id] ?? {};
-                                                        const nextG = { ...prevG };
-                                                        if (e.target.checked) nextG[o.id] = 1;
-                                                        else delete nextG[o.id];
-
-                                                        // Enforce pick cap by dropping extras (keep earliest existing).
-                                                        const ids = Object.keys(nextG);
-                                                        if (pick > 0 && ids.length > pick) {
-                                                          const toRemove = ids.slice(pick);
-                                                          for (const rid of toRemove) delete nextG[rid];
-                                                        }
-                                                        return { ...prev, [g.id]: nextG };
-                                                      });
-                                                    }}
-                                                  />
-                                                }
-                                                label={
-                                                  <span>
-                                                    {o.name}
-                                                    {o.additionalPrice ? ` (+${formatMoney(o.additionalPrice)})` : ''}
-                                                  </span>
-                                                }
-                                              />
-                                            );
-                                          }
-
-                                          // Optional group: qty stepper
-                                          const canIncrease = qty < maxQty && (pick === 0 || selectedCount < pick || qty > 0);
-                                          return (
-                                            <div key={o.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                                              <span style={{ flex: 1 }}>
-                                                {o.name}
-                                                {o.additionalPrice ? ` (+${formatMoney(o.additionalPrice)} each)` : ''}
-                                              </span>
-                                              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                <Button
-                                                  size="small"
-                                                  variant="outlined"
-                                                  disabled={qty === 0}
-                                                  onClick={() => setSelectedGroupOptionQtys((prev) => {
-                                                    const prevG = prev[g.id] ?? {};
-                                                    const nextQty = Math.max(0, (prevG[o.id] ?? 0) - 1);
-                                                    const nextG = { ...prevG };
-                                                    if (nextQty === 0) delete nextG[o.id];
-                                                    else nextG[o.id] = nextQty;
-                                                    return { ...prev, [g.id]: nextG };
-                                                  })}
-                                                  style={{ minWidth: 28, padding: '2px 6px' }}
-                                                >−</Button>
-                                                <Typography variant="body2" style={{ minWidth: 20, textAlign: 'center', fontWeight: 700 }}>{qty}</Typography>
-                                                <Button
-                                                  size="small"
-                                                  variant="outlined"
-                                                  disabled={!canIncrease || (qty === 0 && !canSelectMore)}
-                                                  onClick={() => setSelectedGroupOptionQtys((prev) => {
-                                                    const prevG = prev[g.id] ?? {};
-                                                    const nextQty = (prevG[o.id] ?? 0) + 1;
-                                                    const nextG = { ...prevG, [o.id]: nextQty };
-                                                    return { ...prev, [g.id]: nextG };
-                                                  })}
-                                                  style={{ minWidth: 28, padding: '2px 6px' }}
-                                                >+</Button>
-                                              </div>
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-
-                                {previewPricing ? <div>{renderPricingBreakdown(previewPricing, customerMode)}</div> : null}
-                              </div>
-                            ) : isSelected ? (
-                              <Typography variant="body2" className={styles.muted}>This item is not available in the current mode or is sold out.</Typography>
-                            ) : null}
                           </div>
                         );
                       })}
@@ -985,6 +940,244 @@ export default function MenuBuilder() {
             <strong>&ldquo;{blockedDeleteCategoryName}&rdquo;</strong> is still assigned to one or more items.
             Remove the category from all items before deleting it.
           </Typography>
+        </div>
+      </DialogPopup>
+
+      <Dialog
+        open={isCartDeleteOpen}
+        onClose={() => {
+          setIsCartDeleteOpen(false);
+          setCartDeleteTargetItemId(null);
+        }}
+        fullWidth
+        maxWidth="sm"
+      >
+        <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className={styles.row} style={{ justifyContent: 'space-between' }}>
+            <Typography variant="h6" style={{ fontWeight: 900 }}>Delete from cart</Typography>
+            <IconButton
+              size="small"
+              onClick={() => {
+                setIsCartDeleteOpen(false);
+                setCartDeleteTargetItemId(null);
+              }}
+            >
+              ×
+            </IconButton>
+          </div>
+
+          {cartItems.length === 0 ? (
+            <Typography variant="body2" className={styles.muted}>Cart is empty.</Typography>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 360, overflow: 'auto' }}>
+              {cartItems
+                .filter((ci) => (cartDeleteTargetItemId ? ci.itemId === cartDeleteTargetItemId : false))
+                .map((ci, idx) => {
+                const item = items.find((x) => x.id === ci.itemId);
+                const selections = ci.selections ?? {};
+                const selectionParts = (item?.optionGroups ?? []).flatMap((g) => {
+                  const gSel = selections[g.id] ?? {};
+                  const picked = Object.entries(gSel).filter(([, q]) => q > 0);
+                  if (!picked.length) return [];
+                  const names = picked
+                    .map(([optId, q]) => {
+                      const opt = (g.options ?? []).find((o) => o.id === optId);
+                      if (!opt) return null;
+                      return q > 1 ? `${opt.name} x${q}` : opt.name;
+                    })
+                    .filter(Boolean);
+                  return names.length ? [`${g.name}: ${names.join(', ')}`] : [];
+                });
+
+                return (
+                  <div key={ci.id} className={styles.itemRow} style={{ padding: '8px 10px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                      <Typography variant="body2" style={{ fontWeight: 800 }}>
+                        {idx + 1}. {ci.itemName} - {formatMoney(ci.pricingTotal ?? 0)}
+                      </Typography>
+                      {selectionParts.length ? (
+                        <Typography variant="caption" className={styles.muted}>
+                          {selectionParts.join(' · ')}
+                        </Typography>
+                      ) : null}
+                    </div>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => {
+                        setCartItems((prev) => prev.filter((x) => x.id !== ci.id));
+                      }}
+                      title="Delete this item"
+                    >
+                      <DeleteOutlineRoundedIcon fontSize="small" />
+                    </IconButton>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </Dialog>
+
+      <DialogPopup
+        title={selectedItem ? `Add ${selectedItem.name}` : 'Add item'}
+        isOpen={isPreviewAddOpen}
+        setIsOpen={setIsPreviewAddOpen}
+        actionTitle="Add"
+        actionDisabled={!selectedItem || !canOrderSelectedItem || !isPreviewSelectionValid}
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!selectedItem || !previewPricing) return;
+          console.log('[MenuBuilder][Preview] add item', {
+            itemId: selectedItem.id,
+            itemName: selectedItem.name,
+            mode: customerMode,
+            selections: selectedGroupOptionQtys,
+            pricing: previewPricing,
+          });
+          setCartItems((prev) => [
+            ...prev,
+            {
+              id: makeId(),
+              itemId: selectedItem.id,
+              itemName: selectedItem.name,
+              mode: customerMode,
+              selections: JSON.parse(JSON.stringify(selectedGroupOptionQtys ?? {})),
+              pricingTotal: previewPricing.total,
+            },
+          ]);
+          closePreviewAdd();
+        }}
+        maxWidth="sm"
+      >
+        <div style={{ padding: '12px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {selectedItem ? (
+            <>
+              {(selectedItem.optionGroups ?? []).length ? (
+                (selectedItem.optionGroups ?? []).map((g) => {
+                  const pick = normalizeNumber(g.pick ?? 0);
+                  const required = !!g.required;
+                  const gSel = selectedGroupOptionQtys[g.id] ?? {};
+                  const selectedCount = Object.values(gSel).reduce((s, q) => s + (q > 0 ? 1 : 0), 0);
+                  const canSelectMore = pick === 0 || selectedCount < pick;
+
+                  const header = required
+                    ? `${g.name} (Pick ${pick || 1}) MUST`
+                    : `${g.name} (Optional${pick > 0 ? `, Max: ${pick}` : ''})`;
+
+                  return (
+                    <div key={g.id}>
+                      <Typography variant="caption" className={styles.muted} style={{ fontWeight: 900 }}>
+                        {header}
+                      </Typography>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 6 }}>
+                        {(g.options ?? []).map((o) => {
+                          const qty = gSel[o.id] ?? 0;
+                          const maxQty = Math.max(1, normalizeNumber(o.maxQty ?? 1));
+
+                          const isMust = required && (pick > 0 || required);
+                          if (isMust && (pick || 1) > 0) {
+                            const checked = qty > 0;
+                            const disableCheck = !checked && !canSelectMore;
+                            return (
+                              <FormControlLabel
+                                key={o.id}
+                                control={
+                                  <Checkbox
+                                    checked={checked}
+                                    disabled={disableCheck}
+                                    onChange={(e2) => {
+                                      setSelectedGroupOptionQtys((prev) => {
+                                        const prevG = prev[g.id] ?? {};
+                                        const nextG = { ...prevG };
+                                        if (e2.target.checked) nextG[o.id] = 1;
+                                        else delete nextG[o.id];
+
+                                        const requiredPick = pick > 0 ? pick : 1;
+                                        const ids = Object.keys(nextG);
+                                        if (requiredPick > 0 && ids.length > requiredPick) {
+                                          const toRemove = ids.slice(requiredPick);
+                                          for (const rid of toRemove) delete nextG[rid];
+                                        }
+                                        return { ...prev, [g.id]: nextG };
+                                      });
+                                    }}
+                                  />
+                                }
+                                label={
+                                  <span>
+                                    {o.name}
+                                    {o.additionalPrice ? ` (+${formatMoney(o.additionalPrice)})` : ''}
+                                  </span>
+                                }
+                              />
+                            );
+                          }
+
+                          const canIncrease = qty < maxQty && (pick === 0 || selectedCount < pick || qty > 0);
+                          return (
+                            <div key={o.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                              <span style={{ flex: 1 }}>
+                                {o.name}
+                                {o.additionalPrice ? ` (+${formatMoney(o.additionalPrice)} each` : ''}
+                                {o.additionalPrice && maxQty > 1 ? `, Max: ${maxQty})` : o.additionalPrice ? ')' : ''}
+                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <Button
+                                  size="small"
+                                  variant="outlined"
+                                  disabled={qty === 0}
+                                  onClick={() => setSelectedGroupOptionQtys((prev) => {
+                                    const prevG = prev[g.id] ?? {};
+                                    const nextQty = Math.max(0, (prevG[o.id] ?? 0) - 1);
+                                    const nextG = { ...prevG };
+                                    if (nextQty === 0) delete nextG[o.id];
+                                    else nextG[o.id] = nextQty;
+                                    return { ...prev, [g.id]: nextG };
+                                  })}
+                                  style={{ minWidth: 28, padding: '2px 6px' }}
+                                >−</Button>
+                                <Typography variant="body2" style={{ minWidth: 20, textAlign: 'center', fontWeight: 700 }}>{qty}</Typography>
+                                <Button
+                                  size="small"
+                                  variant="outlined"
+                                  disabled={!canIncrease || (qty === 0 && !canSelectMore)}
+                                  onClick={() => setSelectedGroupOptionQtys((prev) => {
+                                    const prevG = prev[g.id] ?? {};
+                                    const nextQty = (prevG[o.id] ?? 0) + 1;
+                                    const nextG = { ...prevG, [o.id]: nextQty };
+                                    return { ...prev, [g.id]: nextG };
+                                  })}
+                                  style={{ minWidth: 28, padding: '2px 6px' }}
+                                >+</Button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <Typography variant="body2" className={styles.muted}>
+                  No options for this item.
+                </Typography>
+              )}
+
+              {previewPricing ? <div>{renderPricingBreakdown(previewPricing, customerMode)}</div> : null}
+
+              {!isPreviewSelectionValid ? (
+                <Typography variant="caption" style={{ color: '#d32f2f' }}>
+                  Please complete all MUST selections.
+                </Typography>
+              ) : null}
+            </>
+          ) : (
+            <Typography variant="body2" className={styles.muted}>
+              Select an item to add.
+            </Typography>
+          )}
         </div>
       </DialogPopup>
 
