@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './MenuBuilder.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
@@ -8,6 +8,8 @@ import { Button, Checkbox, Dialog, FormControlLabel, IconButton, Menu, MenuItem,
 import AddCircleOutlineRoundedIcon from '@mui/icons-material/AddCircleOutlineRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import DialogPopup from '@/components/DialogPopup/DialogPopup';
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 
@@ -217,6 +219,7 @@ export default function MenuBuilder() {
   const [cartItems, setCartItems] = useState([]); // { id, itemId, itemName, mode, selections, pricingTotal }
   const [isCartDeleteOpen, setIsCartDeleteOpen] = useState(false);
   const [cartDeleteTargetItemId, setCartDeleteTargetItemId] = useState(null);
+  const [isPreviewFullscreenOpen, setIsPreviewFullscreenOpen] = useState(false);
 
   const selectedItem = useMemo(() => items.find((i) => i.id === selectedItemId) ?? null, [items, selectedItemId]);
   const previewCartQtyByItemId = useMemo(() => {
@@ -313,6 +316,10 @@ export default function MenuBuilder() {
   const [itemMenuAnchor, setItemMenuAnchor] = useState(null);
   const openItemMenu = (e, itemId) => setItemMenuAnchor({ el: e.currentTarget, itemId });
   const closeItemMenu = () => setItemMenuAnchor(null);
+
+  const previewRef = useRef(null);
+  const openPreviewFullscreen = () => setIsPreviewFullscreenOpen(true);
+  const closePreviewFullscreen = () => setIsPreviewFullscreenOpen(false);
 
   const openNewItemEditor = () => {
     const firstCategoryId = categories?.[0]?.id ?? null;
@@ -598,20 +605,28 @@ export default function MenuBuilder() {
   return (
     <div className={styles.root}>
       <div className={styles.stickyHeader}>
-        <div className={styles.stickyHeaderInner}>
-          <div>
-            <FieldHeader
-              title="Menu Builder"
-              type="h3"
-              description="Set up categories, items, and pricing rules. All data stays in local state for this mock."
-            />
-          </div>
-          <div className={styles.stickyHeaderActions}>
-            <Button variant="contained" onClick={handlePublishMenu}>
-              Save Menu / Publish
-            </Button>
-          </div>
-        </div>
+        <HeaderSection
+          noMaxWidth
+          title="Menu Builder"
+          description={
+            <p>
+              Set up categories, items, and pricing rules. All data stays in local state for this mock.
+            </p>
+          }
+          buttonText="Save Menu / Publish"
+          rightActions={
+            <IconButton
+              className={styles.mobilePreviewButton}
+              size="small"
+              onClick={openPreviewFullscreen}
+              title="Open menu preview"
+            >
+              <VisibilityOutlinedIcon fontSize="small" />
+            </IconButton>
+          }
+          onClick={handlePublishMenu}
+          showCancelButton={false}
+        />
       </div>
 
       <div className={styles.layout}>
@@ -792,7 +807,7 @@ export default function MenuBuilder() {
           </Menu>
         </div>
 
-        <div className={styles.previewBox}>
+        <div className={styles.previewBox} ref={previewRef}>
           <ContentCard className={styles.fullWidth}>
             <FieldHeader
               title="Menu Preview"
@@ -927,6 +942,151 @@ export default function MenuBuilder() {
           </ContentCard>
         </div>
       </div>
+
+      <Dialog open={isPreviewFullscreenOpen} onClose={closePreviewFullscreen} fullScreen>
+        <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className={styles.row} style={{ justifyContent: 'space-between' }}>
+            <Typography variant="h6" style={{ fontWeight: 900 }}>Menu Preview</Typography>
+            <IconButton size="small" onClick={closePreviewFullscreen}>×</IconButton>
+          </div>
+
+          {/* reuse the same preview UI */}
+          <div style={{ flex: 1, overflow: 'auto' }}>
+            <ContentCard className={styles.fullWidth}>
+              <FieldHeader
+                title="Menu Preview"
+                type="h3"
+                description="This is what customers see after scanning the QR. Select variants/add-ons to see transparent pricing."
+              />
+
+              <div
+                className={styles.row}
+                style={{ margin: '10px 0 12px', justifyContent: 'space-between', width: '100%' }}
+              >
+                <Typography variant="caption" className={styles.muted} style={{ fontWeight: 800 }}>
+                  Customer mode
+                </Typography>
+
+                {shopAcceptance === 'both' ? (
+                  <RadioGroup row value={customerMode} onChange={(e) => setCustomerMode(e.target.value)}>
+                    <FormControlLabel value="takeaway" control={<Radio size="small" />} label="Takeaway" />
+                    <FormControlLabel value="dine-in" control={<Radio size="small" />} label="Dine-in" />
+                  </RadioGroup>
+                ) : (
+                  <Typography variant="caption" className={styles.muted}>
+                    {shopAcceptance === 'takeaway' ? 'Takeaway only' : 'Dine-in only'}
+                  </Typography>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {visibleCategories.length === 0 ? (
+                  <Typography variant="body2" className={styles.muted}>No visible categories yet.</Typography>
+                ) : (
+                  visibleCategories.map((cat) => {
+                    const catItems = (itemsByCategory.get(cat.id) ?? []).filter((i) => {
+                      if (customerMode === 'takeaway') return i.availableTakeaway;
+                      return i.availableDineIn;
+                    });
+
+                    if (catItems.length === 0) return null;
+
+                    return (
+                      <div key={cat.id} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <Typography variant="subtitle1" style={{ fontWeight: 900 }}>
+                          {cat.name}
+                        </Typography>
+
+                        {catItems.map((item) => {
+                          const isAvailableTakeaway = !!item.availableTakeaway;
+                          const isAvailableDineIn = !!item.availableDineIn;
+
+                          const isDisabled =
+                            !!item.soldOut ||
+                            (customerMode === 'takeaway' ? !isAvailableTakeaway : !isAvailableDineIn);
+
+                          const baseForFees = computeBaseForFees({ item, fulfilmentMode: customerMode });
+                          const displayedTotal = baseForFees;
+
+                          return (
+                            <div key={item.id} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                              <div className={styles.itemRow} style={{ padding: 10 }}>
+                                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                                  {item.photo?.url ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img className={styles.thumb} src={item.photo.url} alt={item.name} />
+                                  ) : (
+                                    <div className={styles.thumb} />
+                                  )}
+                                  <div>
+                                    <Typography style={{ fontWeight: 900, lineHeight: 1.2 }}>{item.name}</Typography>
+                                    <Typography variant="caption" className={styles.muted}>
+                                      {customerMode === 'takeaway' ? (
+                                        isAvailableTakeaway ? <>Takeaway: {formatMoney(displayedTotal)}</> : null
+                                      ) : (
+                                        isAvailableDineIn ? <>Dine-in: {formatMoney(displayedTotal)}</> : null
+                                      )}
+                                    </Typography>
+                                  </div>
+                                </div>
+                                <div className={styles.row} style={{ gap: 10 }}>
+                                  {item.featured ? <span className={styles.recommendedBadge}>Recommended</span> : null}
+                                  {item.soldOut ? <span className={styles.soldOutBadge}>Sold out</span> : null}
+                                  {(previewCartQtyByItemId[item.id] ?? 0) > 0 ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                      <Button
+                                        size="small"
+                                        variant="outlined"
+                                        disabled={(previewCartQtyByItemId[item.id] ?? 0) === 0}
+                                        onClick={() => {
+                                          const qty = previewCartQtyByItemId[item.id] ?? 0;
+                                          if (qty >= 2) {
+                                            openCartDeletePopup(item.id);
+                                            return;
+                                          }
+                                          removeOneCartItemByItemId(item.id);
+                                        }}
+                                        style={{ minWidth: 28, padding: '2px 6px' }}
+                                      >
+                                        −
+                                      </Button>
+                                      <Typography variant="body2" style={{ minWidth: 18, textAlign: 'center', fontWeight: 800 }}>
+                                        {previewCartQtyByItemId[item.id] ?? 0}
+                                      </Typography>
+                                      <Button
+                                        size="small"
+                                        variant="outlined"
+                                        disabled={isDisabled}
+                                        onClick={() => openPreviewAdd(item)}
+                                        style={{ minWidth: 28, padding: '2px 6px' }}
+                                      >
+                                        +
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <IconButton
+                                      size="small"
+                                      disabled={isDisabled}
+                                      onClick={() => openPreviewAdd(item)}
+                                      title="Add"
+                                    >
+                                      <AddCircleOutlineRoundedIcon />
+                                    </IconButton>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </ContentCard>
+          </div>
+        </div>
+      </Dialog>
 
       <DialogPopup
         title="Cannot delete category"

@@ -27,6 +27,10 @@
   align-items: center;
 }
 
+.mobilePreviewButton {
+  display: none;
+}
+
 .layout {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
@@ -37,6 +41,14 @@
 @media (max-width: 1100px) {
   .layout {
     grid-template-columns: 1fr;
+  }
+
+  .previewBox {
+    display: none;
+  }
+
+  .mobilePreviewButton {
+    display: inline-flex;
   }
 }
 
