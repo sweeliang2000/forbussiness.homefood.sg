@@ -58,10 +58,7 @@ const getDefaultItem = (categoryId) => ({
   pricingOverrideType: PRICING_OVERRIDE_TYPES.GLOBAL,
   pricingOverrideCustomPercent: 0,
   pricingOverrideFixedPrice: 0,
-  variantsMaxSelection: 1,
-  addOnsMaxTotal: 0,
-  variants: [],
-  addOns: [],
+  optionGroups: [],
 });
 
 const getItemEditorPhotoFromItem = (item) => {
@@ -76,17 +73,35 @@ const computeBaseForFees = ({ item, fulfilmentMode }) => {
   return normalizeNumber(item.takeawayBasePrice);
 };
 
-const computeVariantDelta = ({ selectedVariantId, item }) => {
-  if (!selectedVariantId) return 0;
-  const v = item.variants?.find((x) => x.id === selectedVariantId);
-  return normalizeNumber(v?.additionalPrice);
+const computeOptionsDelta = ({ selectedGroupOptionQtys, item }) => {
+  const groups = item.optionGroups ?? [];
+  const sel = selectedGroupOptionQtys ?? {};
+  let sum = 0;
+  for (const g of groups) {
+    const gSel = sel[g.id] ?? {};
+    for (const opt of (g.options ?? [])) {
+      const qty = gSel[opt.id] ?? 0;
+      sum += qty * normalizeNumber(opt.additionalPrice);
+    }
+  }
+  return sum;
 };
 
-const computeAddOnDelta = ({ selectedAddOnQtys, item }) => {
-  return (item.addOns ?? []).reduce((sum, a) => {
-    const qty = (selectedAddOnQtys ?? {})[a.id] ?? 0;
-    return sum + qty * normalizeNumber(a.additionalPrice);
-  }, 0);
+const buildDefaultGroupSelections = (item) => {
+  const out = {};
+  for (const g of (item?.optionGroups ?? [])) {
+    const pick = normalizeNumber(g.pick ?? 0);
+    if (!g.required || pick <= 0) continue;
+    const opts = g.options ?? [];
+    if (!opts.length) continue;
+    const gSel = {};
+    // Default: pick the first N options (qty=1 each).
+    for (let i = 0; i < Math.min(pick, opts.length); i += 1) {
+      gSel[opts[i].id] = 1;
+    }
+    out[g.id] = gSel;
+  }
+  return out;
 };
 
 export default function MenuBuilder() {
@@ -117,15 +132,27 @@ export default function MenuBuilder() {
       pricingOverrideType: PRICING_OVERRIDE_TYPES.GLOBAL,
       pricingOverrideCustomPercent: 0,
       pricingOverrideFixedPrice: 0,
-      variantsMaxSelection: 1,
-      addOnsMaxTotal: 0,
-      variants: [
-        { id: 'v-spice-mild', name: 'Mild', additionalPrice: 0 },
-        { id: 'v-spice-spicy', name: 'Spicy', additionalPrice: 1.0 },
-      ],
-      addOns: [
-        { id: 'a-extra-sauce', name: 'Extra Sauce', additionalPrice: 0.5, maxQty: 3 },
-        { id: 'a-cheese-dust', name: 'Cheese Dust', additionalPrice: 1.0, maxQty: 2 },
+      optionGroups: [
+        {
+          id: 'og-spice',
+          name: 'Spice level',
+          required: true,
+          pick: 1,
+          options: [
+            { id: 'opt-mild', name: 'Mild', additionalPrice: 0, maxQty: 1 },
+            { id: 'opt-spicy', name: 'Spicy', additionalPrice: 1.0, maxQty: 1 },
+          ],
+        },
+        {
+          id: 'og-addons',
+          name: 'Add Ons',
+          required: false,
+          pick: 0, // 0 = unlimited
+          options: [
+            { id: 'opt-extra-sauce', name: 'Extra Sauce', additionalPrice: 0.5, maxQty: 3 },
+            { id: 'opt-cheese-dust', name: 'Cheese Dust', additionalPrice: 1.0, maxQty: 2 },
+          ],
+        },
       ],
     },
     {
@@ -143,10 +170,22 @@ export default function MenuBuilder() {
       pricingOverrideType: PRICING_OVERRIDE_TYPES.CUSTOM_PERCENT,
       pricingOverrideCustomPercent: 5,
       pricingOverrideFixedPrice: 0,
-      variantsMaxSelection: 1,
-      addOnsMaxTotal: 0,
-      variants: [{ id: 'v-grill', name: 'Grilled', additionalPrice: 0 }],
-      addOns: [{ id: 'a-salad', name: 'Side Salad', additionalPrice: 4.0, maxQty: 1 }],
+      optionGroups: [
+        {
+          id: 'og-cook',
+          name: 'Cooking',
+          required: true,
+          pick: 1,
+          options: [{ id: 'opt-grilled', name: 'Grilled', additionalPrice: 0, maxQty: 1 }],
+        },
+        {
+          id: 'og-addons-steak',
+          name: 'Add Ons',
+          required: false,
+          pick: 0,
+          options: [{ id: 'opt-salad', name: 'Side Salad', additionalPrice: 4.0, maxQty: 1 }],
+        },
+      ],
     },
   ]);
 
@@ -172,8 +211,7 @@ export default function MenuBuilder() {
 
   // Preview selection state.
   const [selectedItemId, setSelectedItemId] = useState(null);
-  const [selectedVariantId, setSelectedVariantId] = useState(null);
-  const [selectedAddOnQtys, setSelectedAddOnQtys] = useState({});
+  const [selectedGroupOptionQtys, setSelectedGroupOptionQtys] = useState({});
 
   const selectedItem = useMemo(() => items.find((i) => i.id === selectedItemId) ?? null, [items, selectedItemId]);
 
@@ -187,8 +225,7 @@ export default function MenuBuilder() {
     // When switching preview mode, clear the selection so the preview always matches
     // "what customer can order".
     setSelectedItemId(null);
-    setSelectedVariantId(null);
-    setSelectedAddOnQtys({});
+    setSelectedGroupOptionQtys({});
   }, [customerMode]);
 
   useEffect(() => {
@@ -196,8 +233,7 @@ export default function MenuBuilder() {
     const stillExists = items.some((i) => i.id === selectedItemId);
     if (!stillExists) {
       setSelectedItemId(null);
-      setSelectedVariantId(null);
-      setSelectedAddOnQtys({});
+      setSelectedGroupOptionQtys({});
     }
   }, [items, selectedItemId]);
 
@@ -278,19 +314,20 @@ export default function MenuBuilder() {
       pricingOverrideCustomPercent: normalizeNumber(itemEditor.pricingOverrideCustomPercent),
       pricingOverrideFixedPrice: normalizeNumber(itemEditor.pricingOverrideFixedPrice),
       photo,
-      variantsMaxSelection: Math.max(1, normalizeNumber(itemEditor.variantsMaxSelection ?? 1)),
-      addOnsMaxTotal: Math.max(0, normalizeNumber(itemEditor.addOnsMaxTotal ?? 0)),
-      variants: (itemEditor.variants ?? []).map((v) => ({
-        id: v.id ?? makeId(),
-        name: v.name ?? '',
-        additionalPrice: normalizeNumber(v.additionalPrice),
-      })),
-      addOns: (itemEditor.addOns ?? []).map((a) => ({
-        id: a.id ?? makeId(),
-        name: a.name ?? '',
-        additionalPrice: normalizeNumber(a.additionalPrice),
-        maxQty: Math.max(1, normalizeNumber(a.maxQty ?? 1)),
-      })),
+      optionGroups: (itemEditor.optionGroups ?? []).map((g) => ({
+        id: g.id ?? makeId(),
+        name: (g.name ?? '').trim(),
+        required: !!g.required,
+        pick: Math.max(0, normalizeNumber(g.pick ?? 0)),
+        options: (g.options ?? [])
+          .map((o) => ({
+            id: o.id ?? makeId(),
+            name: (o.name ?? '').trim(),
+            additionalPrice: normalizeNumber(o.additionalPrice),
+            maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
+          }))
+          .filter((o) => !!o.name),
+      })).filter((g) => !!g.name),
     };
 
     setItems((prev) => {
@@ -353,18 +390,17 @@ export default function MenuBuilder() {
           customPercent: normalizeNumber(i.pricingOverrideCustomPercent),
           fixedPrice: normalizeNumber(i.pricingOverrideFixedPrice),
         },
-        variantsMaxSelection: i.variantsMaxSelection ?? 1,
-        addOnsMaxTotal: i.addOnsMaxTotal ?? 0,
-        variants: (i.variants ?? []).map((v) => ({
-          id: v.id,
-          name: v.name,
-          additionalPrice: normalizeNumber(v.additionalPrice),
-        })),
-        addOns: (i.addOns ?? []).map((a) => ({
-          id: a.id,
-          name: a.name,
-          additionalPrice: normalizeNumber(a.additionalPrice),
-          maxQty: a.maxQty ?? 1,
+        optionGroups: (i.optionGroups ?? []).map((g) => ({
+          id: g.id,
+          name: g.name,
+          required: !!g.required,
+          pick: normalizeNumber(g.pick ?? 0),
+          options: (g.options ?? []).map((o) => ({
+            id: o.id,
+            name: o.name,
+            additionalPrice: normalizeNumber(o.additionalPrice),
+            maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
+          })),
         })),
       })),
     };
@@ -379,8 +415,7 @@ export default function MenuBuilder() {
 
     const computePreviewPricingForMode = (mode) => {
       const baseForFees = computeBaseForFees({ item: selectedItem, fulfilmentMode: mode });
-      const variantDelta = computeVariantDelta({ selectedVariantId, item: selectedItem });
-      const addOnDelta = computeAddOnDelta({ selectedAddOnQtys, item: selectedItem });
+      const optionsDelta = computeOptionsDelta({ selectedGroupOptionQtys, item: selectedItem });
 
       let fee = 0;
       let feeBreakdown = null;
@@ -423,21 +458,20 @@ export default function MenuBuilder() {
         ? normalizeNumber(selectedItem.dineInPrice) - normalizeNumber(selectedItem.takeawayBasePrice)
         : 0;
 
-      const total = baseForFees + fee + variantDelta + addOnDelta;
+      const total = baseForFees + fee + optionsDelta;
 
       return {
         baseForFees,
         dineInDelta,
         fee,
         feeBreakdown,
-        variantDelta,
-        addOnDelta,
+        optionsDelta,
         total,
       };
     };
 
     return computePreviewPricingForMode(customerMode);
-  }, [selectedItem, selectedVariantId, selectedAddOnQtys, customerMode, storePricing]);
+  }, [selectedItem, selectedGroupOptionQtys, customerMode, storePricing]);
 
   const canOrderSelectedItem = useMemo(() => {
     if (!selectedItem) return false;
@@ -503,17 +537,10 @@ export default function MenuBuilder() {
           </div>
         ) : null}
 
-        {pricing.variantDelta ? (
+        {pricing.optionsDelta ? (
           <div className={styles.breakdownLine}>
-            <span className={styles.muted}>Variant</span>
-            <span style={{ fontWeight: 800 }}>+{formatMoney(pricing.variantDelta)}</span>
-          </div>
-        ) : null}
-
-        {pricing.addOnDelta ? (
-          <div className={styles.breakdownLine}>
-            <span className={styles.muted}>Add-ons</span>
-            <span style={{ fontWeight: 800 }}>+{formatMoney(pricing.addOnDelta)}</span>
+            <span className={styles.muted}>Options</span>
+            <span style={{ fontWeight: 800 }}>+{formatMoney(pricing.optionsDelta)}</span>
           </div>
         ) : null}
 
@@ -812,8 +839,7 @@ export default function MenuBuilder() {
                                   disabled={isDisabled}
                                   onClick={() => {
                                     setSelectedItemId(item.id);
-                                    setSelectedVariantId(item.variants?.[0]?.id ?? null);
-                                    setSelectedAddOnQtys({});
+                                    setSelectedGroupOptionQtys(buildDefaultGroupSelections(item));
                                   }}
                                 >
                                   {isSelected ? 'Selected' : 'Customize'}
@@ -823,67 +849,102 @@ export default function MenuBuilder() {
 
                             {isSelected && canOrderSelectedItem ? (
                               <div>
-                                {item.variants?.length ? (
-                                  <div style={{ marginBottom: 10 }}>
-                                    <Typography variant="caption" className={styles.muted}>
-                                      Variants — pick {item.variantsMaxSelection ?? 1}
-                                    </Typography>
-                                    <RadioGroup
-                                      value={selectedVariantId ?? ''}
-                                      onChange={(e) => setSelectedVariantId(e.target.value)}
-                                      style={{ flexDirection: 'column' }}
-                                    >
-                                      {item.variants.map((v) => (
-                                        <FormControlLabel
-                                          key={v.id}
-                                          value={v.id}
-                                          control={<Radio />}
-                                          label={
-                                            <span>
-                                              {v.name}
-                                              {v.additionalPrice ? ` (+${formatMoney(v.additionalPrice)})` : ''}
-                                            </span>
-                                          }
-                                        />
-                                      ))}
-                                    </RadioGroup>
-                                  </div>
-                                ) : null}
+                                {(item.optionGroups ?? []).map((g) => {
+                                  const pick = normalizeNumber(g.pick ?? 0);
+                                  const required = !!g.required;
+                                  const gSel = selectedGroupOptionQtys[g.id] ?? {};
+                                  const selectedCount = Object.values(gSel).reduce((s, q) => s + (q > 0 ? 1 : 0), 0);
+                                  const canSelectMore = pick === 0 || selectedCount < pick;
 
-                                {item.addOns?.length ? (() => {
-                                  const maxTotal = item.addOnsMaxTotal ?? 0;
-                                  const totalSelected = Object.values(selectedAddOnQtys).reduce((s, q) => s + q, 0);
+                                  const header = required
+                                    ? `${g.name} (Pick ${pick || 1}) MUST`
+                                    : `${g.name} (Optional${pick > 0 ? ` • Pick up to ${pick}` : ''})`;
+
                                   return (
-                                    <div style={{ marginBottom: 10 }}>
-                                      <Typography variant="caption" className={styles.muted}>
-                                        Add-ons{maxTotal > 0 ? ` — max ${maxTotal} total` : ' — unlimited'}
-                                        {maxTotal > 0 ? ` (${totalSelected}/${maxTotal} selected)` : ''}
+                                    <div key={g.id} style={{ marginBottom: 12 }}>
+                                      <Typography variant="caption" className={styles.muted} style={{ fontWeight: 800 }}>
+                                        {header}
                                       </Typography>
+
                                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 6 }}>
-                                        {item.addOns.map((a) => {
-                                          const qty = selectedAddOnQtys[a.id] ?? 0;
-                                          const aMaxQty = a.maxQty ?? 1;
-                                          const canIncrease = qty < aMaxQty && (maxTotal === 0 || totalSelected < maxTotal);
+                                        {(g.options ?? []).map((o) => {
+                                          const qty = gSel[o.id] ?? 0;
+                                          const maxQty = Math.max(1, normalizeNumber(o.maxQty ?? 1));
+
+                                          // For MUST groups, treat as selection (qty 0/1).
+                                          const isMust = required && pick > 0;
+                                          if (isMust) {
+                                            const checked = qty > 0;
+                                            const disableCheck = !checked && !canSelectMore;
+                                            return (
+                                              <FormControlLabel
+                                                key={o.id}
+                                                control={
+                                                  <Checkbox
+                                                    checked={checked}
+                                                    disabled={disableCheck}
+                                                    onChange={(e) => {
+                                                      setSelectedGroupOptionQtys((prev) => {
+                                                        const prevG = prev[g.id] ?? {};
+                                                        const nextG = { ...prevG };
+                                                        if (e.target.checked) nextG[o.id] = 1;
+                                                        else delete nextG[o.id];
+
+                                                        // Enforce pick cap by dropping extras (keep earliest existing).
+                                                        const ids = Object.keys(nextG);
+                                                        if (pick > 0 && ids.length > pick) {
+                                                          const toRemove = ids.slice(pick);
+                                                          for (const rid of toRemove) delete nextG[rid];
+                                                        }
+                                                        return { ...prev, [g.id]: nextG };
+                                                      });
+                                                    }}
+                                                  />
+                                                }
+                                                label={
+                                                  <span>
+                                                    {o.name}
+                                                    {o.additionalPrice ? ` (+${formatMoney(o.additionalPrice)})` : ''}
+                                                  </span>
+                                                }
+                                              />
+                                            );
+                                          }
+
+                                          // Optional group: qty stepper
+                                          const canIncrease = qty < maxQty && (pick === 0 || selectedCount < pick || qty > 0);
                                           return (
-                                            <div key={a.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                                            <div key={o.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                                               <span style={{ flex: 1 }}>
-                                                {a.name}
-                                                {a.additionalPrice ? ` (+${formatMoney(a.additionalPrice)} each)` : ''}
+                                                {o.name}
+                                                {o.additionalPrice ? ` (+${formatMoney(o.additionalPrice)} each)` : ''}
                                               </span>
                                               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                                 <Button
                                                   size="small"
                                                   variant="outlined"
                                                   disabled={qty === 0}
-                                                  onClick={() => setSelectedAddOnQtys((prev) => ({ ...prev, [a.id]: Math.max(0, (prev[a.id] ?? 0) - 1) }))}
+                                                  onClick={() => setSelectedGroupOptionQtys((prev) => {
+                                                    const prevG = prev[g.id] ?? {};
+                                                    const nextQty = Math.max(0, (prevG[o.id] ?? 0) - 1);
+                                                    const nextG = { ...prevG };
+                                                    if (nextQty === 0) delete nextG[o.id];
+                                                    else nextG[o.id] = nextQty;
+                                                    return { ...prev, [g.id]: nextG };
+                                                  })}
                                                   style={{ minWidth: 28, padding: '2px 6px' }}
                                                 >−</Button>
                                                 <Typography variant="body2" style={{ minWidth: 20, textAlign: 'center', fontWeight: 700 }}>{qty}</Typography>
                                                 <Button
                                                   size="small"
                                                   variant="outlined"
-                                                  disabled={!canIncrease}
-                                                  onClick={() => setSelectedAddOnQtys((prev) => ({ ...prev, [a.id]: (prev[a.id] ?? 0) + 1 }))}
+                                                  disabled={!canIncrease || (qty === 0 && !canSelectMore)}
+                                                  onClick={() => setSelectedGroupOptionQtys((prev) => {
+                                                    const prevG = prev[g.id] ?? {};
+                                                    const nextQty = (prevG[o.id] ?? 0) + 1;
+                                                    const nextG = { ...prevG, [o.id]: nextQty };
+                                                    return { ...prev, [g.id]: nextG };
+                                                  })}
                                                   style={{ minWidth: 28, padding: '2px 6px' }}
                                                 >+</Button>
                                               </div>
@@ -893,7 +954,7 @@ export default function MenuBuilder() {
                                       </div>
                                     </div>
                                   );
-                                })() : null}
+                                })}
 
                                 {previewPricing ? <div>{renderPricingBreakdown(previewPricing, customerMode)}</div> : null}
                               </div>
@@ -934,6 +995,7 @@ export default function MenuBuilder() {
         actionTitle="Save"
         actionDisabled={!itemEditor?.name?.trim() || !itemEditor?.categoryIds?.length}
         onSubmit={handleItemEditorSubmit}
+        maxWidth="md"
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20, padding: '8px 24px' }}>
           <FieldHeader title="Item details" type="h4" description="Name, description, and base pricing." />
@@ -1057,165 +1119,190 @@ export default function MenuBuilder() {
 
           <div className={styles.dividerLine} />
 
-          <FieldHeader title="Variants" type="h4" description="Single-select options (e.g. Cup vs Cone). Each option can have an additional price." />
+          <FieldHeader
+            title="Option Groups"
+            type="h4"
+            description="Create groups like “Combo”, “Drink”, or “Add Ons (Optional)”."
+          />
 
-          <div className={styles.row} style={{ gap: 16, alignItems: 'center' }}>
-            <TextField
-              type="number"
-              label="Max selections"
-              size="small"
-              value={itemEditor.variantsMaxSelection ?? 1}
-              onChange={(e) => setItemEditorField({ variantsMaxSelection: Math.max(1, normalizeNumber(e.target.value)) })}
-              inputProps={{ min: 1, step: 1 }}
-              style={{ width: 140 }}
-              helperText="Default: 1"
-            />
-          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {(itemEditor.optionGroups ?? []).map((g) => (
+              <div key={g.id} style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, padding: 12 }}>
+                <div className={styles.row} style={{ gap: 10, flexWrap: 'wrap', marginBottom: 18 }}>
+                  <TextField
+                    label="Group name"
+                    size="small"
+                    value={g.name ?? ''}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      setItemEditor((prev) => ({
+                        ...prev,
+                        optionGroups: (prev.optionGroups ?? []).map((x) => (x.id === g.id ? { ...x, name } : x)),
+                      }));
+                    }}
+                    style={{ flex: 1, minWidth: 220, marginBottom: 24 }}
+                  />
+                  <TextField
+                    type="number"
+                    label="Pick"
+                    size="small"
+                    value={g.pick ?? 0}
+                    onChange={(e) => {
+                      const pick = Math.max(0, normalizeNumber(e.target.value));
+                      setItemEditor((prev) => ({
+                        ...prev,
+                        optionGroups: (prev.optionGroups ?? []).map((x) => (x.id === g.id ? { ...x, pick } : x)),
+                      }));
+                    }}
+                    inputProps={{ min: 0, step: 1 }}
+                    style={{ width: 110 }}
+                    helperText="0 = unlimited"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={!!g.required}
+                        onChange={(e) => {
+                          const required = e.target.checked;
+                          setItemEditor((prev) => ({
+                            ...prev,
+                            optionGroups: (prev.optionGroups ?? []).map((x) => (x.id === g.id ? { ...x, required } : x)),
+                          }));
+                        }}
+                      />
+                    }
+                    label="MUST"
+                    style={{ marginBottom: 24 }}
+                  />
+                </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {(itemEditor.variants ?? []).map((v) => (
-              <div key={v.id} className={styles.row} style={{ gap: 10 }}>
-                <TextField
-                  label="Option name"
-                  size="small"
-                  value={v.name}
-                  onChange={(e) => {
-                    const name = e.target.value;
-                    setItemEditor((prev) => ({
-                      ...prev,
-                      variants: (prev.variants ?? []).map((x) => (x.id === v.id ? { ...x, name } : x)),
-                    }));
-                  }}
-                  style={{ flex: 1, minWidth: 160 }}
-                />
-                <TextField
-                  type="number"
-                  label="Additional Price (SGD $)"
-                  size="small"
-                  value={v.additionalPrice ?? 0}
-                  onChange={(e) => {
-                    const additionalPrice = normalizeNumber(e.target.value);
-                    setItemEditor((prev) => ({
-                      ...prev,
-                      variants: (prev.variants ?? []).map((x) => (x.id === v.id ? { ...x, additionalPrice } : x)),
-                    }));
-                  }}
-                  inputProps={{ min: 0, step: 0.01 }}
-                  style={{ width: 170 }}
-                />
-                <Button
-                  size="small"
-                  variant="text"
-                  color="error"
-                  onClick={() => {
-                    setItemEditor((prev) => ({ ...prev, variants: (prev.variants ?? []).filter((x) => x.id !== v.id) }));
-                  }}
-                >
-                  Remove
-                </Button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
+                  {(g.options ?? []).map((o) => (
+                    <div key={o.id} className={styles.row} style={{ gap: 10, flexWrap: 'nowrap', alignItems: 'center' }}>
+                      <TextField
+                        label="Option name"
+                        size="small"
+                        value={o.name ?? ''}
+                        onChange={(e) => {
+                          const name = e.target.value;
+                          setItemEditor((prev) => ({
+                            ...prev,
+                            optionGroups: (prev.optionGroups ?? []).map((x) => (
+                              x.id === g.id
+                                ? { ...x, options: (x.options ?? []).map((y) => (y.id === o.id ? { ...y, name } : y)) }
+                                : x
+                            )),
+                          }));
+                        }}
+                        style={{ flex: 1, minWidth: 160 }}
+                      />
+                      <TextField
+                        type="number"
+                        label="Additional Price (SGD $)"
+                        size="small"
+                        value={o.additionalPrice ?? 0}
+                        onChange={(e) => {
+                          const additionalPrice = normalizeNumber(e.target.value);
+                          setItemEditor((prev) => ({
+                            ...prev,
+                            optionGroups: (prev.optionGroups ?? []).map((x) => (
+                              x.id === g.id
+                                ? { ...x, options: (x.options ?? []).map((y) => (y.id === o.id ? { ...y, additionalPrice } : y)) }
+                                : x
+                            )),
+                          }));
+                        }}
+                        inputProps={{ min: 0, step: 0.01 }}
+                        style={{ width: 158 }}
+                      />
+                      <TextField
+                        type="number"
+                        label="Max servings"
+                        size="small"
+                        value={o.maxQty ?? 1}
+                        onChange={(e) => {
+                          const maxQty = Math.max(1, normalizeNumber(e.target.value));
+                          setItemEditor((prev) => ({
+                            ...prev,
+                            optionGroups: (prev.optionGroups ?? []).map((x) => (
+                              x.id === g.id
+                                ? { ...x, options: (x.options ?? []).map((y) => (y.id === o.id ? { ...y, maxQty } : y)) }
+                                : x
+                            )),
+                          }));
+                        }}
+                        inputProps={{ min: 1, step: 1 }}
+                        style={{ width: 98 }}
+                        helperText=""
+                      />
+                      <Button
+                        size="small"
+                        variant="text"
+                        color="error"
+                        onClick={() => {
+                          setItemEditor((prev) => ({
+                            ...prev,
+                            optionGroups: (prev.optionGroups ?? []).map((x) => (
+                              x.id === g.id ? { ...x, options: (x.options ?? []).filter((y) => y.id !== o.id) } : x
+                            )),
+                          }));
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+
+                  <div className={styles.row} style={{ justifyContent: 'space-between' }}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => {
+                        setItemEditor((prev) => ({
+                          ...prev,
+                          optionGroups: (prev.optionGroups ?? []).map((x) => (
+                            x.id === g.id
+                              ? { ...x, options: [...(x.options ?? []), { id: makeId(), name: '', additionalPrice: 0, maxQty: 1 }] }
+                              : x
+                          )),
+                        }));
+                      }}
+                    >
+                      Add option
+                    </Button>
+
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => {
+                        setItemEditor((prev) => ({
+                          ...prev,
+                          optionGroups: (prev.optionGroups ?? []).filter((x) => x.id !== g.id),
+                        }));
+                      }}
+                      title="Remove group"
+                    >
+                      <DeleteOutlineRoundedIcon fontSize="small" />
+                    </IconButton>
+                  </div>
+                </div>
               </div>
             ))}
+
             <Button
               size="small"
               variant="outlined"
               onClick={() => {
                 setItemEditor((prev) => ({
                   ...prev,
-                  variants: [...(prev.variants ?? []), { id: makeId(), name: '', additionalPrice: 0 }],
+                  optionGroups: [
+                    ...(prev.optionGroups ?? []),
+                    { id: makeId(), name: '', required: false, pick: 0, options: [] },
+                  ],
                 }));
               }}
             >
-              Add Option
-            </Button>
-          </div>
-
-          <div className={styles.dividerLine} />
-
-          <FieldHeader title="Add-ons" type="h4" description="Optional extras customers can add. Each add-on can have a price and a max serving quantity." />
-
-          <div className={styles.row} style={{ gap: 16, alignItems: 'center' }}>
-            <TextField
-              type="number"
-              label="Max total add-ons"
-              size="small"
-              value={itemEditor.addOnsMaxTotal ?? 0}
-              onChange={(e) => setItemEditorField({ addOnsMaxTotal: Math.max(0, normalizeNumber(e.target.value)) })}
-              inputProps={{ min: 0, step: 1 }}
-              style={{ width: 160 }}
-              helperText="0 = unlimited"
-            />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {(itemEditor.addOns ?? []).map((a) => (
-              <div key={a.id} className={styles.row} style={{ gap: 10, flexWrap: 'wrap' }}>
-                <TextField
-                  label="Add-on name"
-                  size="small"
-                  value={a.name}
-                  onChange={(e) => {
-                    const name = e.target.value;
-                    setItemEditor((prev) => ({
-                      ...prev,
-                      addOns: (prev.addOns ?? []).map((x) => (x.id === a.id ? { ...x, name } : x)),
-                    }));
-                  }}
-                  style={{ flex: 1, minWidth: 150 }}
-                />
-                <TextField
-                  type="number"
-                  label="Additional Price (SGD $)"
-                  size="small"
-                  value={a.additionalPrice ?? 0}
-                  onChange={(e) => {
-                    const additionalPrice = normalizeNumber(e.target.value);
-                    setItemEditor((prev) => ({
-                      ...prev,
-                      addOns: (prev.addOns ?? []).map((x) => (x.id === a.id ? { ...x, additionalPrice } : x)),
-                    }));
-                  }}
-                  inputProps={{ min: 0, step: 0.01 }}
-                  style={{ width: 170 }}
-                />
-                <TextField
-                  type="number"
-                  label="Max servings"
-                  size="small"
-                  value={a.maxQty ?? 1}
-                  onChange={(e) => {
-                    const maxQty = Math.max(1, normalizeNumber(e.target.value));
-                    setItemEditor((prev) => ({
-                      ...prev,
-                      addOns: (prev.addOns ?? []).map((x) => (x.id === a.id ? { ...x, maxQty } : x)),
-                    }));
-                  }}
-                  inputProps={{ min: 1, step: 1 }}
-                  style={{ width: 110 }}
-                  helperText=""
-                />
-                <Button
-                  size="small"
-                  variant="text"
-                  color="error"
-                  onClick={() => {
-                    setItemEditor((prev) => ({ ...prev, addOns: (prev.addOns ?? []).filter((x) => x.id !== a.id) }));
-                  }}
-                >
-                  Remove
-                </Button>
-              </div>
-            ))}
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={() => {
-                setItemEditor((prev) => ({
-                  ...prev,
-                  addOns: [...(prev.addOns ?? []), { id: makeId(), name: '', additionalPrice: 0, maxQty: 1 }],
-                }));
-              }}
-            >
-              Add Add-on
+              Add option group
             </Button>
           </div>
         </div>
