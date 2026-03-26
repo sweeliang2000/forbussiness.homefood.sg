@@ -614,6 +614,7 @@ export default function MenuBuilder() {
             </p>
           }
           buttonText="Save Menu / Publish"
+          sx={{ textTransform: 'none' }}
           rightActions={
             <IconButton
               className={styles.mobilePreviewButton}
@@ -664,6 +665,7 @@ export default function MenuBuilder() {
               />
               <Button
                 variant="contained"
+                sx={{ textTransform: 'none' }}
                 onClick={() => {
                   const name = newCategoryName.trim();
                   if (!name) return;
@@ -720,7 +722,7 @@ export default function MenuBuilder() {
             <div className={styles.sectionHeader}>
               <div className={styles.row} style={{ justifyContent: 'space-between' }}>
                 <FieldHeader title="Items" type="h3" description="Add/edit/delete items with photo, pricing, and sold-out/featured toggles." />
-                <Button variant="contained" onClick={openNewItemEditor}>
+                <Button variant="contained" sx={{ textTransform: 'none' }} onClick={openNewItemEditor}>
                   Add Item
                 </Button>
               </div>
