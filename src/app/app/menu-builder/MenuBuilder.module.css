@@ -48,6 +48,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-top: 16px;
 }
 
 .row {
@@ -109,6 +110,7 @@
 
 .previewBox {
   padding: 12px;
+  margin-top: 4px;
 }
 
 .optionPill {
