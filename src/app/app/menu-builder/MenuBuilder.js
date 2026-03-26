@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import styles from './MenuBuilder.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
-import { Button, Checkbox, FormControlLabel, MenuItem, Radio, RadioGroup, Select, Switch, TextField, Typography } from '@mui/material';
+import { Button, Checkbox, FormControlLabel, IconButton, Menu, MenuItem, Radio, RadioGroup, Select, Switch, TextField, Typography } from '@mui/material';
+import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import DialogPopup from '@/components/DialogPopup/DialogPopup';
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 
@@ -222,6 +223,11 @@ export default function MenuBuilder() {
   const [isItemEditorOpen, setIsItemEditorOpen] = useState(false);
   const [itemEditor, setItemEditor] = useState(getDefaultItem(categories?.[0]?.id));
   const [editorPhotoImages, setEditorPhotoImages] = useState([]);
+
+  // Per-item gear-menu anchor: { itemId, el }
+  const [itemMenuAnchor, setItemMenuAnchor] = useState(null);
+  const openItemMenu = (e, itemId) => setItemMenuAnchor({ el: e.currentTarget, itemId });
+  const closeItemMenu = () => setItemMenuAnchor(null);
 
   const openNewItemEditor = () => {
     const firstCategoryId = categories?.[0]?.id ?? null;
@@ -655,33 +661,9 @@ export default function MenuBuilder() {
                                 <Typography variant="caption" className={styles.muted}>Sold out</Typography>
                                 <Switch checked={!!item.soldOut} onChange={(e) => handleQuickSoldOut(item.id, e.target.checked)} size="small" />
                               </div>
-                              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                                <Typography variant="caption" className={styles.muted}>Featured</Typography>
-                                <Switch checked={!!item.featured} onChange={(e) => handleQuickFeatured(item.id, e.target.checked)} size="small" />
-                              </div>
-                              <Select
-                                size="small"
-                                value={item.availableTakeaway && item.availableDineIn ? 'both' : item.availableTakeaway ? 'takeaway' : item.availableDineIn ? 'dine-in' : 'none'}
-                                onChange={(e) => {
-                                  const v = e.target.value;
-                                  if (v === 'both') handleQuickAvailability(item.id, { availableTakeaway: true, availableDineIn: true });
-                                  else if (v === 'takeaway') handleQuickAvailability(item.id, { availableTakeaway: true, availableDineIn: false });
-                                  else if (v === 'dine-in') handleQuickAvailability(item.id, { availableTakeaway: false, availableDineIn: true });
-                                  else handleQuickAvailability(item.id, { availableTakeaway: false, availableDineIn: false });
-                                }}
-                              >
-                                <MenuItem value="both">Takeaway + Dine-in</MenuItem>
-                                <MenuItem value="takeaway">Takeaway</MenuItem>
-                                <MenuItem value="dine-in">Dine-in</MenuItem>
-                                <MenuItem value="none">Not available</MenuItem>
-                              </Select>
-
-                              <Button size="small" variant="outlined" onClick={() => openEditItemEditor(item)}>
-                                Edit
-                              </Button>
-                              <Button size="small" variant="text" color="error" onClick={() => deleteItem(item.id)}>
-                                Delete
-                              </Button>
+                              <IconButton size="small" onClick={(e) => openItemMenu(e, item.id)}>
+                                <SettingsRoundedIcon fontSize="small" />
+                              </IconButton>
                             </div>
                           </div>
                         ))}
@@ -692,6 +674,32 @@ export default function MenuBuilder() {
               })}
             </div>
           </ContentCard>
+
+          {/* Gear dropdown — shared across all item rows */}
+          <Menu
+            anchorEl={itemMenuAnchor?.el}
+            open={!!itemMenuAnchor}
+            onClose={closeItemMenu}
+          >
+            <MenuItem
+              onClick={() => {
+                const item = items.find((i) => i.id === itemMenuAnchor?.itemId);
+                if (item) openEditItemEditor(item);
+                closeItemMenu();
+              }}
+            >
+              Edit item
+            </MenuItem>
+            <MenuItem
+              sx={{ color: 'error.main' }}
+              onClick={() => {
+                if (itemMenuAnchor?.itemId) deleteItem(itemMenuAnchor.itemId);
+                closeItemMenu();
+              }}
+            >
+              Delete item
+            </MenuItem>
+          </Menu>
         </div>
 
         <div className={styles.previewBox}>
@@ -893,21 +901,6 @@ export default function MenuBuilder() {
         onSubmit={handleItemEditorSubmit}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20, padding: '8px 24px' }}>
-          <FieldHeader title="Item image" type="h4" description="Upload a photo for this menu item." />
-          <DragDropImageUploader
-            images={editorPhotoImages}
-            setImages={setEditorPhotoImages}
-            noOfImages={1}
-            isMultiple={false}
-            resetSaving={() => {}}
-            width={240}
-            height={140}
-            imageClassName={styles.fullWidth}
-            disabled={false}
-          />
-
-          <div className={styles.dividerLine} />
-
           <FieldHeader title="Item details" type="h4" description="Name, description, and base pricing." />
 
           <div>
@@ -991,6 +984,21 @@ export default function MenuBuilder() {
 
           <div className={styles.dividerLine} />
 
+          <FieldHeader title="Item image (Optional)" type="h4" description="Upload a photo for this menu item." />
+          <DragDropImageUploader
+            images={editorPhotoImages}
+            setImages={setEditorPhotoImages}
+            noOfImages={1}
+            isMultiple={false}
+            resetSaving={() => {}}
+            width={240}
+            height={140}
+            imageClassName={styles.fullWidth}
+            disabled={false}
+          />
+
+          <div className={styles.dividerLine} />
+
           <FieldHeader title="Toggles" type="h4" />
 
           <div className={styles.row} style={{ gap: 8, flexWrap: 'wrap' }}>
@@ -1011,51 +1019,6 @@ export default function MenuBuilder() {
               label="Dine-in"
             />
           </div>
-
-          <div className={styles.dividerLine} />
-
-          <FieldHeader title="Pricing Setup (Override)" type="h4" description="Choose whether this item uses store Service+GST, or applies a custom fee." />
-
-          <Select
-            fullWidth
-            size="small"
-            value={itemEditor.pricingOverrideType}
-            onChange={(e) => {
-              const next = e.target.value;
-              setItemEditorField({ pricingOverrideType: next });
-            }}
-          >
-            <MenuItem value={PRICING_OVERRIDE_TYPES.GLOBAL}>Global (Service then GST)</MenuItem>
-            <MenuItem value={PRICING_OVERRIDE_TYPES.CUSTOM_PERCENT}>Custom % (skips store service+GST)</MenuItem>
-            <MenuItem value={PRICING_OVERRIDE_TYPES.FIXED_PRICE}>Fixed price (skips store service+GST)</MenuItem>
-            <MenuItem value={PRICING_OVERRIDE_TYPES.EXEMPT}>Exempt (skips service+GST)</MenuItem>
-          </Select>
-
-          {itemEditor.pricingOverrideType === PRICING_OVERRIDE_TYPES.CUSTOM_PERCENT ? (
-            <TextField
-              type="number"
-              label="Custom %"
-              fullWidth
-              size="small"
-              value={itemEditor.pricingOverrideCustomPercent}
-              onChange={(e) => setItemEditorField({ pricingOverrideCustomPercent: normalizeNumber(e.target.value) })}
-              style={{ marginTop: 10 }}
-              inputProps={{ min: 0, step: 0.01 }}
-            />
-          ) : null}
-
-          {itemEditor.pricingOverrideType === PRICING_OVERRIDE_TYPES.FIXED_PRICE ? (
-            <TextField
-              type="number"
-              label="Fixed surcharge amount"
-              fullWidth
-              size="small"
-              value={itemEditor.pricingOverrideFixedPrice}
-              onChange={(e) => setItemEditorField({ pricingOverrideFixedPrice: normalizeNumber(e.target.value) })}
-              style={{ marginTop: 10 }}
-              inputProps={{ min: 0, step: 0.01 }}
-            />
-          ) : null}
 
           <div className={styles.dividerLine} />
 
@@ -1193,7 +1156,7 @@ export default function MenuBuilder() {
                   }}
                   inputProps={{ min: 1, step: 1 }}
                   style={{ width: 110 }}
-                  helperText="Per customer"
+                  helperText=""
                 />
                 <Button
                   size="small"
