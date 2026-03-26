@@ -182,17 +182,6 @@ export default function Sidebar({
                     }
 
                     <Submenu
-                        title={'Stamp System'}
-                        submenus={[
-                            { href: '/app/stamp-management', title: 'Stamp Managment' },
-                            { href: '/app/card-design', title: 'Card Design' }
-                        ]}
-                        isExpand={currentSelection == STAMP_TAB}
-                        icon={LuStamp}
-                        onClick={() => { toggleMenus(STAMP_TAB) }}
-                    />
-
-                    <Submenu
                         title={'Menu & Orders'}
                         submenus={[
                             { href: '/app/menu-builder', title: 'Menu Builder' },
@@ -202,6 +191,17 @@ export default function Sidebar({
                         isExpand={currentSelection == MENU_ORDERS_TAB}
                         icon={LuUtensils}
                         onClick={() => { toggleMenus(MENU_ORDERS_TAB) }}
+                    />
+
+                    <Submenu
+                        title={'Stamp System'}
+                        submenus={[
+                            { href: '/app/stamp-management', title: 'Stamp Managment' },
+                            { href: '/app/card-design', title: 'Card Design' }
+                        ]}
+                        isExpand={currentSelection == STAMP_TAB}
+                        icon={LuStamp}
+                        onClick={() => { toggleMenus(STAMP_TAB) }}
                     />
                     
                     <Submenu
