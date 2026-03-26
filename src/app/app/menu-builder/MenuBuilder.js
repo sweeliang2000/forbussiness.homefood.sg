@@ -6,6 +6,7 @@ import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import { Button, Checkbox, FormControlLabel, IconButton, Menu, MenuItem, Radio, RadioGroup, Select, Switch, TextField, Typography } from '@mui/material';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import DialogPopup from '@/components/DialogPopup/DialogPopup';
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 
@@ -152,6 +153,16 @@ export default function MenuBuilder() {
   // Category creation.
   const [newCategoryName, setNewCategoryName] = useState('');
   const [draggingCategoryId, setDraggingCategoryId] = useState(null);
+  const [blockedDeleteCategoryName, setBlockedDeleteCategoryName] = useState(null);
+
+  const handleDeleteCategory = (cat) => {
+    const inUse = items.some((i) => (i.categoryIds ?? []).includes(cat.id));
+    if (inUse) {
+      setBlockedDeleteCategoryName(cat.name);
+    } else {
+      setCategories((prev) => prev.filter((c) => c.id !== cat.id));
+    }
+  };
 
   // Store acceptance: whether the shop accepts takeaway, dine-in, or both.
   const [shopAcceptance, setShopAcceptance] = useState('takeaway'); // 'takeaway' | 'dine-in' | 'both'
@@ -601,11 +612,20 @@ export default function MenuBuilder() {
                       </Typography>
                     </div>
                   </div>
-                  <Switch
-                    checked={cat.isVisible}
-                    onChange={(e) => setCategories((prev) => prev.map((x) => (x.id === cat.id ? { ...x, isVisible: e.target.checked } : x)))}
-                    size="small"
-                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Switch
+                      checked={cat.isVisible}
+                      onChange={(e) => setCategories((prev) => prev.map((x) => (x.id === cat.id ? { ...x, isVisible: e.target.checked } : x)))}
+                      size="small"
+                    />
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleDeleteCategory(cat)}
+                    >
+                      <DeleteOutlineRoundedIcon fontSize="small" />
+                    </IconButton>
+                  </div>
                 </div>
               ))}
             </div>
@@ -891,6 +911,21 @@ export default function MenuBuilder() {
           </ContentCard>
         </div>
       </div>
+
+      <DialogPopup
+        title="Cannot delete category"
+        isOpen={!!blockedDeleteCategoryName}
+        setIsOpen={(open) => { if (!open) setBlockedDeleteCategoryName(null); }}
+        actionTitle="OK"
+        onSubmit={(e) => { e.preventDefault(); setBlockedDeleteCategoryName(null); }}
+      >
+        <div style={{ padding: '16px 24px' }}>
+          <Typography variant="body1">
+            <strong>&ldquo;{blockedDeleteCategoryName}&rdquo;</strong> is still assigned to one or more items.
+            Remove the category from all items before deleting it.
+          </Typography>
+        </div>
+      </DialogPopup>
 
       <DialogPopup
         title={itemEditor?.id ? 'Edit Item' : 'Add Item'}
