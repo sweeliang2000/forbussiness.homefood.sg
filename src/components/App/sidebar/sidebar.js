@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import styles from './sidebar.module.css';
-import { LuClipboardList, LuLayoutDashboard, LuCreditCard } from 'react-icons/lu';
+import { LuClipboardList, LuLayoutDashboard, LuCreditCard, LuUtensils } from 'react-icons/lu';
 import { AiOutlineMessage, AiOutlineLineChart } from 'react-icons/ai';
 import { BsGift } from 'react-icons/bs';
 import { RiQrScan2Line } from "react-icons/ri";
@@ -35,6 +35,7 @@ export default function Sidebar({
     const SCAN_TO_WIN_TAB = 'SCAN_TO_WIN_TAB';
     const POINTS_TAB = 'POINTS_TAB';
     const REDEEMABLE_TAB = 'REDEEMABLE_TAB';
+    const MENU_ORDERS_TAB = 'MENU_ORDERS_TAB';
 
     const pathname = usePathname();
     const pathSegments = pathname.split('/');
@@ -83,6 +84,12 @@ export default function Sidebar({
             setCurrentSelection(RELEASES_TAB);
         } else if (currentSection === 'stamp-management' || currentSection === 'card-design') {
             setCurrentSelection(STAMP_TAB);
+        } else if (
+            currentSection === 'menu-builder' ||
+            currentSection === 'order-queue' ||
+            currentSection === 'payments-setup'
+        ) {
+            setCurrentSelection(MENU_ORDERS_TAB);
         } else if (currentSection === 'redeemable') {
             setCurrentSelection(REDEEMABLE_TAB);
         } else if (currentSection === 'scan-to-win') {
@@ -183,6 +190,18 @@ export default function Sidebar({
                         isExpand={currentSelection == STAMP_TAB}
                         icon={LuStamp}
                         onClick={() => { toggleMenus(STAMP_TAB) }}
+                    />
+
+                    <Submenu
+                        title={'Menu & Orders'}
+                        submenus={[
+                            { href: '/app/menu-builder', title: 'Menu Builder' },
+                            { href: '/app/order-queue', title: 'Order Queue' },
+                            { href: '/app/payments-setup', title: 'Payments Setup' }
+                        ]}
+                        isExpand={currentSelection == MENU_ORDERS_TAB}
+                        icon={LuUtensils}
+                        onClick={() => { toggleMenus(MENU_ORDERS_TAB) }}
                     />
                     
                     <Submenu
