@@ -86,6 +86,7 @@ export default function Sidebar({
             setCurrentSelection(STAMP_TAB);
         } else if (
             currentSection === 'menu-builder' ||
+            currentSection === 'shop-settings' ||
             currentSection === 'order-queue' ||
             currentSection === 'payments-setup'
         ) {
@@ -185,6 +186,7 @@ export default function Sidebar({
                         title={'Menu & Orders'}
                         submenus={[
                             { href: '/app/menu-builder', title: 'Menu Builder' },
+                            { href: '/app/shop-settings', title: 'Ordering Settings' },
                             { href: '/app/order-queue', title: 'Order Queue' },
                             { href: '/app/payments-setup', title: 'Payments Setup' }
                         ]}
