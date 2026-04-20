@@ -45,7 +45,7 @@ export default function Sidebar({
     const subscriptionPlan = SUBSCRIPTION_DATA.find(plan => plan.lookup_key === subscriptionStatus);
 
     const [sidebarMinimised, setSidebarMinimised] = useState(false);
-    const [currentSelection, setCurrentSelection] = useState(undefined);
+    const [currentSelection, setCurrentSelection] = useState(MENU_ORDERS_TAB);
     const [isLoadingPortal, setIsLoadingPortal] = useState(false);
     const [cancelDate, setCancelDate] = useState(null);
 
@@ -195,7 +195,7 @@ export default function Sidebar({
                         onClick={() => { toggleMenus(MENU_ORDERS_TAB) }}
                     />
 
-                    <Submenu
+                    {/* <Submenu
                         title={'Stamp System'}
                         submenus={[
                             { href: '/app/stamp-management', title: 'Stamp Managment' },
@@ -216,7 +216,7 @@ export default function Sidebar({
                         isExpand={currentSelection == SCAN_TO_WIN_TAB}
                         icon={RiQrScan2Line}
                         onClick={() => { toggleMenus(SCAN_TO_WIN_TAB) }}
-                    />
+                    /> */}
 
                     {/* <Submenu
                         title={'Points System'}
@@ -229,7 +229,7 @@ export default function Sidebar({
                         onClick={() => { toggleMenus(POINTS_TAB) }}
                     /> */}
 
-                    <Submenu
+                    {/* <Submenu
                         title={'Redeemable'}
                         submenus={[
                             { href: '/app/redeemable/rewards', title: 'All Rewards' },
@@ -240,7 +240,7 @@ export default function Sidebar({
                         isExpand={currentSelection == REDEEMABLE_TAB}
                         icon={BsGift}
                         onClick={() => { toggleMenus(REDEEMABLE_TAB) }}
-                    />
+                    /> */}
 
                     {/* {
                         !sidebarMinimised && <li className={styles.labelLi}>
