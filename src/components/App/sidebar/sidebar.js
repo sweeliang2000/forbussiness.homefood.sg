@@ -185,10 +185,10 @@ export default function Sidebar({
                     <Submenu
                         title={'Menu & Orders'}
                         submenus={[
-                            { href: '/app/menu-builder', title: 'Menu Builder' },
                             { href: '/app/shop-settings', title: 'Ordering Settings' },
-                            { href: '/app/order-queue', title: 'Order Queue' },
-                            { href: '/app/payments-setup', title: 'Payments Setup' }
+                            { href: '/app/menu-builder', title: 'Menu Builder' },
+                            { href: '/app/payments-setup', title: 'Payments Setup' },
+                            { href: '/app/order-queue', title: 'Order Queue' }
                         ]}
                         isExpand={currentSelection == MENU_ORDERS_TAB}
                         icon={LuUtensils}
