@@ -2,7 +2,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Link from 'next/link';
 import {
   Alert,
   Accordion,
@@ -74,10 +73,10 @@ export default function ShopSettingsPage() {
   });
 
   // SECTION 2 — Order Settings
+  const [orderMode, setOrderMode] = useState('today_and_preorder');
   const [defaultDailyQuota, setDefaultDailyQuota] = useState(50);
-  const [bookingDaysAhead, setBookingDaysAhead] = useState(7);
-  const [cutoffTime, setCutoffTime] = useState('22:00');
-  const [minNoticeHours, setMinNoticeHours] = useState(2);
+  const [bookingDaysAhead, setBookingDaysAhead] = useState(90);
+  const [minNoticeHours, setMinNoticeHours] = useState(0.5);
 
   // SECTION 3 — Ordering Calendar
   const initialViewMonth = useMemo(() => new Date(2026, 3, 1), []); // April 2026
@@ -249,7 +248,7 @@ export default function ShopSettingsPage() {
       </div>
 
       <div className={styles.content}>
-        <Accordion defaultExpanded>
+        <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <div>
               <Typography sx={{ fontWeight: 900 }}>Ordering Hours</Typography>
@@ -332,17 +331,31 @@ export default function ShopSettingsPage() {
           </AccordionDetails>
         </Accordion>
 
-        <Accordion defaultExpanded>
+        <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <div>
               <Typography sx={{ fontWeight: 900 }}>Order Settings</Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.25 }}>
-                Control how far ahead customers can book, daily order limits, and cutoff times for advance orders.
+                Choose whether to allow immediate orders today, plus how many days ahead customers can pre-order.
               </Typography>
             </div>
           </AccordionSummary>
           <AccordionDetails>
             <div className={styles.grid2}>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <Typography sx={{ fontWeight: 800, fontSize: 14, marginBottom: 1 }}>Order mode</Typography>
+                <RadioGroup value={orderMode} onChange={(e) => setOrderMode(e.target.value)}>
+                  <FormControlLabel
+                    value="today_and_preorder"
+                    control={<Radio size="small" />}
+                    label="Order Today + Pre-order"
+                  />
+                  <FormControlLabel value="preorder_only" control={<Radio size="small" />} label="Pre-order only" />
+                </RadioGroup>
+
+                <br/>
+              </div>
+
               <TextField
                 label="Max items per day (default)"
                 type="number"
@@ -353,32 +366,25 @@ export default function ShopSettingsPage() {
                 size="small"
               />
               <TextField
-                label="Allow booking up to X days ahead"
+                label="Allow pre-orders up to X days ahead"
                 type="number"
-                inputProps={{ min: 1, max: 30 }}
+                inputProps={{ min: 1, max: 90 }}
                 value={bookingDaysAhead}
-                onChange={(e) => setBookingDaysAhead(Math.max(1, Math.min(30, Number(e.target.value))))}
-                helperText="Customers can place orders this many days in advance"
+                onChange={(e) => setBookingDaysAhead(Math.max(1, Math.min(90, Number(e.target.value))))}
+                helperText={
+                  orderMode === 'preorder_only'
+                    ? 'Customers can only pre-order within this range'
+                    : 'Default is 90 days (3 months)'
+                }
                 size="small"
               />
-              <Select
-                value={cutoffTime}
-                size="small"
-                onChange={(e) => setCutoffTime(e.target.value)}
-              >
-                {timeSlots.map((t) => (
-                  <MenuItem key={t} value={t}>
-                    {format12h(t)}
-                  </MenuItem>
-                ))}
-              </Select>
               <TextField
                 label="Minimum hours notice"
                 type="number"
-                inputProps={{ min: 1 }}
+                inputProps={{ min: 0.5, step: 0.5 }}
                 value={minNoticeHours}
-                onChange={(e) => setMinNoticeHours(Math.max(1, Number(e.target.value)))}
-                helperText="Minimum hours before pickup/delivery slot"
+                onChange={(e) => setMinNoticeHours(Math.max(0.5, Number(e.target.value)))}
+                helperText="Set in 0.5-hour steps (default: 0.5 hour)"
                 size="small"
               />
             </div>
