@@ -18,6 +18,8 @@ const UNIT_NUMBER = 'unitNumber';
 const BUILDING_NAME = 'buildingName';
 const STREET_ADDRESS = 'streetAddress';
 const POSTAL_CODE = 'postalCode';
+const UEN_NA_REGEX = /^n\/a$/i;
+const UEN_FORMAT_REGEX = /^[0-9A-Z]{9,10}$/i;
 
 export default function StampSetup() {
   const [isLoading, setIsLoading] = useState(true);
@@ -81,6 +83,23 @@ export default function StampSetup() {
     }))
   };
 
+  const validateOptionalUEN = (value) => {
+    const trimmed = value.trim();
+    if (!trimmed || UEN_NA_REGEX.test(trimmed)) {
+      textfieldErrorHandler(UEN, false);
+      helperTextHandler(UEN, '');
+      return true;
+    }
+    if (!UEN_FORMAT_REGEX.test(trimmed)) {
+      textfieldErrorHandler(UEN, true);
+      helperTextHandler(UEN, "Enter a valid UEN (e.g. 202512345A), or leave this blank / enter 'N/A'.");
+      return false;
+    }
+    textfieldErrorHandler(UEN, false);
+    helperTextHandler(UEN, '');
+    return true;
+  };
+
   const textfieldErrorHandler = (key, value) => {
     setTextfieldError((preValues) => ({
       ...preValues,
@@ -125,6 +144,12 @@ export default function StampSetup() {
   const formSubmissionHandler = async (event) => {
     event.preventDefault();
     setIsBtnLoading(true);
+    clearError();
+
+    if (!validateOptionalUEN(enteredValues[UEN])) {
+      setIsBtnLoading(false);
+      return;
+    }
 
     const payload = {
       [BUSINESS_NAME]: enteredValues[BUSINESS_NAME],
@@ -418,8 +443,8 @@ export default function StampSetup() {
               />
 
               <FormTextField
-                title='Business name*'
-                subtitle='The official business name registered with ACRA. For example, McDonald&apos;s Corporation.'
+                title='Business Name*'
+                subtitle='This is the name customers will see in the app. For home-based or unregistered businesses, you can use your personal name or brand name.'
                 placeholder='McDonald&apos;s Corporation.'
                 id={BUSINESS_NAME}
                 name={BUSINESS_NAME}
@@ -433,23 +458,27 @@ export default function StampSetup() {
 
             <div>
               <FormTextField
-                title='Unique Entity Number (UEN)*'
-                subtitle='The Unique Entity Number (UEN) is a 9- or 10-digit number issued by the Accounting and Corporate Regulatory Authority (ACRA) for registered businesses in Singapore.'
-                placeholder='McDonalds'
+                title='Unique Entity Number (UEN)'
+                subtitle="Required for registered businesses in Singapore. If you are operating a home-based or unregistered business, you may leave this blank or enter 'N/A'."
+                placeholder='e.g. 202512345A or N/A'
                 id={UEN}
                 name={UEN}
                 helperText={helperText.uen}
                 value={enteredValues.uen}
                 error={textfieldError.uen}
                 disabled={isBtnLoading || !isEdit}
-                onChange={(event) => { inputChangeHandler(UEN, event.target.value) }}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  inputChangeHandler(UEN, value);
+                  validateOptionalUEN(value);
+                }}
               />
             </div>
 
             <div>
               <FieldHeader
-                title='Registered Business Address'
-                description='This is the name that customers will see in the app for example, McDonalds.'
+                title='Business Address'
+                description='For registered businesses, enter your official registered address. Home-based businesses can use their residential address or leave this blank if not required.'
                 type='h3'
               />
 
