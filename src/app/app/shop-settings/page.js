@@ -20,6 +20,7 @@ import {
   Typography,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 
 import styles from './ShopSettings.module.css';
 
@@ -54,9 +55,6 @@ const dayNameByIndex = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 
 export default function ShopSettingsPage() {
   const timeSlots = useMemo(() => generateTimeSlots(), []);
   const [isLegendOpen, setIsLegendOpen] = useState(false);
-
-  // Top tabs (Menu Builder placeholder vs Ordering Settings).
-  const [tabValue, setTabValue] = useState('shop'); // UI-only
 
   // SECTION 1 — Ordering Hours
   const [hours, setHours] = useState(() => {
@@ -229,25 +227,24 @@ export default function ShopSettingsPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.tabsRow}>
-        <Button
-          variant={tabValue === 'menu' ? 'contained' : 'outlined'}
-          disabled
-          onClick={() => setTabValue('menu')}
+      <div className={styles.stickyHeader}>
+        <HeaderSection
+          noMaxWidth
+          title="Ordering Settings"
+          description={
+            <p>
+              Configure ordering hours, order mode, and pre-order availability for your shop.
+            </p>
+          }
+          buttonText="Save Settings"
           sx={{ textTransform: 'none' }}
-        >
-          Menu Builder
-        </Button>
-        <Button
-          variant="contained"
-          sx={{ textTransform: 'none' }}
-          onClick={() => setTabValue('shop')}
-        >
-          Ordering Settings
-        </Button>
+          showCancelButton={false}
+          onClick={() => showToast('Settings saved successfully')}
+        />
       </div>
 
       <div className={styles.content}>
+        <br/>
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <div>
@@ -503,21 +500,6 @@ export default function ShopSettingsPage() {
             </div>
           </AccordionDetails>
         </Accordion>
-      </div>
-
-      <div className={styles.stickySave}>
-        <Button
-          variant="contained"
-          fullWidth
-          sx={{
-            textTransform: 'none',
-            backgroundColor: '#2563EB',
-            '&:hover': { backgroundColor: '#2563EB' },
-          }}
-          onClick={() => showToast('Settings saved successfully')}
-        >
-          Save Settings
-        </Button>
       </div>
 
       <Snackbar open={snack.open} autoHideDuration={3000} onClose={() => setSnack({ open: false, message: '' })}>

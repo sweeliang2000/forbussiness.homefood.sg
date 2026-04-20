@@ -3,6 +3,13 @@
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
 }
 
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  background: #fff;
+}
+
 .tabsRow {
   display: flex;
   gap: 12px;
