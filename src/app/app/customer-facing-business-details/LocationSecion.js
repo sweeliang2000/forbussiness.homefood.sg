@@ -1,190 +1,204 @@
 'use client'
+
+import { useEffect, useMemo, useState } from 'react';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import { TextField } from '@mui/material';
+
 import styles from './LocationSection.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
-import {
-    IconButton,
-    Menu,
-    MenuItem,
-    Button
-} from '@mui/material';
-import { useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import AddLocationSection from './AddLocationSection';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
+import OpeningHoursInput from './views/OpeningHoursInput';
 
-const LocationSection = ({ 
-    locations,
-    setLocations,
-    resetSaving,
-    isEdit = true
- }) => {
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [selectedRowId, setSelectedRowId] = useState(null);
-    const [isAddLocationOpen, setIsAddLocationOpen] = useState(false);
-    const paginationModel = { page: 0, pageSize: 10 };
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
-    const [selectedLocation, setSelectedLocation] = useState(null);
+const LOCATION_NAME = 'locationName';
+const ADDRESS = 'address';
+const POSTAL_CODE = 'postalCode';
+const DAY_CONFIG = [
+  { key: 'monday', label: 'Monday' },
+  { key: 'tuesday', label: 'Tuesday' },
+  { key: 'wednesday', label: 'Wednesday' },
+  { key: 'thursday', label: 'Thursday' },
+  { key: 'friday', label: 'Friday' },
+  { key: 'saturday', label: 'Saturday' },
+  { key: 'sunday', label: 'Sunday' },
+];
 
-    const handleMenuOpen = (event, rowId) => {
-        setAnchorEl(event.currentTarget);
-        setSelectedRowId(rowId);
+const sgtTime = (timeStr) => dayjs.tz(`2024-01-01T${timeStr}`, 'Asia/Singapore');
+const makeDefaultHours = () => ({
+  monday: { isOpen: true, start: sgtTime('08:00'), end: sgtTime('22:00') },
+  tuesday: { isOpen: true, start: sgtTime('08:00'), end: sgtTime('22:00') },
+  wednesday: { isOpen: true, start: sgtTime('08:00'), end: sgtTime('22:00') },
+  thursday: { isOpen: true, start: sgtTime('08:00'), end: sgtTime('22:00') },
+  friday: { isOpen: true, start: sgtTime('08:00'), end: sgtTime('22:00') },
+  saturday: { isOpen: true, start: sgtTime('08:00'), end: sgtTime('22:00') },
+  sunday: { isOpen: true, start: sgtTime('08:00'), end: sgtTime('22:00') },
+});
+
+const makeDefaultLocation = () => ({
+  [LOCATION_NAME]: '',
+  [ADDRESS]: '',
+  [POSTAL_CODE]: '',
+  operatingHours: makeDefaultHours(),
+});
+
+const parseHourValue = (rawValue, fallback) => {
+  if (!rawValue) return fallback;
+  const parsed = dayjs.tz(`2024-01-01 ${rawValue}`, 'YYYY-MM-DD hh:mm A', 'Asia/Singapore');
+  return parsed.isValid() ? parsed : fallback;
+};
+
+const formatSGT = (timeValue) => timeValue.tz('Asia/Singapore').format('hh:mm A');
+
+const normalizeFromLocation = (location) => {
+  const fallback = makeDefaultLocation();
+  if (!location) return fallback;
+  const sourceHours = location.operatingHours ?? {};
+  const normalizedHours = {};
+
+  DAY_CONFIG.forEach(({ key }) => {
+    const sourceDay = sourceHours[key] ?? {};
+    const isOpen = sourceDay.isOpen ?? true;
+    const defaultStart = fallback.operatingHours[key].start;
+    const defaultEnd = fallback.operatingHours[key].end;
+    normalizedHours[key] = {
+      isOpen,
+      start: parseHourValue(sourceDay.start, defaultStart),
+      end: parseHourValue(sourceDay.end, defaultEnd),
     };
+  });
 
-    const handleMenuClose = () => {
-        setAnchorEl(null);
-        setSelectedRowId(null);
+  return {
+    [LOCATION_NAME]: location.locationName ?? '',
+    [ADDRESS]: location.address ?? '',
+    [POSTAL_CODE]: location.postalCode ?? '',
+    operatingHours: normalizedHours,
+  };
+};
+
+const toPayloadLocation = (draftLocation) => {
+  const operatingHours = {};
+  DAY_CONFIG.forEach(({ key }) => {
+    const dayValue = draftLocation.operatingHours[key];
+    operatingHours[key] = {
+      isOpen: dayValue.isOpen,
+      start: dayValue.isOpen ? formatSGT(dayValue.start) : '12:00 AM',
+      end: dayValue.isOpen ? formatSGT(dayValue.end) : '12:00 AM',
     };
+  });
 
-    const handleEdit = () => {
-        if (!isEdit) return;
-        console.log('Edit location with id:', selectedRowId);
-        const selectedLocation = locations.filter((location) => location.id === selectedRowId)[0];
+  return {
+    locationName: draftLocation.locationName,
+    address: draftLocation.address,
+    postalCode: draftLocation.postalCode,
+    operatingHours,
+  };
+};
 
-        if (selectedLocation) {
-            setSelectedLocation(selectedLocation);
-            setIsAddLocationOpen(true);
-        } else {
-            console.log('ERROR: No location is found.')
-        }
-    
-        handleMenuClose();
-    };
+const LocationSection = ({
+  location,
+  setLocation,
+  resetSaving,
+  isEdit = true,
+}) => {
+  const initialDraft = useMemo(() => normalizeFromLocation(location), [location]);
+  const [locationDraft, setLocationDraft] = useState(initialDraft);
 
-    const handleDelete = () => {
-        if (!isEdit) return;
-        setLocations((prevLocations) => prevLocations.filter((location) => location.id !== selectedRowId));
-        resetSaving();
-        handleMenuClose();
-    };
+  useEffect(() => {
+    setLocationDraft(normalizeFromLocation(location));
+  }, [location]);
 
-    const columns = [
-        {
-            field: 'locationName',
-            headerName: 'Location Name',
-            // resizable: true,
-            flex: 2, // Optional flex setting for responsive layout
+  const syncLocation = (nextDraft) => {
+    setLocationDraft(nextDraft);
+    setLocation(toPayloadLocation(nextDraft));
+    resetSaving();
+  };
+
+  const updateField = (key, value) => {
+    syncLocation({
+      ...locationDraft,
+      [key]: value,
+    });
+  };
+
+  const updateDay = (dayKey, patch) => {
+    syncLocation({
+      ...locationDraft,
+      operatingHours: {
+        ...locationDraft.operatingHours,
+        [dayKey]: {
+          ...locationDraft.operatingHours[dayKey],
+          ...patch,
         },
-        {
-            field: 'address',
-            headerName: 'Address',
-            // resizable: true,
-            flex: 2,
-        },
-        {
-            field: 'postalCode',
-            headerName: 'Postal Code',
-            // resizable: true,
-            flex: 1,
-        },
-        {
-            field: 'operatingHours',
-            headerName: 'Operating Hours',
-            flex: 2,
-            renderCell: (params) => {
-                // Combine operating hours for each day
-                const hours = params.row.operatingHours;
+      },
+    });
+  };
 
-                return (
-                    <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                        <p>Monday: {hours.monday.isOpen ? `${hours.monday.start} - ${hours.monday.end}` : 'Closed'}</p>
-                        <p>Tuesday: {hours.tuesday.isOpen ? `${hours.tuesday.start} - ${hours.tuesday.end}` : 'Closed'}</p>
-                        <p>Wednesday: {hours.wednesday.isOpen ? `${hours.wednesday.start} - ${hours.wednesday.end}` : 'Closed'}</p>
-                        <p>Thursday: {hours.thursday.isOpen ? `${hours.thursday.start} - ${hours.thursday.end}` : 'Closed'}</p>
-                        <p>Friday: {hours.friday.isOpen ? `${hours.friday.start} - ${hours.friday.end}` : 'Closed'}</p>
-                        <p>Saturday: {hours.saturday.isOpen ? `${hours.saturday.start} - ${hours.saturday.end}` : 'Closed'}</p>
-                        <p>Sunday: {hours.sunday.isOpen ? `${hours.sunday.start} - ${hours.sunday.end}` : 'Closed'}</p>
-                    </div>
-                );
-            }
-        },
-        {
-            field: 'actions',
-            headerName: '',
-            width: 50,
-            sortable: false,
-            align: 'right',
-            renderCell: (params) => (
-                <div>
-                    {isEdit && (
-                        <>
-                            <IconButton onClick={(event) => handleMenuOpen(event, params.row.id)}>
-                                <MoreVertIcon />
-                            </IconButton>
-                            <Menu
-                                anchorEl={anchorEl}
-                                open={Boolean(anchorEl) && selectedRowId === params.row.id}
-                                onClose={handleMenuClose}
-                            >
-                                <MenuItem onClick={handleEdit}>Edit</MenuItem>
-                                <MenuItem onClick={handleDelete}>Delete</MenuItem>
-                            </Menu>
-                        </>
-                    )}
-                </div>
-            ),
-        },
-    ];
+  return (
+    <ContentCard className={styles.content}>
+      <FieldHeader
+        title='Location'
+        description='This setup supports one location. Update the details directly here.'
+        type='h3'
+      />
 
-    const addLocationHandler = () => {
-        if (!isEdit) return;
-        setIsAddLocationOpen(true)
-    };
+      <TextField
+        label='Location Name'
+        variant='outlined'
+        placeholder='Ang Mo Kio Hub'
+        fullWidth
+        value={locationDraft.locationName}
+        onChange={(event) => updateField(LOCATION_NAME, event.target.value)}
+        disabled={!isEdit}
+      />
 
-    const closeAddLocationHandler = () => {
-        setIsAddLocationOpen(false);
-    }
+      <TextField
+        label='Address'
+        variant='outlined'
+        placeholder='53 Ang Mo Kio Ave 3, #01-09/10'
+        fullWidth
+        value={locationDraft.address}
+        onChange={(event) => updateField(ADDRESS, event.target.value)}
+        disabled={!isEdit}
+      />
 
-    return (
-        <>
-            <ContentCard className={styles.content}>
-                <div className={styles.locationHeader}>
-                    <FieldHeader
-                        title='Locations'
-                        type='h3'
-                    />
+      <TextField
+        label='Postal Code'
+        variant='outlined'
+        placeholder='569933'
+        type='number'
+        fullWidth
+        value={locationDraft.postalCode}
+        onChange={(event) => updateField(POSTAL_CODE, event.target.value)}
+        disabled={!isEdit}
+      />
 
-                    <Button
-                        size='small'
-                        onClick={addLocationHandler}
-                        // loading={true}
-                        disabled={!isEdit}
-                        loadingPosition='start'
-                        variant='contained'
-                        className={styles.button}
-                    >
-                        Add Location
-                    </Button>
-                </div>
-            </ContentCard>
-
-            <div className={styles.tableContainer}>
-                <DataGrid
-                    rows={locations}
-                    columns={columns}
-                    initialState={{ pagination: { paginationModel } }}
-                    disableColumnFilter
-                    disableColumnMenu
-                    pageSizeOptions={[10]}
-                    disableSelectionOnClick
-                    getRowHeight={() => 'auto'}
-                    style={{ width: '100%', borderRadius: 12 }} 
-                    pagination
-                />
-            </div>
-
-            <AddLocationSection
-                selectedLocation={selectedLocation}
-                locations={locations}
-                setLocations={setLocations}
-                closeAddLocationHandler={closeAddLocationHandler}
-                isAddLocationOpen={isAddLocationOpen}
-                resetSaving={resetSaving}
-                isEdit={isEdit}
+      <div>
+        <FieldHeader
+          title='Opening Hours'
+          description='Set your operating hours for each day. Turn a day off when your shop is closed.'
+          type='h3'
+        />
+        {DAY_CONFIG.map((day) => (
+          <div key={day.key} className={styles.dayRow}>
+            <OpeningHoursInput
+              dayLabel={day.label}
+              isOpen={locationDraft.operatingHours[day.key].isOpen}
+              onToggleOpen={(event) => updateDay(day.key, { isOpen: event.target.checked })}
+              openTime={locationDraft.operatingHours[day.key].start}
+              closeTime={locationDraft.operatingHours[day.key].end}
+              onOpenTimeChange={(time) => updateDay(day.key, { start: time })}
+              onCloseTimeChange={(time) => updateDay(day.key, { end: time })}
+              disabled={!isEdit}
             />
-        </>
-
-    )
+          </div>
+        ))}
+      </div>
+    </ContentCard>
+  );
 };
 
 export default LocationSection;

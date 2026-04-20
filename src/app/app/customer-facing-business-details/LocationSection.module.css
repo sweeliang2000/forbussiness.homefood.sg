@@ -23,3 +23,7 @@
     display: flex;
     justify-content: space-between;
 }
+
+.dayRow {
+    margin-top: 14px;
+}

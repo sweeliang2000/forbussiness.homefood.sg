@@ -57,7 +57,7 @@ const CustomerFacingBusinessPage = () => {
 
     const [thumbnailImages, setThumbnailImages] = useState([]);
     const [bannerImages, setBannerImages] = useState([]);
-    const [locations, setLocations] = useState([]);
+    const [location, setLocation] = useState(null);
     const [isThumbnailDeleted, setIsThumbnailDeleted] = useState(false);
     const [isBannerDeleted, setIsBannerDeleted] = useState(false);
 
@@ -81,7 +81,7 @@ const CustomerFacingBusinessPage = () => {
     });
     const initialThumbnailImagesRef = useRef([]);
     const initialBannerImagesRef = useRef([]);
-    const initialLocationsRef = useRef([]);
+    const initialLocationRef = useRef(null);
     
     // Track if we've pushed a history state for back button handling
     const historyStatePushedRef = useRef(false);
@@ -133,7 +133,7 @@ const CustomerFacingBusinessPage = () => {
 
         try {
             const formData = new FormData();
-            console.log(locations)
+            console.log(location)
 
             formData.append('displayName', enteredValues[DISPLAY_NAME]);
             formData.append('description', enteredValues[SHOP_DESCRIPTION]);
@@ -149,7 +149,7 @@ const CustomerFacingBusinessPage = () => {
                 formData.append('banner', bannerImages[0].file);
             }
             formData.append('keywords', enteredValues[KEYWORDS]);
-            formData.append('locations', JSON.stringify(locations));
+            formData.append('location', JSON.stringify(location ?? {}));
             
             // Add isThumbnailDeleted flag for PUT requests
             console.log('isThumbnailDeleted', isThumbnailDeleted)
@@ -185,7 +185,7 @@ const CustomerFacingBusinessPage = () => {
             initialValuesRef.current = { ...enteredValues };
             initialThumbnailImagesRef.current = JSON.parse(JSON.stringify(thumbnailImages));
             initialBannerImagesRef.current = JSON.parse(JSON.stringify(bannerImages));
-            initialLocationsRef.current = JSON.parse(JSON.stringify(locations));
+            initialLocationRef.current = JSON.parse(JSON.stringify(location));
         } catch (error) {
             const errorData = error?.response?.data;
             const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
@@ -281,8 +281,11 @@ const CustomerFacingBusinessPage = () => {
                     setBannerImages(loadedBanners);
                     initialBannerImagesRef.current = JSON.parse(JSON.stringify(loadedBanners));
                     
-                    setLocations(data.locations);
-                    initialLocationsRef.current = JSON.parse(JSON.stringify(data.locations));
+                    const loadedLocation = Array.isArray(data.locations)
+                        ? (data.locations[0] ?? null)
+                        : (data.location ?? data.locations ?? null);
+                    setLocation(loadedLocation);
+                    initialLocationRef.current = JSON.parse(JSON.stringify(loadedLocation));
                 } else {
                     setHasExistingData(false);
                     // Initialize with empty values
@@ -296,7 +299,7 @@ const CustomerFacingBusinessPage = () => {
                     };
                     initialThumbnailImagesRef.current = [];
                     initialBannerImagesRef.current = [];
-                    initialLocationsRef.current = [];
+                    initialLocationRef.current = null;
                 }
     
                 setIsLoading(false);
@@ -366,9 +369,9 @@ const CustomerFacingBusinessPage = () => {
             bannerImages.length !== initialBannerImagesRef.current.length;
         
         // Check locations
-        const locationsChanged = JSON.stringify(locations) !== JSON.stringify(initialLocationsRef.current);
+        const locationChanged = JSON.stringify(location) !== JSON.stringify(initialLocationRef.current);
         
-        return formFieldsChanged || thumbnailChanged || bannerChanged || locationsChanged;
+        return formFieldsChanged || thumbnailChanged || bannerChanged || locationChanged;
     };
 
     // Update button disabled state based on unsaved changes
@@ -381,7 +384,7 @@ const CustomerFacingBusinessPage = () => {
         const hasChanges = checkUnsavedChanges();
         setIsBtnDisabled(!hasChanges);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- checkUnsavedChanges derived from deps; omit to avoid re-running every keystroke
-    }, [enteredValues, thumbnailImages, bannerImages, locations, isEdit]);
+    }, [enteredValues, thumbnailImages, bannerImages, location, isEdit]);
 
     // Handle browser refresh/close/back button warning
     useEffect(() => {
@@ -462,7 +465,7 @@ const CustomerFacingBusinessPage = () => {
             document.removeEventListener('click', handleLinkClick, true);
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- checkUnsavedChanges derived from deps; omit to avoid re-running every keystroke
-    }, [enteredValues, thumbnailImages, bannerImages, locations, isEdit]);
+    }, [enteredValues, thumbnailImages, bannerImages, location, isEdit]);
 
     return (
         <>
@@ -652,8 +655,8 @@ const CustomerFacingBusinessPage = () => {
             {
                 (!isLoading && isLoadingErrorMessage === null) &&
                 <LocationSection
-                    locations={locations}
-                    setLocations={setLocations}
+                    location={location}
+                    setLocation={setLocation}
                     resetSaving={resetSaving}
                     isEdit={isEdit}
                 />
