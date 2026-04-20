@@ -18,25 +18,14 @@ import ErrorPage from '@/components/ErrorPage/ErrorPage';
 const DISPLAY_NAME = 'displayName';
 const SHOP_DESCRIPTION = 'description';
 const WEBSITE = 'website';
+const INSTAGRAM = 'instagram';
+const FACEBOOK = 'facebook';
+const WHATSAPP = 'whatsapp';
+const TIKTOK = 'tiktok';
+const PHONE_NUMBER = 'phoneNumber';
 const CATEGORY = 'category';
 const HALAL_CERTIFIED = 'halalCertified';
 const KEYWORDS = 'keywords';
-
-const LOCATION_TEMPLATE = {
-    id: 1,
-    locationName: 'Ang Mo Kio Hub Ang Mo Kio Hub Ang Mo Kio Hub Ang Mo Kio Hub',
-    address: '53 Ang Mo Kio Ave 3',
-    postalCode: '569933',
-    operatingHours: {
-        Monday: { start: '10:00 AM', end: '10:00 PM' },
-        Tuesday: { start: '10:00 AM', end: '10:00 PM' },
-        Wednesday: { start: '10:00 AM', end: '10:00 PM' },
-        Thursday: { start: '10:00 AM', end: '10:00 PM' },
-        Friday: { start: '10:00 AM', end: '10:00 PM' },
-        Saturday: { start: '10:00 AM', end: '10:00 PM' },
-        Sunday: { start: '10:00 AM', end: '10:00 PM' },
-    }
-};
 
 
 const CustomerFacingBusinessPage = () => {
@@ -65,6 +54,11 @@ const CustomerFacingBusinessPage = () => {
         [DISPLAY_NAME]: '',
         [SHOP_DESCRIPTION]: '',
         [WEBSITE]: '',
+        [INSTAGRAM]: '',
+        [FACEBOOK]: '',
+        [WHATSAPP]: '',
+        [TIKTOK]: '',
+        [PHONE_NUMBER]: '',
         [CATEGORY]: '',
         [HALAL_CERTIFIED]: '',
         [KEYWORDS]: '',
@@ -75,6 +69,11 @@ const CustomerFacingBusinessPage = () => {
         [DISPLAY_NAME]: '',
         [SHOP_DESCRIPTION]: '',
         [WEBSITE]: '',
+        [INSTAGRAM]: '',
+        [FACEBOOK]: '',
+        [WHATSAPP]: '',
+        [TIKTOK]: '',
+        [PHONE_NUMBER]: '',
         [CATEGORY]: '',
         [HALAL_CERTIFIED]: '',
         [KEYWORDS]: '',
@@ -90,6 +89,11 @@ const CustomerFacingBusinessPage = () => {
         [DISPLAY_NAME]: false,
         [SHOP_DESCRIPTION]: false,
         [WEBSITE]: false,
+        [INSTAGRAM]: false,
+        [FACEBOOK]: false,
+        [WHATSAPP]: false,
+        [TIKTOK]: false,
+        [PHONE_NUMBER]: false,
         [CATEGORY]: false,
         [HALAL_CERTIFIED]: false,
         [KEYWORDS]: false
@@ -99,6 +103,11 @@ const CustomerFacingBusinessPage = () => {
         [DISPLAY_NAME]: '',
         [SHOP_DESCRIPTION]: '',
         [WEBSITE]: '',
+        [INSTAGRAM]: '',
+        [FACEBOOK]: '',
+        [WHATSAPP]: '',
+        [TIKTOK]: '',
+        [PHONE_NUMBER]: '',
         [CATEGORY]: '',
         [HALAL_CERTIFIED]: '',
         [KEYWORDS]: ''
@@ -138,6 +147,11 @@ const CustomerFacingBusinessPage = () => {
             formData.append('displayName', enteredValues[DISPLAY_NAME]);
             formData.append('description', enteredValues[SHOP_DESCRIPTION]);
             formData.append('website', enteredValues[WEBSITE]);
+            formData.append('instagram', enteredValues[INSTAGRAM]);
+            formData.append('facebook', enteredValues[FACEBOOK]);
+            formData.append('whatsapp', enteredValues[WHATSAPP]);
+            formData.append('tiktok', enteredValues[TIKTOK]);
+            formData.append('phoneNumber', enteredValues[PHONE_NUMBER]);
             formData.append('category', enteredValues[CATEGORY]);
             formData.append('halalcertified', enteredValues[HALAL_CERTIFIED]);
 
@@ -260,6 +274,11 @@ const CustomerFacingBusinessPage = () => {
                         [DISPLAY_NAME]: data.displayName,
                         [SHOP_DESCRIPTION]: data.description,
                         [WEBSITE]: data.website,
+                        [INSTAGRAM]: data.instagram || '',
+                        [FACEBOOK]: data.facebook || '',
+                        [WHATSAPP]: data.whatsapp || '',
+                        [TIKTOK]: data.tiktok || '',
+                        [PHONE_NUMBER]: data.phoneNumber || data.phone_number || '',
                         [CATEGORY]: data.category,
                         [HALAL_CERTIFIED]: data.halalcertified,
                         [KEYWORDS]: data.keywords
@@ -293,6 +312,11 @@ const CustomerFacingBusinessPage = () => {
                         [DISPLAY_NAME]: '',
                         [SHOP_DESCRIPTION]: '',
                         [WEBSITE]: '',
+                        [INSTAGRAM]: '',
+                        [FACEBOOK]: '',
+                        [WHATSAPP]: '',
+                        [TIKTOK]: '',
+                        [PHONE_NUMBER]: '',
                         [CATEGORY]: '',
                         [HALAL_CERTIFIED]: '',
                         [KEYWORDS]: '',
@@ -348,6 +372,11 @@ const CustomerFacingBusinessPage = () => {
             current[DISPLAY_NAME] !== initial[DISPLAY_NAME] ||
             current[SHOP_DESCRIPTION] !== initial[SHOP_DESCRIPTION] ||
             current[WEBSITE] !== initial[WEBSITE] ||
+            current[INSTAGRAM] !== initial[INSTAGRAM] ||
+            current[FACEBOOK] !== initial[FACEBOOK] ||
+            current[WHATSAPP] !== initial[WHATSAPP] ||
+            current[TIKTOK] !== initial[TIKTOK] ||
+            current[PHONE_NUMBER] !== initial[PHONE_NUMBER] ||
             current[CATEGORY] !== initial[CATEGORY] ||
             current[HALAL_CERTIFIED] !== initial[HALAL_CERTIFIED] ||
             current[KEYWORDS] !== initial[KEYWORDS]
@@ -510,6 +539,7 @@ const CustomerFacingBusinessPage = () => {
                         <LoadingPage /> :
                         isLoadingErrorMessage !== null ?
                             <ErrorPage message={isLoadingErrorMessage} statusCode={isLoadingErrorStatus} /> :
+                            <>
                             <ContentCard className={styles.content}>
                                 <FormTextField
                                     title='Display name*'
@@ -554,7 +584,77 @@ const CustomerFacingBusinessPage = () => {
                                     disabled={isBtnLoading || !isEdit}
                                     onChange={(event) => { inputChangeHandler(WEBSITE, event.target.value) }}
                                 />
+                            </ContentCard>
 
+                            <ContentCard className={styles.content}>
+                                <FieldHeader
+                                    title='Contact & Social Links'
+                                    description='Optional. Add channels customers can use to message or call your business.'
+                                    type='h3'
+                                />
+
+                                <FormTextField
+                                    title='Instagram'
+                                    placeholder='https://instagram.com/yourshop or @yourshop'
+                                    id={INSTAGRAM}
+                                    name={INSTAGRAM}
+                                    helperText={helperText.instagram}
+                                    error={textfieldError.instagram}
+                                    value={enteredValues.instagram}
+                                    disabled={isBtnLoading || !isEdit}
+                                    onChange={(event) => { inputChangeHandler(INSTAGRAM, event.target.value) }}
+                                />
+
+                                <FormTextField
+                                    title='Facebook'
+                                    placeholder='https://facebook.com/yourshop'
+                                    id={FACEBOOK}
+                                    name={FACEBOOK}
+                                    helperText={helperText.facebook}
+                                    error={textfieldError.facebook}
+                                    value={enteredValues.facebook}
+                                    disabled={isBtnLoading || !isEdit}
+                                    onChange={(event) => { inputChangeHandler(FACEBOOK, event.target.value) }}
+                                />
+
+                                <FormTextField
+                                    title='TikTok'
+                                    placeholder='https://tiktok.com/@yourshop or @yourshop'
+                                    id={TIKTOK}
+                                    name={TIKTOK}
+                                    helperText={helperText.tiktok}
+                                    error={textfieldError.tiktok}
+                                    value={enteredValues.tiktok}
+                                    disabled={isBtnLoading || !isEdit}
+                                    onChange={(event) => { inputChangeHandler(TIKTOK, event.target.value) }}
+                                />
+
+                                <FormTextField
+                                    title='WhatsApp'
+                                    placeholder='+65 9123 4567'
+                                    id={WHATSAPP}
+                                    name={WHATSAPP}
+                                    helperText={helperText.whatsapp}
+                                    error={textfieldError.whatsapp}
+                                    value={enteredValues.whatsapp}
+                                    disabled={isBtnLoading || !isEdit}
+                                    onChange={(event) => { inputChangeHandler(WHATSAPP, event.target.value) }}
+                                />
+
+                                <FormTextField
+                                    title='Phone Number'
+                                    placeholder='+65 6123 4567'
+                                    id={PHONE_NUMBER}
+                                    name={PHONE_NUMBER}
+                                    helperText={helperText.phoneNumber}
+                                    error={textfieldError.phoneNumber}
+                                    value={enteredValues.phoneNumber}
+                                    disabled={isBtnLoading || !isEdit}
+                                    onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
+                                />
+                            </ContentCard>
+
+                            <ContentCard className={styles.content}>
                                 <div className={styles.fieldContainer}>
                                     <FieldHeader
                                         title='Category'
@@ -649,6 +749,7 @@ const CustomerFacingBusinessPage = () => {
                                     }}
                                 />
                             </ContentCard>
+                            </>
                 }
             </form>
 
