@@ -511,7 +511,7 @@ const CustomerFacingBusinessPage = () => {
                                 <FormTextField
                                     title='Display name*'
                                     subtitle='Display name will be shown on the home screen when user discover your shop. It is better to be something that user used to identify you.'
-                                    placeholder="Keen's Bagelry"
+                                    placeholder='Sunrise Bakery'
                                     id={DISPLAY_NAME}
                                     name={DISPLAY_NAME}
                                     helperText={helperText.displayName}
@@ -524,7 +524,7 @@ const CustomerFacingBusinessPage = () => {
                                 <FormTextField
                                     title="Shop's Description*"
                                     subtitle='Information about your shop.'
-                                    placeholder="Keen's Bagelry"
+                                    placeholder='Fresh Market Cafe'
                                     id={SHOP_DESCRIPTION}
                                     name={SHOP_DESCRIPTION}
                                     helperText={helperText.description}

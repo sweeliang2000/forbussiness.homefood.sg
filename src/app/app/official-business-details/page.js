@@ -445,7 +445,7 @@ export default function StampSetup() {
               <FormTextField
                 title='Business Name*'
                 subtitle='This is the name customers will see in the app. For home-based or unregistered businesses, you can use your personal name or brand name.'
-                placeholder='McDonald&apos;s Corporation.'
+                placeholder='Sunrise Bakery'
                 id={BUSINESS_NAME}
                 name={BUSINESS_NAME}
                 helperText={helperText.businessName}
