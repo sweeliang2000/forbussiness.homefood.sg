@@ -786,10 +786,10 @@ export default function MenuBuilder() {
                 Publish
               </Button>
               <IconButton
-                className={styles.mobilePreviewButton}
                 size="small"
                 onClick={openPreviewFullscreen}
                 title="Open menu preview"
+                sx={{ display: 'none', '@media (max-width: 1100px)': { display: 'inline-flex' } }}
               >
                 <VisibilityOutlinedIcon fontSize="small" />
               </IconButton>
