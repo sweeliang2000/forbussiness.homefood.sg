@@ -5,6 +5,8 @@ import styles from './MenuBuilder.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import { Button, Checkbox, Dialog, FormControlLabel, IconButton, Menu, MenuItem, Radio, RadioGroup, Select, Switch, TextField, Typography } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import Shimmer from '@/components/Shimmer/Shimmer';
 import AddCircleOutlineRoundedIcon from '@mui/icons-material/AddCircleOutlineRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
@@ -12,6 +14,10 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import DialogPopup from '@/components/DialogPopup/DialogPopup';
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
+import { Alert } from '@mui/material';
+import apiClient from '@/utility/api';
+import { MENU } from '@/utility/apiPaths';
+import { getUserDataFromCookie } from '@/utility/cookieUtils';
 
 const makeId = () => Math.random().toString(36).slice(2, 10);
 
@@ -66,7 +72,7 @@ const getDefaultItem = (categoryId) => ({
 
 const getItemEditorPhotoFromItem = (item) => {
   if (!item?.photo?.url) return [];
-  return [{ name: item.photo.name ?? 'photo', url: item.photo.url }];
+  return [{ name: item.photo.name ?? 'photo', url: item.photo.url, file: item.photo.file ?? null }];
 };
 
 const computeBaseForFees = ({ item, fulfilmentMode }) => {
@@ -107,90 +113,47 @@ const buildDefaultGroupSelections = (item) => {
   return out;
 };
 
+// Map an API item (snake_case availability/pricingOverride) to internal component state shape.
+const mapApiItemToState = (i) => ({
+  id: i.id,
+  categoryIds: i.categoryIds ?? [],
+  photo: i.photo ? { name: i.photo.name, url: i.photo.url, file: null } : null,
+  name: i.name ?? '',
+  description: i.description ?? '',
+  takeawayBasePrice: normalizeNumber(i.takeawayBasePrice),
+  dineInPrice: normalizeNumber(i.dineInPrice),
+  soldOut: !!i.soldOut,
+  featured: !!i.featured,
+  availableTakeaway: i.availability?.takeaway ?? true,
+  availableDineIn: i.availability?.dineIn ?? true,
+  pricingOverrideType: i.pricingOverrideType ?? PRICING_OVERRIDE_TYPES.GLOBAL,
+  pricingOverrideCustomPercent: normalizeNumber(i.pricingOverride?.customPercent),
+  pricingOverrideFixedPrice: normalizeNumber(i.pricingOverride?.fixedPrice),
+  optionGroups: (i.optionGroups ?? []).map((g) => ({
+    id: g.id,
+    name: g.name ?? '',
+    required: !!g.required,
+    pick: normalizeNumber(g.pick ?? 0),
+    options: (g.options ?? []).map((o) => ({
+      id: o.id,
+      name: o.name ?? '',
+      additionalPrice: normalizeNumber(o.additionalPrice),
+      maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
+    })),
+  })),
+});
+
 export default function MenuBuilder() {
-  // Store level pricing settings.
-  // This mock intentionally does not expose a UI to edit these values.
   const storePricing = DEFAULT_STORE_PRICING;
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
+
   // Categories are kept in an ordered array for drag-to-reorder.
-  const [categories, setCategories] = useState([
-    { id: 'cat-starters', name: 'Starters', isVisible: true },
-    { id: 'cat-main', name: 'Main Meals', isVisible: true },
-  ]);
+  const [categories, setCategories] = useState([]);
 
   // Items are kept as a flat list with categoryId.
-  const [items, setItems] = useState(() => [
-    {
-      id: 'item-wings',
-      categoryIds: ['cat-starters'],
-      photo: null,
-      name: 'Chicken Wings',
-      description: 'Crispy wings with your choice of spice level.',
-      takeawayBasePrice: 12.0,
-      dineInPrice: 14.0,
-      soldOut: false,
-      featured: true,
-      availableTakeaway: true,
-      availableDineIn: true,
-      pricingOverrideType: PRICING_OVERRIDE_TYPES.GLOBAL,
-      pricingOverrideCustomPercent: 0,
-      pricingOverrideFixedPrice: 0,
-      optionGroups: [
-        {
-          id: 'og-spice',
-          name: 'Spice level',
-          required: true,
-          pick: 1,
-          options: [
-            { id: 'opt-mild', name: 'Mild', additionalPrice: 0, maxQty: 1 },
-            { id: 'opt-spicy', name: 'Spicy', additionalPrice: 1.0, maxQty: 1 },
-          ],
-        },
-        {
-          id: 'og-addons',
-          name: 'Add Ons',
-          required: false,
-          pick: 0, // 0 = unlimited
-          options: [
-            { id: 'opt-extra-sauce', name: 'Extra Sauce', additionalPrice: 0.5, maxQty: 3 },
-            { id: 'opt-cheese-dust', name: 'Cheese Dust', additionalPrice: 1.0, maxQty: 2 },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'item-steak',
-      categoryIds: ['cat-main'],
-      photo: null,
-      name: 'Garlic Butter Steak',
-      description: 'Juicy steak with garlic butter sauce.',
-      takeawayBasePrice: 28.0,
-      dineInPrice: 32.0,
-      soldOut: false,
-      featured: false,
-      availableTakeaway: true,
-      availableDineIn: true,
-      pricingOverrideType: PRICING_OVERRIDE_TYPES.CUSTOM_PERCENT,
-      pricingOverrideCustomPercent: 5,
-      pricingOverrideFixedPrice: 0,
-      optionGroups: [
-        {
-          id: 'og-cook',
-          name: 'Cooking',
-          required: true,
-          pick: 1,
-          options: [{ id: 'opt-grilled', name: 'Grilled', additionalPrice: 0, maxQty: 1 }],
-        },
-        {
-          id: 'og-addons-steak',
-          name: 'Add Ons',
-          required: false,
-          pick: 0,
-          options: [{ id: 'opt-salad', name: 'Side Salad', additionalPrice: 4.0, maxQty: 1 }],
-        },
-      ],
-    },
-  ]);
+  const [items, setItems] = useState([]);
 
   // Category creation.
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -278,8 +241,40 @@ export default function MenuBuilder() {
     }
   }, [items, selectedItemId]);
 
+  useEffect(() => {
+    const userData = getUserDataFromCookie();
+    const shopId = userData?.shop_id;
+    if (!shopId) {
+      setLoadError('Shop ID not found. Please re-login.');
+      setIsLoading(false);
+      return;
+    }
+
+    apiClient
+      .get(`${MENU}?shop_id=${shopId}`)
+      .then((res) => {
+        const data = res.data?.data;
+        if (!data) {
+          setCategories([
+            { id: makeId(), name: 'For You', isVisible: true },
+            { id: makeId(), name: 'Main', isVisible: true },
+          ]);
+          return;
+        }
+        if (data.categories) setCategories(data.categories);
+        if (data.items) setItems(data.items.map(mapApiItemToState));
+        if (data.shopAcceptance) setShopAcceptance(data.shopAcceptance);
+      })
+      .catch((err) => {
+        setLoadError(err?.response?.data?.message ?? 'Failed to load menu. Please refresh.');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const visibleCategories = useMemo(() => {
-    // Keep category order exactly as the user arranged it.
     return categories.filter((c) => c.isVisible);
   }, [categories]);
 
@@ -311,6 +306,9 @@ export default function MenuBuilder() {
   const [isItemEditorOpen, setIsItemEditorOpen] = useState(false);
   const [itemEditor, setItemEditor] = useState(getDefaultItem(categories?.[0]?.id));
   const [editorPhotoImages, setEditorPhotoImages] = useState([]);
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
   // Per-item gear-menu anchor: { itemId, el }
   const [itemMenuAnchor, setItemMenuAnchor] = useState(null);
@@ -346,7 +344,7 @@ export default function MenuBuilder() {
     event.preventDefault();
 
     const photo = editorPhotoImages?.length
-      ? { name: editorPhotoImages[0].name ?? 'photo', url: editorPhotoImages[0].url }
+      ? { name: editorPhotoImages[0].name ?? 'photo', url: editorPhotoImages[0].url, file: editorPhotoImages[0].file ?? null }
       : null;
 
     if (!itemEditor?.name?.trim()) return;
@@ -407,51 +405,85 @@ export default function MenuBuilder() {
     setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, ...patch } : i)));
   };
 
-  const handlePublishMenu = () => {
-    const payload = {
-      storePricing,
-      categories: categories.map((c, idx) => ({
-        id: c.id,
-        name: c.name,
-        isVisible: c.isVisible,
-        sortIndex: idx,
-      })),
-      items: items.map((i) => ({
-        id: i.id,
-        categoryIds: i.categoryIds ?? [],
-        photo: i.photo ? { name: i.photo.name, url: i.photo.url } : null,
-        name: i.name,
-        description: i.description,
-        takeawayBasePrice: normalizeNumber(i.takeawayBasePrice),
-        dineInPrice: normalizeNumber(i.dineInPrice),
-        soldOut: !!i.soldOut,
-        featured: !!i.featured,
-        availability: {
-          takeaway: !!i.availableTakeaway,
-          dineIn: !!i.availableDineIn,
-        },
-        pricingOverrideType: i.pricingOverrideType,
-        pricingOverride: {
-          customPercent: normalizeNumber(i.pricingOverrideCustomPercent),
-          fixedPrice: normalizeNumber(i.pricingOverrideFixedPrice),
-        },
-        optionGroups: (i.optionGroups ?? []).map((g) => ({
-          id: g.id,
-          name: g.name,
-          required: !!g.required,
-          pick: normalizeNumber(g.pick ?? 0),
-          options: (g.options ?? []).map((o) => ({
-            id: o.id,
-            name: o.name,
-            additionalPrice: normalizeNumber(o.additionalPrice),
-            maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
+  const handlePublishMenu = async (status = 'published') => {
+    const userData = getUserDataFromCookie();
+    const shopId = userData?.shop_id;
+    if (!shopId) {
+      setSaveError('Shop ID not found. Please re-login.');
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('shop_id', shopId);
+      formData.append('status', status);
+
+      const menuPayload = {
+        storePricing,
+        shopAcceptance,
+        categories: categories.map((c, idx) => ({
+          id: c.id,
+          name: c.name,
+          isVisible: c.isVisible,
+          sortIndex: idx,
+        })),
+        items: items.map((i) => ({
+          id: i.id,
+          categoryIds: i.categoryIds ?? [],
+          // When photo.file exists it will be sent as a separate FormData field;
+          // signal to the backend by setting url to null.
+          photo: i.photo
+            ? { name: i.photo.name, url: i.photo.file ? null : i.photo.url }
+            : null,
+          name: i.name,
+          description: i.description,
+          takeawayBasePrice: normalizeNumber(i.takeawayBasePrice),
+          dineInPrice: normalizeNumber(i.dineInPrice),
+          soldOut: !!i.soldOut,
+          featured: !!i.featured,
+          availability: {
+            takeaway: !!i.availableTakeaway,
+            dineIn: !!i.availableDineIn,
+          },
+          pricingOverrideType: i.pricingOverrideType,
+          pricingOverride: {
+            customPercent: normalizeNumber(i.pricingOverrideCustomPercent),
+            fixedPrice: normalizeNumber(i.pricingOverrideFixedPrice),
+          },
+          optionGroups: (i.optionGroups ?? []).map((g) => ({
+            id: g.id,
+            name: g.name,
+            required: !!g.required,
+            pick: normalizeNumber(g.pick ?? 0),
+            options: (g.options ?? []).map((o) => ({
+              id: o.id,
+              name: o.name,
+              additionalPrice: normalizeNumber(o.additionalPrice),
+              maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
+            })),
           })),
         })),
-      })),
-    };
+      };
 
-    // UI-only mock: this is where the backend integration will be wired later.
-    console.log('[MenuBuilder] publish payload:', payload);
+      formData.append('menu', JSON.stringify(menuPayload));
+
+      for (const i of items) {
+        if (i.photo?.file) {
+          formData.append(`item_photo_${i.id}`, i.photo.file);
+        }
+      }
+
+      await apiClient.post(MENU, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    } catch (err) {
+      setSaveError(err?.response?.data?.message ?? 'Failed to save menu. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Preview computations for the currently selected item, for the current preview mode.
@@ -602,6 +634,124 @@ export default function MenuBuilder() {
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className={styles.root}>
+        {/* Header skeleton */}
+        <div className={styles.stickyHeader}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <Shimmer width="180px" height="28px" borderRadius="6px" responsive={false} />
+              <Shimmer width="320px" height="16px" borderRadius="4px" responsive={false} />
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+                <Shimmer width="100px" height="36px" borderRadius="8px" responsive={false} />
+                <Shimmer width="80px" height="36px" borderRadius="8px" responsive={false} />
+              </div>
+          </div>
+        </div>
+
+        <div className={styles.layout}>
+          {/* Left column skeleton */}
+          <div className={styles.cardStack}>
+            {/* Shop accepts card */}
+            <ContentCard>
+              <Shimmer width="140px" height="20px" borderRadius="4px" responsive={false} style={{ marginBottom: 12 }} />
+              <div style={{ display: 'flex', gap: 20 }}>
+                <Shimmer width="110px" height="20px" borderRadius="4px" responsive={false} />
+                <Shimmer width="110px" height="20px" borderRadius="4px" responsive={false} />
+                <Shimmer width="60px" height="20px" borderRadius="4px" responsive={false} />
+              </div>
+            </ContentCard>
+
+            {/* Categories card */}
+            <ContentCard>
+              <Shimmer width="120px" height="20px" borderRadius="4px" responsive={false} style={{ marginBottom: 16 }} />
+              <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+                <Shimmer height="40px" borderRadius="8px" />
+                <Shimmer width="130px" height="40px" borderRadius="8px" responsive={false} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[1, 2].map((i) => (
+                  <div key={i} className={styles.categoryRow}>
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                      <Shimmer width="16px" height="20px" borderRadius="3px" responsive={false} />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <Shimmer width="100px" height="16px" borderRadius="4px" responsive={false} />
+                        <Shimmer width="60px" height="12px" borderRadius="4px" responsive={false} />
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <Shimmer width="36px" height="22px" borderRadius="999px" responsive={false} />
+                      <Shimmer width="28px" height="28px" borderRadius="50%" responsive={false} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ContentCard>
+
+            {/* Items card */}
+            <ContentCard>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <Shimmer width="60px" height="20px" borderRadius="4px" responsive={false} />
+                <Shimmer width="100px" height="36px" borderRadius="8px" responsive={false} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {[1, 2].map((cat) => (
+                  <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <Shimmer width="110px" height="22px" borderRadius="4px" responsive={false} />
+                    {[1, 2].map((item) => (
+                      <div key={item} className={styles.itemRow}>
+                        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                          <Shimmer width="44px" height="44px" borderRadius="8px" responsive={false} />
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            <Shimmer width="120px" height="16px" borderRadius="4px" responsive={false} />
+                            <Shimmer width="90px" height="12px" borderRadius="4px" responsive={false} />
+                          </div>
+                        </div>
+                        <Shimmer width="48px" height="22px" borderRadius="999px" responsive={false} />
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </ContentCard>
+          </div>
+
+          {/* Right column skeleton (preview panel) */}
+          <div className={styles.previewBox}>
+            <ContentCard className={styles.fullWidth}>
+              <Shimmer width="140px" height="20px" borderRadius="4px" responsive={false} style={{ marginBottom: 8 }} />
+              <Shimmer width="260px" height="14px" borderRadius="4px" responsive={false} style={{ marginBottom: 20 }} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className={styles.itemRow}>
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                      <Shimmer width="44px" height="44px" borderRadius="8px" responsive={false} />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <Shimmer width="110px" height="16px" borderRadius="4px" responsive={false} />
+                        <Shimmer width="70px" height="12px" borderRadius="4px" responsive={false} />
+                      </div>
+                    </div>
+                    <Shimmer width="28px" height="28px" borderRadius="50%" responsive={false} />
+                  </div>
+                ))}
+              </div>
+            </ContentCard>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div style={{ padding: 24 }}>
+        <Alert severity="error">{loadError}</Alert>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.root}>
       <div className={styles.stickyHeader}>
@@ -610,24 +760,47 @@ export default function MenuBuilder() {
           title="Menu Builder"
           description={
             <p>
-              Set up categories, items, and pricing rules. All data stays in local state for this mock.
+              Set up categories, items, and pricing rules.
             </p>
           }
-          buttonText="Save Menu / Publish"
-          sx={{ textTransform: 'none' }}
-          rightActions={
-            <IconButton
-              className={styles.mobilePreviewButton}
-              size="small"
-              onClick={openPreviewFullscreen}
-              title="Open menu preview"
-            >
-              <VisibilityOutlinedIcon fontSize="small" />
-            </IconButton>
-          }
-          onClick={handlePublishMenu}
+          showButton={false}
           showCancelButton={false}
+          rightActions={
+            <>
+              <LoadingButton
+                size="small"
+                variant="contained"
+                loading={isSaving}
+                onClick={() => handlePublishMenu('draft')}
+                sx={{ textTransform: 'none' }}
+              >
+                Save Menu
+              </LoadingButton>
+              <Button
+                size="small"
+                variant="outlined"
+                disabled={isSaving}
+                onClick={() => handlePublishMenu('published')}
+                sx={{ textTransform: 'none' }}
+              >
+                Publish
+              </Button>
+              <IconButton
+                className={styles.mobilePreviewButton}
+                size="small"
+                onClick={openPreviewFullscreen}
+                title="Open menu preview"
+              >
+                <VisibilityOutlinedIcon fontSize="small" />
+              </IconButton>
+            </>
+          }
         />
+        {saveError && (
+          <Alert severity="error" onClose={() => setSaveError(null)} sx={{ mt: 1 }}>
+            {saveError}
+          </Alert>
+        )}
       </div>
 
       <div className={styles.layout}>
@@ -1443,8 +1616,8 @@ export default function MenuBuilder() {
             noOfImages={1}
             isMultiple={false}
             resetSaving={() => {}}
-            width={240}
-            height={140}
+            width={100}
+            height={100}
             imageClassName={styles.fullWidth}
             disabled={false}
           />

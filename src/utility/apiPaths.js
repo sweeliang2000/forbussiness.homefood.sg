@@ -56,3 +56,5 @@ export const STRIPE_CONNECT_ACCOUNT_STATUS = '/api/stripe-connect/account-status
 export const STRIPE_CONNECT_CREATE_ACCOUNT = '/api/stripe-connect/create-connect-account';
 export const STRIPE_CONNECT_CREATE_ACCOUNT_LINK = '/api/stripe-connect/create-account-link';
 export const STRIPE_CONNECT_DASHBOARD_LINK = '/api/stripe-connect/dashboard-link';
+
+export const MENU = '/api/menu';

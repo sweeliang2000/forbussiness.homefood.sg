@@ -8,6 +8,7 @@ const nextConfig = {
           "images.unsplash.com",
           "collbine-forbusiness-shop-images.s3.ap-southeast-1.amazonaws.com",
           "collbine-forbusiness-reward-images.s3.ap-southeast-1.amazonaws.com",
+          "collbine-forbusiness-menus.s3.ap-southeast-1.amazonaws.com",
           "d2n23ozk9atrac.cloudfront.net"
         ],
       },
