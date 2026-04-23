@@ -1119,14 +1119,20 @@ export default function MenuBuilder() {
       </div>
 
       <Dialog open={isPreviewFullscreenOpen} onClose={closePreviewFullscreen} fullScreen>
-        <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div className={styles.row} style={{ justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            background: '#f5f5f5',
+            borderBottom: '1px solid rgba(0,0,0,0.1)',
+          }}>
             <Typography variant="h6" style={{ fontWeight: 900 }}>Menu Preview</Typography>
             <IconButton size="small" onClick={closePreviewFullscreen}>×</IconButton>
           </div>
 
-          {/* reuse the same preview UI */}
-          <div style={{ flex: 1, overflow: 'auto' }}>
+          <div style={{ flex: 1, overflow: 'auto', padding: 16 }}>
             <ContentCard className={styles.fullWidth}>
               <FieldHeader
                 title="Menu Preview"
