@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import styles from './sidebar.module.css';
-import { LuClipboardList, LuLayoutDashboard, LuCreditCard } from 'react-icons/lu';
+import { LuClipboardList, LuLayoutDashboard, LuCreditCard, LuUtensils } from 'react-icons/lu';
 import { AiOutlineMessage, AiOutlineLineChart } from 'react-icons/ai';
 import { BsGift } from 'react-icons/bs';
 import { RiQrScan2Line } from "react-icons/ri";
@@ -35,6 +35,7 @@ export default function Sidebar({
     const SCAN_TO_WIN_TAB = 'SCAN_TO_WIN_TAB';
     const POINTS_TAB = 'POINTS_TAB';
     const REDEEMABLE_TAB = 'REDEEMABLE_TAB';
+    const MENU_ORDERS_TAB = 'MENU_ORDERS_TAB';
 
     const pathname = usePathname();
     const pathSegments = pathname.split('/');
@@ -44,7 +45,7 @@ export default function Sidebar({
     const subscriptionPlan = SUBSCRIPTION_DATA.find(plan => plan.lookup_key === subscriptionStatus);
 
     const [sidebarMinimised, setSidebarMinimised] = useState(false);
-    const [currentSelection, setCurrentSelection] = useState(undefined);
+    const [currentSelection, setCurrentSelection] = useState(MENU_ORDERS_TAB);
     const [isLoadingPortal, setIsLoadingPortal] = useState(false);
     const [cancelDate, setCancelDate] = useState(null);
 
@@ -83,6 +84,13 @@ export default function Sidebar({
             setCurrentSelection(RELEASES_TAB);
         } else if (currentSection === 'stamp-management' || currentSection === 'card-design') {
             setCurrentSelection(STAMP_TAB);
+        } else if (
+            currentSection === 'menu-builder' ||
+            currentSection === 'shop-settings' ||
+            currentSection === 'order-queue' ||
+            currentSection === 'payments-setup'
+        ) {
+            setCurrentSelection(MENU_ORDERS_TAB);
         } else if (currentSection === 'redeemable') {
             setCurrentSelection(REDEEMABLE_TAB);
         } else if (currentSection === 'scan-to-win') {
@@ -175,6 +183,19 @@ export default function Sidebar({
                     }
 
                     <Submenu
+                        title={'Menu & Orders'}
+                        submenus={[
+                            { href: '/app/shop-settings', title: 'Ordering Settings' },
+                            { href: '/app/menu-builder', title: 'Menu Builder' },
+                            { href: '/app/payments-setup', title: 'Payments Setup' },
+                            { href: '/app/order-queue', title: 'Order Queue' }
+                        ]}
+                        isExpand={currentSelection == MENU_ORDERS_TAB}
+                        icon={LuUtensils}
+                        onClick={() => { toggleMenus(MENU_ORDERS_TAB) }}
+                    />
+
+                    {/* <Submenu
                         title={'Stamp System'}
                         submenus={[
                             { href: '/app/stamp-management', title: 'Stamp Managment' },
@@ -195,7 +216,7 @@ export default function Sidebar({
                         isExpand={currentSelection == SCAN_TO_WIN_TAB}
                         icon={RiQrScan2Line}
                         onClick={() => { toggleMenus(SCAN_TO_WIN_TAB) }}
-                    />
+                    /> */}
 
                     {/* <Submenu
                         title={'Points System'}
@@ -208,7 +229,7 @@ export default function Sidebar({
                         onClick={() => { toggleMenus(POINTS_TAB) }}
                     /> */}
 
-                    <Submenu
+                    {/* <Submenu
                         title={'Redeemable'}
                         submenus={[
                             { href: '/app/redeemable/rewards', title: 'All Rewards' },
@@ -219,7 +240,7 @@ export default function Sidebar({
                         isExpand={currentSelection == REDEEMABLE_TAB}
                         icon={BsGift}
                         onClick={() => { toggleMenus(REDEEMABLE_TAB) }}
-                    />
+                    /> */}
 
                     {/* {
                         !sidebarMinimised && <li className={styles.labelLi}>

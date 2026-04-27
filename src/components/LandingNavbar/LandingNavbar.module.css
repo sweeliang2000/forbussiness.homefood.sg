@@ -208,8 +208,208 @@
     .desktopMenu {
         gap: 1.5rem;
     }
-    
+
     .navContainer {
         gap: 1.5rem;
+    }
+}
+
+/* ---- Waitlist Modal ---- */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.modalCard {
+    background: #fff;
+    border-radius: 24px;
+    padding: 40px;
+    width: 100%;
+    max-width: 440px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+.modalClose {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: #f3f4f6;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #555;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.modalClose:hover {
+    background: #e5e7eb;
+}
+
+/* Header */
+.modalHeader {
+    text-align: center;
+    margin-bottom: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+.modalBadge {
+    display: inline-block;
+    padding: 5px 13px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-family: var(--font-raleway);
+    background: #e8f1fc;
+    color: var(--accent-color);
+}
+
+.modalTitle {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--on-primary);
+    letter-spacing: -0.015em;
+    font-family: var(--font-raleway);
+    line-height: 1.15;
+    margin: 0;
+}
+
+.modalSub {
+    font-size: 14px;
+    color: var(--on-primary-light2);
+    line-height: 1.6;
+    max-width: 34ch;
+    margin: 0;
+}
+
+/* Form */
+.modalForm {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modalField {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.modalLabel {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #333;
+}
+
+.modalInput {
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px 13px;
+    font-size: 14.5px;
+    font-family: inherit;
+    color: #1a1a1a;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #fff;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.modalInput:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(14, 70, 163, 0.08);
+}
+
+.modalInput::placeholder {
+    color: #bbb;
+}
+
+.modalError {
+    font-size: 12.5px;
+    color: var(--error-color);
+    margin: 0;
+}
+
+.modalSubmit {
+    margin-top: 4px;
+    background: var(--accent-color);
+    color: #fff;
+    border: none;
+    border-radius: 200px;
+    padding: 12px 24px;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s, transform 0.2s;
+    width: 100%;
+}
+
+.modalSubmit:hover:not(:disabled) {
+    background: #0d3d91;
+    transform: translateY(-1px);
+}
+
+.modalSubmit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Success */
+.modalSuccess {
+    text-align: center;
+    padding: 8px 0 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.modalSuccessIcon {
+    font-size: 52px;
+}
+
+.modalSuccessTitle {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--on-primary);
+    font-family: var(--font-raleway);
+    margin: 0;
+}
+
+.modalSuccessSub {
+    font-size: 14.5px;
+    color: var(--on-primary-light2);
+    line-height: 1.6;
+    max-width: 30ch;
+    margin: 0;
+}
+
+@media (max-width: 480px) {
+    .modalCard {
+        padding: 32px 24px;
+    }
+
+    .modalTitle {
+        font-size: 22px;
     }
 }

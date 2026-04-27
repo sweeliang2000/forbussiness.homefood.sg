@@ -2,6 +2,7 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getRemoteConfig, fetchAndActivate, getValue } from "firebase/remote-config";
+import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -106,6 +107,8 @@ export const getNotificationConfig = async () => {
     return null;
   }
 };
+
+export const db = getFirestore(app);
 
 export { app, analytics, remoteConfig };
 

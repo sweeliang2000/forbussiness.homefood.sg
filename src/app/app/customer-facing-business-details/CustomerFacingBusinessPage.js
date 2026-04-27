@@ -18,25 +18,14 @@ import ErrorPage from '@/components/ErrorPage/ErrorPage';
 const DISPLAY_NAME = 'displayName';
 const SHOP_DESCRIPTION = 'description';
 const WEBSITE = 'website';
+const INSTAGRAM = 'instagram';
+const FACEBOOK = 'facebook';
+const WHATSAPP = 'whatsapp';
+const TIKTOK = 'tiktok';
+const PHONE_NUMBER = 'phoneNumber';
 const CATEGORY = 'category';
 const HALAL_CERTIFIED = 'halalCertified';
 const KEYWORDS = 'keywords';
-
-const LOCATION_TEMPLATE = {
-    id: 1,
-    locationName: 'Ang Mo Kio Hub Ang Mo Kio Hub Ang Mo Kio Hub Ang Mo Kio Hub',
-    address: '53 Ang Mo Kio Ave 3',
-    postalCode: '569933',
-    operatingHours: {
-        Monday: { start: '10:00 AM', end: '10:00 PM' },
-        Tuesday: { start: '10:00 AM', end: '10:00 PM' },
-        Wednesday: { start: '10:00 AM', end: '10:00 PM' },
-        Thursday: { start: '10:00 AM', end: '10:00 PM' },
-        Friday: { start: '10:00 AM', end: '10:00 PM' },
-        Saturday: { start: '10:00 AM', end: '10:00 PM' },
-        Sunday: { start: '10:00 AM', end: '10:00 PM' },
-    }
-};
 
 
 const CustomerFacingBusinessPage = () => {
@@ -57,7 +46,7 @@ const CustomerFacingBusinessPage = () => {
 
     const [thumbnailImages, setThumbnailImages] = useState([]);
     const [bannerImages, setBannerImages] = useState([]);
-    const [locations, setLocations] = useState([]);
+    const [location, setLocation] = useState(null);
     const [isThumbnailDeleted, setIsThumbnailDeleted] = useState(false);
     const [isBannerDeleted, setIsBannerDeleted] = useState(false);
 
@@ -65,6 +54,11 @@ const CustomerFacingBusinessPage = () => {
         [DISPLAY_NAME]: '',
         [SHOP_DESCRIPTION]: '',
         [WEBSITE]: '',
+        [INSTAGRAM]: '',
+        [FACEBOOK]: '',
+        [WHATSAPP]: '',
+        [TIKTOK]: '',
+        [PHONE_NUMBER]: '',
         [CATEGORY]: '',
         [HALAL_CERTIFIED]: '',
         [KEYWORDS]: '',
@@ -75,13 +69,18 @@ const CustomerFacingBusinessPage = () => {
         [DISPLAY_NAME]: '',
         [SHOP_DESCRIPTION]: '',
         [WEBSITE]: '',
+        [INSTAGRAM]: '',
+        [FACEBOOK]: '',
+        [WHATSAPP]: '',
+        [TIKTOK]: '',
+        [PHONE_NUMBER]: '',
         [CATEGORY]: '',
         [HALAL_CERTIFIED]: '',
         [KEYWORDS]: '',
     });
     const initialThumbnailImagesRef = useRef([]);
     const initialBannerImagesRef = useRef([]);
-    const initialLocationsRef = useRef([]);
+    const initialLocationRef = useRef(null);
     
     // Track if we've pushed a history state for back button handling
     const historyStatePushedRef = useRef(false);
@@ -90,6 +89,11 @@ const CustomerFacingBusinessPage = () => {
         [DISPLAY_NAME]: false,
         [SHOP_DESCRIPTION]: false,
         [WEBSITE]: false,
+        [INSTAGRAM]: false,
+        [FACEBOOK]: false,
+        [WHATSAPP]: false,
+        [TIKTOK]: false,
+        [PHONE_NUMBER]: false,
         [CATEGORY]: false,
         [HALAL_CERTIFIED]: false,
         [KEYWORDS]: false
@@ -99,6 +103,11 @@ const CustomerFacingBusinessPage = () => {
         [DISPLAY_NAME]: '',
         [SHOP_DESCRIPTION]: '',
         [WEBSITE]: '',
+        [INSTAGRAM]: '',
+        [FACEBOOK]: '',
+        [WHATSAPP]: '',
+        [TIKTOK]: '',
+        [PHONE_NUMBER]: '',
         [CATEGORY]: '',
         [HALAL_CERTIFIED]: '',
         [KEYWORDS]: ''
@@ -133,11 +142,16 @@ const CustomerFacingBusinessPage = () => {
 
         try {
             const formData = new FormData();
-            console.log(locations)
+            console.log(location)
 
             formData.append('displayName', enteredValues[DISPLAY_NAME]);
             formData.append('description', enteredValues[SHOP_DESCRIPTION]);
             formData.append('website', enteredValues[WEBSITE]);
+            formData.append('instagram', enteredValues[INSTAGRAM]);
+            formData.append('facebook', enteredValues[FACEBOOK]);
+            formData.append('whatsapp', enteredValues[WHATSAPP]);
+            formData.append('tiktok', enteredValues[TIKTOK]);
+            formData.append('phoneNumber', enteredValues[PHONE_NUMBER]);
             formData.append('category', enteredValues[CATEGORY]);
             formData.append('halalcertified', enteredValues[HALAL_CERTIFIED]);
 
@@ -149,7 +163,7 @@ const CustomerFacingBusinessPage = () => {
                 formData.append('banner', bannerImages[0].file);
             }
             formData.append('keywords', enteredValues[KEYWORDS]);
-            formData.append('locations', JSON.stringify(locations));
+            formData.append('location', JSON.stringify(location ?? {}));
             
             // Add isThumbnailDeleted flag for PUT requests
             console.log('isThumbnailDeleted', isThumbnailDeleted)
@@ -185,7 +199,7 @@ const CustomerFacingBusinessPage = () => {
             initialValuesRef.current = { ...enteredValues };
             initialThumbnailImagesRef.current = JSON.parse(JSON.stringify(thumbnailImages));
             initialBannerImagesRef.current = JSON.parse(JSON.stringify(bannerImages));
-            initialLocationsRef.current = JSON.parse(JSON.stringify(locations));
+            initialLocationRef.current = JSON.parse(JSON.stringify(location));
         } catch (error) {
             const errorData = error?.response?.data;
             const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
@@ -260,6 +274,11 @@ const CustomerFacingBusinessPage = () => {
                         [DISPLAY_NAME]: data.displayName,
                         [SHOP_DESCRIPTION]: data.description,
                         [WEBSITE]: data.website,
+                        [INSTAGRAM]: data.instagram || '',
+                        [FACEBOOK]: data.facebook || '',
+                        [WHATSAPP]: data.whatsapp || '',
+                        [TIKTOK]: data.tiktok || '',
+                        [PHONE_NUMBER]: data.phoneNumber || data.phone_number || '',
                         [CATEGORY]: data.category,
                         [HALAL_CERTIFIED]: data.halalcertified,
                         [KEYWORDS]: data.keywords
@@ -281,8 +300,11 @@ const CustomerFacingBusinessPage = () => {
                     setBannerImages(loadedBanners);
                     initialBannerImagesRef.current = JSON.parse(JSON.stringify(loadedBanners));
                     
-                    setLocations(data.locations);
-                    initialLocationsRef.current = JSON.parse(JSON.stringify(data.locations));
+                    const loadedLocation = Array.isArray(data.locations)
+                        ? (data.locations[0] ?? null)
+                        : (data.location ?? data.locations ?? null);
+                    setLocation(loadedLocation);
+                    initialLocationRef.current = JSON.parse(JSON.stringify(loadedLocation));
                 } else {
                     setHasExistingData(false);
                     // Initialize with empty values
@@ -290,13 +312,18 @@ const CustomerFacingBusinessPage = () => {
                         [DISPLAY_NAME]: '',
                         [SHOP_DESCRIPTION]: '',
                         [WEBSITE]: '',
+                        [INSTAGRAM]: '',
+                        [FACEBOOK]: '',
+                        [WHATSAPP]: '',
+                        [TIKTOK]: '',
+                        [PHONE_NUMBER]: '',
                         [CATEGORY]: '',
                         [HALAL_CERTIFIED]: '',
                         [KEYWORDS]: '',
                     };
                     initialThumbnailImagesRef.current = [];
                     initialBannerImagesRef.current = [];
-                    initialLocationsRef.current = [];
+                    initialLocationRef.current = null;
                 }
     
                 setIsLoading(false);
@@ -345,6 +372,11 @@ const CustomerFacingBusinessPage = () => {
             current[DISPLAY_NAME] !== initial[DISPLAY_NAME] ||
             current[SHOP_DESCRIPTION] !== initial[SHOP_DESCRIPTION] ||
             current[WEBSITE] !== initial[WEBSITE] ||
+            current[INSTAGRAM] !== initial[INSTAGRAM] ||
+            current[FACEBOOK] !== initial[FACEBOOK] ||
+            current[WHATSAPP] !== initial[WHATSAPP] ||
+            current[TIKTOK] !== initial[TIKTOK] ||
+            current[PHONE_NUMBER] !== initial[PHONE_NUMBER] ||
             current[CATEGORY] !== initial[CATEGORY] ||
             current[HALAL_CERTIFIED] !== initial[HALAL_CERTIFIED] ||
             current[KEYWORDS] !== initial[KEYWORDS]
@@ -366,9 +398,9 @@ const CustomerFacingBusinessPage = () => {
             bannerImages.length !== initialBannerImagesRef.current.length;
         
         // Check locations
-        const locationsChanged = JSON.stringify(locations) !== JSON.stringify(initialLocationsRef.current);
+        const locationChanged = JSON.stringify(location) !== JSON.stringify(initialLocationRef.current);
         
-        return formFieldsChanged || thumbnailChanged || bannerChanged || locationsChanged;
+        return formFieldsChanged || thumbnailChanged || bannerChanged || locationChanged;
     };
 
     // Update button disabled state based on unsaved changes
@@ -381,7 +413,7 @@ const CustomerFacingBusinessPage = () => {
         const hasChanges = checkUnsavedChanges();
         setIsBtnDisabled(!hasChanges);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- checkUnsavedChanges derived from deps; omit to avoid re-running every keystroke
-    }, [enteredValues, thumbnailImages, bannerImages, locations, isEdit]);
+    }, [enteredValues, thumbnailImages, bannerImages, location, isEdit]);
 
     // Handle browser refresh/close/back button warning
     useEffect(() => {
@@ -462,7 +494,7 @@ const CustomerFacingBusinessPage = () => {
             document.removeEventListener('click', handleLinkClick, true);
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- checkUnsavedChanges derived from deps; omit to avoid re-running every keystroke
-    }, [enteredValues, thumbnailImages, bannerImages, locations, isEdit]);
+    }, [enteredValues, thumbnailImages, bannerImages, location, isEdit]);
 
     return (
         <>
@@ -507,11 +539,12 @@ const CustomerFacingBusinessPage = () => {
                         <LoadingPage /> :
                         isLoadingErrorMessage !== null ?
                             <ErrorPage message={isLoadingErrorMessage} statusCode={isLoadingErrorStatus} /> :
+                            <>
                             <ContentCard className={styles.content}>
                                 <FormTextField
                                     title='Display name*'
                                     subtitle='Display name will be shown on the home screen when user discover your shop. It is better to be something that user used to identify you.'
-                                    placeholder="Keen's Bagelry"
+                                    placeholder='Sunrise Bakery'
                                     id={DISPLAY_NAME}
                                     name={DISPLAY_NAME}
                                     helperText={helperText.displayName}
@@ -524,7 +557,7 @@ const CustomerFacingBusinessPage = () => {
                                 <FormTextField
                                     title="Shop's Description*"
                                     subtitle='Information about your shop.'
-                                    placeholder="Keen's Bagelry"
+                                    placeholder='Fresh Market Cafe'
                                     id={SHOP_DESCRIPTION}
                                     name={SHOP_DESCRIPTION}
                                     helperText={helperText.description}
@@ -551,7 +584,77 @@ const CustomerFacingBusinessPage = () => {
                                     disabled={isBtnLoading || !isEdit}
                                     onChange={(event) => { inputChangeHandler(WEBSITE, event.target.value) }}
                                 />
+                            </ContentCard>
 
+                            <ContentCard className={styles.content}>
+                                <FieldHeader
+                                    title='Contact & Social Links'
+                                    description='Optional. Add channels customers can use to message or call your business.'
+                                    type='h3'
+                                />
+
+                                <FormTextField
+                                    title='Instagram'
+                                    placeholder='https://instagram.com/yourshop or @yourshop'
+                                    id={INSTAGRAM}
+                                    name={INSTAGRAM}
+                                    helperText={helperText.instagram}
+                                    error={textfieldError.instagram}
+                                    value={enteredValues.instagram}
+                                    disabled={isBtnLoading || !isEdit}
+                                    onChange={(event) => { inputChangeHandler(INSTAGRAM, event.target.value) }}
+                                />
+
+                                <FormTextField
+                                    title='Facebook'
+                                    placeholder='https://facebook.com/yourshop'
+                                    id={FACEBOOK}
+                                    name={FACEBOOK}
+                                    helperText={helperText.facebook}
+                                    error={textfieldError.facebook}
+                                    value={enteredValues.facebook}
+                                    disabled={isBtnLoading || !isEdit}
+                                    onChange={(event) => { inputChangeHandler(FACEBOOK, event.target.value) }}
+                                />
+
+                                <FormTextField
+                                    title='TikTok'
+                                    placeholder='https://tiktok.com/@yourshop or @yourshop'
+                                    id={TIKTOK}
+                                    name={TIKTOK}
+                                    helperText={helperText.tiktok}
+                                    error={textfieldError.tiktok}
+                                    value={enteredValues.tiktok}
+                                    disabled={isBtnLoading || !isEdit}
+                                    onChange={(event) => { inputChangeHandler(TIKTOK, event.target.value) }}
+                                />
+
+                                <FormTextField
+                                    title='WhatsApp'
+                                    placeholder='+65 9123 4567'
+                                    id={WHATSAPP}
+                                    name={WHATSAPP}
+                                    helperText={helperText.whatsapp}
+                                    error={textfieldError.whatsapp}
+                                    value={enteredValues.whatsapp}
+                                    disabled={isBtnLoading || !isEdit}
+                                    onChange={(event) => { inputChangeHandler(WHATSAPP, event.target.value) }}
+                                />
+
+                                <FormTextField
+                                    title='Phone Number'
+                                    placeholder='+65 6123 4567'
+                                    id={PHONE_NUMBER}
+                                    name={PHONE_NUMBER}
+                                    helperText={helperText.phoneNumber}
+                                    error={textfieldError.phoneNumber}
+                                    value={enteredValues.phoneNumber}
+                                    disabled={isBtnLoading || !isEdit}
+                                    onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
+                                />
+                            </ContentCard>
+
+                            <ContentCard className={styles.content}>
                                 <div className={styles.fieldContainer}>
                                     <FieldHeader
                                         title='Category'
@@ -646,14 +749,15 @@ const CustomerFacingBusinessPage = () => {
                                     }}
                                 />
                             </ContentCard>
+                            </>
                 }
             </form>
 
             {
                 (!isLoading && isLoadingErrorMessage === null) &&
                 <LocationSection
-                    locations={locations}
-                    setLocations={setLocations}
+                    location={location}
+                    setLocation={setLocation}
                     resetSaving={resetSaving}
                     isEdit={isEdit}
                 />

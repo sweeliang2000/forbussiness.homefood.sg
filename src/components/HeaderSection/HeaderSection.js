@@ -28,6 +28,8 @@ export const HeaderSection = ({
     buttonText = 'Save',
     successButtonText = 'Saved',
     warningMessage = '',
+    noMaxWidth = false,
+    rightActions = null,
     ...props
 }) => {
     const [showSuccessAlert, setShowSuccessAlert] = useState(true);
@@ -37,7 +39,7 @@ export const HeaderSection = ({
     const shouldShowSuccess = successMessage && successMessage !== '' && successMessage !== null && successMessage !== undefined && (setShowSuccess ? true : showSuccessAlert);
 
     return (
-        <ContentCard className={`${className} ${styles.informationCard}`}>
+        <ContentCard noMaxWidth={noMaxWidth} className={`${className} ${styles.informationCard}`}>
             <div className={styles.titleSection}>
                 <h1 className={styles.title}>{title}</h1>
 
@@ -67,6 +69,7 @@ export const HeaderSection = ({
                             {isSuccess ? successButtonText : buttonText}
                         </Button>
                     )}
+                    {rightActions}
                 </div>
             </div>
             <div className={styles.description}>{description}</div>
