@@ -292,12 +292,14 @@
     align-items: center;
     gap: 6px;
     font-family: var(--font-raleway);
+    margin-bottom: 16px;
 }
 
 .tileSub {
     font-size: 11.5px;
     color: #666;
     margin-top: -4px;
+    margin-bottom: 8px;
 }
 
 /* ---- Order status ---- */
@@ -313,7 +315,7 @@
     content: '';
     position: absolute;
     inset: 0 40% 0 0;
-    background: linear-gradient(90deg, var(--accent-color), #4a8df0);
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
     border-radius: 999px;
     animation: barPulse 3s ease-in-out infinite;
 }
@@ -346,20 +348,28 @@
 }
 
 .active .stepDot {
-    background: var(--accent-color);
-    box-shadow: 0 0 0 4px rgba(14, 70, 163, 0.15);
-}
-
-.done .stepDot {
-    background: #22c55e;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
 }
 
 .orderStep span:last-child {
     font-size: 10px;
-    color: #555;
+    color: #aab;
     font-weight: 600;
     line-height: 1.2;
 }
+
+/* Per-step colors */
+.stepReceived .stepDot { background: #3b82f6; }
+.stepReceived span:last-child { color: #3b82f6; }
+
+.stepCooking .stepDot { background: #f59e0b; }
+.stepCooking span:last-child { color: #f59e0b; }
+
+.stepAlmostReady .stepDot { background: #d8dee6; }
+.stepAlmostReady span:last-child { color: #aab; }
+
+.stepReady .stepDot { background: #22c55e; }
+.stepReady span:last-child { color: #22c55e; }
 
 .orderNow {
     margin-top: auto;
@@ -378,8 +388,8 @@
 
 /* ---- Payment tile ---- */
 .payRow {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 6px;
 }
 

@@ -83,19 +83,19 @@ const HeroSection = () => {
                     </div>
                     <div className={styles.orderBar}></div>
                     <div className={styles.orderSteps}>
-                        <div className={`${styles.orderStep} ${styles.done}`}>
+                        <div className={`${styles.orderStep} ${styles.done} ${styles.stepReceived}`}>
                             <span className={styles.stepDot}></span>
                             <span>Received</span>
                         </div>
-                        <div className={`${styles.orderStep} ${styles.done}`}>
+                        <div className={`${styles.orderStep} ${styles.active} ${styles.stepCooking}`}>
                             <span className={styles.stepDot}></span>
                             <span>Cooking</span>
                         </div>
-                        <div className={`${styles.orderStep} ${styles.active}`}>
+                        <div className={`${styles.orderStep} ${styles.stepAlmostReady}`}>
                             <span className={styles.stepDot}></span>
                             <span>Almost ready</span>
                         </div>
-                        <div className={styles.orderStep}>
+                        <div className={`${styles.orderStep} ${styles.stepReady}`}>
                             <span className={styles.stepDot}></span>
                             <span>Ready</span>
                         </div>
