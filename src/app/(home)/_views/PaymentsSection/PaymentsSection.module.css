@@ -54,7 +54,7 @@
 /* --- Payment methods --- */
 .methods {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 12px;
 }
 
@@ -111,6 +111,7 @@
     color: var(--on-primary-light2);
     font-size: 14px;
     line-height: 1.55;
+    margin-top: auto;
 }
 
 /* --- Settlement --- */
@@ -187,5 +188,4 @@
 
 @media (max-width: 640px) {
     .sectionTitle { font-size: 30px; }
-    .methods { grid-template-columns: 1fr; }
 }
