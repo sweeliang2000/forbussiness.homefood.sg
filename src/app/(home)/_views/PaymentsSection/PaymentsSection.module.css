@@ -1,0 +1,191 @@
+.paySection {
+    background: var(--background);
+    padding: 80px var(--side-spacing);
+}
+
+.sectionHead {
+    text-align: center;
+    margin-bottom: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: center;
+}
+
+.sectionTitle {
+    font-size: 40px;
+    color: var(--on-primary);
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+}
+
+.sectionSub {
+    font-size: 19px;
+    color: var(--on-primary-light2);
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.55;
+}
+
+.payGrid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: stretch;
+}
+
+.payCard {
+    background: #fff;
+    border-radius: 24px;
+    padding: 36px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.payCard h3 {
+    font-size: 26px;
+    letter-spacing: -0.01em;
+}
+
+/* --- Payment methods --- */
+.methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.method {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    background: #fff;
+}
+
+.methodIcon {
+    width: 44px;
+    height: 30px;
+    border-radius: 6px;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 10px;
+    letter-spacing: 0.03em;
+    color: #444;
+    flex-shrink: 0;
+    font-family: var(--font-raleway);
+    position: relative;
+    overflow: hidden;
+}
+
+.paynow .methodIcon { background: linear-gradient(135deg, #7b2d8e, #b043c8); color: #fff; }
+.paylah .methodIcon { background: linear-gradient(135deg, #dc1e2c, #ff4d5c); color: #fff; }
+.visa .methodIcon { background: #1a1f71; color: #f7b600; }
+.master .methodIcon { background: #fff; border: 1px solid var(--border-color); }
+
+.masterLeft,
+.masterRight {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.masterLeft { background: #eb001b; left: 9px; }
+.masterRight { background: #f79e1b; right: 9px; mix-blend-mode: multiply; }
+
+.mname { font-weight: 700; font-size: 14.5px; }
+.msub { font-size: 12px; color: var(--on-primary-light2); }
+
+.payNote {
+    color: var(--on-primary-light2);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+/* --- Settlement --- */
+.settleList {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.settleItem {
+    display: flex;
+    gap: 14px;
+}
+
+.check {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #eaf7ee;
+    color: #0a8754;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+}
+
+.ct {
+    font-size: 14.5px;
+    color: var(--on-primary-light2);
+    line-height: 1.55;
+}
+
+.ct b { color: var(--on-primary); }
+
+.payoutCard {
+    background: linear-gradient(135deg, #0e46a3, #2b6fd6);
+    color: #fff;
+    border-radius: 20px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.payoutKey {
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    font-family: var(--font-raleway);
+}
+
+.payoutVal {
+    font-size: 28px;
+    font-weight: 700;
+    font-family: var(--font-raleway);
+    letter-spacing: -0.01em;
+}
+
+.payoutDesc {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.5;
+}
+
+@media (max-width: 1024px) {
+    .payGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .sectionTitle { font-size: 30px; }
+    .methods { grid-template-columns: 1fr; }
+}

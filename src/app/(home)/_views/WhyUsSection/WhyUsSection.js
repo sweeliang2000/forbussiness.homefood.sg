@@ -1,84 +1,57 @@
 import styles from './WhyUsSection.module.css';
 import Badge from '@/components/Badge';
-import FeatureImageCard from '@/components/FeatureImageCard';
-import Abutton from '@/components/Buttons/Abutton';
-import { FaLightbulb } from 'react-icons/fa';
+
+const reasons = [
+    {
+        icon: '🚀',
+        title: 'Go live this week',
+        description:
+            'Add your menu, set pickup slots, print your QR. Your kitchen is discoverable in under an hour — no hardware to buy.',
+    },
+    {
+        icon: '🔒',
+        title: 'You never touch money',
+        description:
+            'Customers pay online. We handle refunds and chargebacks. You just cook, notify, and hand over the order.',
+    },
+    {
+        icon: '📈',
+        title: 'Repeat customers, automatically',
+        description:
+            'Every happy pickup is a reason to come back. Pre-order batches make sure regulars know your next drop.',
+    },
+    {
+        icon: '🤝',
+        title: 'Grandfathered forever',
+        description:
+            "Join us now and your plan stays free as we grow. We'd rather win together than squeeze our earliest merchants.",
+    },
+];
 
 const WhyUsSection = () => {
-    const features = [
-        {
-            image: "/images/pages/why/discover.png",
-            title: "Discover",
-            description: "Make your loyalty and offers easy to find. When customers know where to look, they come back.",
-            icon: "🎯"
-        },
-        {
-            image: "/images/pages/why/scan-to-win.png",
-            title: "Scan to Win",
-            description: "Random rewards work like a blind box. Customers want to come back to see what they get next.",
-            icon: "🎁"
-        },
-        {
-            image: "/images/pages/why/centralised-loyalty-card.png",
-            title: "Centralised Loyalty Card",
-            description: "One place for stamps and rewards. <strong>No forgotten reward systems, no lost cards.</strong>",
-            icon: "📋"
-        }
-    ];
-
     return (
-        <section id="why" className={styles.whyUsSection}>
-            <div className={styles.sectionContainer}>
-                <div className={styles.sectionHeader}>
-                    <Badge variant="blue">Why Choose Collbine?</Badge>
-
-                    <div className={styles.sectionContent}>
-                        <h2 className={styles.sectionTitle}>No More Forgotten Reward Systems.</h2>
-                        <p className={styles.sectionSubtitle}>
-                            Discover. Scan to win with random rewards that bring customers back. One centralised loyalty card so stamps and rewards are never lost.
-                        </p>
-                    </div>
-                </div>
-                <div className={styles.featuresGrid}>
-                    {features.map((feature, index) => (
-                        <FeatureImageCard
-                            key={index}
-                            image={feature.image}
-                            title={feature.title}
-                            description={feature.description}
-                            imageWidth={420}
-                            imageHeight={320}
-                            isImageNarrow={true}
-                        />
-                    ))}
-                </div>
-
-                {/* CTA Section */}
-                <div className={styles.ctaBubble}>
-                    <div className={styles.ctaContent}>
-                        <div className={styles.lightbulbIcon}>
-                            <FaLightbulb />
-                        </div>
-                        <div className={styles.ctaText}>
-                            <p>
-                                Your customers already have their stamps — remind them to return, redeem, and boost your sales.
-                            </p>
-                            <span className={styles.tagline}>(Get free scan to win banner for your first merchants)</span>
-                        </div>
-                        <div className={styles.ctaButton}>
-                            <Abutton href="/signup" variant="primary" size="medium">
-                                Get Started for Free
-                            </Abutton>
+        <section id="why" className={styles.whySection}>
+            <div className={styles.sectionHead}>
+                <Badge variant="blue">Why grow with us</Badge>
+                <h2 className={styles.sectionTitle}>Built around how home kitchens actually work.</h2>
+                <p className={styles.sectionSub}>
+                    Not a clone of a restaurant POS. A tool shaped around small batches, limited slots, and a
+                    doorstep-pickup experience.
+                </p>
+            </div>
+            <div className={styles.whyGrid}>
+                {reasons.map((r, i) => (
+                    <div key={i} className={styles.whyCard}>
+                        <div className={styles.icon}>{r.icon}</div>
+                        <div>
+                            <h4>{r.title}</h4>
+                            <p>{r.description}</p>
                         </div>
                     </div>
-                    <div className={styles.stickyNote}>
-                        <span>No more forgotten reward systems.</span>
-                    </div>
-                </div>
+                ))}
             </div>
         </section>
     );
 };
 
 export default WhyUsSection;
-

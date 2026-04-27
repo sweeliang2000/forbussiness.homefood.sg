@@ -4,23 +4,21 @@ import Badge from "@/components/Badge";
 const StatementSection = () => {
     return (
         <section className={styles.statementSection}>
-            <div className={styles.sectionContainer}>
-                <div className={styles.statementContainer}>
-                    <div className={styles.statementContent}>
-                        <Badge variant="blue">Proved by Experts</Badge>
-                        <h2>Loyalty Keeps Customers Coming Back. Promotions Drive Discovery and Spending.</h2>
-                        <p>
-                            Nearly 47% of shoppers buy more or try new brands when redeeming promotions, showing how incentives influence purchase behaviour. That&apos;s why effective retail strategies combine promotions that attract customers with loyalty systems that keep them returning. <strong>Collbine does both: scan-to-win to bring them in and drive spend, and loyalty to turn visitors into regulars.</strong>
-                        </p>
-                    </div>
-
-                    <p>
-                        *Source: XCCommerce 2026 Retail Promotions Shopper Study.
-                    </p>
-                </div>
+            <div className={styles.statementInner}>
+                <Badge variant="blue">Built for home kitchens</Badge>
+                <h2>Great home food is everywhere. It just isn&apos;t easy to find, order, or collect. Collbine fixes all three.</h2>
+                <p>
+                    Home-based food businesses in Singapore are booming — but most rely on word of mouth, messy WhatsApp
+                    threads, and manual payment tracking.{' '}
+                    <strong>
+                        Collbine turns your home kitchen into a proper, discoverable business
+                    </strong>{' '}
+                    with pre-orders, live status updates, online payments, and a home-pickup flow customers already understand.
+                </p>
+                <p className={styles.src}>*Designed with and for Singapore home-based food (HBF) sellers.</p>
             </div>
         </section>
-    )
+    );
 };
 
 export default StatementSection;

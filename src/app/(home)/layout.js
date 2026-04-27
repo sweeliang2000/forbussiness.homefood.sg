@@ -7,23 +7,23 @@ const WHATSAPP_URL =
 
 /** @type {import('next').Metadata} */
 export const metadata = {
-  title: 'Scan-to-Win Loyalty for Merchants | Collbine for Business',
+  title: 'Grow Your Home Kitchen Business | Collbine for Business',
   description:
-    'Boost Singapore customer visits with scan-to-win loyalty for merchants. Collbine helps run QR rewards and redeem points in one simple system.',
+    'Collbine helps home-based food sellers in Singapore get discovered, take pre-orders, accept online payments, and manage home pickup — all in one place.',
   keywords: [
-    'scan-to-win loyalty',
-    'QR scan to win',
-    'loyalty program Singapore',
-    'merchant rewards',
-    'customer retention',
-    'digital loyalty card',
-    'Singapore QR loyalty',
-    'reward redemption',
+    'home based food Singapore',
+    'HBF seller platform',
+    'home kitchen pre-order',
+    'home food pickup Singapore',
+    'online payment home business',
+    'Collbine for business',
+    'home food order app',
+    'Singapore home food seller',
   ],
   openGraph: {
-    title: 'Scan-to-Win Loyalty for Merchants | Collbine for Business',
+    title: 'Grow Your Home Kitchen Business | Collbine for Business',
     description:
-      'Boost Singapore customer visits with scan-to-win loyalty for merchants. Collbine helps run QR rewards and redeem points in one simple system.',
+      'Collbine helps home-based food sellers in Singapore get discovered, take pre-orders, accept online payments, and manage home pickup — all in one place.',
     url: 'https://forbusiness.collbine.com/',
     siteName: 'Collbine for Business',
     images: [
@@ -31,7 +31,7 @@ export const metadata = {
         url: 'https://forbusiness.collbine.com/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Scan-to-Win Loyalty for Merchants',
+        alt: 'Grow Your Home Kitchen Business with Collbine',
       },
     ],
     type: 'website',
@@ -39,9 +39,9 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Scan-to-Win Loyalty for Merchants | Collbine for Business',
+    title: 'Grow Your Home Kitchen Business | Collbine for Business',
     description:
-      'Boost Singapore customer visits with scan-to-win loyalty for merchants. Collbine helps run QR rewards and redeem points in one simple system.',
+      'Collbine helps home-based food sellers in Singapore get discovered, take pre-orders, accept online payments, and manage home pickup — all in one place.',
     images: ['https://forbusiness.collbine.com/og-image.png'],
   },
   robots: { index: true, follow: true },

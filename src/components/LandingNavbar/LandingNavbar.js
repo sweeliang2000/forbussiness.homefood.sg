@@ -17,15 +17,15 @@ import { REFRESH_USER_COOKIE } from '@/utility/apiPaths';
 
 const menuItems = [
     { label: 'Why Collbine', href: '#why' },
-    { label: 'Features', href: '#features' },
+    { label: 'What we offer', href: '#offer' },
+    { label: 'How it works', href: '#how' },
+    { label: 'Payments', href: '#payments' },
     { label: 'Pricing', href: '#pricing' },
     { label: 'FAQ', href: '#faq' },
-    { label: 'Get Started', href: 'https://guide.collbine.com/', external: true },
-    { label: 'Contact', href: '#contact' }
 ];
 
-const login = { label: 'Login', href: '/login' };
-const signup = { label: 'Sign up for free', href: '/signup' };
+const login = { label: 'Log in', href: '/login' };
+const signup = { label: 'Join early adopters', href: '/signup' };
 const consoleCta = { label: 'Console', href: '/app' };
 
 const LandingNavbar = () => {
