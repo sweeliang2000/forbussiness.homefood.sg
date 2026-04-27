@@ -20,7 +20,7 @@ const HeroSection = () => {
                     it&apos;s ready. <strong>You just cook.</strong>
                 </p>
                 <div className={styles.heroBtns}>
-                    <Link href="#pricing" className={`${styles.btn} ${styles.primary} ${styles.large}`}>
+                    <Link href="/early-adopter" className={`${styles.btn} ${styles.primary} ${styles.large}`}>
                         Grow with us — it&apos;s free
                     </Link>
                     <Link href="#how" className={`${styles.btn} ${styles.outline} ${styles.large}`}>

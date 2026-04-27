@@ -55,7 +55,7 @@ const PricingSection = () => {
                     <p className={styles.feeNote}>
                         <b>That&apos;s it.</b> Payment fees go straight to the processor — no markup from us during early adopter.
                     </p>
-                    <Link href="/signup" className={styles.applyBtn}>
+                    <Link href="/early-adopter" className={styles.applyBtn}>
                         Apply to join — free
                     </Link>
                 </div>

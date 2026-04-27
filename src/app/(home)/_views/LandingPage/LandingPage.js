@@ -44,7 +44,7 @@ const LandingPage = () => {
                                 (Free onboarding call &amp; QR starter pack for the first 100 home kitchens.)
                             </span>
                         </div>
-                        <Link href="#pricing" className={styles.ctaBtn}>
+                        <Link href="/early-adopter" className={styles.ctaBtn}>
                             Become an early adopter
                         </Link>
                     </div>
