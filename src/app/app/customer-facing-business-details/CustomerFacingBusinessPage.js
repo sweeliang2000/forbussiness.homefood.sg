@@ -217,44 +217,14 @@ const CustomerFacingBusinessPage = () => {
     // Track thumbnail deletion
     useEffect(() => {
         if (hasExistingData) {
-            console.log('Thumbnail images changed:', {
-                hasExistingData,
-                thumbnailImagesLength: thumbnailImages.length,
-                thumbnailImages: thumbnailImages
-            });
-            
-            // If we had an existing thumbnail loaded from server and now it's deleted
-            if (thumbnailImages.length === 0) {
-                setIsThumbnailDeleted(true);
-            } else if (thumbnailImages.length > 0) {
-                setIsThumbnailDeleted(false);
-            }
-            
-            // Call resetSaving when thumbnail changes
-            resetSaving();
+            setIsThumbnailDeleted(thumbnailImages.length === 0);
         }
     }, [thumbnailImages, hasExistingData]);
 
     // Track banner deletion
     useEffect(() => {
         if (hasExistingData) {
-            console.log('Banner images changed:', {
-                hasExistingData,
-                bannerImagesLength: bannerImages.length,
-                bannerImages: bannerImages
-            });
-            
-            // If we had an existing banner loaded from server and now it's deleted
-            if (bannerImages.length === 0) {
-                console.log('DELETED - banner was deleted');
-                setIsBannerDeleted(true);
-            } else if (bannerImages.length > 0) {
-                console.log('NOT DELETED - banner exists or was added');
-                setIsBannerDeleted(false);
-            }
-            
-            // Call resetSaving when banner changes
-            resetSaving();
+            setIsBannerDeleted(bannerImages.length === 0);
         }
     }, [bannerImages, hasExistingData]);
 

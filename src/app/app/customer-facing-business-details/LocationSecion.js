@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -104,14 +104,19 @@ const LocationSection = ({
   resetSaving,
   isEdit = true,
 }) => {
-  const initialDraft = useMemo(() => normalizeFromLocation(location), [location]);
-  const [locationDraft, setLocationDraft] = useState(initialDraft);
+  const [locationDraft, setLocationDraft] = useState(() => normalizeFromLocation(location));
+  const skipEffectRef = useRef(false);
 
   useEffect(() => {
+    if (skipEffectRef.current) {
+      skipEffectRef.current = false;
+      return;
+    }
     setLocationDraft(normalizeFromLocation(location));
   }, [location]);
 
   const syncLocation = (nextDraft) => {
+    skipEffectRef.current = true;
     setLocationDraft(nextDraft);
     setLocation(toPayloadLocation(nextDraft));
     resetSaving();
