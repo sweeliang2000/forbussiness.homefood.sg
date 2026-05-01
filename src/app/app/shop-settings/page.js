@@ -300,7 +300,6 @@ export default function ShopSettingsPage() {
     <div className={styles.page}>
       <div className={styles.stickyHeader}>
         <HeaderSection
-          noMaxWidth
           title="Ordering Settings"
           description={
             <p>Configure ordering hours, order mode, and pre-order availability for your shop.</p>

@@ -756,7 +756,6 @@ export default function MenuBuilder() {
     <div className={styles.root}>
       <div className={styles.stickyHeader}>
         <HeaderSection
-          noMaxWidth
           title="Menu Builder"
           description={
             <p>

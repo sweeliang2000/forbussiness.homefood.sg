@@ -7,7 +7,6 @@
   position: sticky;
   top: 0;
   z-index: 6;
-  background: #fff;
 }
 
 .tabsRow {
@@ -21,6 +20,9 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  width: 100%;
 }
 
 .grid2 {
