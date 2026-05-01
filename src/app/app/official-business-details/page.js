@@ -470,7 +470,7 @@ export default function StampSetup() {
                 />
 
                 <TextField
-                  label='Building Name'
+                  label='Building Name (Optional)'
                   variant='outlined'
                   placeholder='International Plaza'
                   fullWidth
