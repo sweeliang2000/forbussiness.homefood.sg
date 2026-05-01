@@ -27,6 +27,7 @@ const CATEGORY = 'category';
 const HALAL_CERTIFIED = 'halalCertified';
 const KEYWORDS = 'keywords';
 
+const sanitize = (value) => (!value || value === 'undefined') ? '' : value;
 
 const CustomerFacingBusinessPage = () => {
     // For initial Loading Status
@@ -144,16 +145,16 @@ const CustomerFacingBusinessPage = () => {
             const formData = new FormData();
             console.log(location)
 
-            formData.append('displayName', enteredValues[DISPLAY_NAME]);
-            formData.append('description', enteredValues[SHOP_DESCRIPTION]);
-            formData.append('website', enteredValues[WEBSITE]);
-            formData.append('instagram', enteredValues[INSTAGRAM]);
-            formData.append('facebook', enteredValues[FACEBOOK]);
-            formData.append('whatsapp', enteredValues[WHATSAPP]);
-            formData.append('tiktok', enteredValues[TIKTOK]);
-            formData.append('phoneNumber', enteredValues[PHONE_NUMBER]);
-            formData.append('category', enteredValues[CATEGORY]);
-            formData.append('halalcertified', enteredValues[HALAL_CERTIFIED]);
+            formData.append('displayName', sanitize(enteredValues[DISPLAY_NAME]));
+            formData.append('description', sanitize(enteredValues[SHOP_DESCRIPTION]));
+            formData.append('website', sanitize(enteredValues[WEBSITE]));
+            formData.append('instagram', sanitize(enteredValues[INSTAGRAM]));
+            formData.append('facebook', sanitize(enteredValues[FACEBOOK]));
+            formData.append('whatsapp', sanitize(enteredValues[WHATSAPP]));
+            formData.append('tiktok', sanitize(enteredValues[TIKTOK]));
+            formData.append('phoneNumber', sanitize(enteredValues[PHONE_NUMBER]));
+            formData.append('category', sanitize(enteredValues[CATEGORY]));
+            formData.append('halalcertified', sanitize(enteredValues[HALAL_CERTIFIED]));
 
             if (thumbnailImages.length > 0 && thumbnailImages[0] !== null) {
                 formData.append('thumbnail', thumbnailImages[0].file);
@@ -162,7 +163,7 @@ const CustomerFacingBusinessPage = () => {
             if (bannerImages.length > 0 && bannerImages[0] !== null) {
                 formData.append('banner', bannerImages[0].file);
             }
-            formData.append('keywords', enteredValues[KEYWORDS]);
+            formData.append('keywords', sanitize(enteredValues[KEYWORDS]));
             formData.append('location', JSON.stringify(location ?? {}));
             
             // Add isThumbnailDeleted flag for PUT requests
@@ -271,19 +272,20 @@ const CustomerFacingBusinessPage = () => {
                     setIsEdit(isEditValue !== undefined ? isEditValue : true);
                     
                     const loadedValues = {
-                        [DISPLAY_NAME]: data.displayName,
-                        [SHOP_DESCRIPTION]: data.description,
-                        [WEBSITE]: data.website,
-                        [INSTAGRAM]: data.instagram || '',
-                        [FACEBOOK]: data.facebook || '',
-                        [WHATSAPP]: data.whatsapp || '',
-                        [TIKTOK]: data.tiktok || '',
-                        [PHONE_NUMBER]: data.phoneNumber || data.phone_number || '',
-                        [CATEGORY]: data.category,
-                        [HALAL_CERTIFIED]: data.halalcertified,
-                        [KEYWORDS]: data.keywords
+                        [DISPLAY_NAME]: sanitize(data.displayName),
+                        [SHOP_DESCRIPTION]: sanitize(data.description),
+                        [WEBSITE]: sanitize(data.website),
+                        [INSTAGRAM]: sanitize(data.instagram),
+                        [FACEBOOK]: sanitize(data.facebook),
+                        [WHATSAPP]: sanitize(data.whatsapp),
+                        [TIKTOK]: sanitize(data.tiktok),
+                        [PHONE_NUMBER]: sanitize(data.phoneNumber || data.phone_number),
+                        [CATEGORY]: sanitize(data.category),
+                        [HALAL_CERTIFIED]: sanitize(data.halalcertified),
+                        [KEYWORDS]: sanitize(data.keywords),
                     };
                     setEnteredValues(loadedValues);
+                    console.log('loadedValues', loadedValues);
                     
                     // Store initial values for comparison
                     initialValuesRef.current = { ...loadedValues };
