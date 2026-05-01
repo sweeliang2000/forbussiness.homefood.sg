@@ -512,228 +512,225 @@ const CustomerFacingBusinessPage = () => {
                         isLoadingErrorMessage !== null ?
                             <ErrorPage message={isLoadingErrorMessage} statusCode={isLoadingErrorStatus} /> :
                             <>
-                            <ContentCard className={styles.content}>
-                                <FormTextField
-                                    title='Display name*'
-                                    subtitle='Display name will be shown on the home screen when user discover your shop. It is better to be something that user used to identify you.'
-                                    placeholder='Sunrise Bakery'
-                                    id={DISPLAY_NAME}
-                                    name={DISPLAY_NAME}
-                                    helperText={helperText.displayName}
-                                    error={textfieldError.displayName}
-                                    value={enteredValues.displayName}
-                                    disabled={isBtnLoading || !isEdit}
-                                    onChange={(event) => { inputChangeHandler(DISPLAY_NAME, event.target.value) }}
-                                />
+                                <ContentCard className={styles.content}>
+                                    <FormTextField
+                                        title='Display name*'
+                                        subtitle='Display name will be shown on the home screen when user discover your shop. It is better to be something that user used to identify you.'
+                                        placeholder='Sunrise Bakery'
+                                        id={DISPLAY_NAME}
+                                        name={DISPLAY_NAME}
+                                        helperText={helperText.displayName}
+                                        error={textfieldError.displayName}
+                                        value={enteredValues.displayName}
+                                        disabled={isBtnLoading || !isEdit}
+                                        onChange={(event) => { inputChangeHandler(DISPLAY_NAME, event.target.value) }}
+                                    />
 
-                                <FormTextField
-                                    title="Shop's Description*"
-                                    subtitle='Information about your shop.'
-                                    placeholder='Fresh Market Cafe'
-                                    id={SHOP_DESCRIPTION}
-                                    name={SHOP_DESCRIPTION}
-                                    helperText={helperText.description}
-                                    error={textfieldError.description}
-                                    value={enteredValues.description}
-                                    disabled={isBtnLoading || !isEdit}
-                                    onChange={(event) => { inputChangeHandler(SHOP_DESCRIPTION, event.target.value) }}
-                                    multiline
-                                    slotProps={{
-                                        input: {
-                                            min: 0,
-                                            maxLength: 10,
-                                        },
-                                    }}
-                                />
+                                    <FormTextField
+                                        title="Shop's Description*"
+                                        subtitle='Information about your shop.'
+                                        placeholder='Fresh Market Cafe'
+                                        id={SHOP_DESCRIPTION}
+                                        name={SHOP_DESCRIPTION}
+                                        helperText={helperText.description}
+                                        error={textfieldError.description}
+                                        value={enteredValues.description}
+                                        disabled={isBtnLoading || !isEdit}
+                                        onChange={(event) => { inputChangeHandler(SHOP_DESCRIPTION, event.target.value) }}
+                                        multiline
+                                        slotProps={{
+                                            input: {
+                                                min: 0,
+                                                maxLength: 10,
+                                            },
+                                        }}
+                                    />
 
-                                <FormTextField
-                                    title="Website"
-                                    id={WEBSITE}
-                                    name={WEBSITE}
-                                    helperText={helperText.website}
-                                    error={textfieldError.website}
-                                    value={enteredValues.website}
-                                    disabled={isBtnLoading || !isEdit}
-                                    onChange={(event) => { inputChangeHandler(WEBSITE, event.target.value) }}
-                                />
-                            </ContentCard>
+                                    <FormTextField
+                                        title="Website"
+                                        id={WEBSITE}
+                                        name={WEBSITE}
+                                        helperText={helperText.website}
+                                        error={textfieldError.website}
+                                        value={enteredValues.website}
+                                        disabled={isBtnLoading || !isEdit}
+                                        onChange={(event) => { inputChangeHandler(WEBSITE, event.target.value) }}
+                                    />
+                                </ContentCard>
 
-                            <ContentCard className={styles.content}>
-                                <FieldHeader
-                                    title='Contact & Social Links'
-                                    description='Optional. Add channels customers can use to message or call your business.'
-                                    type='h3'
-                                />
-
-                                <FormTextField
-                                    title='Instagram'
-                                    placeholder='https://instagram.com/yourshop or @yourshop'
-                                    id={INSTAGRAM}
-                                    name={INSTAGRAM}
-                                    helperText={helperText.instagram}
-                                    error={textfieldError.instagram}
-                                    value={enteredValues.instagram}
-                                    disabled={isBtnLoading || !isEdit}
-                                    onChange={(event) => { inputChangeHandler(INSTAGRAM, event.target.value) }}
-                                />
-
-                                <FormTextField
-                                    title='Facebook'
-                                    placeholder='https://facebook.com/yourshop'
-                                    id={FACEBOOK}
-                                    name={FACEBOOK}
-                                    helperText={helperText.facebook}
-                                    error={textfieldError.facebook}
-                                    value={enteredValues.facebook}
-                                    disabled={isBtnLoading || !isEdit}
-                                    onChange={(event) => { inputChangeHandler(FACEBOOK, event.target.value) }}
-                                />
-
-                                <FormTextField
-                                    title='TikTok'
-                                    placeholder='https://tiktok.com/@yourshop or @yourshop'
-                                    id={TIKTOK}
-                                    name={TIKTOK}
-                                    helperText={helperText.tiktok}
-                                    error={textfieldError.tiktok}
-                                    value={enteredValues.tiktok}
-                                    disabled={isBtnLoading || !isEdit}
-                                    onChange={(event) => { inputChangeHandler(TIKTOK, event.target.value) }}
-                                />
-
-                                <FormTextField
-                                    title='WhatsApp'
-                                    placeholder='+65 9123 4567'
-                                    id={WHATSAPP}
-                                    name={WHATSAPP}
-                                    helperText={helperText.whatsapp}
-                                    error={textfieldError.whatsapp}
-                                    value={enteredValues.whatsapp}
-                                    disabled={isBtnLoading || !isEdit}
-                                    onChange={(event) => { inputChangeHandler(WHATSAPP, event.target.value) }}
-                                />
-
-                                <FormTextField
-                                    title='Phone Number'
-                                    placeholder='+65 6123 4567'
-                                    id={PHONE_NUMBER}
-                                    name={PHONE_NUMBER}
-                                    helperText={helperText.phoneNumber}
-                                    error={textfieldError.phoneNumber}
-                                    value={enteredValues.phoneNumber}
-                                    disabled={isBtnLoading || !isEdit}
-                                    onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
-                                />
-                            </ContentCard>
-
-                            <ContentCard className={styles.content}>
-                                <div className={styles.fieldContainer}>
+                                <ContentCard className={styles.content}>
                                     <FieldHeader
-                                        title='Category'
+                                        title='Contact & Social Links'
+                                        description='Optional. Add channels customers can use to message or call your business.'
                                         type='h3'
                                     />
 
-                                    <FullWidthDropdown
-                                        value={enteredValues.category}
-                                        onChange={(event) => { inputChangeHandler(CATEGORY, event.target.value) }}
-                                        options={[
-                                            { value: 'food_and_beverage', title: 'Food and Beverage' },
-                                            { value: 'retailers', title: 'Retailers' },
-                                            { value: 'service', title: 'Service' }
-                                        ]}
-                                        disabled={!isEdit}
+                                    <FormTextField
+                                        title='Instagram'
+                                        placeholder='https://instagram.com/yourshop or @yourshop'
+                                        id={INSTAGRAM}
+                                        name={INSTAGRAM}
+                                        helperText={helperText.instagram}
+                                        error={textfieldError.instagram}
+                                        value={enteredValues.instagram}
+                                        disabled={isBtnLoading || !isEdit}
+                                        onChange={(event) => { inputChangeHandler(INSTAGRAM, event.target.value) }}
                                     />
-                                </div>
-                                {
-                                    enteredValues.category === 'food_and_beverage' &&
+
+                                    <FormTextField
+                                        title='Facebook'
+                                        placeholder='https://facebook.com/yourshop'
+                                        id={FACEBOOK}
+                                        name={FACEBOOK}
+                                        helperText={helperText.facebook}
+                                        error={textfieldError.facebook}
+                                        value={enteredValues.facebook}
+                                        disabled={isBtnLoading || !isEdit}
+                                        onChange={(event) => { inputChangeHandler(FACEBOOK, event.target.value) }}
+                                    />
+
+                                    <FormTextField
+                                        title='TikTok'
+                                        placeholder='https://tiktok.com/@yourshop or @yourshop'
+                                        id={TIKTOK}
+                                        name={TIKTOK}
+                                        helperText={helperText.tiktok}
+                                        error={textfieldError.tiktok}
+                                        value={enteredValues.tiktok}
+                                        disabled={isBtnLoading || !isEdit}
+                                        onChange={(event) => { inputChangeHandler(TIKTOK, event.target.value) }}
+                                    />
+
+                                    <FormTextField
+                                        title='WhatsApp'
+                                        placeholder='+65 9123 4567'
+                                        id={WHATSAPP}
+                                        name={WHATSAPP}
+                                        helperText={helperText.whatsapp}
+                                        error={textfieldError.whatsapp}
+                                        value={enteredValues.whatsapp}
+                                        disabled={isBtnLoading || !isEdit}
+                                        onChange={(event) => { inputChangeHandler(WHATSAPP, event.target.value) }}
+                                    />
+
+                                    <FormTextField
+                                        title='Phone Number'
+                                        placeholder='+65 6123 4567'
+                                        id={PHONE_NUMBER}
+                                        name={PHONE_NUMBER}
+                                        helperText={helperText.phoneNumber}
+                                        error={textfieldError.phoneNumber}
+                                        value={enteredValues.phoneNumber}
+                                        disabled={isBtnLoading || !isEdit}
+                                        onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
+                                    />
+                                </ContentCard>
+
+                                <ContentCard className={styles.content}>
                                     <div className={styles.fieldContainer}>
                                         <FieldHeader
-                                            title='Halal Certified'
+                                            title='Category'
                                             type='h3'
                                         />
 
                                         <FullWidthDropdown
-                                            value={enteredValues.halalCertified}
-                                            onChange={(event) => { inputChangeHandler(HALAL_CERTIFIED, event.target.value) }}
+                                            value={enteredValues.category}
+                                            onChange={(event) => { inputChangeHandler(CATEGORY, event.target.value) }}
                                             options={[
-                                                { value: 'Yes', title: 'Yes' },
-                                                { value: 'No', title: 'No' },
-                                                { value: 'Not Applicable', title: 'Not Applicable' }
+                                                { value: 'food_and_beverage', title: 'Food and Beverage' },
+                                                { value: 'retailers', title: 'Retailers' },
+                                                { value: 'service', title: 'Service' }
                                             ]}
                                             disabled={!isEdit}
                                         />
                                     </div>
-                                }
+                                    {
+                                        enteredValues.category === 'food_and_beverage' &&
+                                        <div className={styles.fieldContainer}>
+                                            <FieldHeader
+                                                title='Halal Certified'
+                                                type='h3'
+                                            />
 
-                                <div className={styles.fieldContainer}>
-                                    <FieldHeader
-                                        title='Thumbnail / Featured Image'
-                                        description='Aspect ratio: 1:1. Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
-                                        type='h3'
+                                            <FullWidthDropdown
+                                                value={enteredValues.halalCertified}
+                                                onChange={(event) => { inputChangeHandler(HALAL_CERTIFIED, event.target.value) }}
+                                                options={[
+                                                    { value: 'Yes', title: 'Yes' },
+                                                    { value: 'No', title: 'No' },
+                                                    { value: 'Not Applicable', title: 'Not Applicable' }
+                                                ]}
+                                                disabled={!isEdit}
+                                            />
+                                        </div>
+                                    }
+
+                                    <div className={styles.fieldContainer}>
+                                        <FieldHeader
+                                            title='Thumbnail / Featured Image'
+                                            description='Aspect ratio: 1:1. Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                                            type='h3'
+                                        />
+
+                                        <DragDropImageUploader
+                                            images={thumbnailImages}
+                                            setImages={setThumbnailImages}
+                                            resetSaving={resetSaving}
+                                            noOfImages={1}
+                                            width={180}
+                                            height={180}
+                                            imageClassName={styles.dragdropImage}
+                                            disabled={!isEdit}
+                                        />
+                                    </div>
+
+                                    <div className={styles.fieldContainer}>
+                                        <FieldHeader
+                                            title='Banner Image'
+                                            description='Aspect ratio: 16:9. Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                                            type='h3'
+                                        />
+
+                                        <DragDropImageUploader
+                                            images={bannerImages}
+                                            setImages={setBannerImages}
+                                            noOfImages={1}
+                                            resetSaving={resetSaving}
+                                            width={480}
+                                            height={270}
+                                            imageClassName={styles.dragdropBannerImage}
+                                            disabled={!isEdit}
+                                        />
+                                    </div>
+
+                                    <FormTextField
+                                        title="Keywords*"
+                                        subtitle='Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                                        id={KEYWORDS}
+                                        name={KEYWORDS}
+                                        helperText={helperText.keywords}
+                                        error={textfieldError.keywords}
+                                        value={enteredValues.keywords}
+                                        disabled={isBtnLoading || !isEdit}
+                                        onChange={(event) => { inputChangeHandler(KEYWORDS, event.target.value) }}
+                                        slotProps={{
+                                            input: {
+                                                min: 0,
+                                                maxLength: 10,
+                                            },
+                                        }}
                                     />
+                                </ContentCard>
 
-                                    <DragDropImageUploader
-                                        images={thumbnailImages}
-                                        setImages={setThumbnailImages}
-                                        resetSaving={resetSaving}
-                                        noOfImages={1}
-                                        width={180}
-                                        height={180}
-                                        imageClassName={styles.dragdropImage}
-                                        disabled={!isEdit}
-                                    />
-                                </div>
-
-                                <div className={styles.fieldContainer}>
-                                    <FieldHeader
-                                        title='Banner Image'
-                                        description='Aspect ratio: 16:9. Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
-                                        type='h3'
-                                    />
-
-                                    <DragDropImageUploader
-                                        images={bannerImages}
-                                        setImages={setBannerImages}
-                                        noOfImages={1}
-                                        resetSaving={resetSaving}
-                                        width={480}
-                                        height={270}
-                                        imageClassName={styles.dragdropBannerImage}
-                                        disabled={!isEdit}
-                                    />
-                                </div>
-
-                                <FormTextField
-                                    title="Keywords*"
-                                    subtitle='Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
-                                    id={KEYWORDS}
-                                    name={KEYWORDS}
-                                    helperText={helperText.keywords}
-                                    error={textfieldError.keywords}
-                                    value={enteredValues.keywords}
-                                    disabled={isBtnLoading || !isEdit}
-                                    onChange={(event) => { inputChangeHandler(KEYWORDS, event.target.value) }}
-                                    slotProps={{
-                                        input: {
-                                            min: 0,
-                                            maxLength: 10,
-                                        },
-                                    }}
+                                <LocationSection
+                                    location={location}
+                                    setLocation={setLocation}
+                                    resetSaving={resetSaving}
+                                    isEdit={isEdit}
                                 />
-                            </ContentCard>
                             </>
                 }
             </form>
-
-            {
-                (!isLoading && isLoadingErrorMessage === null) &&
-                <LocationSection
-                    location={location}
-                    setLocation={setLocation}
-                    resetSaving={resetSaving}
-                    isEdit={isEdit}
-                />
-            }
         </>
     )
 };
