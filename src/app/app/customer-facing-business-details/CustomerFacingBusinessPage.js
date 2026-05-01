@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
-import { TextField } from '@mui/material';
+import { TextField, InputAdornment } from '@mui/material';
 import LocationSection from './LocationSecion';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
@@ -28,6 +28,23 @@ const HALAL_CERTIFIED = 'halalCertified';
 const KEYWORDS = 'keywords';
 
 const sanitize = (value) => (!value || value === 'undefined') ? '' : value;
+
+const formatSgPhone = (value) => {
+    const digits = value.replace(/\D/g, '').slice(0, 8);
+    if (digits.length <= 4) return digits;
+    return `${digits.slice(0, 4)} ${digits.slice(4)}`;
+};
+
+const stripSgPrefix = (value) => {
+    const v = sanitize(value);
+    if (!v) return '';
+    return formatSgPhone(v.replace(/^\+65\s?/, ''));
+};
+
+const toFullSgPhone = (value) => {
+    const v = sanitize(value);
+    return v ? `+65 ${v}` : '';
+};
 
 const CustomerFacingBusinessPage = () => {
     // For initial Loading Status
@@ -132,6 +149,14 @@ const CustomerFacingBusinessPage = () => {
         }))
     };
 
+    const phoneChangeHandler = (key, value) => {
+        resetSaving();
+        setEnteredValues((prevValues) => ({
+            ...prevValues,
+            [key]: formatSgPhone(value)
+        }));
+    };
+
     const showError = (message) => {
         setIsError(true);
         setErrorMessage(message)
@@ -150,9 +175,9 @@ const CustomerFacingBusinessPage = () => {
             formData.append('website', sanitize(enteredValues[WEBSITE]));
             formData.append('instagram', sanitize(enteredValues[INSTAGRAM]));
             formData.append('facebook', sanitize(enteredValues[FACEBOOK]));
-            formData.append('whatsapp', sanitize(enteredValues[WHATSAPP]));
+            formData.append('whatsapp', toFullSgPhone(enteredValues[WHATSAPP]));
             formData.append('tiktok', sanitize(enteredValues[TIKTOK]));
-            formData.append('phoneNumber', sanitize(enteredValues[PHONE_NUMBER]));
+            formData.append('phoneNumber', toFullSgPhone(enteredValues[PHONE_NUMBER]));
             formData.append('category', sanitize(enteredValues[CATEGORY]));
             formData.append('halalcertified', sanitize(enteredValues[HALAL_CERTIFIED]));
 
@@ -247,9 +272,9 @@ const CustomerFacingBusinessPage = () => {
                         [WEBSITE]: sanitize(data.website),
                         [INSTAGRAM]: sanitize(data.instagram),
                         [FACEBOOK]: sanitize(data.facebook),
-                        [WHATSAPP]: sanitize(data.whatsapp),
+                        [WHATSAPP]: stripSgPrefix(data.whatsapp),
                         [TIKTOK]: sanitize(data.tiktok),
-                        [PHONE_NUMBER]: sanitize(data.phoneNumber || data.phone_number),
+                        [PHONE_NUMBER]: stripSgPrefix(data.phoneNumber || data.phone_number),
                         [CATEGORY]: sanitize(data.category),
                         [HALAL_CERTIFIED]: sanitize(data.halalcertified),
                         [KEYWORDS]: sanitize(data.keywords),
@@ -603,26 +628,36 @@ const CustomerFacingBusinessPage = () => {
 
                                     <FormTextField
                                         title='WhatsApp'
-                                        placeholder='+65 9123 4567'
+                                        placeholder='9123 4567'
                                         id={WHATSAPP}
                                         name={WHATSAPP}
                                         helperText={helperText.whatsapp}
                                         error={textfieldError.whatsapp}
                                         value={enteredValues.whatsapp}
                                         disabled={isBtnLoading || !isEdit}
-                                        onChange={(event) => { inputChangeHandler(WHATSAPP, event.target.value) }}
+                                        onChange={(event) => { phoneChangeHandler(WHATSAPP, event.target.value) }}
+                                        slotProps={{
+                                            input: {
+                                                startAdornment: <InputAdornment position="start">+65</InputAdornment>,
+                                            }
+                                        }}
                                     />
 
                                     <FormTextField
                                         title='Phone Number'
-                                        placeholder='+65 6123 4567'
+                                        placeholder='6123 4567'
                                         id={PHONE_NUMBER}
                                         name={PHONE_NUMBER}
                                         helperText={helperText.phoneNumber}
                                         error={textfieldError.phoneNumber}
                                         value={enteredValues.phoneNumber}
                                         disabled={isBtnLoading || !isEdit}
-                                        onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
+                                        onChange={(event) => { phoneChangeHandler(PHONE_NUMBER, event.target.value) }}
+                                        slotProps={{
+                                            input: {
+                                                startAdornment: <InputAdornment position="start">+65</InputAdornment>,
+                                            }
+                                        }}
                                     />
                                 </ContentCard>
 
