@@ -58,3 +58,7 @@ export const STRIPE_CONNECT_CREATE_ACCOUNT_LINK = '/api/stripe-connect/create-ac
 export const STRIPE_CONNECT_DASHBOARD_LINK = '/api/stripe-connect/dashboard-link';
 
 export const MENU = '/api/menu';
+
+export const ORDERING_SETTINGS = '/api/data/orderingSettings';
+export const CALENDAR_OVERRIDES = '/api/data/calendarOverrides';
+export const CALENDAR_OVERRIDE = '/api/data/calendarOverride';

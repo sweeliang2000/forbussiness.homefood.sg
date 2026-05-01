@@ -1,7 +1,6 @@
-// Ordering Settings (mock) - all local state, no backend.
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Accordion,
@@ -9,6 +8,7 @@ import {
   AccordionSummary,
   Button,
   Checkbox,
+  CircularProgress,
   FormControlLabel,
   MenuItem,
   Popover,
@@ -21,6 +21,8 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
+import apiClient from '@/utility/api';
+import { ORDERING_SETTINGS, CALENDAR_OVERRIDES, CALENDAR_OVERRIDE } from '@/utility/apiPaths';
 
 import styles from './ShopSettings.module.css';
 
@@ -29,7 +31,6 @@ const dateKey = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.ge
 const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
 const generateTimeSlots = () => {
-  // 06:00 AM – 11:30 PM, every 30 minutes.
   const slots = [];
   for (let m = 6 * 60; m <= 23 * 60 + 30; m += 30) {
     const h = Math.floor(m / 60);
@@ -46,29 +47,30 @@ const format12h = (hhmm) => {
   return `${pad2(h12)}:${pad2(mm)} ${suffix}`;
 };
 
-const formatDateHuman = (d) => {
-  return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-};
+const formatDateHuman = (d) =>
+  d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
 const dayNameByIndex = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+const DEFAULT_HOURS = [
+  { enabled: false, open: '09:00', close: '22:00' },
+  { enabled: true,  open: '09:00', close: '22:00' },
+  { enabled: true,  open: '09:00', close: '22:00' },
+  { enabled: true,  open: '09:00', close: '22:00' },
+  { enabled: true,  open: '09:00', close: '22:00' },
+  { enabled: true,  open: '09:00', close: '22:00' },
+  { enabled: true,  open: '10:00', close: '23:00' },
+];
 
 export default function ShopSettingsPage() {
   const timeSlots = useMemo(() => generateTimeSlots(), []);
   const [isLegendOpen, setIsLegendOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
 
   // SECTION 1 — Ordering Hours
-  const [hours, setHours] = useState(() => {
-    // 0=Sun ... 6=Sat
-    return [
-      { enabled: false, open: '09:00', close: '22:00' }, // Sun OFF
-      { enabled: true, open: '09:00', close: '22:00' }, // Mon
-      { enabled: true, open: '09:00', close: '22:00' }, // Tue
-      { enabled: true, open: '09:00', close: '22:00' }, // Wed
-      { enabled: true, open: '09:00', close: '22:00' }, // Thu
-      { enabled: true, open: '09:00', close: '22:00' }, // Fri
-      { enabled: true, open: '10:00', close: '23:00' }, // Sat
-    ];
-  });
+  const [hours, setHours] = useState(DEFAULT_HOURS);
 
   // SECTION 2 — Order Settings
   const [orderMode, setOrderMode] = useState('today_and_preorder');
@@ -76,68 +78,131 @@ export default function ShopSettingsPage() {
   const [bookingDaysAhead, setBookingDaysAhead] = useState(90);
   const [minNoticeHours, setMinNoticeHours] = useState(0.5);
 
-  // SECTION 3 — Ordering Calendar
-  const initialViewMonth = useMemo(() => new Date(2026, 3, 1), []); // April 2026
-  const [viewMonth, setViewMonth] = useState(initialViewMonth);
+  // Snapshot of last-saved (or loaded) values — used to detect unsaved changes
+  const [savedSettings, setSavedSettings] = useState(null);
 
-  // Pre-orders (mock data).
-  const preOrdersByDate = useMemo(() => {
-    return {
-      '2026-04-05': 3,
-      '2026-04-10': 7,
-      '2026-04-14': 1,
+  const hasChanges = useMemo(() => {
+    if (!savedSettings) return false;
+    return (
+      JSON.stringify(hours) !== JSON.stringify(savedSettings.hours) ||
+      orderMode !== savedSettings.orderMode ||
+      defaultDailyQuota !== savedSettings.defaultDailyQuota ||
+      bookingDaysAhead !== savedSettings.bookingDaysAhead ||
+      minNoticeHours !== savedSettings.minNoticeHours
+    );
+  }, [hours, orderMode, defaultDailyQuota, bookingDaysAhead, minNoticeHours, savedSettings]);
+
+  // SECTION 3 — Ordering Calendar
+  const today = useMemo(() => startOfDay(new Date()), []);
+  const [viewMonth, setViewMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
+  const currentMonthLabel = viewMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  // Pre-orders come from a separate orders endpoint — placeholder until orders API is built
+  const preOrdersByDate = useMemo(() => ({}), []);
+
+  const [calendarOverrides, setCalendarOverrides] = useState({});
+
+  const showToast = (message, severity = 'success') => setSnack({ open: true, message, severity });
+
+  // Load ordering settings on mount
+  useEffect(() => {
+    const load = async () => {
+      setIsLoading(true);
+      try {
+        const res = await apiClient.get(ORDERING_SETTINGS);
+        const data = res.data.data;
+        const loaded = {
+          hours: data?.hours ?? DEFAULT_HOURS,
+          orderMode: data?.orderMode ?? 'today_and_preorder',
+          defaultDailyQuota: data?.defaultDailyQuota ?? 50,
+          bookingDaysAhead: data?.bookingDaysAhead ?? 90,
+          minNoticeHours: data?.minNoticeHours ?? 0.5,
+        };
+        setHours(loaded.hours);
+        setOrderMode(loaded.orderMode);
+        setDefaultDailyQuota(loaded.defaultDailyQuota);
+        setBookingDaysAhead(loaded.bookingDaysAhead);
+        setMinNoticeHours(loaded.minNoticeHours);
+        setSavedSettings(loaded);
+      } catch (err) {
+        if (err.response?.status === 404) {
+          // No settings saved yet — set defaults as the baseline
+          setSavedSettings({
+            hours: DEFAULT_HOURS,
+            orderMode: 'today_and_preorder',
+            defaultDailyQuota: 50,
+            bookingDaysAhead: 90,
+            minNoticeHours: 0.5,
+          });
+        } else {
+          showToast('Failed to load ordering settings', 'error');
+        }
+      } finally {
+        setIsLoading(false);
+      }
     };
+    load();
   }, []);
 
-  // Manual override for 12 Apr 2026 (closed with reason).
-  const [calendarOverrides, setCalendarOverrides] = useState(() => {
-    return {
-      '2026-04-12': {
-        status: 'closed',
-        useDefaultQuota: true,
-        quota: 0,
-        reason: 'Staff Training',
-      },
-    };
-  });
+  // Load calendar overrides whenever the viewed month changes
+  const loadCalendarOverrides = useCallback(async (month) => {
+    try {
+      const year = month.getFullYear();
+      const m = month.getMonth() + 1;
+      const res = await apiClient.get(CALENDAR_OVERRIDES, { params: { year, month: m } });
+      setCalendarOverrides((prev) => ({ ...prev, ...res.data.data }));
+    } catch {
+      // Non-fatal: calendar still works without override data
+    }
+  }, []);
 
-  const today = useMemo(() => startOfDay(new Date()), []);
-  const currentMonthLabel = viewMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  useEffect(() => {
+    loadCalendarOverrides(viewMonth);
+  }, [viewMonth, loadCalendarOverrides]);
+
+  const handleSaveSettings = async () => {
+    setIsSaving(true);
+    try {
+      const payload = { hours, orderMode, defaultDailyQuota, bookingDaysAhead, minNoticeHours };
+      await apiClient.put(ORDERING_SETTINGS, payload);
+      setSavedSettings(payload);
+      showToast('Settings saved successfully');
+    } catch {
+      showToast('Failed to save settings', 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const normalizeNumberSafe = (value, fallback) => {
     const n = Number(value);
     return Number.isFinite(n) ? n : fallback;
   };
 
-  const { calendarCells, monthStart, monthEnd } = useMemo(() => {
+  const { calendarCells } = useMemo(() => {
     const first = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1);
-    const last = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0);
-    const startIdx = first.getDay(); // 0=Sun
-    const totalDays = last.getDate();
+    const startIdx = first.getDay();
     const cells = [];
-    // Fill 6 weeks grid (42 cells)
     for (let i = 0; i < 42; i += 1) {
       const dayNum = i - startIdx + 1;
-      const d = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), dayNum);
-      cells.push(d);
+      cells.push(new Date(viewMonth.getFullYear(), viewMonth.getMonth(), dayNum));
     }
-    return { calendarCells: cells, monthStart: first, monthEnd: last };
+    return { calendarCells: cells };
   }, [viewMonth]);
 
   const getDayDerived = (d) => {
     const key = dateKey(d);
     const override = calendarOverrides[key];
-    const dow = d.getDay(); // 0..6 (Sun..Sat)
+    const dow = d.getDay();
     const defaultOpen = !!hours[dow]?.enabled;
-    const status = override?.status ? override.status : defaultOpen ? 'open' : 'closed';
+    const status = override?.status ?? (defaultOpen ? 'open' : 'closed');
     const preOrders = preOrdersByDate[key] ?? 0;
-    const defaultQuota = defaultDailyQuota;
     const useDefaultQuota = override ? !!override.useDefaultQuota : true;
     const quota = override
       ? useDefaultQuota
-        ? defaultQuota
-        : normalizeNumberSafe(override.quota, defaultQuota)
-      : defaultQuota;
+        ? defaultDailyQuota
+        : normalizeNumberSafe(override.quota, defaultDailyQuota)
+      : defaultDailyQuota;
     const isQuotaOverridden = override ? !useDefaultQuota : false;
     const reason = override?.reason ?? '';
     return { key, status, preOrders, quota, isQuotaOverridden, reason };
@@ -146,22 +211,20 @@ export default function ShopSettingsPage() {
   // Popover state
   const [dayPopoverAnchorEl, setDayPopoverAnchorEl] = useState(null);
   const [dayPopoverKey, setDayPopoverKey] = useState(null);
-
-  const popoverDerived = (() => {
-    if (!dayPopoverKey) return null;
-    const [y, m, da] = dayPopoverKey.split('-').map((x) => Number(x));
-    const d = new Date(y, m - 1, da);
-    return getDayDerived(d);
-  })();
-
   const [draftStatus, setDraftStatus] = useState('open');
   const [draftUseDefaultQuota, setDraftUseDefaultQuota] = useState(true);
   const [draftQuota, setDraftQuota] = useState(defaultDailyQuota);
   const [draftReason, setDraftReason] = useState('');
+  const [isSavingOverride, setIsSavingOverride] = useState(false);
+
+  const popoverDerived = (() => {
+    if (!dayPopoverKey) return null;
+    const [y, m, da] = dayPopoverKey.split('-').map((x) => Number(x));
+    return getDayDerived(new Date(y, m - 1, da));
+  })();
 
   const openDayPopover = (d, anchorEl) => {
     const derived = getDayDerived(d);
-    // Only open future dates that are open by default/override.
     const isPast = startOfDay(d).getTime() < today.getTime();
     if (isPast) return;
     if (derived.status !== 'open') return;
@@ -179,51 +242,59 @@ export default function ShopSettingsPage() {
     setDayPopoverKey(null);
   };
 
-  const [snack, setSnack] = useState({ open: false, message: '' });
-  const showToast = (message) => setSnack({ open: true, message });
-
-  // Calendar popover anchor: use element anchor. We'll store clicked key and compute anchor via query.
-  // Because the cells are plain divs, we use a ref-less fallback: open at top-left by using a dummy element.
-  // For a mock UX, this is sufficient.
-  const popoverOpen = Boolean(dayPopoverKey);
-
-  const applyOverrideForDay = () => {
+  const applyOverrideForDay = async () => {
     if (!popoverDerived) return;
 
-    const preOrders = popoverDerived.preOrders;
-    const isClosing = draftStatus === 'closed';
-    const reasonToSave = isClosing ? (draftReason || popoverDerived.reason || '') : '';
+    const reasonToSave = draftStatus === 'closed' ? (draftReason || '') : '';
+    const payload = {
+      date: popoverDerived.key,
+      status: draftStatus,
+      useDefaultQuota: draftUseDefaultQuota,
+      quota: draftUseDefaultQuota ? null : Math.max(1, draftQuota),
+      reason: reasonToSave,
+    };
 
-    setCalendarOverrides((prev) => ({
-      ...prev,
-      [popoverDerived.key]: {
-        status: draftStatus,
-        useDefaultQuota: draftUseDefaultQuota,
-        quota: draftUseDefaultQuota ? 0 : Math.max(1, draftQuota),
-        reason: reasonToSave,
-      },
-    }));
-    // Also validate warning: no block, only UI messaging.
-    void preOrders;
-    closeDayPopover();
+    setIsSavingOverride(true);
+    try {
+      await apiClient.put(CALENDAR_OVERRIDE, payload);
+      setCalendarOverrides((prev) => ({
+        ...prev,
+        [popoverDerived.key]: {
+          status: draftStatus,
+          useDefaultQuota: draftUseDefaultQuota,
+          quota: draftUseDefaultQuota ? 0 : Math.max(1, draftQuota),
+          reason: reasonToSave,
+        },
+      }));
+      closeDayPopover();
+      showToast('Day override saved');
+    } catch {
+      showToast('Failed to save day override', 'error');
+    } finally {
+      setIsSavingOverride(false);
+    }
   };
 
   const { daysOfWeek } = useMemo(() => ({ daysOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] }), []);
 
-  const prevMonth = () => {
+  const prevMonth = () =>
     setViewMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
-  };
 
-  const nextMonth = () => {
+  const nextMonth = () =>
     setViewMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
-  };
 
   const dayPopoverWarning = useMemo(() => {
-    if (!popoverDerived) return '';
-    if (draftStatus !== 'closed') return '';
-    if (popoverDerived.preOrders <= 0) return '';
+    if (!popoverDerived || draftStatus !== 'closed' || popoverDerived.preOrders <= 0) return '';
     return `⚠️ Closing this date will affect ${popoverDerived.preOrders} existing pre-orders.`;
   }, [popoverDerived, draftStatus]);
+
+  if (isLoading) {
+    return (
+      <div className={styles.page} style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -232,25 +303,24 @@ export default function ShopSettingsPage() {
           noMaxWidth
           title="Ordering Settings"
           description={
-            <p>
-              Configure ordering hours, order mode, and pre-order availability for your shop.
-            </p>
+            <p>Configure ordering hours, order mode, and pre-order availability for your shop.</p>
           }
-          buttonText="Save Settings"
+          buttonText={isSaving ? 'Saving…' : 'Save Settings'}
           sx={{ textTransform: 'none' }}
           showCancelButton={false}
-          onClick={() => showToast('Settings saved successfully')}
+          onClick={handleSaveSettings}
+          disabled={isSaving || !hasChanges}
         />
       </div>
 
       <div className={styles.content}>
-        <br/>
+        <br />
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <div>
               <Typography sx={{ fontWeight: 900 }}>Ordering Hours</Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.25 }}>
-                Set the hours customers can place orders. Orders can be scheduled for future dates within these hours — &ldquo;closed&rdquo; means no orders can be placed, not that the shop is physically closed.
+                Set the hours customers can place orders. &ldquo;Closed&rdquo; means no orders can be placed, not that the shop is physically closed.
               </Typography>
             </div>
           </AccordionSummary>
@@ -295,9 +365,7 @@ export default function ShopSettingsPage() {
                         }}
                       >
                         {timeSlots.map((t) => (
-                          <MenuItem key={t} value={t}>
-                            {format12h(t)}
-                          </MenuItem>
+                          <MenuItem key={t} value={t}>{format12h(t)}</MenuItem>
                         ))}
                       </Select>
                       <Select
@@ -315,9 +383,7 @@ export default function ShopSettingsPage() {
                         }}
                       >
                         {timeSlots.map((t) => (
-                          <MenuItem key={t} value={t}>
-                            {format12h(t)}
-                          </MenuItem>
+                          <MenuItem key={t} value={t}>{format12h(t)}</MenuItem>
                         ))}
                       </Select>
                     </div>
@@ -349,8 +415,7 @@ export default function ShopSettingsPage() {
                   />
                   <FormControlLabel value="preorder_only" control={<Radio size="small" />} label="Pre-order only" />
                 </RadioGroup>
-
-                <br/>
+                <br />
               </div>
 
               <TextField
@@ -411,9 +476,7 @@ export default function ShopSettingsPage() {
 
               <div className={styles.calendarGrid}>
                 {daysOfWeek.map((d) => (
-                  <div key={d} className={styles.dowCell}>
-                    {d}
-                  </div>
+                  <div key={d} className={styles.dowCell}>{d}</div>
                 ))}
 
                 {calendarCells.map((d, idx) => {
@@ -423,7 +486,6 @@ export default function ShopSettingsPage() {
                   const derived = getDayDerived(d);
                   const hasPreOrders = derived.preOrders > 0;
                   const isClosed = derived.status === 'closed';
-                  const isQuotaOverridden = derived.isQuotaOverridden;
                   const remainingSlots = Math.max(0, derived.quota - derived.preOrders);
 
                   const background = isClosed
@@ -453,15 +515,13 @@ export default function ShopSettingsPage() {
                       </div>
 
                       {hasPreOrders ? (
-                        <div className={styles.badgeOrders}>
-                          {derived.preOrders} orders
-                        </div>
+                        <div className={styles.badgeOrders}>{derived.preOrders} orders</div>
                       ) : null}
 
                       {!isClosed ? (
                         <div className={styles.badgeQuota}>
                           {remainingSlots} slots
-                          {isQuotaOverridden ? <span className={styles.badgeBolt}>⚡</span> : null}
+                          {derived.isQuotaOverridden ? <span className={styles.badgeBolt}>⚡</span> : null}
                         </div>
                       ) : null}
 
@@ -502,14 +562,18 @@ export default function ShopSettingsPage() {
         </Accordion>
       </div>
 
-      <Snackbar open={snack.open} autoHideDuration={3000} onClose={() => setSnack({ open: false, message: '' })}>
-        <Alert severity="success" sx={{ width: '100%' }}>
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={3000}
+        onClose={() => setSnack((prev) => ({ ...prev, open: false }))}
+      >
+        <Alert severity={snack.severity} sx={{ width: '100%' }}>
           {snack.message}
         </Alert>
       </Snackbar>
 
       <Popover
-        open={popoverOpen}
+        open={Boolean(dayPopoverKey)}
         onClose={closeDayPopover}
         anchorEl={dayPopoverAnchorEl}
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
@@ -523,11 +587,7 @@ export default function ShopSettingsPage() {
 
               <div className={styles.popRow}>
                 <Typography className={styles.popLabel}>Status</Typography>
-                <Select
-                  size="small"
-                  value={draftStatus}
-                  onChange={(e) => setDraftStatus(e.target.value)}
-                >
+                <Select size="small" value={draftStatus} onChange={(e) => setDraftStatus(e.target.value)}>
                   <MenuItem value="open">Open</MenuItem>
                   <MenuItem value="closed">Closed</MenuItem>
                 </Select>
@@ -569,9 +629,7 @@ export default function ShopSettingsPage() {
               </div>
 
               {dayPopoverWarning ? (
-                <Alert severity="error" sx={{ marginTop: 8 }}>
-                  {dayPopoverWarning}
-                </Alert>
+                <Alert severity="error" sx={{ marginTop: 8 }}>{dayPopoverWarning}</Alert>
               ) : null}
 
               <Typography variant="caption" className={styles.popHint} sx={{ marginTop: 4 }}>
@@ -582,8 +640,13 @@ export default function ShopSettingsPage() {
                 <Button variant="outlined" sx={{ textTransform: 'none' }} onClick={closeDayPopover}>
                   Cancel
                 </Button>
-                <Button variant="contained" sx={{ textTransform: 'none' }} onClick={applyOverrideForDay}>
-                  Save
+                <Button
+                  variant="contained"
+                  sx={{ textTransform: 'none' }}
+                  onClick={applyOverrideForDay}
+                  disabled={isSavingOverride}
+                >
+                  {isSavingOverride ? 'Saving…' : 'Save'}
                 </Button>
               </div>
             </>
@@ -593,4 +656,3 @@ export default function ShopSettingsPage() {
     </div>
   );
 }
-
