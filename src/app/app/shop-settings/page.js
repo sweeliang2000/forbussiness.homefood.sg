@@ -394,7 +394,7 @@ export default function ShopSettingsPage() {
           </AccordionDetails>
         </Accordion>
 
-        <Accordion>
+        <Accordion defaultExpanded>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <div>
               <Typography sx={{ fontWeight: 900 }}>Order Settings</Typography>
