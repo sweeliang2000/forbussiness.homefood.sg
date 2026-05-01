@@ -18,8 +18,6 @@ const UNIT_NUMBER = 'unitNumber';
 const BUILDING_NAME = 'buildingName';
 const STREET_ADDRESS = 'streetAddress';
 const POSTAL_CODE = 'postalCode';
-const UEN_NA_REGEX = /^n\/a$/i;
-const UEN_FORMAT_REGEX = /^[0-9A-Z]{9,10}$/i;
 
 export default function StampSetup() {
   const [isLoading, setIsLoading] = useState(true);
@@ -83,23 +81,6 @@ export default function StampSetup() {
     }))
   };
 
-  const validateOptionalUEN = (value) => {
-    const trimmed = value.trim();
-    if (!trimmed || UEN_NA_REGEX.test(trimmed)) {
-      textfieldErrorHandler(UEN, false);
-      helperTextHandler(UEN, '');
-      return true;
-    }
-    if (!UEN_FORMAT_REGEX.test(trimmed)) {
-      textfieldErrorHandler(UEN, true);
-      helperTextHandler(UEN, "Enter a valid UEN (e.g. 202512345A), or leave this blank / enter 'N/A'.");
-      return false;
-    }
-    textfieldErrorHandler(UEN, false);
-    helperTextHandler(UEN, '');
-    return true;
-  };
-
   const textfieldErrorHandler = (key, value) => {
     setTextfieldError((preValues) => ({
       ...preValues,
@@ -145,11 +126,6 @@ export default function StampSetup() {
     event.preventDefault();
     setIsBtnLoading(true);
     clearError();
-
-    if (!validateOptionalUEN(enteredValues[UEN])) {
-      setIsBtnLoading(false);
-      return;
-    }
 
     const payload = {
       [BUSINESS_NAME]: enteredValues[BUSINESS_NAME],
@@ -467,11 +443,7 @@ export default function StampSetup() {
                 value={enteredValues.uen}
                 error={textfieldError.uen}
                 disabled={isBtnLoading || !isEdit}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  inputChangeHandler(UEN, value);
-                  validateOptionalUEN(value);
-                }}
+                onChange={(event) => { inputChangeHandler(UEN, event.target.value) }}
               />
             </div>
 
