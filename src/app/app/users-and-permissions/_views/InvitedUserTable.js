@@ -75,11 +75,6 @@ const InvitedUserTable = ({ invitedUsersRows, onDeleteSuccess }) => {
             flex: 2,
         },
         {
-            field: 'location',
-            headerName: 'Location',
-            flex: 2,
-        },
-        {
             field: 'role',
             headerName: 'Role',
             flex: 1,

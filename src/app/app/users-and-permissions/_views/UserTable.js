@@ -136,11 +136,6 @@ const UserTable = ({ usersRows, onUserUpdated, onDeleteError }) => {
             flex: 2,
         },
         {
-            field: 'location',
-            headerName: 'Location',
-            flex: 2,
-        },
-        {
             field: 'role',
             headerName: 'Role',
             flex: 1,

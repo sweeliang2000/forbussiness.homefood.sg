@@ -1,6 +1,7 @@
 'use client';
 import styles from './page.module.css';
 import Link from 'next/link';
+import { InputAdornment } from '@mui/material';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
@@ -26,6 +27,19 @@ import { HiOutlineExclamationCircle } from 'react-icons/hi';
 import { SUBSCRIPTION_DATA } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
 
 
+
+const formatSgPhone = (value) => {
+    const digits = value.replace(/\D/g, '').slice(0, 8);
+    if (digits.length <= 4) return digits;
+    return `${digits.slice(0, 4)} ${digits.slice(4)}`;
+};
+
+const stripSgPrefix = (value) => {
+    if (!value) return '';
+    return formatSgPhone(value.replace(/^\+65\s?/, ''));
+};
+
+const toFullSgPhone = (value) => value ? `+65 ${value}` : '';
 
 const PUBLISHING_TYPE = 'publishingType';
 const NAME = 'name';
@@ -229,8 +243,8 @@ const SubmissionView = () => {
             };
 
             // Add phone number if provided
-            if (enteredValues.phoneNumber && enteredValues.phoneNumber.trim() !== '') {
-                payload.contact_details_phone_number = enteredValues.phoneNumber.trim();
+            if (enteredValues.number && enteredValues.number.trim() !== '') {
+                payload.contact_details_phone_number = toFullSgPhone(enteredValues.number.trim());
             }
 
             // Add release_datetime if schedule (in GST +8)
@@ -298,7 +312,7 @@ const SubmissionView = () => {
                     [NAME]: contactData.contact_details_name || '',
                     [ROLE]: contactData.contact_details_role || '',
                     [EMAIL]: contactData.contact_details_email || '',
-                    [PHONE_NUMBER]: contactData.contact_details_phone_number || '',
+                    [PHONE_NUMBER]: stripSgPrefix(contactData.contact_details_phone_number),
                 });
                 if (contactData.release_datetime) {
                     const parsedDateTime = dayjs(contactData.release_datetime);
@@ -595,15 +609,20 @@ const SubmissionView = () => {
 
                 <FormTextField
                     title='Phone Number'
-                    placeholder='+6591234567'
+                    placeholder='9123 4567'
                     id={PHONE_NUMBER}
                     name={PHONE_NUMBER}
                     type='tel'
-                    helperText={helperText.phoneNumber}
-                    error={textfieldError.phoneNumber}
-                        value={enteredValues.phoneNumber}
+                    helperText={helperText.number}
+                    error={textfieldError.number}
+                        value={enteredValues.number}
                         disabled={isPending || isApprovedScheduled || isRejected || isBtnLoading}
-                        onChange={(event) => { inputChangeHandler(PHONE_NUMBER, event.target.value) }}
+                        onChange={(event) => { inputChangeHandler(PHONE_NUMBER, formatSgPhone(event.target.value)) }}
+                    slotProps={{
+                        input: {
+                            startAdornment: <InputAdornment position="start">+65</InputAdornment>,
+                        }
+                    }}
                 />
             </ContentCard>
             </>

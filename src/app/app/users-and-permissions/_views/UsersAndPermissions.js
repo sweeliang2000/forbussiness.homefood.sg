@@ -106,7 +106,6 @@ const UsersAndPermissions = () => {
     const usersRows = usersData.actual_users.map((item, index) => ({
         id: `${index + 1}`,
         email: item.user_id || 'Unknown',
-        location: item.location_name || 'All Locations',
         role: item.role || 'Viewer'
     }));
 
@@ -114,7 +113,6 @@ const UsersAndPermissions = () => {
     const invitedUsersRows = usersData.invited_users.map((item, index) => ({
         id: `${index + 1}`,
         email: item.email || 'Unknown',
-        location: item.location_name || 'All Locations',
         role: item.role || 'Viewer',
         status: item.status || 'pending'
     }));
