@@ -133,7 +133,7 @@ export default function Sidebar({
                     <li>
                         <Link href='/terminal'>
                             <PiCashRegister className={styles.icon} />
-                            <span>Loyalty Terminal</span>
+                            <span>Terminal / POS</span>
                         </Link>
                     </li>
 
@@ -255,11 +255,11 @@ export default function Sidebar({
                         </Link>
                     </li> */}
 
-                    {
+                    {/* {
                         !sidebarMinimised && <li className={styles.labelLi}>
                             <label className={styles.label}>Analytics</label>
                         </li>
-                    }
+                    } */}
 
                     {/* <li className={section == 'ratings' ? styles.active : ''}>
                         <Link href='/app/ratings'>
@@ -268,12 +268,12 @@ export default function Sidebar({
                         </Link>
                     </li> */}
 
-                    <li className={section == 'analytics' ? styles.active : ''}>
+                    {/* <li className={section == 'analytics' ? styles.active : ''}>
                         <Link href='/app/analytics'>
                         <AiOutlineLineChart className={styles.icon} />
                             <span>Activity</span>
                         </Link>
-                    </li>
+                    </li> */}
 
                     {/* <li className={section == 'ratings' ? styles.active : ''}>
                         <Link href='/app/ratings'>
