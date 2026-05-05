@@ -18,8 +18,8 @@ const Checklists = ({ checklistStatus }) => {
             />
 
             <ChecklistCell
-                title='Stamp system and/or Scan to Win'
-                description={'Ensure that your reward system (stamp or QR/scan to win) is set up correctly.'}
+                title='Menu and Payment Setup'
+                description={'Ensure that your menu is set up with at least one item and that your payment details are configured correctly.'}
                 isCompleted={checklistStatus?.thirdRequirementMet || false}
             />
         </div>
