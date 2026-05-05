@@ -216,7 +216,7 @@ const AccountSetting = () => {
                     </div>
                 </ContentCard>
 
-                <ContentCard className={styles.content}>
+                {/* <ContentCard className={styles.content}>
                     <div>
                         <h2>Products</h2>
                         <p className={styles.productsDescription}>Which features are enabled for your shop.</p>
@@ -251,7 +251,7 @@ const AccountSetting = () => {
                             </div>
                         )}
                     </div>
-                </ContentCard>
+                </ContentCard> */}
 
                 <ContentCard className={`${styles.content} ${styles.danger}`}>
                     <div>
