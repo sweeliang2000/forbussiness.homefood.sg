@@ -19,7 +19,17 @@ const Checklists = ({ checklistStatus }) => {
 
             <ChecklistCell
                 title='Menu and Payment Setup'
-                description={'Ensure that your menu is set up with at least one item and that your payment details are configured correctly.'}
+                description={(() => {
+                    const missing = [];
+                    if (!checklistStatus?.menuSettingReady) missing.push('menu');
+                    if (!checklistStatus?.orderSettingsReady) missing.push('order settings');
+                    if (!checklistStatus?.stripeConnectReady) missing.push('payment details');
+                    if (missing.length === 0) return 'Your menu, order settings, and payment details are all configured correctly.';
+                    const formatted = missing.length === 1
+                        ? missing[0]
+                        : `${missing.slice(0, -1).join(', ')} and ${missing[missing.length - 1]}`;
+                    return `Please complete your ${formatted} before submitting for review.`;
+                })()}
                 isCompleted={checklistStatus?.thirdRequirementMet || false}
             />
         </div>

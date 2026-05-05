@@ -58,8 +58,9 @@ const SubmissionView = () => {
     const [checklistStatus, setChecklistStatus] = useState({
         businessHasAllRequiredField: false,
         customerHasAllRequiredField: false,
-        stampHasAllRequiredField: false,
-        qrCodeHasAllRequiredField: false,
+        orderSettingsReady: false,
+        menuSettingReady: false,
+        stripeConnectReady: false,
         thirdRequirementMet: false,
     });
 
@@ -264,12 +265,16 @@ const SubmissionView = () => {
 
             const checklistData = checklistResponse.data;
             if (checklistData?.data) {
+                const orderSettingsReady = checklistData.data.orderSettingsReady || false;
+                const menuSettingReady = checklistData.data.menuSettingReady || false;
+                const stripeConnectReady = checklistData.data.stripeConnectReady || false;
                 setChecklistStatus({
                     businessHasAllRequiredField: checklistData.data.businessHasAllRequiredField || false,
                     customerHasAllRequiredField: checklistData.data.customerHasAllRequiredField || false,
-                    stampHasAllRequiredField: checklistData.data.stampHasAllRequiredField || false,
-                    qrCodeHasAllRequiredField: checklistData.data.qrCodeHasAllRequiredField || false,
-                    thirdRequirementMet: checklistData.data.thirdRequirementMet || false,
+                    orderSettingsReady,
+                    menuSettingReady,
+                    stripeConnectReady,
+                    thirdRequirementMet: orderSettingsReady && menuSettingReady && stripeConnectReady,
                 });
             }
 
