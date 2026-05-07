@@ -27,8 +27,9 @@ export default function Content() {
   const [checklistStatus, setChecklistStatus] = useState({
     businessHasAllRequiredField: false,
     customerHasAllRequiredField: false,
-    stampHasAllRequiredField: false,
-    qrCodeHasAllRequiredField: false,
+    menuSettingReady: false,
+    orderSettingsReady: false,
+    stripeConnectReady: false,
     thirdRequirementMet: false,
   });
   const [isLoadingChecklist, setIsLoadingChecklist] = useState(true);
@@ -68,12 +69,16 @@ export default function Content() {
         const response = await apiClient.get(CHECKLIST_STATUS);
         const checklistData = response.data;
         if (checklistData && checklistData.data) {
+          const menuSettingReady = checklistData.data.menuSettingReady || false;
+          const orderSettingsReady = checklistData.data.orderSettingsReady || false;
+          const stripeConnectReady = checklistData.data.stripeConnectReady || false;
           setChecklistStatus({
             businessHasAllRequiredField: checklistData.data.businessHasAllRequiredField || false,
             customerHasAllRequiredField: checklistData.data.customerHasAllRequiredField || false,
-            stampHasAllRequiredField: checklistData.data.stampHasAllRequiredField || false,
-            qrCodeHasAllRequiredField: checklistData.data.qrCodeHasAllRequiredField || false,
-            thirdRequirementMet: checklistData.data.thirdRequirementMet || false,
+            menuSettingReady,
+            orderSettingsReady,
+            stripeConnectReady,
+            thirdRequirementMet: menuSettingReady && orderSettingsReady && stripeConnectReady,
           });
         }
       } catch (error) {
@@ -232,8 +237,18 @@ export default function Content() {
                   editLink="/app/customer-facing-business-details"
                 />
                 <ChecklistCell
-                  title="Stamp system and/or Scan to Win"
-                  description="Ensure your reward system (stamp or QR/scan to win) is properly configured."
+                  title="Menu and Payment Setup"
+                  description={(() => {
+                    const missing = [];
+                    if (!checklistStatus.menuSettingReady) missing.push('menu');
+                    if (!checklistStatus.orderSettingsReady) missing.push('order settings');
+                    if (!checklistStatus.stripeConnectReady) missing.push('payment details');
+                    if (missing.length === 0) return 'Your menu, order settings, and payment details are all configured correctly.';
+                    const formatted = missing.length === 1
+                      ? missing[0]
+                      : `${missing.slice(0, -1).join(', ')} and ${missing[missing.length - 1]}`;
+                    return `Please complete your ${formatted} before submitting for review.`;
+                  })()}
                   isCompleted={checklistStatus.thirdRequirementMet}
                   editLink="/app/stamp-management"
                 />

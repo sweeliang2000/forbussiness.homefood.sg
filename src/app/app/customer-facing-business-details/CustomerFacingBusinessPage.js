@@ -11,7 +11,7 @@ import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import apiClient from '@/utility/api';
-import { CUSTOMER_FACING_INFORMATION, RELEASE_STATUS } from '@/utility/apiPaths';
+import { CUSTOMER_FACING_INFORMATION, RELEASE_STATUS, STRIPE_CONNECT_ACCOUNT_STATUS } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 
@@ -340,21 +340,30 @@ const CustomerFacingBusinessPage = () => {
         getFormData();
     }, []);
 
-    // Fetch release status to determine messaging when not editable
+    // Fetch release status and isEdit from account status
     useEffect(() => {
-        const fetchReleaseStatus = async () => {
+        const fetchStatuses = async () => {
             try {
-                const response = await apiClient.get(RELEASE_STATUS);
-                const data = response.data;
-                if (data && data.data && data.data.status) {
-                    setReleaseStatus(data.data.status);
+                const [releaseRes, accountRes] = await Promise.all([
+                    apiClient.get(RELEASE_STATUS),
+                    apiClient.get(STRIPE_CONNECT_ACCOUNT_STATUS),
+                ]);
+
+                const releaseData = releaseRes.data;
+                if (releaseData && releaseData.data && releaseData.data.status) {
+                    setReleaseStatus(releaseData.data.status);
+                }
+
+                const accountData = accountRes.data;
+                if (accountData && accountData.isEdit !== undefined) {
+                    setIsEdit(accountData.isEdit);
                 }
             } catch {
-                // Silently ignore errors for release status; it is not critical for this page
+                // Silently ignore errors; not critical for this page
             }
         };
 
-        fetchReleaseStatus();
+        fetchStatuses();
     }, []);
 
     // Check if there are unsaved changes

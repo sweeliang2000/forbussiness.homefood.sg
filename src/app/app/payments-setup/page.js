@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import styles from './page.module.css';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
-import { Alert, Button, CircularProgress } from '@mui/material';
+import { Button, CircularProgress } from '@mui/material';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import apiClient from '@/utility/api';
+import Link from 'next/link';
 import {
   STRIPE_CONNECT_ACCOUNT_STATUS,
   STRIPE_CONNECT_CREATE_ACCOUNT,
@@ -20,7 +21,9 @@ export default function PaymentsSetupPage() {
   const [loadingErrorMessage, setLoadingErrorMessage] = useState(null);
   const [loadingErrorStatus, setLoadingErrorStatus] = useState(null);
 
-  const [status, setStatus] = useState(null); // { connected, detailsSubmitted, chargesEnabled, payoutsEnabled }
+  const [status, setStatus] = useState(null);
+  const [isEdit, setIsEdit] = useState(true);
+  const [releaseStatus, setReleaseStatus] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -29,7 +32,10 @@ export default function PaymentsSetupPage() {
     const fetchStatus = async () => {
       try {
         const res = await apiClient.get(STRIPE_CONNECT_ACCOUNT_STATUS);
-        setStatus(res.data?.data ?? res.data);
+        const data = res.data?.data ?? res.data;
+        setStatus(data);
+        if (data?.isEdit !== undefined) setIsEdit(data.isEdit);
+        if (data?.releaseStatus !== undefined) setReleaseStatus(data.releaseStatus);
       } catch (error) {
         const message = error?.response?.data?.message || error.message;
         const code = error?.response?.data?.code || error.code;
@@ -52,7 +58,6 @@ export default function PaymentsSetupPage() {
       const url = linkRes.data?.data?.url ?? linkRes.data?.url;
       if (url) {
         window.location.href = url;
-        // keep loading — page will navigate away
       } else {
         setActionLoading(false);
       }
@@ -88,7 +93,6 @@ export default function PaymentsSetupPage() {
       const url = linkRes.data?.data?.url ?? linkRes.data?.url;
       if (url) {
         window.location.href = url;
-        // keep loading — page will navigate away
       } else {
         setActionLoading(false);
       }
@@ -100,6 +104,8 @@ export default function PaymentsSetupPage() {
     }
   };
 
+  const isApprovedScheduled = releaseStatus === 'approved_scheduled';
+
   return (
     <div className={styles.root}>
       <HeaderSection
@@ -110,6 +116,23 @@ export default function PaymentsSetupPage() {
         isError={isError}
         setShowError={setIsError}
         errorMessage={errorMessage}
+        isSuccess={isApprovedScheduled}
+        successMessage={
+          !isEdit && isApprovedScheduled
+            ? (
+              <>
+                Your release has been approved. It will be released on the date you stated on{' '}
+                <Link href="/app/release/submission">Release Submission Page</Link>.
+                {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@collbine.com.
+              </>
+            )
+            : null
+        }
+        infoMessage={
+          !isEdit && !isApprovedScheduled
+            ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.'
+            : null
+        }
       />
 
       {isLoading ? (
@@ -130,7 +153,7 @@ export default function PaymentsSetupPage() {
               size="small"
               style={{ textTransform: 'none' }}
               onClick={handleConnect}
-              disabled={actionLoading}
+              disabled={actionLoading || !isEdit}
               startIcon={actionLoading ? <CircularProgress size={14} color="inherit" /> : null}
             >
               Start Onboarding
@@ -145,16 +168,13 @@ export default function PaymentsSetupPage() {
             Complete payout setup to receive payments from orders placed through Collbine.
             You&apos;ll be guided through the onboarding steps to get started.
           </p>
-          <Alert severity="warning">
-            Your payout setup is incomplete. Please finish onboarding to enable payouts.
-          </Alert>
           <div>
             <Button
               variant="contained"
               size="small"
               style={{ textTransform: 'none' }}
               onClick={handleContinueOnboarding}
-              disabled={actionLoading}
+              disabled={actionLoading || !isEdit}
               startIcon={actionLoading ? <CircularProgress size={14} color="inherit" /> : null}
             >
               Continue Onboarding
@@ -185,4 +205,3 @@ export default function PaymentsSetupPage() {
     </div>
   );
 }
-

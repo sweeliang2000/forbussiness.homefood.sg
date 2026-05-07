@@ -22,7 +22,8 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import apiClient from '@/utility/api';
-import { ORDERING_SETTINGS, CALENDAR_OVERRIDES, CALENDAR_OVERRIDE } from '@/utility/apiPaths';
+import { ORDERING_SETTINGS, CALENDAR_OVERRIDES, CALENDAR_OVERRIDE, RELEASE_STATUS } from '@/utility/apiPaths';
+import Link from 'next/link';
 
 import styles from './ShopSettings.module.css';
 
@@ -68,6 +69,8 @@ export default function ShopSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
+  const [isEdit, setIsEdit] = useState(true);
+  const [releaseStatus, setReleaseStatus] = useState(null);
 
   // SECTION 1 — Ordering Hours
   const [hours, setHours] = useState(DEFAULT_HOURS);
@@ -124,6 +127,7 @@ export default function ShopSettingsPage() {
         setBookingDaysAhead(loaded.bookingDaysAhead);
         setMinNoticeHours(loaded.minNoticeHours);
         setSavedSettings(loaded);
+        if (data?.isEdit !== undefined) setIsEdit(data.isEdit);
       } catch (err) {
         if (err.response?.status === 404) {
           // No settings saved yet — set defaults as the baseline
@@ -142,6 +146,19 @@ export default function ShopSettingsPage() {
       }
     };
     load();
+  }, []);
+
+  useEffect(() => {
+    const fetchReleaseStatus = async () => {
+      try {
+        const res = await apiClient.get(RELEASE_STATUS);
+        const data = res.data;
+        if (data?.data?.status) setReleaseStatus(data.data.status);
+      } catch {
+        // Non-critical
+      }
+    };
+    fetchReleaseStatus();
   }, []);
 
   // Load calendar overrides whenever the viewed month changes
@@ -224,6 +241,7 @@ export default function ShopSettingsPage() {
   })();
 
   const openDayPopover = (d, anchorEl) => {
+    if (!isEdit) return;
     const derived = getDayDerived(d);
     const isPast = startOfDay(d).getTime() < today.getTime();
     if (isPast) return;
@@ -308,7 +326,24 @@ export default function ShopSettingsPage() {
           sx={{ textTransform: 'none' }}
           showCancelButton={false}
           onClick={handleSaveSettings}
-          disabled={isSaving || !hasChanges}
+          disabled={isSaving || !hasChanges || !isEdit}
+          isSuccess={releaseStatus === 'approved_scheduled'}
+          successMessage={
+            !isEdit && releaseStatus === 'approved_scheduled'
+              ? (
+                <>
+                  Your release has been approved. It will be released on the date you stated on{' '}
+                  <Link href="/app/release/submission">Release Submission Page</Link>.
+                  {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@collbine.com.
+                </>
+              )
+              : null
+          }
+          infoMessage={
+            !isEdit && releaseStatus !== 'approved_scheduled'
+              ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.'
+              : null
+          }
         />
       </div>
 
@@ -327,7 +362,7 @@ export default function ShopSettingsPage() {
             <div className={styles.tableWrap}>
               <div className={styles.hoursTable}>
                 {hours.map((h, idx) => {
-                  const disabled = !h.enabled;
+                  const disabled = !h.enabled || !isEdit;
                   return (
                     <div key={idx} className={styles.hoursRow}>
                       <Typography className={styles.dayCell}>{dayNameByIndex[idx]}</Typography>
@@ -336,6 +371,7 @@ export default function ShopSettingsPage() {
                           control={
                             <Checkbox
                               checked={h.enabled}
+                              disabled={!isEdit}
                               onChange={(e) => {
                                 const nextEnabled = e.target.checked;
                                 setHours((prev) => {
@@ -409,10 +445,10 @@ export default function ShopSettingsPage() {
                 <RadioGroup value={orderMode} onChange={(e) => setOrderMode(e.target.value)}>
                   <FormControlLabel
                     value="today_and_preorder"
-                    control={<Radio size="small" />}
+                    control={<Radio size="small" disabled={!isEdit} />}
                     label="Order Today + Pre-order"
                   />
-                  <FormControlLabel value="preorder_only" control={<Radio size="small" />} label="Pre-order only" />
+                  <FormControlLabel value="preorder_only" control={<Radio size="small" disabled={!isEdit} />} label="Pre-order only" />
                 </RadioGroup>
                 <br />
               </div>
@@ -422,6 +458,7 @@ export default function ShopSettingsPage() {
                 type="number"
                 inputProps={{ min: 1 }}
                 value={defaultDailyQuota}
+                disabled={!isEdit}
                 onChange={(e) => setDefaultDailyQuota(Math.max(1, Number(e.target.value)))}
                 helperText="Applied to all calendar days unless overridden"
                 size="small"
@@ -431,6 +468,7 @@ export default function ShopSettingsPage() {
                 type="number"
                 inputProps={{ min: 1, max: 90 }}
                 value={bookingDaysAhead}
+                disabled={!isEdit}
                 onChange={(e) => setBookingDaysAhead(Math.max(1, Math.min(90, Number(e.target.value))))}
                 helperText={
                   orderMode === 'preorder_only'
@@ -444,6 +482,7 @@ export default function ShopSettingsPage() {
                 type="number"
                 inputProps={{ min: 0.5, step: 0.5 }}
                 value={minNoticeHours}
+                disabled={!isEdit}
                 onChange={(e) => setMinNoticeHours(Math.max(0.5, Number(e.target.value)))}
                 helperText="Set in 0.5-hour steps (default: 0.5 hour)"
                 size="small"

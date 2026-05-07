@@ -16,8 +16,9 @@ import DialogPopup from '@/components/DialogPopup/DialogPopup';
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 import { Alert } from '@mui/material';
 import apiClient from '@/utility/api';
-import { MENU } from '@/utility/apiPaths';
+import { MENU, RELEASE_STATUS } from '@/utility/apiPaths';
 import { getUserDataFromCookie } from '@/utility/cookieUtils';
+import Link from 'next/link';
 
 const makeId = () => Math.random().toString(36).slice(2, 10);
 
@@ -148,6 +149,8 @@ export default function MenuBuilder() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+  const [isEdit, setIsEdit] = useState(true);
+  const [releaseStatus, setReleaseStatus] = useState(null);
 
   // Categories are kept in an ordered array for drag-to-reorder.
   const [categories, setCategories] = useState([]);
@@ -264,6 +267,7 @@ export default function MenuBuilder() {
         if (data.categories) setCategories(data.categories);
         if (data.items) setItems(data.items.map(mapApiItemToState));
         if (data.shopAcceptance) setShopAcceptance(data.shopAcceptance);
+        if (data.isEdit !== undefined) setIsEdit(data.isEdit);
       })
       .catch((err) => {
         setLoadError(err?.response?.data?.message ?? 'Failed to load menu. Please refresh.');
@@ -272,6 +276,19 @@ export default function MenuBuilder() {
         setIsLoading(false);
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const fetchReleaseStatus = async () => {
+      try {
+        const res = await apiClient.get(RELEASE_STATUS);
+        const data = res.data;
+        if (data?.data?.status) setReleaseStatus(data.data.status);
+      } catch {
+        // Non-critical
+      }
+    };
+    fetchReleaseStatus();
   }, []);
 
   const visibleCategories = useMemo(() => {
@@ -764,12 +781,30 @@ export default function MenuBuilder() {
           }
           showButton={false}
           showCancelButton={false}
+          isSuccess={releaseStatus === 'approved_scheduled'}
+          successMessage={
+            !isEdit && releaseStatus === 'approved_scheduled'
+              ? (
+                <>
+                  Your release has been approved. It will be released on the date you stated on{' '}
+                  <Link href="/app/release/submission">Release Submission Page</Link>.
+                  {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@collbine.com.
+                </>
+              )
+              : null
+          }
+          infoMessage={
+            !isEdit && releaseStatus !== 'approved_scheduled'
+              ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.'
+              : null
+          }
           rightActions={
             <>
               <LoadingButton
                 size="small"
                 variant="contained"
                 loading={isSaving}
+                disabled={!isEdit}
                 onClick={() => handlePublishMenu('draft')}
                 sx={{ textTransform: 'none' }}
               >
@@ -778,7 +813,7 @@ export default function MenuBuilder() {
               <Button
                 size="small"
                 variant="outlined"
-                disabled={isSaving}
+                disabled={isSaving || !isEdit}
                 onClick={() => handlePublishMenu('published')}
                 sx={{ textTransform: 'none' }}
               >
@@ -815,9 +850,9 @@ export default function MenuBuilder() {
 
             <div className={styles.row} style={{ justifyContent: 'space-between' }}>
               <RadioGroup row value={shopAcceptance} onChange={(e) => setShopAcceptance(e.target.value)}>
-                <FormControlLabel value="takeaway" control={<Radio size="small" />} label="Takeaway only" />
-                <FormControlLabel value="dine-in" control={<Radio size="small" />} label="Dine-in only" />
-                <FormControlLabel value="both" control={<Radio size="small" />} label="Both" />
+                <FormControlLabel value="takeaway" control={<Radio size="small" disabled={!isEdit} />} label="Takeaway only" />
+                <FormControlLabel value="dine-in" control={<Radio size="small" disabled={!isEdit} />} label="Dine-in only" />
+                <FormControlLabel value="both" control={<Radio size="small" disabled={!isEdit} />} label="Both" />
               </RadioGroup>
             </div>
           </ContentCard>
@@ -834,10 +869,12 @@ export default function MenuBuilder() {
                 onChange={(e) => setNewCategoryName(e.target.value)}
                 placeholder="e.g. Drinks"
                 size="small"
+                disabled={!isEdit}
               />
               <Button
                 variant="contained"
                 sx={{ textTransform: 'none' }}
+                disabled={!isEdit}
                 onClick={() => {
                   const name = newCategoryName.trim();
                   if (!name) return;
@@ -874,12 +911,14 @@ export default function MenuBuilder() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <Switch
                       checked={cat.isVisible}
+                      disabled={!isEdit}
                       onChange={(e) => setCategories((prev) => prev.map((x) => (x.id === cat.id ? { ...x, isVisible: e.target.checked } : x)))}
                       size="small"
                     />
                     <IconButton
                       size="small"
                       color="error"
+                      disabled={!isEdit}
                       onClick={() => handleDeleteCategory(cat)}
                     >
                       <DeleteOutlineRoundedIcon fontSize="small" />
@@ -894,7 +933,7 @@ export default function MenuBuilder() {
             <div className={styles.sectionHeader}>
               <div className={styles.row} style={{ justifyContent: 'space-between' }}>
                 <FieldHeader title="Items" type="h3" description="Add/edit/delete items with photo, pricing, and sold-out/featured toggles." />
-                <Button variant="contained" sx={{ textTransform: 'none' }} onClick={openNewItemEditor}>
+                <Button variant="contained" sx={{ textTransform: 'none' }} disabled={!isEdit} onClick={openNewItemEditor}>
                   Add Item
                 </Button>
               </div>
@@ -938,9 +977,9 @@ export default function MenuBuilder() {
                             <div className={styles.row} style={{ gap: 10 }}>
                               <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                                 <Typography variant="caption" className={styles.muted}>Sold out</Typography>
-                                <Switch checked={!!item.soldOut} onChange={(e) => handleQuickSoldOut(item.id, e.target.checked)} size="small" />
+                                <Switch checked={!!item.soldOut} disabled={!isEdit} onChange={(e) => handleQuickSoldOut(item.id, e.target.checked)} size="small" />
                               </div>
-                              <IconButton size="small" onClick={(e) => openItemMenu(e, item.id)}>
+                              <IconButton size="small" disabled={!isEdit} onClick={(e) => openItemMenu(e, item.id)}>
                                 <SettingsRoundedIcon fontSize="small" />
                               </IconButton>
                             </div>
