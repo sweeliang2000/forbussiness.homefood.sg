@@ -11,9 +11,10 @@ import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import apiClient from '@/utility/api';
-import { CUSTOMER_FACING_INFORMATION, RELEASE_STATUS, STRIPE_CONNECT_ACCOUNT_STATUS } from '@/utility/apiPaths';
+import { CUSTOMER_FACING_INFORMATION, RELEASE_STATUS, STRIPE_CONNECT_ACCOUNT_STATUS, PUBLISH_UPDATE } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
+import { Button } from '@mui/material';
 
 const DISPLAY_NAME = 'displayName';
 const SHOP_DESCRIPTION = 'description';
@@ -61,6 +62,9 @@ const CustomerFacingBusinessPage = () => {
     const [hasExistingData, setHasExistingData] = useState(false);
     const [isEdit, setIsEdit] = useState(true);
     const [releaseStatus, setReleaseStatus] = useState(null);
+    const [isPublishLoading, setIsPublishLoading] = useState(false);
+    const [isPublishSuccess, setIsPublishSuccess] = useState(false);
+    const [publishError, setPublishError] = useState('');
 
     const [thumbnailImages, setThumbnailImages] = useState([]);
     const [bannerImages, setBannerImages] = useState([]);
@@ -160,6 +164,23 @@ const CustomerFacingBusinessPage = () => {
     const showError = (message) => {
         setIsError(true);
         setErrorMessage(message)
+    };
+
+    const handlePublishUpdate = async () => {
+        setIsPublishLoading(true);
+        setIsPublishSuccess(false);
+        setPublishError('');
+        try {
+            await apiClient.post(PUBLISH_UPDATE);
+            setIsPublishSuccess(true);
+        } catch (error) {
+            const errorData = error?.response?.data;
+            const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+            const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
+            setPublishError(`Failed to publish update. ${message} (Error code: ${code})`);
+        } finally {
+            setIsPublishLoading(false);
+        }
     };
 
     const formSubmissionHandler = async (event) => {
@@ -519,9 +540,9 @@ const CustomerFacingBusinessPage = () => {
                     }
                     loading={isBtnLoading}
                     isSuccess={isSubmissionSuccess || releaseStatus === 'approved_scheduled'}
-                    isError={isError}
+                    isError={isError || !!publishError}
                     isDisabled={isBtnDisabled || !isEdit}
-                    errorMessage={errorMessage}
+                    errorMessage={publishError || errorMessage}
                     successMessage={
                         !isEdit && releaseStatus === 'approved_scheduled'
                             ? (
@@ -537,6 +558,20 @@ const CustomerFacingBusinessPage = () => {
                         !isEdit && releaseStatus !== 'approved_scheduled'
                             ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.'
                             : null
+                    }
+                    rightActions={
+                        releaseStatus === 'Released' ? (
+                            <Button
+                                size='small'
+                                variant='outlined'
+                                color='primary'
+                                onClick={handlePublishUpdate}
+                                disabled={isPublishLoading || isPublishSuccess}
+                                style={{ textTransform: 'none' }}
+                            >
+                                {isPublishSuccess ? 'Update Published' : isPublishLoading ? 'Publishing...' : 'Publish Update'}
+                            </Button>
+                        ) : null
                     }
                 />
 
