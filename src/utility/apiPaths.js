@@ -51,7 +51,7 @@ export const SEND_FOR_REVIEW = '/api/data/sendForReview';
 export const CANCEL_RELEASE = '/api/data/cancelRelease';
 export const CANCEL_SCHEDULED_RELEASE = '/api/data/cancelScheduledRelease';
 export const RELEASED_HISTORY = '/api/data/releasedHistory';
-export const PUBLISH_UPDATE = '/api/data/publishUpdate';
+export const PUBLISH_UPDATE = '/api/data/publish/customer-facing-business-details';
 
 export const STRIPE_CONNECT_ACCOUNT_STATUS = '/api/stripe-connect/account-status';
 export const STRIPE_CONNECT_CREATE_ACCOUNT = '/api/stripe-connect/create-connect-account';

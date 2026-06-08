@@ -14,7 +14,8 @@ import apiClient from '@/utility/api';
 import { CUSTOMER_FACING_INFORMATION, RELEASE_STATUS, STRIPE_CONNECT_ACCOUNT_STATUS, PUBLISH_UPDATE } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
-import { Button } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import { FaCheck } from 'react-icons/fa';
 
 const DISPLAY_NAME = 'displayName';
 const SHOP_DESCRIPTION = 'description';
@@ -65,6 +66,8 @@ const CustomerFacingBusinessPage = () => {
     const [isPublishLoading, setIsPublishLoading] = useState(false);
     const [isPublishSuccess, setIsPublishSuccess] = useState(false);
     const [publishError, setPublishError] = useState('');
+    const [hasChanges, setHasChanges] = useState(false);
+    const [hasUnsavedEdits, setHasUnsavedEdits] = useState(false);
 
     const [thumbnailImages, setThumbnailImages] = useState([]);
     const [bannerImages, setBannerImages] = useState([]);
@@ -137,6 +140,7 @@ const CustomerFacingBusinessPage = () => {
 
     const resetSaving= () => {
         setIsSubmissionSuccess(false);
+        setHasUnsavedEdits(true);
         console.log('resetSaving');
     };
 
@@ -173,6 +177,7 @@ const CustomerFacingBusinessPage = () => {
         try {
             await apiClient.post(PUBLISH_UPDATE);
             setIsPublishSuccess(true);
+            setHasChanges(false);
         } catch (error) {
             const errorData = error?.response?.data;
             const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
@@ -241,7 +246,10 @@ const CustomerFacingBusinessPage = () => {
             console.log('Form submitted successfully');
             setIsSubmissionSuccess(true);
             setIsBtnLoading(false);
-            
+            setHasChanges(true);
+            setHasUnsavedEdits(false);
+            setIsPublishSuccess(false);
+
             // Update initial values after successful save
             initialValuesRef.current = { ...enteredValues };
             initialThumbnailImagesRef.current = JSON.parse(JSON.stringify(thumbnailImages));
@@ -286,6 +294,7 @@ const CustomerFacingBusinessPage = () => {
                     setHasExistingData(true);
                     const isEditValue = data.isEdit;
                     setIsEdit(isEditValue !== undefined ? isEditValue : true);
+                    setHasChanges(data.isChanges ?? false);
                     
                     const loadedValues = {
                         [DISPLAY_NAME]: sanitize(data.displayName),
@@ -561,16 +570,19 @@ const CustomerFacingBusinessPage = () => {
                     }
                     rightActions={
                         releaseStatus === 'Released' ? (
-                            <Button
+                            <LoadingButton
                                 size='small'
                                 variant='outlined'
                                 color='primary'
+                                loading={isPublishLoading}
+                                loadingPosition='start'
                                 onClick={handlePublishUpdate}
-                                disabled={isPublishLoading || isPublishSuccess}
+                                disabled={isPublishSuccess || !hasChanges || hasUnsavedEdits}
+                                startIcon={isPublishSuccess ? <FaCheck /> : undefined}
                                 style={{ textTransform: 'none' }}
                             >
-                                {isPublishSuccess ? 'Update Published' : isPublishLoading ? 'Publishing...' : 'Publish Update'}
-                            </Button>
+                                {isPublishSuccess ? 'Update Published' : 'Publish Update'}
+                            </LoadingButton>
                         ) : null
                     }
                 />
