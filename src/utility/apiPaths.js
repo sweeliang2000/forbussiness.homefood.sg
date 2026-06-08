@@ -62,5 +62,6 @@ export const MENU = '/api/menu';
 export const PUBLISH_MENU_UPDATE = '/api/data/publish/menu';
 
 export const ORDERING_SETTINGS = '/api/data/orderingSettings';
+export const PUBLISH_SHOP_SETTINGS_UPDATE = '/api/data/publish/shop-settings';
 export const CALENDAR_OVERRIDES = '/api/data/calendarOverrides';
 export const CALENDAR_OVERRIDE = '/api/data/calendarOverride';

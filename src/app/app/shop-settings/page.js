@@ -9,6 +9,11 @@ import {
   Button,
   Checkbox,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   FormControlLabel,
   MenuItem,
   Popover,
@@ -19,10 +24,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import { FaCheck } from 'react-icons/fa';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import apiClient from '@/utility/api';
-import { ORDERING_SETTINGS, CALENDAR_OVERRIDES, CALENDAR_OVERRIDE, RELEASE_STATUS } from '@/utility/apiPaths';
+import { ORDERING_SETTINGS, CALENDAR_OVERRIDES, CALENDAR_OVERRIDE, RELEASE_STATUS, PUBLISH_SHOP_SETTINGS_UPDATE } from '@/utility/apiPaths';
 import Link from 'next/link';
 
 import styles from './ShopSettings.module.css';
@@ -68,6 +75,11 @@ export default function ShopSettingsPage() {
   const [isLegendOpen, setIsLegendOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSaveSuccess, setIsSaveSuccess] = useState(false);
+  const [hasPublishableChanges, setHasPublishableChanges] = useState(false);
+  const [isPublishLoading, setIsPublishLoading] = useState(false);
+  const [isPublishSuccess, setIsPublishSuccess] = useState(false);
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
   const [isEdit, setIsEdit] = useState(true);
   const [releaseStatus, setReleaseStatus] = useState(null);
@@ -106,6 +118,11 @@ export default function ShopSettingsPage() {
   const [calendarOverrides, setCalendarOverrides] = useState({});
 
   const showToast = (message, severity = 'success') => setSnack({ open: true, message, severity });
+
+  // Reset save success tick when user makes new edits
+  useEffect(() => {
+    if (hasChanges) setIsSaveSuccess(false);
+  }, [hasChanges]);
 
   // Load ordering settings on mount
   useEffect(() => {
@@ -183,11 +200,31 @@ export default function ShopSettingsPage() {
       const payload = { hours, orderMode, defaultDailyQuota, bookingDaysAhead, minNoticeHours };
       await apiClient.put(ORDERING_SETTINGS, payload);
       setSavedSettings(payload);
+      setIsSaveSuccess(true);
+      setHasPublishableChanges(true);
+      setIsPublishSuccess(false);
       showToast('Settings saved successfully');
     } catch {
       showToast('Failed to save settings', 'error');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handlePublishSettingsUpdate = () => setShowPublishConfirm(true);
+
+  const handleConfirmPublishSettingsUpdate = async () => {
+    setShowPublishConfirm(false);
+    setIsPublishLoading(true);
+    setIsPublishSuccess(false);
+    try {
+      await apiClient.post(PUBLISH_SHOP_SETTINGS_UPDATE);
+      setIsPublishSuccess(true);
+      setHasPublishableChanges(false);
+    } catch {
+      showToast('Failed to publish settings update', 'error');
+    } finally {
+      setIsPublishLoading(false);
     }
   };
 
@@ -322,11 +359,8 @@ export default function ShopSettingsPage() {
           description={
             <p>Configure ordering hours, order mode, and pre-order availability for your shop.</p>
           }
-          buttonText={isSaving ? 'Saving…' : 'Save Settings'}
-          sx={{ textTransform: 'none' }}
+          showButton={false}
           showCancelButton={false}
-          onClick={handleSaveSettings}
-          disabled={isSaving || !hasChanges || !isEdit}
           isSuccess={releaseStatus === 'approved_scheduled'}
           successMessage={
             !isEdit && releaseStatus === 'approved_scheduled'
@@ -343,6 +377,37 @@ export default function ShopSettingsPage() {
             !isEdit && releaseStatus !== 'approved_scheduled'
               ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.'
               : null
+          }
+          rightActions={
+            <>
+              <LoadingButton
+                size="small"
+                variant="contained"
+                loading={isSaving}
+                loadingPosition="start"
+                startIcon={isSaveSuccess ? <FaCheck /> : undefined}
+                disabled={isSaving || !hasChanges || !isEdit || isSaveSuccess}
+                onClick={handleSaveSettings}
+                sx={{ textTransform: 'none' }}
+              >
+                {isSaveSuccess ? 'Saved' : 'Save Settings'}
+              </LoadingButton>
+              {releaseStatus === 'Released' && (
+                <LoadingButton
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+                  loading={isPublishLoading}
+                  loadingPosition="start"
+                  startIcon={isPublishSuccess ? <FaCheck /> : undefined}
+                  disabled={isPublishSuccess || !hasPublishableChanges || hasChanges}
+                  onClick={handlePublishSettingsUpdate}
+                  sx={{ textTransform: 'none' }}
+                >
+                  {isPublishSuccess ? 'Update Published' : 'Publish Update'}
+                </LoadingButton>
+              )}
+            </>
           }
         />
       </div>
@@ -691,6 +756,23 @@ export default function ShopSettingsPage() {
           ) : null}
         </div>
       </Popover>
+
+      <Dialog open={showPublishConfirm} onClose={() => setShowPublishConfirm(false)}>
+        <DialogTitle>Publish Update for Ordering Settings</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to publish your ordering settings? This will make your latest changes visible to customers immediately.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowPublishConfirm(false)} style={{ textTransform: 'none' }}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmPublishSettingsUpdate} variant="contained" style={{ textTransform: 'none' }}>
+            Publish
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
