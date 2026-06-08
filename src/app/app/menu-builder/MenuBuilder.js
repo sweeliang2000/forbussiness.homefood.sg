@@ -270,7 +270,7 @@ export default function MenuBuilder() {
         if (data.items) setItems(data.items.map(mapApiItemToState));
         if (data.shopAcceptance) setShopAcceptance(data.shopAcceptance);
         if (data.isEdit !== undefined) setIsEdit(data.isEdit);
-        setHasChanges(data.isChanges ?? false);
+        if (data.releaseStatus) setReleaseStatus(data.releaseStatus);
       })
       .catch((err) => {
         setLoadError(err?.response?.data?.message ?? 'Failed to load menu. Please refresh.');
@@ -332,6 +332,7 @@ export default function MenuBuilder() {
   const [saveError, setSaveError] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [hasUnsavedEdits, setHasUnsavedEdits] = useState(false);
+  const [isSaveSuccess, setIsSaveSuccess] = useState(false);
   const [isPublishLoading, setIsPublishLoading] = useState(false);
   const [isPublishSuccess, setIsPublishSuccess] = useState(false);
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
@@ -511,6 +512,7 @@ export default function MenuBuilder() {
       });
       setHasChanges(true);
       setHasUnsavedEdits(false);
+      setIsSaveSuccess(true);
       setIsPublishSuccess(false);
     } catch (err) {
       setSaveError(err?.response?.data?.message ?? 'Failed to save menu. Please try again.');
@@ -519,7 +521,7 @@ export default function MenuBuilder() {
     }
   };
 
-  const markMenuChanged = () => setHasUnsavedEdits(true);
+  const markMenuChanged = () => { setHasUnsavedEdits(true); setIsSaveSuccess(false); };
 
   const handlePublishMenuUpdate = () => setShowPublishConfirm(true);
 
@@ -839,11 +841,13 @@ export default function MenuBuilder() {
                 size="small"
                 variant="contained"
                 loading={isSaving}
-                disabled={!isEdit}
+                loadingPosition="start"
+                startIcon={isSaveSuccess ? <FaCheck /> : undefined}
+                disabled={!isEdit || !hasUnsavedEdits}
                 onClick={() => handlePublishMenu('draft')}
                 sx={{ textTransform: 'none' }}
               >
-                Save Menu
+                {isSaveSuccess ? 'Saved' : 'Save Menu'}
               </LoadingButton>
               {releaseStatus === 'Released' && (
                 <LoadingButton
