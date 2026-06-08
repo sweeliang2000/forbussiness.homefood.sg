@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './MenuBuilder.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
-import { Button, Checkbox, Dialog, FormControlLabel, IconButton, Menu, MenuItem, Radio, RadioGroup, Select, Switch, TextField, Typography } from '@mui/material';
+import { Button, Checkbox, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, FormControlLabel, IconButton, Menu, MenuItem, Radio, RadioGroup, Select, Switch, TextField, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import Shimmer from '@/components/Shimmer/Shimmer';
 import AddCircleOutlineRoundedIcon from '@mui/icons-material/AddCircleOutlineRounded';
@@ -16,7 +16,8 @@ import DialogPopup from '@/components/DialogPopup/DialogPopup';
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 import { Alert } from '@mui/material';
 import apiClient from '@/utility/api';
-import { MENU, RELEASE_STATUS } from '@/utility/apiPaths';
+import { MENU, RELEASE_STATUS, PUBLISH_MENU_UPDATE } from '@/utility/apiPaths';
+import { FaCheck } from 'react-icons/fa';
 import { getUserDataFromCookie } from '@/utility/cookieUtils';
 import Link from 'next/link';
 
@@ -169,6 +170,7 @@ export default function MenuBuilder() {
       setBlockedDeleteCategoryName(cat.name);
     } else {
       setCategories((prev) => prev.filter((c) => c.id !== cat.id));
+      markMenuChanged();
     }
   };
 
@@ -268,6 +270,7 @@ export default function MenuBuilder() {
         if (data.items) setItems(data.items.map(mapApiItemToState));
         if (data.shopAcceptance) setShopAcceptance(data.shopAcceptance);
         if (data.isEdit !== undefined) setIsEdit(data.isEdit);
+        setHasChanges(data.isChanges ?? false);
       })
       .catch((err) => {
         setLoadError(err?.response?.data?.message ?? 'Failed to load menu. Please refresh.');
@@ -316,6 +319,7 @@ export default function MenuBuilder() {
     const toIndex = categories.findIndex((c) => c.id === targetCategoryId);
     if (fromIndex < 0 || toIndex < 0) return;
     setCategories((prev) => arrayMove(prev, fromIndex, toIndex));
+    markMenuChanged();
     stopReorder();
   };
 
@@ -326,6 +330,11 @@ export default function MenuBuilder() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [hasUnsavedEdits, setHasUnsavedEdits] = useState(false);
+  const [isPublishLoading, setIsPublishLoading] = useState(false);
+  const [isPublishSuccess, setIsPublishSuccess] = useState(false);
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
 
   // Per-item gear-menu anchor: { itemId, el }
   const [itemMenuAnchor, setItemMenuAnchor] = useState(null);
@@ -402,24 +411,28 @@ export default function MenuBuilder() {
         },
       ];
     });
-
+    markMenuChanged();
     closeItemEditor();
   };
 
   const deleteItem = (itemId) => {
     setItems((prev) => prev.filter((i) => i.id !== itemId));
+    markMenuChanged();
   };
 
   const handleQuickSoldOut = (itemId, nextValue) => {
     setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, soldOut: nextValue } : i)));
+    markMenuChanged();
   };
 
   const handleQuickFeatured = (itemId, nextValue) => {
     setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, featured: nextValue } : i)));
+    markMenuChanged();
   };
 
   const handleQuickAvailability = (itemId, patch) => {
     setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, ...patch } : i)));
+    markMenuChanged();
   };
 
   const handlePublishMenu = async (status = 'published') => {
@@ -496,10 +509,32 @@ export default function MenuBuilder() {
       await apiClient.post(MENU, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+      setHasChanges(true);
+      setHasUnsavedEdits(false);
+      setIsPublishSuccess(false);
     } catch (err) {
       setSaveError(err?.response?.data?.message ?? 'Failed to save menu. Please try again.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const markMenuChanged = () => setHasUnsavedEdits(true);
+
+  const handlePublishMenuUpdate = () => setShowPublishConfirm(true);
+
+  const handleConfirmPublishMenuUpdate = async () => {
+    setShowPublishConfirm(false);
+    setIsPublishLoading(true);
+    setIsPublishSuccess(false);
+    try {
+      await apiClient.post(PUBLISH_MENU_UPDATE);
+      setIsPublishSuccess(true);
+      setHasChanges(false);
+    } catch (err) {
+      setSaveError(err?.response?.data?.message ?? 'Failed to publish menu update.');
+    } finally {
+      setIsPublishLoading(false);
     }
   };
 
@@ -810,15 +845,21 @@ export default function MenuBuilder() {
               >
                 Save Menu
               </LoadingButton>
-              <Button
-                size="small"
-                variant="outlined"
-                disabled={isSaving || !isEdit}
-                onClick={() => handlePublishMenu('published')}
-                sx={{ textTransform: 'none' }}
-              >
-                Publish
-              </Button>
+              {releaseStatus === 'Released' && (
+                <LoadingButton
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+                  loading={isPublishLoading}
+                  loadingPosition="start"
+                  startIcon={isPublishSuccess ? <FaCheck /> : undefined}
+                  disabled={isPublishSuccess || !hasChanges || hasUnsavedEdits}
+                  onClick={handlePublishMenuUpdate}
+                  sx={{ textTransform: 'none' }}
+                >
+                  {isPublishSuccess ? 'Update Published' : 'Publish Update'}
+                </LoadingButton>
+              )}
               <IconButton
                 size="small"
                 onClick={openPreviewFullscreen}
@@ -849,7 +890,7 @@ export default function MenuBuilder() {
             </div>
 
             <div className={styles.row} style={{ justifyContent: 'space-between' }}>
-              <RadioGroup row value={shopAcceptance} onChange={(e) => setShopAcceptance(e.target.value)}>
+              <RadioGroup row value={shopAcceptance} onChange={(e) => { setShopAcceptance(e.target.value); markMenuChanged(); }}>
                 <FormControlLabel value="takeaway" control={<Radio size="small" disabled={!isEdit} />} label="Takeaway only" />
                 <FormControlLabel value="dine-in" control={<Radio size="small" disabled={!isEdit} />} label="Dine-in only" />
                 <FormControlLabel value="both" control={<Radio size="small" disabled={!isEdit} />} label="Both" />
@@ -880,6 +921,7 @@ export default function MenuBuilder() {
                   if (!name) return;
                   setCategories((prev) => [...prev, { id: makeId(), name, isVisible: true }]);
                   setNewCategoryName('');
+                  markMenuChanged();
                 }}
               >
                 Add Category
@@ -912,7 +954,7 @@ export default function MenuBuilder() {
                     <Switch
                       checked={cat.isVisible}
                       disabled={!isEdit}
-                      onChange={(e) => setCategories((prev) => prev.map((x) => (x.id === cat.id ? { ...x, isVisible: e.target.checked } : x)))}
+                      onChange={(e) => { setCategories((prev) => prev.map((x) => (x.id === cat.id ? { ...x, isVisible: e.target.checked } : x))); markMenuChanged(); }}
                       size="small"
                     />
                     <IconButton
@@ -1879,6 +1921,23 @@ export default function MenuBuilder() {
           </div>
         </div>
       </DialogPopup>
+
+      <Dialog open={showPublishConfirm} onClose={() => setShowPublishConfirm(false)}>
+        <DialogTitle>Publish Update for Menu</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to publish your menu updates? This will make your latest menu changes visible to customers immediately.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowPublishConfirm(false)} style={{ textTransform: 'none' }}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmPublishMenuUpdate} variant="contained" style={{ textTransform: 'none' }}>
+            Publish
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
