@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
-import { TextField, InputAdornment } from '@mui/material';
+import { TextField, InputAdornment, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 import LocationSection from './LocationSecion';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
@@ -68,6 +68,7 @@ const CustomerFacingBusinessPage = () => {
     const [publishError, setPublishError] = useState('');
     const [hasChanges, setHasChanges] = useState(false);
     const [hasUnsavedEdits, setHasUnsavedEdits] = useState(false);
+    const [showPublishConfirm, setShowPublishConfirm] = useState(false);
 
     const [thumbnailImages, setThumbnailImages] = useState([]);
     const [bannerImages, setBannerImages] = useState([]);
@@ -170,7 +171,12 @@ const CustomerFacingBusinessPage = () => {
         setErrorMessage(message)
     };
 
-    const handlePublishUpdate = async () => {
+    const handlePublishUpdate = () => {
+        setShowPublishConfirm(true);
+    };
+
+    const handleConfirmPublish = async () => {
+        setShowPublishConfirm(false);
         setIsPublishLoading(true);
         setIsPublishSuccess(false);
         setPublishError('');
@@ -778,7 +784,7 @@ const CustomerFacingBusinessPage = () => {
                                     <div className={styles.fieldContainer}>
                                         <FieldHeader
                                             title='Banner Image'
-                                            description='Aspect ratio: 16:9. Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                                            description='Aspect ratio: 4:1. Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
                                             type='h3'
                                         />
 
@@ -788,7 +794,7 @@ const CustomerFacingBusinessPage = () => {
                                             noOfImages={1}
                                             resetSaving={resetSaving}
                                             width={480}
-                                            height={270}
+                                            height={120}
                                             imageClassName={styles.dragdropBannerImage}
                                             disabled={!isEdit}
                                         />
@@ -822,6 +828,23 @@ const CustomerFacingBusinessPage = () => {
                             </>
                 }
             </form>
+
+            <Dialog open={showPublishConfirm} onClose={() => setShowPublishConfirm(false)}>
+                <DialogTitle>Publish Update for Customer Facing Details</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to publish your updates? This will make your latest changes visible to customers immediately.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setShowPublishConfirm(false)} style={{ textTransform: 'none' }}>
+                        Cancel
+                    </Button>
+                    <Button onClick={handleConfirmPublish} variant='contained' style={{ textTransform: 'none' }}>
+                        Publish
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     )
 };
