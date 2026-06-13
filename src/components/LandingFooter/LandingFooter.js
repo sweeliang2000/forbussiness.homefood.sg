@@ -34,6 +34,7 @@ const LandingFooter = () => {
                             </a>
                         </li>
                         <li><a href="#">Onboarding guide</a></li>
+                        <li><Link href="/payment-types-and-fees">Payment Types &amp; Fees</Link></li>
                         <li><Link href="/refund-policy">Refund &amp; Payment Policy</Link></li>
                     </ul>
                 </div>
