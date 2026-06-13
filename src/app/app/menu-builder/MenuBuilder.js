@@ -1706,9 +1706,9 @@ export default function MenuBuilder() {
             noOfImages={1}
             isMultiple={false}
             resetSaving={() => {}}
-            width={100}
-            height={100}
-            imageClassName={styles.fullWidth}
+            width={120}
+            height={120}
+            imageClassName={styles.itemImageThumb}
             disabled={false}
           />
 

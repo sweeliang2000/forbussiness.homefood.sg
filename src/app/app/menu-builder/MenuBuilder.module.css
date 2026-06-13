@@ -180,6 +180,13 @@
   width: 100%;
 }
 
+/* Square 1:1 thumbnail for the item image uploader preview. */
+.itemImageThumb {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+}
+
 @media only screen and (max-width: 820px) {
   .stickyHeader {
     top: 62px;

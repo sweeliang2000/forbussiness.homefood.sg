@@ -55,51 +55,6 @@ const LandingPage = () => {
             </div>
 
             <FAQSection />
-
-            {/* Footer */}
-            <footer className={styles.footer}>
-                <div className={styles.footerGrid}>
-                    <div>
-                        <h4>Collbine for Business</h4>
-                        <p>Home-based food, made easy to discover, order, and pick up.</p>
-                    </div>
-                    <div>
-                        <h4>Product</h4>
-                        <ul>
-                            <li><a href="#offer">What we offer</a></li>
-                            <li><a href="#how">How it works</a></li>
-                            <li><a href="#pricing">Pricing</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4>Support</h4>
-                        <ul>
-                            <li><a href="#faq">FAQ</a></li>
-                            <li>
-                                <a
-                                    href="https://api.whatsapp.com/send/?phone=6588678978&text&type=phone_number&app_absent=0"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    WhatsApp us
-                                </a>
-                            </li>
-                            <li><a href="#">Onboarding guide</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4>Company</h4>
-                        <ul>
-                            <li><a href="#">About</a></li>
-                            <li><a href="/careers">Careers</a></li>
-                            <li><a href="/privacy">Privacy</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div className={styles.footerBottom}>
-                    <p>&copy; 2026 Collbine for Business. Built with home kitchens, for home kitchens.</p>
-                </div>
-            </footer>
         </div>
     );
 };

@@ -1,4 +1,5 @@
 import LandingNavbar from '@/components/LandingNavbar/LandingNavbar';
+import LandingFooter from '@/components/LandingFooter/LandingFooter';
 import { FaWhatsapp } from 'react-icons/fa';
 import styles from './layout.module.css';
 
@@ -53,6 +54,7 @@ export default function RootLayout({ children }) {
     <>
       <LandingNavbar />
       {children}
+      <LandingFooter />
       <a
         href={WHATSAPP_URL}
         target="_blank"
