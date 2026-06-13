@@ -1,207 +1,286 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Alert,
+} from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import { FaCheck } from 'react-icons/fa';
 import styles from './page.module.css';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
-import { Button, CircularProgress } from '@mui/material';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
-import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import apiClient from '@/utility/api';
-import Link from 'next/link';
-import {
-  STRIPE_CONNECT_ACCOUNT_STATUS,
-  STRIPE_CONNECT_CREATE_ACCOUNT,
-  STRIPE_CONNECT_CREATE_ACCOUNT_LINK,
-  STRIPE_CONNECT_DASHBOARD_LINK,
-} from '@/utility/apiPaths';
+import { PAYMENT_SETTINGS, PUBLISH_PAYMENT_SETTINGS_UPDATE, OFFICIAL_BUSINESS_INFORMATION } from '@/utility/apiPaths';
+import { normalizeMobile } from '@/utility/paynow';
+import ManualPayNowSection from './_views/ManualPayNowSection';
+import AutomaticPaymentsSection from './_views/AutomaticPaymentsSection';
+
+// Only the persistent PayNow identity is saved. Amount / reference / expiry are
+// test-only values entered in the section and are never persisted.
+const DEFAULT_FORM = {
+  proxyType: 'UEN',
+  uen: '',
+  companyName: '',
+  mobile: '',
+};
+
+// Stored (API) shape -> form (UI) shape
+const toForm = (paynow = {}) => ({
+  proxyType: paynow.proxyType === 'MOBILE' ? 'MOBILE' : 'UEN',
+  uen: paynow.uen || '',
+  companyName: paynow.companyName || '',
+  // Stored as the local 8-digit number; the +65 prefix is fixed in the UI.
+  mobile: normalizeMobile(paynow.mobile || ''),
+});
+
+// Form (UI) shape -> stored (API) shape. The amount is always fixed (Editable
+// Amount = No); the actual amount comes from the order at checkout.
+const toStored = (form) => ({
+  proxyType: form.proxyType,
+  uen: form.uen.trim(),
+  companyName: form.companyName.trim(),
+  mobile: form.mobile.trim(),
+  editableAmount: false,
+});
 
 export default function PaymentsSetupPage() {
   const [isLoading, setIsLoading] = useState(true);
-  const [loadingErrorMessage, setLoadingErrorMessage] = useState(null);
-  const [loadingErrorStatus, setLoadingErrorStatus] = useState(null);
 
-  const [status, setStatus] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState(null);
+  const [paynow, setPaynow] = useState(DEFAULT_FORM);
+
+  // Which section is expanded (accordion-style: only one open at a time).
+  const [expanded, setExpanded] = useState('manual');
+
   const [isEdit, setIsEdit] = useState(true);
   const [releaseStatus, setReleaseStatus] = useState(null);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+
+  // Menu-builder style state machine
+  const [hasUnsavedEdits, setHasUnsavedEdits] = useState(false); // local edits not yet saved
+  const [hasChanges, setHasChanges] = useState(false); // saved but not yet published
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSaveSuccess, setIsSaveSuccess] = useState(false);
+  const [isPublishLoading, setIsPublishLoading] = useState(false);
+  const [isPublishSuccess, setIsPublishSuccess] = useState(false);
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
-    const fetchStatus = async () => {
+    const load = async () => {
       try {
-        const res = await apiClient.get(STRIPE_CONNECT_ACCOUNT_STATUS);
-        const data = res.data?.data ?? res.data;
-        setStatus(data);
-        if (data?.isEdit !== undefined) setIsEdit(data.isEdit);
-        if (data?.releaseStatus !== undefined) setReleaseStatus(data.releaseStatus);
-      } catch (error) {
-        const message = error?.response?.data?.message || error.message;
-        const code = error?.response?.data?.code || error.code;
-        const statusCode = error?.response?.status;
-        setLoadingErrorMessage(`An error had occurred. ${message} (Error code: ${code})`);
-        setLoadingErrorStatus(statusCode ?? null);
+        const res = await apiClient.get(PAYMENT_SETTINGS);
+        const data = res.data?.data ?? res.data ?? {};
+        setPaymentMethod(data.paymentMethod ?? null);
+        // Auto-open the active method (default to Manual when none is set).
+        setExpanded(data.paymentMethod ?? 'manual');
+        let form = toForm(data.paynow);
+
+        // Best-effort prefill of UEN / company from saved business info.
+        if (!form.uen && !form.companyName) {
+          try {
+            const biz = await apiClient.get(OFFICIAL_BUSINESS_INFORMATION);
+            const b = biz.data?.data ?? biz.data ?? {};
+            form = { ...form, uen: form.uen || b.uen || '', companyName: form.companyName || b.businessName || '' };
+          } catch {
+            /* prefill is optional */
+          }
+        }
+
+        setPaynow(form);
+        setHasChanges(!!data.isChanges);
+        if (data.isEdit !== undefined) setIsEdit(data.isEdit);
+        if (data.releaseStatus !== undefined) setReleaseStatus(data.releaseStatus);
+      } catch {
+        // Resilient: still render the generator so the merchant can test it out.
+        setPaynow(DEFAULT_FORM);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchStatus();
+    load();
   }, []);
 
-  const handleConnect = async () => {
-    setActionLoading(true);
-    setIsError(false);
-    try {
-      await apiClient.post(STRIPE_CONNECT_CREATE_ACCOUNT);
-      const linkRes = await apiClient.post(STRIPE_CONNECT_CREATE_ACCOUNT_LINK);
-      const url = linkRes.data?.data?.url ?? linkRes.data?.url;
-      if (url) {
-        window.location.href = url;
-      } else {
-        setActionLoading(false);
-      }
-    } catch (error) {
-      const message = error?.response?.data?.message || error.message;
-      setIsError(true);
-      setErrorMessage(`Failed to start onboarding. ${message}`);
-      setActionLoading(false);
-    }
+  const markChanged = () => {
+    setHasUnsavedEdits(true);
+    setIsSaveSuccess(false);
   };
 
-  const handleViewDashboard = async () => {
-    setActionLoading(true);
-    setIsError(false);
+  const setField = (field, value) => {
+    setPaynow((prev) => ({ ...prev, [field]: value }));
+    markChanged();
+  };
+
+  const handleManualToggle = (checked) => {
+    setPaymentMethod((prev) => (checked ? 'manual' : prev === 'manual' ? null : prev));
+    if (checked) setExpanded('manual'); // turning one on opens it (and collapses the other)
+    markChanged();
+  };
+
+  const handleAutomaticToggle = (checked) => {
+    setPaymentMethod((prev) => (checked ? 'automatic' : prev === 'automatic' ? null : prev));
+    if (checked) setExpanded('automatic');
+    markChanged();
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveError('');
     try {
-      const res = await apiClient.get(STRIPE_CONNECT_DASHBOARD_LINK);
-      const url = res.data?.data?.url ?? res.data?.url;
-      if (url) window.open(url, '_blank');
-    } catch (error) {
-      const message = error?.response?.data?.message || error.message;
-      setIsError(true);
-      setErrorMessage(`Failed to retrieve dashboard link. ${message}`);
+      await apiClient.put(PAYMENT_SETTINGS, {
+        paymentMethod,
+        paynow: toStored(paynow),
+      });
+      setHasChanges(true);
+      setHasUnsavedEdits(false);
+      setIsSaveSuccess(true);
+      setIsPublishSuccess(false);
+    } catch (err) {
+      setSaveError(err?.response?.data?.message ?? 'Failed to save payment settings. Please try again.');
     } finally {
-      setActionLoading(false);
+      setIsSaving(false);
     }
   };
 
-  const handleContinueOnboarding = async () => {
-    setActionLoading(true);
-    setIsError(false);
+  const handleConfirmPublish = async () => {
+    setShowPublishConfirm(false);
+    setIsPublishLoading(true);
+    setIsPublishSuccess(false);
     try {
-      const linkRes = await apiClient.post(STRIPE_CONNECT_CREATE_ACCOUNT_LINK);
-      const url = linkRes.data?.data?.url ?? linkRes.data?.url;
-      if (url) {
-        window.location.href = url;
-      } else {
-        setActionLoading(false);
-      }
-    } catch (error) {
-      const message = error?.response?.data?.message || error.message;
-      setIsError(true);
-      setErrorMessage(`Failed to retrieve onboarding link. ${message}`);
-      setActionLoading(false);
+      await apiClient.post(PUBLISH_PAYMENT_SETTINGS_UPDATE);
+      setIsPublishSuccess(true);
+      setHasChanges(false);
+    } catch (err) {
+      setSaveError(err?.response?.data?.message ?? 'Failed to publish payment settings update.');
+    } finally {
+      setIsPublishLoading(false);
     }
   };
 
-  const isApprovedScheduled = releaseStatus === 'approved_scheduled';
+  if (isLoading) {
+    return <LoadingPage />;
+  }
 
   return (
     <div className={styles.root}>
-      <HeaderSection
-        className={styles.header}
-        title="Payments Setup"
-        description={<p>Configure your payout settings and payment preferences.</p>}
-        showButton={false}
-        isError={isError}
-        setShowError={setIsError}
-        errorMessage={errorMessage}
-        isSuccess={isApprovedScheduled}
-        successMessage={
-          !isEdit && isApprovedScheduled
-            ? (
+      <div>
+        <HeaderSection
+          className={styles.header}
+          title="Payments Setup"
+          description={
+            <p>
+              Choose how you accept payment. Compare options on the{' '}
+              <Link href="/payment-types-and-fees">payment types &amp; fees</Link> page.
+            </p>
+          }
+          showButton={false}
+          isSuccess={releaseStatus === 'approved_scheduled'}
+          successMessage={
+            !isEdit && releaseStatus === 'approved_scheduled' ? (
               <>
                 Your release has been approved. It will be released on the date you stated on{' '}
-                <Link href="/app/release/submission">Release Submission Page</Link>.
-                {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@collbine.com.
+                <Link href="/app/release/submission">Release Submission Page</Link>. If you wish to
+                change the date, cancel and re-send for approval. For any enquiry or urgent release,
+                please email support@collbine.com.
               </>
-            )
-            : null
-        }
-        infoMessage={
-          !isEdit && !isApprovedScheduled
-            ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.'
-            : null
-        }
-      />
+            ) : null
+          }
+          infoMessage={
+            !isEdit && releaseStatus !== 'approved_scheduled'
+              ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.'
+              : null
+          }
+          rightActions={
+            <>
+              <LoadingButton
+                size="small"
+                variant="contained"
+                loading={isSaving}
+                loadingPosition="start"
+                startIcon={isSaveSuccess ? <FaCheck /> : undefined}
+                disabled={!isEdit || !hasUnsavedEdits}
+                onClick={handleSave}
+                sx={{ textTransform: 'none' }}
+              >
+                {isSaveSuccess ? 'Saved' : 'Save'}
+              </LoadingButton>
+              {releaseStatus === 'Released' && (
+                <LoadingButton
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+                  loading={isPublishLoading}
+                  loadingPosition="start"
+                  startIcon={isPublishSuccess ? <FaCheck /> : undefined}
+                  disabled={isPublishSuccess || !hasChanges || hasUnsavedEdits}
+                  onClick={() => setShowPublishConfirm(true)}
+                  sx={{ textTransform: 'none' }}
+                >
+                  {isPublishSuccess ? 'Update Published' : 'Publish Update'}
+                </LoadingButton>
+              )}
+            </>
+          }
+        />
+        {saveError && (
+          <ContentCard>
+            <Alert severity="error" onClose={() => setSaveError('')} sx={{ mt: 1 }}>
+              {saveError}
+            </Alert>
+          </ContentCard>
+        )}
+      </div>
 
-      {isLoading ? (
-        <LoadingPage />
-      ) : loadingErrorMessage !== null ? (
-        <ErrorPage message={loadingErrorMessage} statusCode={loadingErrorStatus} />
-      ) : !status?.connected ? (
-        // State 1 — Not connected
-        <ContentCard className={styles.content}>
-          <p style={{ fontWeight: 600, fontSize: 15, margin: 0 }}>Set Up Payouts</p>
-          <p style={{ color: 'rgba(0,0,0,0.6)', margin: 0, fontSize: 14 }}>
-            Complete payout setup to receive payments from orders placed through Collbine.
-            You&apos;ll be guided through the onboarding steps to get started.
-          </p>
-          <div>
-            <Button
-              variant="contained"
-              size="small"
-              style={{ textTransform: 'none' }}
-              onClick={handleConnect}
-              disabled={actionLoading || !isEdit}
-              startIcon={actionLoading ? <CircularProgress size={14} color="inherit" /> : null}
-            >
-              Start Onboarding
-            </Button>
-          </div>
-        </ContentCard>
-      ) : !status?.detailsSubmitted ? (
-        // State 2 — Connected but incomplete
-        <ContentCard className={styles.content}>
-          <p style={{ fontWeight: 600, fontSize: 15, margin: 0 }}>Set Up Payouts</p>
-          <p style={{ color: 'rgba(0,0,0,0.6)', margin: 0, fontSize: 14 }}>
-            Complete payout setup to receive payments from orders placed through Collbine.
-            You&apos;ll be guided through the onboarding steps to get started.
-          </p>
-          <div>
-            <Button
-              variant="contained"
-              size="small"
-              style={{ textTransform: 'none' }}
-              onClick={handleContinueOnboarding}
-              disabled={actionLoading || !isEdit}
-              startIcon={actionLoading ? <CircularProgress size={14} color="inherit" /> : null}
-            >
-              Continue Onboarding
-            </Button>
-          </div>
-        </ContentCard>
-      ) : (
-        // State 3 — Fully onboarded
-        <ContentCard className={styles.content}>
-          <p style={{ fontWeight: 600, fontSize: 15, margin: 0 }}>Payouts Connected</p>
-          <p style={{ color: 'rgba(0,0,0,0.6)', margin: 0, fontSize: 14 }}>
-            Your payout account is active. Visit the dashboard to manage your account details and payout settings.
-          </p>
-          <div>
-            <Button
-              variant="contained"
-              size="small"
-              style={{ textTransform: 'none' }}
-              onClick={handleViewDashboard}
-              disabled={actionLoading}
-              startIcon={actionLoading ? <CircularProgress size={14} color="inherit" /> : null}
-            >
-              View Dashboard
-            </Button>
-          </div>
-        </ContentCard>
-      )}
+      <ContentCard>
+        <ManualPayNowSection
+          paynow={paynow}
+          setField={setField}
+          disabled={!isEdit}
+          checked={paymentMethod === 'manual'}
+          onToggle={handleManualToggle}
+          expanded={expanded === 'manual'}
+          onToggleExpand={() => setExpanded((e) => (e === 'manual' ? null : 'manual'))}
+        />
+      </ContentCard>
+
+      <ContentCard>
+        <AutomaticPaymentsSection
+          checked={paymentMethod === 'automatic'}
+          disabled={!isEdit}
+          onToggle={handleAutomaticToggle}
+          expanded={expanded === 'automatic'}
+          onToggleExpand={() => setExpanded((e) => (e === 'automatic' ? null : 'automatic'))}
+        />
+      </ContentCard>
+
+      <Dialog open={showPublishConfirm} onClose={() => setShowPublishConfirm(false)}>
+        <DialogTitle>Publish Payment Settings Update</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to publish your payment settings? This will make your latest payment
+            configuration live for customers immediately.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowPublishConfirm(false)} sx={{ textTransform: 'none' }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmPublish}
+            variant="contained"
+            sx={{ textTransform: 'none', backgroundColor: 'var(--accent-color)', boxShadow: 'none', '&:hover': { backgroundColor: '#0d3d91', boxShadow: 'none' } }}
+          >
+            Publish
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

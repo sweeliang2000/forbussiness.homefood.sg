@@ -65,3 +65,6 @@ export const ORDERING_SETTINGS = '/api/data/orderingSettings';
 export const PUBLISH_SHOP_SETTINGS_UPDATE = '/api/data/publish/shop-settings';
 export const CALENDAR_OVERRIDES = '/api/data/calendarOverrides';
 export const CALENDAR_OVERRIDE = '/api/data/calendarOverride';
+
+export const PAYMENT_SETTINGS = '/api/data/paymentSettings';
+export const PUBLISH_PAYMENT_SETTINGS_UPDATE = '/api/data/publish/payment-settings';
