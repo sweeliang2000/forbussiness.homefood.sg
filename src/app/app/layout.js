@@ -9,6 +9,7 @@ import { getSubscriptionLookupKey, setSubscriptionLookupKey } from '@/utility/su
 import apiClient from '@/utility/api';
 import { REFRESH_USER_COOKIE } from '@/utility/apiPaths';
 import { useRouter, usePathname } from 'next/navigation';
+import { FaWhatsapp } from 'react-icons/fa';
 
 export default function RootLayout({ children }) {
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
@@ -75,6 +76,31 @@ export default function RootLayout({ children }) {
     refreshUserCookie();
     fetchSubscriptionStatus();
   }, [router, pathname])
+
+  // The terminal is a focused, full-screen POS — no dashboard sidebar; its own
+  // design with a support footer pinned to the bottom (sticky-footer layout).
+  if (pathname === '/app/terminal') {
+    return (
+      <div className={styles.terminalShell}>
+        <main className={styles.terminalMain}>{children}</main>
+        <footer className={styles.terminalFooter}>
+          <div className={styles.footerHelp}>
+            <span className={styles.footerText}>Need help with your terminal?</span>
+            <a
+              href="https://api.whatsapp.com/send/?phone=6588678978&text&type=phone_number&app_absent=0"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.footerWhatsapp}
+            >
+              <FaWhatsapp /> WhatsApp Support
+            </a>
+            <a href="mailto:support@collbine.com" className={styles.footerEmail}>support@collbine.com</a>
+          </div>
+          <span className={styles.footerCopy}>© {new Date().getFullYear()} Collbine</span>
+        </footer>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.body}>

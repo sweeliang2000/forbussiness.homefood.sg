@@ -131,7 +131,7 @@ export default function Sidebar({
                     </li>
 
                     <li>
-                        <Link href='/terminal'>
+                        <Link href='/app/terminal'>
                             <PiCashRegister className={styles.icon} />
                             <span>Terminal / POS</span>
                         </Link>

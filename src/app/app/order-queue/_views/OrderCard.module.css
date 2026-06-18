@@ -1,0 +1,154 @@
+.orderCard {
+    background: var(--primary);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.cardHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.orderRef {
+    font-weight: 800;
+    font-size: 15px;
+    margin-right: 8px;
+}
+
+.orderTime {
+    font-size: 12px;
+    color: var(--on-primary-light2);
+}
+
+.badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.typeBadge {
+    background: #f1f5f9;
+    color: var(--on-primary-light2);
+}
+
+.stNew { background: #e8f0fe; color: var(--accent-color); }
+.stPreparing { background: #fff4e5; color: #b26a00; }
+.stReady { background: #e6f4ea; color: #137333; }
+.stCompleted { background: #eef2f6; color: #475569; }
+.stCancelled { background: #fdecec; color: #c62828; }
+
+.items {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 10px 0;
+}
+
+.itemRow {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.itemName {
+    color: var(--on-primary);
+}
+
+.itemOptions {
+    color: var(--on-primary-light2);
+    font-size: 12px;
+}
+
+.itemPrice {
+    color: var(--on-primary-light2);
+    white-space: nowrap;
+}
+
+.notes {
+    font-size: 12px;
+    color: var(--on-primary-light2);
+    font-style: italic;
+}
+
+.payRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.payMethod {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--on-primary-light2);
+}
+
+.payBadge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+.pyPending { background: #fff4e5; color: #b26a00; }
+.pyPaid { background: #e6f4ea; color: #137333; }
+.pyFailed { background: #fdecec; color: #c62828; }
+
+.linkBtn {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.mutedNote {
+    font-size: 12px;
+    color: var(--on-primary-light2);
+    font-weight: 600;
+}
+
+.cardFoot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 2px;
+}
+
+.total {
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}

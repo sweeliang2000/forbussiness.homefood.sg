@@ -68,3 +68,10 @@ export const CALENDAR_OVERRIDE = '/api/data/calendarOverride';
 
 export const PAYMENT_SETTINGS = '/api/data/paymentSettings';
 export const PUBLISH_PAYMENT_SETTINGS_UPDATE = '/api/data/publish/payment-settings';
+
+export const SHOP_ORDERS = '/api/data/shop-orders';
+
+// Terminal / POS
+export const WALK_IN_ORDER = '/api/data/walk-in-order';
+export const MENU_SOLD_OUT = '/api/data/menu/sold-out';
+export const SHOP_OPEN = '/api/data/shop-open';
