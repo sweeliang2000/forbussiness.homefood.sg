@@ -97,7 +97,7 @@
 }
 
 .primary:hover {
-    background: #0d3d91;
+    background: #C2410C;
     transform: translateY(-1px);
 }
 
@@ -167,9 +167,9 @@
     flex-direction: column;
     gap: 18px;
     background:
-        radial-gradient(1200px 600px at -10% 110%, rgba(14, 70, 163, 0.22), transparent 55%),
+        radial-gradient(1200px 600px at -10% 110%, rgba(228, 85, 13, 0.22), transparent 55%),
         radial-gradient(900px 500px at 110% -10%, rgba(250, 140, 22, 0.18), transparent 55%),
-        linear-gradient(160deg, #0e46a3 0%, #1b61c9 45%, #2b7cdb 100%);
+        linear-gradient(160deg, #E4550D 0%, #E4550D 45%, #F96A1B 100%);
     color: #fff;
 }
 
@@ -359,8 +359,8 @@
 }
 
 /* Per-step colors */
-.stepReceived .stepDot { background: #3b82f6; }
-.stepReceived span:last-child { color: #3b82f6; }
+.stepReceived .stepDot { background: #FB7F45; }
+.stepReceived span:last-child { color: #FB7F45; }
 
 .stepCooking .stepDot { background: #f59e0b; }
 .stepCooking span:last-child { color: #f59e0b; }

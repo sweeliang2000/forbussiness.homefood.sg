@@ -7,7 +7,7 @@ const faqs = [
     {
         question: 'Do I need a commercial kitchen or license?',
         answer:
-            "Collbine is built for home-based food (HBF) sellers operating within SFA's HBF guidelines. You don't need a commercial kitchen, but you're responsible for meeting the usual HBF food safety requirements — same as you would on WhatsApp or Instagram today.",
+            "HomeFood is built for home-based food (HBF) sellers operating within SFA's HBF guidelines. You don't need a commercial kitchen, but you're responsible for meeting the usual HBF food safety requirements — same as you would on WhatsApp or Instagram today.",
     },
     {
         question: 'How do the payment fees actually work?',
@@ -17,7 +17,7 @@ const faqs = [
     {
         question: 'When do I actually get paid?',
         answer:
-            "Your earnings build up in your Collbine balance as orders complete. You can withdraw once a month to your linked bank account. Every payout comes with an itemised statement showing orders, fees, and any refunds.",
+            "Your earnings build up in your HomeFood balance as orders complete. You can withdraw once a month to your linked bank account. Every payout comes with an itemised statement showing orders, fees, and any refunds.",
     },
     {
         question: 'What if a customer asks for a refund?',
@@ -27,12 +27,12 @@ const faqs = [
     {
         question: 'Will the platform really stay free?',
         answer:
-            "Yes. Early adopter accounts are grandfathered — you keep the free plan for the lifetime of your Collbine account, even after we start charging new sign-ups. This offer is intentionally limited to our first cohort so we can grow with you.",
+            "Yes. Early adopter accounts are grandfathered — you keep the free plan for the lifetime of your HomeFood account, even after we start charging new sign-ups. This offer is intentionally limited to our first cohort so we can grow with you.",
     },
     {
         question: 'Do I need a POS or card reader?',
         answer:
-            'No hardware at all. Customers pay on their own phone when they order. Your "terminal" is just the Collbine merchant app on any phone or laptop — you see incoming orders, mark them "almost ready" and "ready", and that\'s it.',
+            'No hardware at all. Customers pay on their own phone when they order. Your "terminal" is just the HomeFood merchant app on any phone or laptop — you see incoming orders, mark them "almost ready" and "ready", and that\'s it.',
     },
 ];
 
@@ -44,7 +44,7 @@ const FAQSection = () => {
     return (
         <section id="faq" className={styles.faqSection}>
             <div className={styles.sectionHead}>
-                <Badge variant="blue">Common questions</Badge>
+                <Badge variant="brand">Common questions</Badge>
                 <h2 className={styles.sectionTitle}>Answers before you ask.</h2>
             </div>
             <div className={styles.faqList}>

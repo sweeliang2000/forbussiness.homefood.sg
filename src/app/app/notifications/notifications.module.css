@@ -46,8 +46,8 @@
     font-size: 1.125rem;
     font-weight: 600;
     padding: 4px 12px;
-    background-color: #e0e7ff;
-    color: #6366f1;
+    background-color: var(--brand-100);
+    color: var(--brand-700);
     border-radius: 16px;
     min-width: 32px;
     text-align: center;
@@ -175,14 +175,14 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: #3b82f6;
+    background-color: #FB7F45;
     flex-shrink: 0;
 }
 
 .unreadBadge {
     display: inline-block;
     padding: 2px 8px;
-    background-color: #3b82f6;
+    background-color: #FB7F45;
     color: white;
     border-radius: 12px;
     font-size: 0.75rem;
@@ -214,8 +214,8 @@
 }
 
 .notificationItem.info .notificationIconWrapper {
-    background-color: #dbeafe;
-    color: #3b82f6;
+    background-color: #FFE6D5;
+    color: #FB7F45;
 }
 
 .notificationItem.error .notificationIconWrapper {

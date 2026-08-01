@@ -3,31 +3,31 @@ import styles from './layout.module.css';
 
 /** @type {import('next').Metadata} */
 export const metadata = {
-  title: 'Subscription & Promo Codes | Collbine',
+  title: 'Subscription & Promo Codes | HomeFood',
   description:
-    'Manage your Collbine business subscription and redeem promo codes in seconds. Pick a plan, apply your code, and access premium features today.',
+    'Manage your HomeFood business subscription and redeem promo codes in seconds. Pick a plan, apply your code, and access premium features today.',
   keywords: [
-    'Collbine subscription',
+    'HomeFood subscription',
     'promo codes',
     'business subscription',
     'subscription plans',
     'billing and payments',
     'apply promo code',
     'premium features',
-    'Collbine for Business',
+    'HomeFood for Business',
   ],
   openGraph: {
-    title: 'Subscription & Promo Codes | Collbine',
+    title: 'Subscription & Promo Codes | HomeFood',
     description:
-      'Manage your Collbine business subscription and redeem promo codes in seconds. Pick a plan, apply your code, and access premium features today.',
-    url: 'https://forbusiness.collbine.com/app/subscription',
-    siteName: 'Collbine',
+      'Manage your HomeFood business subscription and redeem promo codes in seconds. Pick a plan, apply your code, and access premium features today.',
+    url: 'https://business.homefood.sg/app/subscription',
+    siteName: 'HomeFood',
     images: [
       {
-        url: 'https://forbusiness.collbine.com/og-image.png',
+        url: 'https://business.homefood.sg/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Collbine subscription & promo codes',
+        alt: 'HomeFood subscription & promo codes',
       },
     ],
     type: 'website',
@@ -35,14 +35,14 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Subscription & Promo Codes | Collbine',
+    title: 'Subscription & Promo Codes | HomeFood',
     description:
-      'Manage your Collbine business subscription and redeem promo codes in seconds. Pick a plan, apply your code, and access premium features today.',
-    images: ['https://forbusiness.collbine.com/og-image.png'],
+      'Manage your HomeFood business subscription and redeem promo codes in seconds. Pick a plan, apply your code, and access premium features today.',
+    images: ['https://business.homefood.sg/og-image.png'],
   },
   robots: { index: true, follow: true },
   alternates: {
-    canonical: 'https://forbusiness.collbine.com/app/subscription',
+    canonical: 'https://business.homefood.sg/app/subscription',
   },
 };
 

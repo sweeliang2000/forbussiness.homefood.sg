@@ -8,31 +8,31 @@ const WHATSAPP_URL =
 
 /** @type {import('next').Metadata} */
 export const metadata = {
-  title: 'Grow Your Home Kitchen Business | Collbine for Business',
+  title: 'Grow Your Home Kitchen Business | HomeFood for Business',
   description:
-    'Collbine helps home-based food sellers in Singapore get discovered, take pre-orders, accept online payments, and manage home pickup — all in one place.',
+    'HomeFood helps home-based food sellers in Singapore get discovered, take pre-orders, accept online payments, and manage home pickup — all in one place.',
   keywords: [
     'home based food Singapore',
     'HBF seller platform',
     'home kitchen pre-order',
     'home food pickup Singapore',
     'online payment home business',
-    'Collbine for business',
+    'HomeFood for business',
     'home food order app',
     'Singapore home food seller',
   ],
   openGraph: {
-    title: 'Grow Your Home Kitchen Business | Collbine for Business',
+    title: 'Grow Your Home Kitchen Business | HomeFood for Business',
     description:
-      'Collbine helps home-based food sellers in Singapore get discovered, take pre-orders, accept online payments, and manage home pickup — all in one place.',
-    url: 'https://forbusiness.collbine.com/',
-    siteName: 'Collbine for Business',
+      'HomeFood helps home-based food sellers in Singapore get discovered, take pre-orders, accept online payments, and manage home pickup — all in one place.',
+    url: 'https://business.homefood.sg/',
+    siteName: 'HomeFood for Business',
     images: [
       {
-        url: 'https://forbusiness.collbine.com/og-image.png',
+        url: 'https://business.homefood.sg/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Grow Your Home Kitchen Business with Collbine',
+        alt: 'Grow Your Home Kitchen Business with HomeFood',
       },
     ],
     type: 'website',
@@ -40,13 +40,13 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Grow Your Home Kitchen Business | Collbine for Business',
+    title: 'Grow Your Home Kitchen Business | HomeFood for Business',
     description:
-      'Collbine helps home-based food sellers in Singapore get discovered, take pre-orders, accept online payments, and manage home pickup — all in one place.',
-    images: ['https://forbusiness.collbine.com/og-image.png'],
+      'HomeFood helps home-based food sellers in Singapore get discovered, take pre-orders, accept online payments, and manage home pickup — all in one place.',
+    images: ['https://business.homefood.sg/og-image.png'],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: 'https://forbusiness.collbine.com/' },
+  alternates: { canonical: 'https://business.homefood.sg/' },
 };
 
 export default function RootLayout({ children }) {

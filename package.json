@@ -1,5 +1,5 @@
 {
-  "name": "collbine-for-business-frontend",
+  "name": "homefood-for-business-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,9 +8,19 @@
     "build": "next build",
     "postbuild": "next-sitemap",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate:controllers": "node scripts/port-controllers.mjs",
+    "migrate:routes": "node scripts/generate-api-routes.mjs",
+    "migrate:routes:check": "node scripts/generate-api-routes.mjs --check",
+    "verify:routes": "node scripts/verify-route-parity.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.1101.0",
+    "@aws-sdk/client-dynamodb": "^3.1101.0",
+    "@aws-sdk/client-s3": "^3.1101.0",
+    "@aws-sdk/client-ses": "^3.1101.0",
+    "@aws-sdk/s3-request-presigner": "^3.1101.0",
+    "@aws-sdk/util-dynamodb": "^3.996.7",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.3",
@@ -18,10 +28,12 @@
     "@mui/material": "^6.4.7",
     "@mui/x-data-grid": "^7.23.0",
     "@mui/x-date-pickers": "^7.27.1",
+    "@supabase/supabase-js": "^2.111.0",
     "@uiw/react-md-editor": "^4.0.11",
     "axios": "^1.7.7",
     "dayjs": "^1.11.13",
     "firebase": "^12.7.0",
+    "jose": "^6.2.6",
     "js-cookie": "^3.0.5",
     "motion": "^12.23.12",
     "mui-color-input": "^6.0.0",
@@ -31,7 +43,10 @@
     "react-dom": "^19.2.3",
     "react-icons": "^5.3.0",
     "react-qr-code": "^2.0.18",
-    "recharts": "^2.15.0"
+    "recharts": "^2.15.0",
+    "server-only": "^0.0.1",
+    "stripe": "^22.4.0",
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
     "@types/node": "22.13.16",

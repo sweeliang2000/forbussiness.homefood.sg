@@ -41,7 +41,7 @@ const EarlyAdopter = () => {
                     <div className={styles.successIcon}>🎉</div>
                     <h1 className={styles.successTitle}>You&apos;re on the list!</h1>
                     <p className={styles.successSub}>
-                        We&apos;ll reach out as soon as we&apos;re ready to set you up on Collbine. Stay tuned!
+                        We&apos;ll reach out as soon as we&apos;re ready to set you up on HomeFood. Stay tuned!
                     </p>
                 </div>
             </div>
@@ -55,7 +55,7 @@ const EarlyAdopter = () => {
                     <span className={styles.badge}>Early Access</span>
                     <h1 className={styles.title}>Join early adopters</h1>
                     <p className={styles.sub}>
-                        Be among the first to get set up on Collbine. Fill in your details and we&apos;ll reach out once we&apos;re ready for you.
+                        Be among the first to get set up on HomeFood. Fill in your details and we&apos;ll reach out once we&apos;re ready for you.
                     </p>
                 </div>
                 <form className={styles.form} onSubmit={handleSubmit}>

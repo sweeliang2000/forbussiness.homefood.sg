@@ -69,7 +69,7 @@ const PaymentTypesAndFees = () => {
                     </span>
                     <h1 className={styles.title}>Payment Types &amp; Fees</h1>
                     <p className={styles.subtitle}>
-                        Compare Collbine payment methods, fees, verification flows and refund
+                        Compare HomeFood payment methods, fees, verification flows and refund
                         responsibilities before choosing how customers pay your shop.
                     </p>
                     <p className={styles.updated}>Last updated {LAST_UPDATED}</p>
@@ -96,7 +96,7 @@ const PaymentTypesAndFees = () => {
                         <h2 className={styles.sectionTitle}>Payment Options</h2>
                     </div>
                     <div className={styles.body}>
-                        <p>Collbine offers four payment options for merchants.</p>
+                        <p>HomeFood offers four payment options for merchants.</p>
                         <div className={styles.tableWrap}>
                             <table className={styles.table}>
                                 <thead>
@@ -152,8 +152,8 @@ const PaymentTypesAndFees = () => {
                                 "Customer scans the merchant's PayNow QR code.",
                                 'Customer completes payment using their banking application.',
                                 'Customer takes a screenshot of the successful payment.',
-                                'Customer uploads the screenshot to Collbine.',
-                                'Collbine AI reviews the screenshot and compares payment amount, merchant information when available, order details and potential mismatches.',
+                                'Customer uploads the screenshot to HomeFood.',
+                                'HomeFood AI reviews the screenshot and compares payment amount, merchant information when available, order details and potential mismatches.',
                             ].map((item) => (
                                 <li key={item}>{item}</li>
                             ))}
@@ -203,7 +203,7 @@ const PaymentTypesAndFees = () => {
                         <ul className={styles.noteList}>
                             <li>Customers pay merchants directly.</li>
                             <li>Merchants are responsible for issuing refunds directly to customers.</li>
-                            <li>Collbine does not process refunds for Manual PayNow transactions.</li>
+                            <li>HomeFood does not process refunds for Manual PayNow transactions.</li>
                         </ul>
                     </div>
                 </section>

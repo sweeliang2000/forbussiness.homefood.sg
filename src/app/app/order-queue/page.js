@@ -20,7 +20,7 @@ import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import apiClient from '@/utility/api';
 import { SHOP_ORDERS } from '@/utility/apiPaths';
-import { OrderCard, STATUS_FILTERS, orderRef } from './_views/OrderCard';
+import { OrderCard, STATUS_FILTERS, orderRef, UndoStatusDialog, EditEtaDialog, CancelOrderDialog } from './_views/OrderCard';
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const dayKeyOf = (d) => dayjs(d).format('YYYY-MM-DD');
@@ -62,6 +62,9 @@ export default function OrderQueuePage() {
   const [search, setSearch] = useState('');
   const [busyId, setBusyId] = useState(null);
   const [screenshot, setScreenshot] = useState(null); // { url, ref }
+  const [undoTarget, setUndoTarget] = useState(null); // order being undone
+  const [etaTarget, setEtaTarget] = useState(null); // order whose est. time is edited
+  const [cancelTarget, setCancelTarget] = useState(null); // order being cancelled
 
   const viewMonthRef = useRef(viewMonth);
   viewMonthRef.current = viewMonth;
@@ -113,18 +116,38 @@ export default function OrderQueuePage() {
     return monthOrders.filter((o) => dayKeyOf(o.created_at) === k);
   }, [monthOrders, selectedDate]);
 
+  // Daily queue numbers: 1-based position within each day's orders by creation time.
+  const queueNumberById = useMemo(() => {
+    const byDay = {};
+    for (const o of monthOrders) {
+      const k = dayKeyOf(o.created_at);
+      if (!byDay[k]) byDay[k] = [];
+      byDay[k].push(o);
+    }
+    const m = {};
+    for (const k of Object.keys(byDay)) {
+      byDay[k]
+        .sort((a, b) => {
+          const d = new Date(a.created_at) - new Date(b.created_at);
+          return d !== 0 ? d : String(a.id).localeCompare(String(b.id));
+        })
+        .forEach((o, i) => { m[o.id] = i + 1; });
+    }
+    return m;
+  }, [monthOrders]);
+
   const filtered = useMemo(() => {
     const sf = STATUS_FILTERS.find((f) => f.key === statusFilter);
     const q = search.trim().toLowerCase();
     return dayOrders.filter((o) => {
       if (sf?.match && !sf.match(o.status)) return false;
       if (q) {
-        const hay = `${orderRef(o.id)} ${(o.items || []).map((i) => i.name).join(' ')}`.toLowerCase();
+        const hay = `q${queueNumberById[o.id]} ${orderRef(o.id)} ${(o.items || []).map((i) => i.name).join(' ')}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
     });
-  }, [dayOrders, statusFilter, search]);
+  }, [dayOrders, statusFilter, search, queueNumberById]);
 
   const handleSetStatus = async (order, status) => {
     setBusyId(order.id);
@@ -147,6 +170,49 @@ export default function OrderQueuePage() {
       setMonthOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, payment_status: 'paid' } : o)));
     } catch (err) {
       setError(err?.response?.data?.message || 'Failed to confirm payment.');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleUndoStatus = async (order, reason) => {
+    setBusyId(order.id);
+    setError('');
+    try {
+      const res = await apiClient.post(`${SHOP_ORDERS}/${order.id}/undo-status`, { reason });
+      const status = res.data?.data?.status;
+      if (status) setMonthOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status } : o)));
+      setUndoTarget(null);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to undo order status.');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleCancel = async (order, reason) => {
+    setBusyId(order.id);
+    setError('');
+    try {
+      await apiClient.put(`${SHOP_ORDERS}/${order.id}/status`, { status: 'cancelled', reason });
+      setMonthOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: 'cancelled' } : o)));
+      setCancelTarget(null);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to cancel order.');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleSaveEta = async (order, estimatedReadyAt) => {
+    setBusyId(order.id);
+    setError('');
+    try {
+      await apiClient.put(`${SHOP_ORDERS}/${order.id}/estimated-ready`, { estimatedReadyAt });
+      setMonthOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, estimated_ready_at: estimatedReadyAt } : o)));
+      setEtaTarget(null);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to update estimated time.');
     } finally {
       setBusyId(null);
     }
@@ -256,13 +322,44 @@ export default function OrderQueuePage() {
             <OrderCard
               key={order.id}
               order={order}
+              queueNumber={queueNumberById[order.id]}
               busy={busyId === order.id}
               onSetStatus={handleSetStatus}
               onConfirmPayment={handleConfirmPayment}
               onViewScreenshot={(o) => setScreenshot({ url: o.screenshot_signed_url, ref: orderRef(o.id) })}
+              onUndoStatus={(o) => setUndoTarget(o)}
+              onEditEta={(o) => setEtaTarget(o)}
+              onCancel={(o) => setCancelTarget(o)}
             />
           ))}
         </div>
+      )}
+
+      {undoTarget && (
+        <UndoStatusDialog
+          order={undoTarget}
+          busy={busyId === undoTarget.id}
+          onClose={() => setUndoTarget(null)}
+          onConfirm={handleUndoStatus}
+        />
+      )}
+
+      {etaTarget && (
+        <EditEtaDialog
+          order={etaTarget}
+          busy={busyId === etaTarget.id}
+          onClose={() => setEtaTarget(null)}
+          onConfirm={handleSaveEta}
+        />
+      )}
+
+      {cancelTarget && (
+        <CancelOrderDialog
+          order={cancelTarget}
+          busy={busyId === cancelTarget.id}
+          onClose={() => setCancelTarget(null)}
+          onConfirm={handleCancel}
+        />
       )}
 
       <Dialog open={!!screenshot} onClose={() => setScreenshot(null)} maxWidth="xs" fullWidth>

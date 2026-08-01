@@ -46,7 +46,7 @@
 .modeSelector :global(.MuiToggleButton-root.Mui-selected) {
     background: var(--accent-color);
     color: white;
-    box-shadow: 0 2px 4px rgba(14, 70, 163, 0.2);
+    box-shadow: 0 2px 4px rgba(228, 85, 13, 0.2);
 }
 
 .modeSelector :global(.MuiToggleButton-root:hover) {
@@ -54,7 +54,7 @@
 }
 
 .modeSelector :global(.MuiToggleButton-root.Mui-selected:hover) {
-    background: #0d3d91;
+    background: #C2410C;
 }
 
 .numberDisplay {
@@ -85,18 +85,18 @@
     color: white;
     transition: all 0.15s ease;
     flex-shrink: 0;
-    box-shadow: 0 2px 4px rgba(14, 70, 163, 0.2);
+    box-shadow: 0 2px 4px rgba(228, 85, 13, 0.2);
 }
 
 .iconButton:hover {
-    background: #0d3d91;
+    background: #C2410C;
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(14, 70, 163, 0.3);
+    box-shadow: 0 4px 8px rgba(228, 85, 13, 0.3);
 }
 
 .iconButton:active {
     transform: scale(0.95);
-    box-shadow: 0 1px 2px rgba(14, 70, 163, 0.2);
+    box-shadow: 0 1px 2px rgba(228, 85, 13, 0.2);
 }
 
 .numberInput {
@@ -175,7 +175,7 @@
 }
 
 .operatorButton:hover {
-    background: #0d3d91 !important;
+    background: #C2410C !important;
 }
 
 .moneyDisplay {
@@ -323,19 +323,19 @@
     background: var(--accent-color) !important;
     color: white !important;
     border-radius: 12px !important;
-    box-shadow: 0 4px 12px rgba(14, 70, 163, 0.3) !important;
+    box-shadow: 0 4px 12px rgba(228, 85, 13, 0.3) !important;
     transition: all 0.15s ease !important;
 }
 
 .button:hover:not(:disabled) {
-    background: #0d3d91 !important;
+    background: #C2410C !important;
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(14, 70, 163, 0.4) !important;
+    box-shadow: 0 6px 16px rgba(228, 85, 13, 0.4) !important;
 }
 
 .button:active:not(:disabled) {
     transform: scale(0.98);
-    box-shadow: 0 2px 8px rgba(14, 70, 163, 0.3) !important;
+    box-shadow: 0 2px 8px rgba(228, 85, 13, 0.3) !important;
 }
 
 .button:disabled {

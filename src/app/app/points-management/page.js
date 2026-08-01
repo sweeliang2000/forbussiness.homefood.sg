@@ -2,9 +2,9 @@ import PointsOnboarding from './PointsOnboarding/PointsOnboarding';
 
 /** @type {import('next').Metadata} */
 export const metadata = {
-  title: 'Loyalty Points System for Merchants | Collbine for Business',
+  title: 'Loyalty Points System for Merchants | HomeFood for Business',
   description:
-    'Set up a loyalty points system for your shop as a merchant. Customise points rules, rewards, and expiry settings in Collbine for Business today.',
+    'Set up a loyalty points system for your shop as a merchant. Customise points rules, rewards, and expiry settings in HomeFood for Business today.',
   keywords: [
     'loyalty points system',
     'points reward program',
@@ -13,17 +13,17 @@ export const metadata = {
     'loyalty rewards',
     'points expiry',
     'rewards for customers',
-    'Collbine for Business',
+    'HomeFood for Business',
   ],
   openGraph: {
-    title: 'Loyalty Points System for Merchants | Collbine for Business',
+    title: 'Loyalty Points System for Merchants | HomeFood for Business',
     description:
-      'Set up a loyalty points system for your shop as a merchant. Customise points rules, rewards, and expiry settings in Collbine for Business today.',
-    url: 'https://forbusiness.collbine.com/app/points-management',
-    siteName: 'Collbine for Business',
+      'Set up a loyalty points system for your shop as a merchant. Customise points rules, rewards, and expiry settings in HomeFood for Business today.',
+    url: 'https://business.homefood.sg/app/points-management',
+    siteName: 'HomeFood for Business',
     images: [
       {
-        url: 'https://forbusiness.collbine.com/og-image.png',
+        url: 'https://business.homefood.sg/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Loyalty points system setup',
@@ -34,13 +34,13 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Loyalty Points System for Merchants | Collbine for Business',
+    title: 'Loyalty Points System for Merchants | HomeFood for Business',
     description:
-      'Set up a loyalty points system for your shop as a merchant. Customise points rules, rewards, and expiry settings in Collbine for Business today.',
-    images: ['https://forbusiness.collbine.com/og-image.png'],
+      'Set up a loyalty points system for your shop as a merchant. Customise points rules, rewards, and expiry settings in HomeFood for Business today.',
+    images: ['https://business.homefood.sg/og-image.png'],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: 'https://forbusiness.collbine.com/app/points-management' },
+  alternates: { canonical: 'https://business.homefood.sg/app/points-management' },
 };
 
 const PointsManagement = () => {

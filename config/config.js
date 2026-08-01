@@ -12,9 +12,6 @@ const getEnvVariable = (key, fallback = '') => {
     return value || fallback;
 };
 
-// Direct access to ensure Next.js can statically analyze and inline the value
-export const BASE_URL_BACKEND = process.env.NEXT_PUBLIC_BASE_URL_BACKEND || 'http://localhost:8080';
-
 // Supabase configuration
 // Note: Service role key should only be used server-side (in API routes)
 // For client-side, use anon key or API routes
@@ -28,4 +25,3 @@ if (!SUPABASE_URL) {
 if (!SUPABASE_SERVICE_ROLE_KEY) {
   console.warn('SUPABASE_SERVICE_ROLE_KEY is not set in environment variables');
 }
-

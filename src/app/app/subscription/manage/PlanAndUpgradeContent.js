@@ -6,13 +6,26 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, CircularProg
 import { IoCloseSharp } from 'react-icons/io5';
 import styles from './ManageSubscription.module.css';
 import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
-import { SUBSCRIPTION_DATA } from '../data/SUBSCRIPTION_DATA';
+import {
+  FREE_PLAN,
+  PRO_MONTHLY_LOOKUP_KEY,
+  PRO_YEARLY_LOOKUP_KEY,
+  findPlanByLookupKey,
+  getProPlan,
+  isProLookupKey,
+} from '../data/SUBSCRIPTION_DATA';
 import apiClient, { getShopSubscriptionStatus } from '@/utility/api';
-import { UPGRADE_SUBSCRIPTION, UPGRADE_STATUS, PREVIEW_UPGRADE_SUBSCRIPTION, DOWNGRADE_SUBSCRIPTION, CANCEL_SCHEDULE, REFRESH_USER_COOKIE, CREATE_PORTAL_SESSION, SUBSCRIPTION_END_DATE } from '@/utility/apiPaths';
+import { UPGRADE_SUBSCRIPTION, UPGRADE_STATUS, PREVIEW_UPGRADE_SUBSCRIPTION, DOWNGRADE_SUBSCRIPTION, CANCEL_SCHEDULE, REFRESH_USER_COOKIE, CREATE_PORTAL_SESSION, SUBSCRIPTION_END_DATE, CHECKOUT_SESSION_STRIPE } from '@/utility/apiPaths';
 import { setSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import { FaChevronDown, FaCheck } from 'react-icons/fa';
 import DialogPopup from '@/components/DialogPopup/DialogPopup';
 
+
+/** Free has no billing interval, so it reads as "Free" rather than "SGD 0.00 / month". */
+function formatPlanPrice(plan) {
+  if (!plan || plan.isFree || !plan.price) return 'Free';
+  return `SGD ${plan.price.toFixed(2)} / ${plan.interval === 'year' ? 'year' : 'month'}`;
+}
 
 function BenefitsList({ features, className }) {
   if (!features?.length) return null;
@@ -72,38 +85,65 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
     fetchEndDate();
   }, []);
 
-  const currentPlan = useMemo(() => {
-    if (!currentLookupKey) return null;
-    return SUBSCRIPTION_DATA.find((p) => p.lookup_key === currentLookupKey) || null;
-  }, [currentLookupKey]);
+  // Every merchant is on Free unless they hold a paid subscription, so an
+  // unrecognised or absent lookup key means Free — not "no plan".
+  const currentPlan = useMemo(
+    () => findPlanByLookupKey(currentLookupKey) || FREE_PLAN,
+    [currentLookupKey]
+  );
 
-  const currentPrice = currentPlan?.price ?? 0;
+  const isOnPro = isProLookupKey(currentLookupKey);
 
+  /**
+   * With only two plans the ladder is short:
+   *   Free        → upgrade to Pro (monthly or yearly)
+   *   Pro monthly → upgrade to Pro yearly (same plan, cheaper per month)
+   *   Pro yearly  → nothing above it
+   * and downgrading from any Pro plan means going back to Free.
+   */
   const visiblePlans = useMemo(() => {
-    const isYearly = billingInterval === 'year';
-    const baseKeys = ['1_outlets', '2-3_outlets', '4-6_outlets'];
+    if (isDowngrade) {
+      return isOnPro ? [FREE_PLAN] : [];
+    }
 
-    return baseKeys
-      .map((baseKey) => {
-        const lookupKey = isYearly ? `${baseKey}_yearly` : baseKey;
-        const plan = SUBSCRIPTION_DATA.find((p) => p.lookup_key === lookupKey);
-        if (!plan) return null;
-        if (currentLookupKey && plan.lookup_key === currentLookupKey) return null;
+    if (!isOnPro) {
+      const proPlan = getProPlan(billingInterval);
+      return proPlan ? [proPlan] : [];
+    }
 
-        if (isDowngrade) {
-          if (plan.price >= currentPrice) return null;
-        } else {
-          if (plan.price <= currentPrice) return null;
-        }
+    if (currentLookupKey === PRO_MONTHLY_LOOKUP_KEY) {
+      const yearly = findPlanByLookupKey(PRO_YEARLY_LOOKUP_KEY);
+      return yearly ? [yearly] : [];
+    }
 
-        return plan;
-      })
-      .filter(Boolean);
-  }, [billingInterval, currentLookupKey, currentPrice, isDowngrade]);
+    return [];
+  }, [billingInterval, currentLookupKey, isDowngrade, isOnPro]);
+
+  // The billing toggle only means something when choosing a Pro interval.
+  const showBillingToggle = !isDowngrade && !isOnPro;
 
   const handleUpgrade = async (lookupKey, planName, interval) => {
     if (upgradeLoading) return;
     setUpgradeLoading(lookupKey);
+
+    // Coming from Free there is no subscription to prorate against, so the
+    // proration preview doesn't apply — send them straight to Checkout.
+    if (!isOnPro) {
+      try {
+        const response = await apiClient.post(CHECKOUT_SESSION_STRIPE, { lookup_key: lookupKey });
+        const url = response.data?.data?.url;
+        if (url) {
+          window.location.href = url;
+          return;
+        }
+      } catch (err) {
+        console.error('Failed to create checkout session:', err);
+      } finally {
+        setUpgradeLoading(null);
+      }
+      return;
+    }
+
     try {
       const response = await apiClient.post(PREVIEW_UPGRADE_SUBSCRIPTION, { lookup_key: lookupKey });
       const previewData = response.data?.data;
@@ -198,6 +238,12 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
   };
 
   const handleDowngrade = (lookupKey, planName, plan) => {
+    // Free has no Stripe price behind it, so "downgrade to Free" is really
+    // "cancel at period end" — which the billing portal already handles.
+    if (plan.isFree) {
+      handleGoToPortal();
+      return;
+    }
     setDowngradePreview({ planName, lookupKey, price: plan.price, interval: plan.interval });
     setDowngradeConfirmText('');
     setDowngradeResult(null);
@@ -260,9 +306,7 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
                 <div className={styles.currentPlanInfo}>
                   <h3>{currentPlan.name}</h3>
                   <p className={styles.planDescription}>{currentPlan.description}</p>
-                  <p className={styles.planPrice}>
-                    SGD {currentPlan.price.toFixed(2)} / {currentPlan.interval === 'year' ? 'year' : 'month'}
-                  </p>
+                  <p className={styles.planPrice}>{formatPlanPrice(currentPlan)}</p>
                 </div>
                 <button
                   type="button"
@@ -338,25 +382,27 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
           </div>
         ) : (
         <>
-        <div className={styles.sectionHeaderRow}>
-          <span />
-          <div className={styles.billingToggle} aria-label="Billing interval">
-            <button
-              type="button"
-              className={`${styles.billingToggleButton} ${billingInterval === 'month' ? styles.billingToggleButtonActive : ''}`}
-              onClick={() => setBillingInterval('month')}
-            >
-              Monthly
-            </button>
-            <button
-              type="button"
-              className={`${styles.billingToggleButton} ${billingInterval === 'year' ? styles.billingToggleButtonActive : ''}`}
-              onClick={() => setBillingInterval('year')}
-            >
-              Yearly
-            </button>
+        {showBillingToggle && (
+          <div className={styles.sectionHeaderRow}>
+            <span />
+            <div className={styles.billingToggle} aria-label="Billing interval">
+              <button
+                type="button"
+                className={`${styles.billingToggleButton} ${billingInterval === 'month' ? styles.billingToggleButtonActive : ''}`}
+                onClick={() => setBillingInterval('month')}
+              >
+                Monthly
+              </button>
+              <button
+                type="button"
+                className={`${styles.billingToggleButton} ${billingInterval === 'year' ? styles.billingToggleButtonActive : ''}`}
+                onClick={() => setBillingInterval('year')}
+              >
+                Yearly
+              </button>
+            </div>
           </div>
-        </div>
+        )}
         {visiblePlans.length > 0 || !isDowngrade ? (
           <div className={styles.upgradeGrid}>
             {visiblePlans.map((plan) => (
@@ -367,9 +413,7 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
                   <div className={styles.upgradeCardHeader}>
                     <h3>{plan.name}</h3>
                     <p className={styles.planDescription}>{plan.description}</p>
-                    <p className={styles.planPrice}>
-                      SGD {plan.price.toFixed(2)} / {plan.interval === 'year' ? 'year' : 'month'}
-                    </p>
+                    <p className={styles.planPrice}>{formatPlanPrice(plan)}</p>
                   </div>
                   <button
                     type="button"
@@ -393,7 +437,7 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
                           <CircularProgress size={16} color="inherit" />
                           Loading…
                         </span>
-                      ) : isDowngrade ? 'Downgrade' : 'Upgrade'}
+                      ) : isDowngrade ? (plan.isFree ? 'Switch to Free' : 'Downgrade') : 'Upgrade'}
                     </button>
                   </div>
                 </div>
@@ -401,36 +445,16 @@ export default function PlanAndUpgradeContent({ mode = 'upgrade' }) {
             {!isDowngrade && visiblePlans.length === 0 && (
               <div className={styles.infoCard}>
                 <p>
-                  Looking to switch to a monthly plan? Monthly plans are priced lower than your current plan.
-                  Visit <Link href="/app/subscription/manage/downgrade">Downgrade Subscription</Link> to view available monthly options.
+                  You&rsquo;re on Pro billed yearly — our best rate. To move to monthly billing or
+                  back to Free, visit{' '}
+                  <Link href="/app/subscription/manage/downgrade">Downgrade Subscription</Link>.
                 </p>
-              </div>
-            )}
-            {!isDowngrade && (
-              <div className={styles.upgradeCard}>
-                <div className={styles.upgradeCardHeader}>
-                  <h3>More than 6 Outlets</h3>
-                  <p className={styles.planDescription}>
-                    Running more than 6 outlets? Contact us for custom enterprise pricing tailored to your needs.
-                  </p>
-                  <p className={styles.planPrice}>Custom</p>
-                </div>
-                <div className={styles.upgradeCardFooter}>
-                  <a
-                    href="/contact"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.contactUsButton}
-                  >
-                    Contact Us
-                  </a>
-                </div>
               </div>
             )}
           </div>
         ) : (
           <div className={styles.emptyState}>
-            {"You're already on the lowest tier plan. There are no downgrade options available."}
+            You&rsquo;re on the Free plan. There&rsquo;s nothing to downgrade to.
           </div>
         )}
         </>

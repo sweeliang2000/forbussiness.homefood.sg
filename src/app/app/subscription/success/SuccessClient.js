@@ -53,12 +53,12 @@ export default function SuccessClient() {
               sx={{
                 borderRadius: '9999px',
                 padding: '10px 24px',
-                borderColor: '#4F46E5',
-                color: '#4F46E5',
+                borderColor: '#E4550D',
+                color: '#E4550D',
                 '&:hover': {
-                  borderColor: '#4338CA',
+                  borderColor: '#C2410C',
                   backgroundColor: 'transparent',
-                  color: '#4338CA',
+                  color: '#C2410C',
                 },
               }}
             >
@@ -69,9 +69,9 @@ export default function SuccessClient() {
               size="large"
               onClick={handleManageBilling}
               sx={{
-                backgroundColor: '#4F46E5',
+                backgroundColor: '#E4550D',
                 '&:hover': {
-                  backgroundColor: '#4338CA',
+                  backgroundColor: '#C2410C',
                 },
                 borderRadius: '9999px',
                 padding: '10px 24px',

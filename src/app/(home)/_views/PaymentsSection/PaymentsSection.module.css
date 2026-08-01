@@ -149,7 +149,7 @@
 .ct b { color: var(--on-primary); }
 
 .payoutCard {
-    background: linear-gradient(135deg, #0e46a3, #2b6fd6);
+    background: linear-gradient(135deg, #E4550D, #F96A1B);
     color: #fff;
     border-radius: 20px;
     padding: 22px;

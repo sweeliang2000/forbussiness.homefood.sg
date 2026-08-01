@@ -97,12 +97,12 @@
 .resetPwdButton {
     padding: 8px 32px;
     text-transform: capitalize;
-    background-color: var(--secondary-color);
+    background-color: var(--accent-color);
     margin-top: 24px;
 }
 
 .resetPwdButton:hover {
-    background-color: var(--secondary-hover-color);
+    background-color: var(--accent-hover-color);
 }
 
 .backToLogin {

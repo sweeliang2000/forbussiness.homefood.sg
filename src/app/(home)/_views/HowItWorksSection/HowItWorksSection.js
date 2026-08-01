@@ -5,7 +5,7 @@ const steps = [
     {
         num: 1,
         title: 'Discover & choose',
-        description: 'Customer opens Collbine, browses home kitchens nearby, and picks dishes from your menu.',
+        description: 'Customer opens HomeFood, browses home kitchens nearby, and picks dishes from your menu.',
         tag: 'Map + menu',
     },
     {
@@ -19,7 +19,7 @@ const steps = [
         num: 3,
         title: '"Almost ready" alert',
         description:
-            'When the food is close to done, Collbine pings the customer so they can leave home at the right time.',
+            'When the food is close to done, HomeFood pings the customer so they can leave home at the right time.',
         tag: 'Heads-up push',
     },
     {

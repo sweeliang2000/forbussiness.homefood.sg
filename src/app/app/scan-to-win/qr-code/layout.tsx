@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Scan-to-Win QR Code Generator | Collbine for Business',
+  title: 'Scan-to-Win QR Code Generator | HomeFood for Business',
   description:
-    'Generate your scan-to-win QR code for your poster. Create, name, and download QR codes so customers scan and earn rewards on Collbine for Business.',
+    'Generate your scan-to-win QR code for your poster. Create, name, and download QR codes so customers scan and earn rewards on HomeFood for Business.',
   keywords: [
     'scan-to-win QR code',
     'Scan to Win rewards',
@@ -12,17 +12,17 @@ export const metadata: Metadata = {
     'merchant QR codes',
     'loyalty rewards for customers',
     'reward scanning',
-    'Collbine for Business',
+    'HomeFood for Business',
   ],
   openGraph: {
-    title: 'Scan-to-Win QR Code Generator | Collbine for Business',
+    title: 'Scan-to-Win QR Code Generator | HomeFood for Business',
     description:
-      'Generate your scan-to-win QR code for your poster. Create, name, and download QR codes so customers scan and earn rewards on Collbine for Business.',
-    url: 'https://forbusiness.collbine.com/app/scan-to-win/qr-code',
-    siteName: 'Collbine for Business',
+      'Generate your scan-to-win QR code for your poster. Create, name, and download QR codes so customers scan and earn rewards on HomeFood for Business.',
+    url: 'https://business.homefood.sg/app/scan-to-win/qr-code',
+    siteName: 'HomeFood for Business',
     images: [
       {
-        url: 'https://forbusiness.collbine.com/og-image.png',
+        url: 'https://business.homefood.sg/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Scan-to-Win QR Code Generator',
@@ -33,14 +33,14 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Scan-to-Win QR Code Generator | Collbine for Business',
+    title: 'Scan-to-Win QR Code Generator | HomeFood for Business',
     description:
-      'Generate your scan-to-win QR code for your poster. Create, name, and download QR codes so customers scan and earn rewards on Collbine for Business.',
-    images: ['https://forbusiness.collbine.com/og-image.png'],
+      'Generate your scan-to-win QR code for your poster. Create, name, and download QR codes so customers scan and earn rewards on HomeFood for Business.',
+    images: ['https://business.homefood.sg/og-image.png'],
   },
   robots: { index: true, follow: true },
   alternates: {
-    canonical: 'https://forbusiness.collbine.com/app/scan-to-win/qr-code',
+    canonical: 'https://business.homefood.sg/app/scan-to-win/qr-code',
   },
 };
 

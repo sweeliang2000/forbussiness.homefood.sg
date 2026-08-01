@@ -49,7 +49,7 @@
     color: var(--on-primary-light2);
 }
 
-.stNew { background: #e8f0fe; color: var(--accent-color); }
+.stNew { background: #FFF4ED; color: var(--accent-color); }
 .stPreparing { background: #fff4e5; color: #b26a00; }
 .stReady { background: #e6f4ea; color: #137333; }
 .stCompleted { background: #eef2f6; color: #475569; }
@@ -78,6 +78,12 @@
 .itemOptions {
     color: var(--on-primary-light2);
     font-size: 12px;
+}
+
+.itemNote {
+    color: #7a4b00;
+    font-size: 12px;
+    font-style: italic;
 }
 
 .itemPrice {
@@ -151,4 +157,65 @@
     align-items: center;
     flex-wrap: wrap;
     justify-content: flex-end;
+}
+
+.etaRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    margin: 2px 0;
+}
+
+.etaLabel {
+    color: var(--on-primary-light2);
+    font-weight: 600;
+}
+
+.etaValue {
+    font-weight: 700;
+}
+
+.etaOverdue {
+    color: #c62828;
+}
+
+.queueNo {
+    display: inline-block;
+    font-size: 15px;
+    font-weight: 900;
+    color: #fff;
+    background: var(--accent-color);
+    border-radius: 8px;
+    padding: 2px 9px;
+    margin-right: 8px;
+}
+
+.walkinBadge {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.etaTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12.5px;
+    font-weight: 700;
+    background: #e6f4ea;
+    color: #137333;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.etaTagOverdue {
+    background: #fdecec;
+    color: #c62828;
+}
+
+.preorderBadge {
+    background: #fff4e5;
+    color: #b26a00;
+    text-transform: none;
 }

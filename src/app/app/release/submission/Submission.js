@@ -24,7 +24,7 @@ import AlertModal from '@/components/AlertModal/AlertModal';
 import DialogPopup from '@/components/DialogPopup/DialogPopup';
 import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
-import { SUBSCRIPTION_DATA } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
+import { isProLookupKey } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
 
 
 
@@ -336,7 +336,7 @@ const SubmissionView = () => {
 
     useEffect(() => {
         const storedLookupKey = getSubscriptionLookupKey();
-        setIsUserSubscribed(SUBSCRIPTION_DATA.some(plan => plan.lookup_key === storedLookupKey));
+        setIsUserSubscribed(isProLookupKey(storedLookupKey));
         refetchReleaseData();
     }, []);
 
@@ -386,7 +386,7 @@ const SubmissionView = () => {
         const dateText = formattedDate || 'the scheduled date';
         return (
             <>
-                Your release has been approved. It will be released on {dateText}. If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, email support@collbine.com
+                Your release has been approved. It will be released on {dateText}. If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, email support@homefood.sg
             </>
         );
     };
@@ -413,14 +413,14 @@ const SubmissionView = () => {
             const formattedDate = sentDateTime.format('DD MMM YYYY, hh:mm A');
             return (
                 <>
-                    Your review submitted on {formattedDate} has been received and we are reviewing it. It will take 1 to 2 working days to get approved. Please wait or email to support@collbine.com if there are any questions. {viewDetailsLink}
+                    Your review submitted on {formattedDate} has been received and we are reviewing it. It will take 1 to 2 working days to get approved. Please wait or email to support@homefood.sg if there are any questions. {viewDetailsLink}
                 </>
             );
         }
         
         return (
             <>
-                Your release had been sent to the reviewer and it will take 1 to 2 working days to get approved. Please wait or email to support@collbine.com if there are any questions. {viewDetailsLink}
+                Your release had been sent to the reviewer and it will take 1 to 2 working days to get approved. Please wait or email to support@homefood.sg if there are any questions. {viewDetailsLink}
             </>
         );
     };
@@ -483,7 +483,7 @@ const SubmissionView = () => {
                     <div className={styles.bannerContent}>
                         <HiOutlineExclamationCircle className={styles.bannerIcon} />
                         <p className={styles.bannerText}>
-                            You will need to purchase in order for you to release to Collbine up.{` `}
+                            You will need to purchase in order for you to release to HomeFood up.{` `}
                             <Link href="/app/subscription" className={styles.bannerLink}>Upgrade now</Link>
                         </p>
                     </div>
@@ -512,12 +512,12 @@ const SubmissionView = () => {
             <ContentCard className={styles.content}>
                 <FieldHeader
                     title='Managed publishing'
-                    description='To make your release or update avilable on Collbine app, you need to send to Collbine for review. You can automatically release it after it&apos;s been approved by Collbine Reviewer or you can also manually release it on App Store at a later date.'
+                    description='To make your release or update avilable on HomeFood app, you need to send to HomeFood for review. You can automatically release it after it&apos;s been approved by HomeFood Reviewer or you can also manually release it on App Store at a later date.'
                 />
 
                 <FullWidthDropdown
                     options={[
-                        { value: 'immediate', title: 'Automatically release this version. (Once approved, it will be live on Collbine app immediately)' },
+                        { value: 'immediate', title: 'Automatically release this version. (Once approved, it will be live on HomeFood app immediately)' },
                         // { value: 'manually', title: 'Manually release this version' },
                         { value: 'schedule', title: 'Schedule release this version for a later date' }
                     ]}

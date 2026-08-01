@@ -292,10 +292,10 @@ const TerminalPage = () => {
                                     <p className={styles.loadingText}>Loading customer information...</p>
                                 ) : error === 'not_found' ? (
                                     <div className={styles.errorContainer}>
-                                        <p className={styles.errorTitle}>Collbine Account Not Created</p>
+                                        <p className={styles.errorTitle}>HomeFood Account Not Created</p>
                                         <p className={styles.errorMessage}>
-                                            This phone number is not associated with a Collbine account. 
-                                            Please inform the customer to download the Collbine app to view loyalty information.
+                                            This phone number is not associated with a HomeFood account. 
+                                            Please inform the customer to download the HomeFood app to view loyalty information.
                                         </p>
                                         <p className={styles.customerPhone}>{phoneNumber}</p>
                                     </div>

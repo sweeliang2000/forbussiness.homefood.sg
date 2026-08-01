@@ -76,7 +76,7 @@ const ContactSection = () => {
                     <div className={styles.contactDetails}>
                         <div className={styles.contactItem}>
                             <h4>Email:</h4>
-                            <a href="mailto:contact@collbine.com">contact@collbine.com</a>
+                            <a href="mailto:contact@homefood.sg">contact@homefood.sg</a>
                         </div>
                         
                         <div className={styles.contactItem}>

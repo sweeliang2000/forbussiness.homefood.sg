@@ -168,7 +168,7 @@ export default function ScanToWinQrCodePage() {
   // Generate QR code URL (deep link to app)
   const buildQrUrl = (id) => {
     // This can be adjusted to your deep link scheme
-    return `https://collbine.com/scan-to-win?code=${id}`;
+    return `https://homefood.sg/scan-to-win?code=${id}`;
   };
 
   const formatDate = (isoString) => {

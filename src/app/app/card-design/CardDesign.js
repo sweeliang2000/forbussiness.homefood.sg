@@ -33,9 +33,9 @@ const CardDesign = () => {
     const [cardTitleColor, setCardTitleColor] = useState('#000000')
     const [cardFooterColor, setCardFooterColor] = useState('#797979')
     const [cardNoStampBorderColor, setCardNoStampBorderColor] = useState('#dddddd')
-    const [cardStampBackground, setCardStampBackground] = useState('#e8f9ff')
+    const [cardStampBackground, setCardStampBackground] = useState('#FFF4ED')
     const [cardNoStampBackgroundColor, setCardNoStampBackgroundColor] = useState('#ffffff')
-    const [cardStampCollectedBorderColor, setCardStampCollectedBorderColor] = useState('#e8f9ff')
+    const [cardStampCollectedBorderColor, setCardStampCollectedBorderColor] = useState('#FFF4ED')
     const [checkmarkColor, setCheckmarkColor] = useState('#6698aa')
     const [numberOfStamp, setNumberOfStamp] = useState(18);
     const [collectedStamps, setCollectedStamps] = useState(10);
@@ -57,9 +57,9 @@ const CardDesign = () => {
     const initialCardTitleColorRef = useRef('#000000');
     const initialCardFooterColorRef = useRef('#797979');
     const initialCardNoStampBorderColorRef = useRef('#dddddd');
-    const initialCardStampBackgroundRef = useRef('#e8f9ff');
+    const initialCardStampBackgroundRef = useRef('#FFF4ED');
     const initialCardNoStampBackgroundColorRef = useRef('#ffffff');
-    const initialCardStampCollectedBorderColorRef = useRef('#e8f9ff');
+    const initialCardStampCollectedBorderColorRef = useRef('#FFF4ED');
     const initialCheckmarkColorRef = useRef('#6698aa');
     
     // Track if we've pushed a history state for back button handling
@@ -72,8 +72,8 @@ const CardDesign = () => {
         setCardFooterColor('#797979');
         setCardNoStampBorderColor('#dddddd');
         setCardNoStampBackgroundColor('#ffffff');
-        setCardStampCollectedBorderColor('#e8f9ff');
-        setCardStampBackground('#e8f9ff');
+        setCardStampCollectedBorderColor('#FFF4ED');
+        setCardStampBackground('#FFF4ED');
         setCheckmarkColor('#6698aa');
         enableSaveBtn();
     };
@@ -151,8 +151,8 @@ const CardDesign = () => {
                         const loadedFooterColor = cardDesignData.data.footerTextColor || '#797979';
                         const loadedNoStampBorderColor = cardDesignData.data.noStampBorderColor || '#dddddd';
                         const loadedNoStampBackgroundColor = cardDesignData.data.noStampBackgroundColor || '#ffffff';
-                        const loadedStampCollectedBorderColor = cardDesignData.data.stampBorderColor || '#e8f9ff';
-                        const loadedStampBackground = cardDesignData.data.stampBackgroundColor || '#e8f9ff';
+                        const loadedStampCollectedBorderColor = cardDesignData.data.stampBorderColor || '#FFF4ED';
+                        const loadedStampBackground = cardDesignData.data.stampBackgroundColor || '#FFF4ED';
                         const loadedCheckmarkColor = cardDesignData.data.checkmarkColor || '#6698aa';
                         
                         setCardBackgroundColor(loadedBackground);
@@ -179,9 +179,9 @@ const CardDesign = () => {
                         initialCardTitleColorRef.current = '#000000';
                         initialCardFooterColorRef.current = '#797979';
                         initialCardNoStampBorderColorRef.current = '#dddddd';
-                        initialCardStampBackgroundRef.current = '#e8f9ff';
+                        initialCardStampBackgroundRef.current = '#FFF4ED';
                         initialCardNoStampBackgroundColorRef.current = '#ffffff';
-                        initialCardStampCollectedBorderColorRef.current = '#e8f9ff';
+                        initialCardStampCollectedBorderColorRef.current = '#FFF4ED';
                         initialCheckmarkColorRef.current = '#6698aa';
                     }
                 } else {
@@ -433,7 +433,7 @@ const CardDesign = () => {
                                 <>
                                     Your release has been approved. It will be released on the date you stated on{' '}
                                     <Link href="/app/release/submission">Release Submission Page</Link>.
-                                    {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@collbine.com.
+                                    {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@homefood.sg.
                                 </>
                             )
                             : null

@@ -1,1 +1,1 @@
-export const EMAIL_CONTACT_ADDRESS = 'contact@collbine.com'
+export const EMAIL_CONTACT_ADDRESS = 'contact@homefood.sg'

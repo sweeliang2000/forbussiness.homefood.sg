@@ -59,6 +59,23 @@ Do not use pixel for font size, width and media querys.
 }
 
 :root {
+  /* ---------------------------------------------------------------
+     HomeFood brand palette — persimmon orange.
+     --brand-500 is the brand colour; --brand-600 is the button fill
+     (deeper, so white label text stays legible); --brand-700 is the
+     text-on-white tone for links and small copy (5.2:1 on white).
+     --------------------------------------------------------------- */
+  --brand-50: #FFF4ED;
+  --brand-100: #FFE6D5;
+  --brand-200: #FFC9AA;
+  --brand-300: #FDA474;
+  --brand-400: #FB7F45;
+  --brand-500: #F96A1B;
+  --brand-600: #E4550D;
+  --brand-700: #C2410C;
+  --brand-800: #9A340B;
+  --brand-gradient: linear-gradient(135deg, #FA8C22 0%, #FE4A0C 100%);
+
   --background: #F5F7F9;
   --onBackground: black;
 
@@ -68,14 +85,18 @@ Do not use pixel for font size, width and media querys.
   --on-primary-light: gray;
   --on-primary-light2: rgb(98, 98, 98);
 
-  /* Used for Buttons */
+  /* Neutral dark surface: footer, dark notifications, text on light chips */
   --secondary-color: rgb(36, 36, 39);
   --secondary-hover-color: rgb(39, 39, 60);
 
-  --accent-color: #0E46A3;
+  --accent-color: var(--brand-600);
+  --accent-hover-color: var(--brand-700);
+  --accent-strong: var(--brand-700);
+  --accent-soft: var(--brand-50);
+  --accent-soft-border: var(--brand-200);
   --border-color: #eaeaea;
-  --link-color: #2c15bf;
-  --link-hover-color: #2200ff;
+  --link-color: var(--brand-700);
+  --link-hover-color: var(--brand-800);
 
   --error-color: #d42020;
 

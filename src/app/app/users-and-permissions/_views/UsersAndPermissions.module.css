@@ -25,7 +25,7 @@
 .button {
     box-shadow: none;
     text-transform: capitalize !important;
-    background-color: var(--secondary-color) !important;
+    background-color: var(--accent-color) !important;
 }
 
 .usersHeader {

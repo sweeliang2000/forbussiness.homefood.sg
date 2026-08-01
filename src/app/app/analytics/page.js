@@ -173,7 +173,7 @@ export default function AnalyticsPage() {
   };
 
   const LINE_COLORS = {
-    unique: '#1976d2',
+    unique: '#E4550D',
     returning: '#2e7d32',
     new: '#ed6c02',
   };

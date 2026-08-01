@@ -5,7 +5,7 @@
 }
 
 .checklistItemLink:hover .checklistItem {
-    background-color: rgba(14, 70, 163, 0.05);
+    background-color: rgba(228, 85, 13, 0.05);
     border-radius: 8px;
     padding: 12px 12px 24px 12px;
     margin-left: -12px;

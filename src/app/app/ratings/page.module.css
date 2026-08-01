@@ -20,3 +20,103 @@
     column-count: 1;
   }
 }
+
+.summaryCard {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  flex-wrap: wrap;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  background: #fff;
+  padding: 24px 28px;
+  margin: 16px 0 20px;
+  box-shadow: 0 2px 8px #f0f0f0;
+}
+
+.summaryScore {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+}
+
+.avgNumber {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.avgStars {
+  font-size: 20px;
+  color: #f5a623;
+  margin-top: 4px;
+}
+
+.avgStarsMuted {
+  color: #d9d9d9;
+}
+
+.avgCount {
+  font-size: 13px;
+  color: #888;
+  margin-top: 6px;
+}
+
+.distribution {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.distRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.distLabel {
+  width: 28px;
+  font-size: 13px;
+  color: #555;
+}
+
+.distTrack {
+  flex: 1;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.distFill {
+  height: 100%;
+  background: #f5a623;
+  border-radius: 999px;
+}
+
+.distCount {
+  width: 28px;
+  text-align: right;
+  font-size: 13px;
+  color: #555;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 64px 24px;
+  color: #888;
+}
+
+.emptyStars {
+  font-size: 40px;
+  color: #e0e0e0;
+  margin-bottom: 8px;
+}
+
+.emptyState h3 {
+  margin: 8px 0 4px;
+  color: #333;
+}

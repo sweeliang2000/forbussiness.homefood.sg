@@ -111,7 +111,7 @@ export default function ManualPayNowSection({ paynow, setField, disabled, checke
         <div className={styles.collapseInner}>
           <p className={styles.sectionDesc}>
             Show customers your own PayNow QR. They pay and upload a payment screenshot, which
-            Collbine&apos;s AI verifies. You confirm funds and handle any refunds.
+            HomeFood&apos;s AI verifies. You confirm funds and handle any refunds.
           </p>
 
           <div className={styles.manualBody}>

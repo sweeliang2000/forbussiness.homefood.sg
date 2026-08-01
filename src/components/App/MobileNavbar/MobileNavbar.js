@@ -1,4 +1,4 @@
-import CollbineForBusiness from '@/components/CollbineForBusiness/CollbineForBusiness';
+import HomeFoodForBusiness from '@/components/HomeFoodForBusiness/HomeFoodForBusiness';
 import styles from './MobileNavbar.module.css';
 import { RiMenu2Fill } from 'react-icons/ri';
 import { IoCloseSharp } from 'react-icons/io5';
@@ -16,7 +16,7 @@ const MobileNavbar = ({
                     <RiMenu2Fill className={styles.menu} onClick={toggleMenu}/> :
                     <IoCloseSharp className={styles.menu} onClick={toggleMenu}/> 
                 }
-                <CollbineForBusiness/>
+                <HomeFoodForBusiness/>
             </div>
         </nav>
     )

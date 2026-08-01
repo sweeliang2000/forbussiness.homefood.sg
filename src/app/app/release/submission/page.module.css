@@ -60,10 +60,10 @@
 
 /* Purchase Banner (mirrors main app dashboard) */
 .banner {
-    background: linear-gradient(135deg, #0E46A3 0%, #0d3d91 100%);
+    background: linear-gradient(135deg, #E4550D 0%, #C2410C 100%);
     border-radius: 12px;
     padding: 20px 24px;
-    box-shadow: 0 2px 8px rgba(14, 70, 163, 0.2);
+    box-shadow: 0 2px 8px rgba(228, 85, 13, 0.2);
 }
 
 .bannerContent {

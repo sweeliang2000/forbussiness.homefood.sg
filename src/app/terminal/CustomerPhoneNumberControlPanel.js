@@ -43,8 +43,8 @@ const CustomerPhoneNumberControlPanel = ({ onPhoneNumberSubmit }) => {
             <div className={styles.rightContent}>
                 <div className={styles.logoContainer}>
                     <Image
-                        src="/images/collbine.png"
-                        alt="Collbine Logo"
+                        src="/images/homefood.png"
+                        alt="HomeFood Logo"
                         width={100}
                         height={100}
                         className={styles.logo}

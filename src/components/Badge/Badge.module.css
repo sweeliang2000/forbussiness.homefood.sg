@@ -10,9 +10,11 @@
     font-family: var(--font-raleway);
 }
 
-/* Variant: Blue (default) - light background with accent color text */
+/* Variant: Brand (default) - light persimmon background with accent text.
+   `.blue` kept as an alias from before the HomeFood rebrand. */
+.brand,
 .blue {
-    background-color: #e6f7ff;
+    background-color: var(--brand-50);
     color: var(--accent-color);
 }
 

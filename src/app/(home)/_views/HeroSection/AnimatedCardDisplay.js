@@ -6,15 +6,15 @@ import styles from './HeroSection.module.css';
 
 const cardImages = [
     { 
-        src: '/images/pages/landing/card example/car washes card - collbine.png', 
+        src: '/images/pages/landing/card example/car washes card - homefood.png', 
         alt: 'Car Washes Loyalty Card' 
     },
     { 
-        src: '/images/pages/landing/card example/dessert card - collbine.png', 
+        src: '/images/pages/landing/card example/dessert card - homefood.png', 
         alt: 'Dessert Loyalty Card' 
     },
     { 
-        src: '/images/pages/landing/card example/lunch card - collbine.png', 
+        src: '/images/pages/landing/card example/lunch card - homefood.png', 
         alt: 'Lunch Loyalty Card' 
     },
 ];

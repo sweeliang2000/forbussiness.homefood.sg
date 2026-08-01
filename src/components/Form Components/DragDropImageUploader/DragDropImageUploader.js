@@ -19,6 +19,11 @@ const DragDropImageUploader = ({
     // const [images, setImages] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
+    const renderableImages = Array.isArray(images)
+        ? images
+            .map((image, originalIndex) => ({ image, originalIndex }))
+            .filter(({ image }) => typeof image?.url === 'string' && image.url.trim())
+        : [];
 
     const selectFiles = () => {
         if (disabled) return;
@@ -110,7 +115,7 @@ const DragDropImageUploader = ({
     return (
         <div className={styles.card}>
             {
-                images.length === 0 ?
+                renderableImages.length === 0 ?
                     <div
                         className={styles.dragArea}
                         onDragOver={onDragOver}
@@ -131,17 +136,16 @@ const DragDropImageUploader = ({
                     </div> :
                     <div className={styles.container}>
                         {
-                            images.map((images, index) => {
-                                console.log(images)
+                            renderableImages.map(({ image, originalIndex }) => {
                                 return (
-                                <div className={styles.imageContainer} key={index}>
-                                    {!disabled && <FaMinusCircle className={styles.delete} onClick={() => deleteImage(index)} />}
+                                <div className={styles.imageContainer} key={`${image.name || 'image'}-${originalIndex}`}>
+                                    {!disabled && <FaMinusCircle className={styles.delete} onClick={() => deleteImage(originalIndex)} />}
                                     <Image
                                         className={`${styles.image} ${imageClassName}`}
                                         width={width}
                                         height={height}
-                                        src={images.url}
-                                        alt={images.name} />
+                                        src={image.url}
+                                        alt={image.name || 'Uploaded image'} />
                                 </div>
                             )})
                         }
@@ -159,7 +163,7 @@ const DragDropImageUploader = ({
             />
 
             <div className={styles.bottomFooter}>
-                <p>{images.length} of {noOfImages} Image</p>
+                <p>{renderableImages.length} of {noOfImages} Image</p>
                 <p>|</p>
                 <Button
                     className={styles.button}
@@ -167,7 +171,7 @@ const DragDropImageUploader = ({
                     variant='text'
                     disabled={disabled}
                 >
-                    {images.length !== 0 & noOfImages === 1 ? 'Replace' : 'Choose File'}
+                    {renderableImages.length !== 0 && noOfImages === 1 ? 'Replace' : 'Choose File'}
                 </Button>
             </div>
         </div>

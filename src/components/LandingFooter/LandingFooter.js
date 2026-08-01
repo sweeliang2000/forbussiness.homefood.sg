@@ -9,7 +9,7 @@ const LandingFooter = () => {
         <footer className={styles.footer}>
             <div className={styles.footerGrid}>
                 <div>
-                    <h4>Collbine for Business</h4>
+                    <h4>HomeFood for Business</h4>
                     <p>Home-based food, made easy to discover, order, and pick up.</p>
                 </div>
                 <div>
@@ -48,7 +48,7 @@ const LandingFooter = () => {
                 </div>
             </div>
             <div className={styles.footerBottom}>
-                <p>&copy; 2026 Collbine for Business. Built with home kitchens, for home kitchens.</p>
+                <p>&copy; 2026 HomeFood for Business. Built with home kitchens, for home kitchens.</p>
             </div>
         </footer>
     );

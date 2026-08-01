@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styles from './MenuBuilder.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
@@ -10,13 +10,16 @@ import Shimmer from '@/components/Shimmer/Shimmer';
 import AddCircleOutlineRoundedIcon from '@mui/icons-material/AddCircleOutlineRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import KeyboardArrowUpRoundedIcon from '@mui/icons-material/KeyboardArrowUpRounded';
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import DialogPopup from '@/components/DialogPopup/DialogPopup';
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 import { Alert } from '@mui/material';
 import apiClient from '@/utility/api';
-import { MENU, RELEASE_STATUS, PUBLISH_MENU_UPDATE } from '@/utility/apiPaths';
+import { MENU, RELEASE_STATUS, PUBLISH_MENU_UPDATE, ORDERING_SETTINGS } from '@/utility/apiPaths';
 import { FaCheck } from 'react-icons/fa';
 import { getUserDataFromCookie } from '@/utility/cookieUtils';
 import Link from 'next/link';
@@ -40,6 +43,18 @@ const arrayMove = (arr, fromIndex, toIndex) => {
   return copy;
 };
 
+// The cheapest add-on a customer is forced to pay: for each REQUIRED group (min ≥ 1),
+// the sum of the `min` cheapest option prices. Optional groups add nothing. Used to
+// compute an item's "from" price. `groups` are resolved groups with min + options.
+const minRequiredAddOn = (groups) => (groups ?? []).reduce((sum, g) => {
+  const min = normalizeNumber(g?.min ?? (g?.required ? 1 : 0));
+  if (min <= 0) return sum;
+  const prices = (g?.options ?? []).map((o) => normalizeNumber(o.additionalPrice)).sort((a, b) => a - b);
+  let add = 0;
+  for (let k = 0; k < Math.min(min, prices.length); k++) add += prices[k];
+  return sum + add;
+}, 0);
+
 const PRICING_OVERRIDE_TYPES = {
   GLOBAL: 'global',
   CUSTOM_PERCENT: 'custom_percent',
@@ -62,14 +77,44 @@ const getDefaultItem = (categoryId) => ({
   description: '',
   takeawayBasePrice: 0,
   dineInPrice: 0,
+  prepTimeMinutes: 0,
   soldOut: false,
+  soldOutPreorder: false,
   featured: false,
   availableTakeaway: true,
   availableDineIn: true,
   pricingOverrideType: PRICING_OVERRIDE_TYPES.GLOBAL,
   pricingOverrideCustomPercent: 0,
   pricingOverrideFixedPrice: 0,
-  optionGroups: [],
+  optionGroupIds: [],
+});
+
+// A reusable option group lives at shop level and is attached to items by id.
+// `referenceName` is internal (merchant-only); customers only ever see `name`.
+const getDefaultGroup = () => ({
+  id: null,
+  referenceName: '',
+  name: '',
+  required: false,
+  min: 0,
+  pick: 0,
+  options: [],
+});
+
+// Signature of the customer-affecting parts of a group — used to detect whether a
+// group edit actually changes anything items would see. referenceName is excluded
+// on purpose: renaming the internal label shouldn't trigger the shared-edit warning.
+const groupComparable = (g) => JSON.stringify({
+  name: (g.name ?? '').trim(),
+  required: !!g.required, min: normalizeNumber(g.min ?? (g.required ? 1 : 0)),
+  pick: Math.max(0, normalizeNumber(g.pick ?? 0)),
+  options: (g.options ?? []).map((o) => ({
+    id: o.id,
+    name: (o.name ?? '').trim(),
+    additionalPrice: normalizeNumber(o.additionalPrice),
+    maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
+    soldOut: !!o.soldOut, soldOutPreorder: !!o.soldOutPreorder,
+  })),
 });
 
 const getItemEditorPhotoFromItem = (item) => {
@@ -84,11 +129,10 @@ const computeBaseForFees = ({ item, fulfilmentMode }) => {
   return normalizeNumber(item.takeawayBasePrice);
 };
 
-const computeOptionsDelta = ({ selectedGroupOptionQtys, item }) => {
-  const groups = item.optionGroups ?? [];
+const computeOptionsDelta = ({ selectedGroupOptionQtys, groups }) => {
   const sel = selectedGroupOptionQtys ?? {};
   let sum = 0;
-  for (const g of groups) {
+  for (const g of (groups ?? [])) {
     const gSel = sel[g.id] ?? {};
     for (const opt of (g.options ?? [])) {
       const qty = gSel[opt.id] ?? 0;
@@ -98,15 +142,15 @@ const computeOptionsDelta = ({ selectedGroupOptionQtys, item }) => {
   return sum;
 };
 
-const buildDefaultGroupSelections = (item) => {
+const buildDefaultGroupSelections = (groups) => {
   const out = {};
-  for (const g of (item?.optionGroups ?? [])) {
+  for (const g of (groups ?? [])) {
     const pick = normalizeNumber(g.pick ?? 0);
     if (!g.required || pick <= 0) continue;
-    const opts = g.options ?? [];
+    const opts = (g.options ?? []).filter((o) => !o.soldOut);
     if (!opts.length) continue;
     const gSel = {};
-    // Default: pick the first N options (qty=1 each).
+    // Default: pick the first N available options (qty=1 each).
     for (let i = 0; i < Math.min(pick, opts.length); i += 1) {
       gSel[opts[i].id] = 1;
     }
@@ -116,6 +160,8 @@ const buildDefaultGroupSelections = (item) => {
 };
 
 // Map an API item (snake_case availability/pricingOverride) to internal component state shape.
+// Legacy embedded `optionGroups` are kept here only so they can be migrated into the
+// shop-level reusable library right after load (see migrateMenuToLibrary).
 const mapApiItemToState = (i) => ({
   id: i.id,
   categoryIds: i.categoryIds ?? [],
@@ -124,26 +170,114 @@ const mapApiItemToState = (i) => ({
   description: i.description ?? '',
   takeawayBasePrice: normalizeNumber(i.takeawayBasePrice),
   dineInPrice: normalizeNumber(i.dineInPrice),
-  soldOut: !!i.soldOut,
+  prepTimeMinutes: Math.max(0, normalizeNumber(i.prepTimeMinutes)),
+  soldOut: !!i.soldOut,                 // sold out for today / immediate
+  soldOutPreorder: !!i.soldOutPreorder, // sold out for pre-order
   featured: !!i.featured,
   availableTakeaway: i.availability?.takeaway ?? true,
   availableDineIn: i.availability?.dineIn ?? true,
   pricingOverrideType: i.pricingOverrideType ?? PRICING_OVERRIDE_TYPES.GLOBAL,
   pricingOverrideCustomPercent: normalizeNumber(i.pricingOverride?.customPercent),
   pricingOverrideFixedPrice: normalizeNumber(i.pricingOverride?.fixedPrice),
+  optionGroupIds: Array.isArray(i.optionGroupIds) ? i.optionGroupIds : [],
   optionGroups: (i.optionGroups ?? []).map((g) => ({
     id: g.id,
     name: g.name ?? '',
-    required: !!g.required,
+    required: !!g.required, min: normalizeNumber(g.min ?? (g.required ? 1 : 0)),
     pick: normalizeNumber(g.pick ?? 0),
     options: (g.options ?? []).map((o) => ({
       id: o.id,
       name: o.name ?? '',
       additionalPrice: normalizeNumber(o.additionalPrice),
       maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
+      soldOut: !!o.soldOut, soldOutPreorder: !!o.soldOutPreorder,
     })),
   })),
 });
+
+const mapApiGroupToState = (g) => ({
+  id: g.id,
+  referenceName: g.referenceName ?? g.name ?? '',
+  name: g.name ?? '',
+  required: !!g.required, min: normalizeNumber(g.min ?? (g.required ? 1 : 0)),
+  pick: normalizeNumber(g.pick ?? 0),
+  options: (g.options ?? []).map((o) => ({
+    id: o.id,
+    name: o.name ?? '',
+    additionalPrice: normalizeNumber(o.additionalPrice),
+    maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
+    soldOut: !!o.soldOut, soldOutPreorder: !!o.soldOutPreorder,
+  })),
+});
+
+// One-time migration: hoist legacy per-item embedded option groups into the shop-level
+// reusable library. Structurally identical groups collapse into a single library entry,
+// so existing duplicated groups become genuinely shared.
+const migrateMenuToLibrary = (rawItems, rawLibrary) => {
+  const library = [...rawLibrary];
+
+  const signatureOf = (g) => JSON.stringify({
+    name: (g.name ?? '').trim().toLowerCase(),
+    required: !!g.required, min: normalizeNumber(g.min ?? (g.required ? 1 : 0)),
+    pick: normalizeNumber(g.pick ?? 0),
+    options: (g.options ?? []).map((o) => ({
+      name: (o.name ?? '').trim().toLowerCase(),
+      additionalPrice: normalizeNumber(o.additionalPrice),
+      maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
+    })),
+  });
+
+  const signatureToId = new Map(library.map((g) => [signatureOf(g), g.id]));
+  const usedReferenceNames = new Set(library.map((g) => (g.referenceName || g.name || '').toLowerCase()));
+
+  const uniqueReferenceName = (base) => {
+    const clean = (base ?? '').trim() || 'Option group';
+    if (!usedReferenceNames.has(clean.toLowerCase())) {
+      usedReferenceNames.add(clean.toLowerCase());
+      return clean;
+    }
+    let n = 2;
+    while (usedReferenceNames.has(`${clean} (${n})`.toLowerCase())) n += 1;
+    usedReferenceNames.add(`${clean} (${n})`.toLowerCase());
+    return `${clean} (${n})`;
+  };
+
+  let didMigrate = false;
+
+  const items = rawItems.map((item) => {
+    if ((item.optionGroupIds ?? []).length || !(item.optionGroups ?? []).length) return item;
+
+    didMigrate = true;
+    const ids = [];
+    for (const g of item.optionGroups) {
+      const sig = signatureOf(g);
+      let gid = signatureToId.get(sig);
+      if (!gid) {
+        gid = g.id ?? makeId();
+        if (library.some((x) => x.id === gid)) gid = makeId();
+        library.push({
+          id: gid,
+          referenceName: uniqueReferenceName(g.name),
+          name: g.name ?? '',
+          required: !!g.required, min: normalizeNumber(g.min ?? (g.required ? 1 : 0)),
+          pick: normalizeNumber(g.pick ?? 0),
+          options: (g.options ?? []).map((o) => ({
+            id: o.id ?? makeId(),
+            name: o.name ?? '',
+            additionalPrice: normalizeNumber(o.additionalPrice),
+            maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
+            soldOut: !!o.soldOut, soldOutPreorder: !!o.soldOutPreorder,
+          })),
+        });
+        signatureToId.set(sig, gid);
+      }
+      ids.push(gid);
+    }
+    return { ...item, optionGroupIds: ids };
+  });
+
+  return { items, library, didMigrate };
+};
 
 export default function MenuBuilder() {
   const storePricing = DEFAULT_STORE_PRICING;
@@ -158,6 +292,13 @@ export default function MenuBuilder() {
 
   // Items are kept as a flat list with categoryId.
   const [items, setItems] = useState([]);
+
+  // Shop-level reusable option groups. Items reference them by id (optionGroupIds).
+  const [optionGroupsLibrary, setOptionGroupsLibrary] = useState([]);
+
+  // Base minutes added on top of item make times when estimating an order's
+  // completion time (POS/terminal). Default 5.
+  const [prepBufferMinutes, setPrepBufferMinutes] = useState(5);
 
   // Category creation.
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -176,6 +317,7 @@ export default function MenuBuilder() {
 
   // Store acceptance: whether the shop accepts takeaway, dine-in, or both.
   const [shopAcceptance, setShopAcceptance] = useState('takeaway'); // 'takeaway' | 'dine-in' | 'both'
+  const [orderMode, setOrderMode] = useState(null); // 'today_only' | 'today_and_preorder' | 'preorder_only'
 
   // Customer mode for the preview (what the merchant wants to preview).
   const [customerMode, setCustomerMode] = useState('takeaway'); // 'takeaway' | 'dine-in'
@@ -190,6 +332,28 @@ export default function MenuBuilder() {
   const [isPreviewFullscreenOpen, setIsPreviewFullscreenOpen] = useState(false);
 
   const selectedItem = useMemo(() => items.find((i) => i.id === selectedItemId) ?? null, [items, selectedItemId]);
+
+  const groupsById = useMemo(() => {
+    const map = {};
+    for (const g of optionGroupsLibrary) map[g.id] = g;
+    return map;
+  }, [optionGroupsLibrary]);
+
+  // Resolve an item's attached reusable groups (in the item's attach order).
+  const resolveItemGroups = useCallback(
+    (item) => (item?.optionGroupIds ?? []).map((gid) => groupsById[gid]).filter(Boolean),
+    [groupsById]
+  );
+
+  const groupUsageCountById = useMemo(() => {
+    const map = {};
+    for (const i of items) {
+      for (const gid of (i.optionGroupIds ?? [])) map[gid] = (map[gid] ?? 0) + 1;
+    }
+    return map;
+  }, [items]);
+
+  const selectedItemGroups = useMemo(() => resolveItemGroups(selectedItem), [resolveItemGroups, selectedItem]);
   const previewCartQtyByItemId = useMemo(() => {
     const map = {};
     for (const ci of cartItems) {
@@ -201,7 +365,7 @@ export default function MenuBuilder() {
 
   const openPreviewAdd = (item) => {
     setSelectedItemId(item.id);
-    setSelectedGroupOptionQtys(buildDefaultGroupSelections(item));
+    setSelectedGroupOptionQtys(buildDefaultGroupSelections(resolveItemGroups(item)));
     setIsPreviewAddOpen(true);
   };
 
@@ -267,10 +431,22 @@ export default function MenuBuilder() {
           return;
         }
         if (data.categories) setCategories(data.categories);
-        if (data.items) setItems(data.items.map(mapApiItemToState));
+        {
+          const rawLibrary = (data.optionGroupsLibrary ?? []).map(mapApiGroupToState);
+          const rawItems = (data.items ?? []).map(mapApiItemToState);
+          const { items: migratedItems, library, didMigrate } = migrateMenuToLibrary(rawItems, rawLibrary);
+          setItems(migratedItems);
+          setOptionGroupsLibrary(library);
+          // Legacy embedded groups were hoisted into the library — enable Save so the
+          // migrated structure gets persisted.
+          if (didMigrate) setHasUnsavedEdits(true);
+        }
         if (data.shopAcceptance) setShopAcceptance(data.shopAcceptance);
+        if (Number.isFinite(Number(data.prepBufferMinutes))) setPrepBufferMinutes(Math.max(0, Number(data.prepBufferMinutes)));
         if (data.isEdit !== undefined) setIsEdit(data.isEdit);
         if (data.releaseStatus) setReleaseStatus(data.releaseStatus);
+        // Show the Publish button as available on load if there are saved-but-unpublished changes.
+        if (data.isChanges !== undefined) setHasChanges(!!data.isChanges);
       })
       .catch((err) => {
         setLoadError(err?.response?.data?.message ?? 'Failed to load menu. Please refresh.');
@@ -292,6 +468,21 @@ export default function MenuBuilder() {
       }
     };
     fetchReleaseStatus();
+  }, []);
+
+  // Load the shop's order mode so per-item sold-out toggles can offer the right
+  // scope(s): today (immediate), pre-order, or both.
+  useEffect(() => {
+    const fetchOrderMode = async () => {
+      try {
+        const res = await apiClient.get(ORDERING_SETTINGS);
+        const mode = res.data?.data?.orderMode;
+        if (mode) setOrderMode(mode);
+      } catch {
+        // Non-critical — falls back to the single (immediate) sold-out toggle.
+      }
+    };
+    fetchOrderMode();
   }, []);
 
   const visibleCategories = useMemo(() => {
@@ -323,10 +514,132 @@ export default function MenuBuilder() {
     stopReorder();
   };
 
+  // Reorder an item within its category. Items render in the `items` array order,
+  // so we move it just past its neighbour in that global array (dir = -1 up / +1 down).
+  const moveItemInCategory = (catItems, fromPos, dir) => {
+    const toPos = fromPos + dir;
+    if (toPos < 0 || toPos >= catItems.length) return;
+    const movingId = catItems[fromPos].id;
+    const targetId = catItems[toPos].id;
+    setItems((prev) => {
+      const from = prev.findIndex((i) => i.id === movingId);
+      const to = prev.findIndex((i) => i.id === targetId);
+      if (from < 0 || to < 0) return prev;
+      return arrayMove(prev, from, to);
+    });
+    markMenuChanged();
+  };
+
+  // Reorder an option within the group being edited (customers see options in this order).
+  const moveGroupOption = (fromPos, dir) => {
+    setGroupEditor((prev) => {
+      const opts = prev.options ?? [];
+      const toPos = fromPos + dir;
+      if (toPos < 0 || toPos >= opts.length) return prev;
+      return { ...prev, options: arrayMove(opts, fromPos, toPos) };
+    });
+    markMenuChanged();
+  };
+
   // Item editor modal.
   const [isItemEditorOpen, setIsItemEditorOpen] = useState(false);
   const [itemEditor, setItemEditor] = useState(getDefaultItem(categories?.[0]?.id));
   const [editorPhotoImages, setEditorPhotoImages] = useState([]);
+
+  // Reusable option group editor modal.
+  const [isGroupEditorOpen, setIsGroupEditorOpen] = useState(false);
+  const [groupEditor, setGroupEditor] = useState(getDefaultGroup());
+  // When the editor is opened from within the item editor, a newly created group is
+  // auto-attached to the item being edited.
+  const [attachNewGroupToItem, setAttachNewGroupToItem] = useState(false);
+  const [blockedDeleteGroup, setBlockedDeleteGroup] = useState(null); // { referenceName, usedBy }
+  // A modified shared group waiting for the "this updates every item" confirmation.
+  const [pendingGroupSave, setPendingGroupSave] = useState(null);
+
+  const openNewGroupEditor = (fromItemEditor = false) => {
+    setGroupEditor(getDefaultGroup());
+    setAttachNewGroupToItem(fromItemEditor);
+    setIsGroupEditorOpen(true);
+  };
+
+  const openEditGroupEditor = (group) => {
+    setGroupEditor(JSON.parse(JSON.stringify(group)));
+    setAttachNewGroupToItem(false);
+    setIsGroupEditorOpen(true);
+  };
+
+  const setGroupEditorField = (patch) => {
+    setGroupEditor((prev) => ({ ...prev, ...patch }));
+  };
+
+  const applyGroupSave = (normalizedGroup) => {
+    setOptionGroupsLibrary((prev) => {
+      const exists = prev.some((g) => g.id === normalizedGroup.id);
+      return exists ? prev.map((g) => (g.id === normalizedGroup.id ? normalizedGroup : g)) : [...prev, normalizedGroup];
+    });
+
+    if (attachNewGroupToItem && !groupEditor.id) {
+      setItemEditor((prev) => ({
+        ...prev,
+        optionGroupIds: [...(prev.optionGroupIds ?? []), normalizedGroup.id],
+      }));
+    }
+
+    markMenuChanged();
+    setPendingGroupSave(null);
+    setIsGroupEditorOpen(false);
+    setAttachNewGroupToItem(false);
+  };
+
+  const handleGroupEditorSubmit = (event) => {
+    event.preventDefault();
+
+    const referenceName = (groupEditor.referenceName ?? '').trim();
+    const displayName = (groupEditor.name ?? '').trim();
+    if (!referenceName || !displayName) return;
+
+    const normalizedGroup = {
+      id: groupEditor.id ?? makeId(),
+      referenceName,
+      name: displayName,
+      // `required` is derived: a group is required when it needs at least one pick.
+      min: Math.max(0, normalizeNumber(groupEditor.min ?? 0)),
+      required: Math.max(0, normalizeNumber(groupEditor.min ?? 0)) >= 1,
+      pick: Math.max(0, normalizeNumber(groupEditor.pick ?? 0)),
+      options: (groupEditor.options ?? [])
+        .map((o) => ({
+          id: o.id ?? makeId(),
+          name: (o.name ?? '').trim(),
+          additionalPrice: normalizeNumber(o.additionalPrice),
+          maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
+          soldOut: !!o.soldOut, soldOutPreorder: !!o.soldOutPreorder,
+        }))
+        .filter((o) => !!o.name),
+    };
+
+    // Editing an existing group that items already use, with real (customer-visible)
+    // changes → confirm before applying, since the edit hits every item at once.
+    const existing = groupEditor.id ? optionGroupsLibrary.find((g) => g.id === groupEditor.id) : null;
+    const usedBy = existing ? (groupUsageCountById[existing.id] ?? 0) : 0;
+    const contentChanged = existing ? groupComparable(existing) !== groupComparable(normalizedGroup) : false;
+
+    if (existing && usedBy > 0 && contentChanged) {
+      setPendingGroupSave(normalizedGroup);
+      return;
+    }
+
+    applyGroupSave(normalizedGroup);
+  };
+
+  const handleDeleteGroup = (group) => {
+    const usedBy = items.filter((i) => (i.optionGroupIds ?? []).includes(group.id)).length;
+    if (usedBy > 0) {
+      setBlockedDeleteGroup({ referenceName: group.referenceName, usedBy });
+      return;
+    }
+    setOptionGroupsLibrary((prev) => prev.filter((g) => g.id !== group.id));
+    markMenuChanged();
+  };
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
@@ -339,6 +652,7 @@ export default function MenuBuilder() {
 
   // Per-item gear-menu anchor: { itemId, el }
   const [itemMenuAnchor, setItemMenuAnchor] = useState(null);
+  const [addGroupMenuAnchor, setAddGroupMenuAnchor] = useState(null); // "Add existing group" dropdown in the item editor
   const openItemMenu = (e, itemId) => setItemMenuAnchor({ el: e.currentTarget, itemId });
   const closeItemMenu = () => setItemMenuAnchor(null);
 
@@ -381,23 +695,11 @@ export default function MenuBuilder() {
       ...itemEditor,
       takeawayBasePrice: normalizeNumber(itemEditor.takeawayBasePrice),
       dineInPrice: normalizeNumber(itemEditor.dineInPrice),
+      prepTimeMinutes: Math.max(0, normalizeNumber(itemEditor.prepTimeMinutes)),
       pricingOverrideCustomPercent: normalizeNumber(itemEditor.pricingOverrideCustomPercent),
       pricingOverrideFixedPrice: normalizeNumber(itemEditor.pricingOverrideFixedPrice),
       photo,
-      optionGroups: (itemEditor.optionGroups ?? []).map((g) => ({
-        id: g.id ?? makeId(),
-        name: (g.name ?? '').trim(),
-        required: !!g.required,
-        pick: Math.max(0, normalizeNumber(g.pick ?? 0)),
-        options: (g.options ?? [])
-          .map((o) => ({
-            id: o.id ?? makeId(),
-            name: (o.name ?? '').trim(),
-            additionalPrice: normalizeNumber(o.additionalPrice),
-            maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
-          }))
-          .filter((o) => !!o.name),
-      })).filter((g) => !!g.name),
+      optionGroupIds: (itemEditor.optionGroupIds ?? []).filter((gid) => optionGroupsLibrary.some((g) => g.id === gid)),
     };
 
     setItems((prev) => {
@@ -418,11 +720,6 @@ export default function MenuBuilder() {
 
   const deleteItem = (itemId) => {
     setItems((prev) => prev.filter((i) => i.id !== itemId));
-    markMenuChanged();
-  };
-
-  const handleQuickSoldOut = (itemId, nextValue) => {
-    setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, soldOut: nextValue } : i)));
     markMenuChanged();
   };
 
@@ -452,16 +749,52 @@ export default function MenuBuilder() {
       formData.append('shop_id', shopId);
       formData.append('status', status);
 
+      // Denormalized snapshot of an item's attached groups. Only the customer-facing
+      // display name is embedded — referenceName stays in optionGroupsLibrary.
+      const denormalizedGroupsForItem = (i) => (i.optionGroupIds ?? [])
+        .map((gid) => optionGroupsLibrary.find((g) => g.id === gid))
+        .filter(Boolean)
+        .map((g) => ({
+          id: g.id,
+          name: g.name,
+          required: !!g.required, min: normalizeNumber(g.min ?? (g.required ? 1 : 0)),
+          pick: normalizeNumber(g.pick ?? 0),
+          options: (g.options ?? []).map((o) => ({
+            id: o.id,
+            name: o.name,
+            additionalPrice: normalizeNumber(o.additionalPrice),
+            maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
+            soldOut: !!o.soldOut, soldOutPreorder: !!o.soldOutPreorder,
+          })),
+        }));
+
       const menuPayload = {
         storePricing,
         shopAcceptance,
+        prepBufferMinutes: Math.max(0, normalizeNumber(prepBufferMinutes)),
+        optionGroupsLibrary: optionGroupsLibrary.map((g) => ({
+          id: g.id,
+          referenceName: g.referenceName,
+          name: g.name,
+          required: !!g.required, min: normalizeNumber(g.min ?? (g.required ? 1 : 0)),
+          pick: normalizeNumber(g.pick ?? 0),
+          options: (g.options ?? []).map((o) => ({
+            id: o.id,
+            name: o.name,
+            additionalPrice: normalizeNumber(o.additionalPrice),
+            maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
+            soldOut: !!o.soldOut, soldOutPreorder: !!o.soldOutPreorder,
+          })),
+        })),
         categories: categories.map((c, idx) => ({
           id: c.id,
           name: c.name,
           isVisible: c.isVisible,
           sortIndex: idx,
         })),
-        items: items.map((i) => ({
+        items: items.map((i) => {
+          const groups = denormalizedGroupsForItem(i);
+          return {
           id: i.id,
           categoryIds: i.categoryIds ?? [],
           // When photo.file exists it will be sent as a separate FormData field;
@@ -473,7 +806,9 @@ export default function MenuBuilder() {
           description: i.description,
           takeawayBasePrice: normalizeNumber(i.takeawayBasePrice),
           dineInPrice: normalizeNumber(i.dineInPrice),
+          prepTimeMinutes: Math.max(0, normalizeNumber(i.prepTimeMinutes)),
           soldOut: !!i.soldOut,
+          soldOutPreorder: !!i.soldOutPreorder,
           featured: !!i.featured,
           availability: {
             takeaway: !!i.availableTakeaway,
@@ -484,19 +819,15 @@ export default function MenuBuilder() {
             customPercent: normalizeNumber(i.pricingOverrideCustomPercent),
             fixedPrice: normalizeNumber(i.pricingOverrideFixedPrice),
           },
-          optionGroups: (i.optionGroups ?? []).map((g) => ({
-            id: g.id,
-            name: g.name,
-            required: !!g.required,
-            pick: normalizeNumber(g.pick ?? 0),
-            options: (g.options ?? []).map((o) => ({
-              id: o.id,
-              name: o.name,
-              additionalPrice: normalizeNumber(o.additionalPrice),
-              maxQty: Math.max(1, normalizeNumber(o.maxQty ?? 1)),
-            })),
-          })),
-        })),
+          optionGroupIds: i.optionGroupIds ?? [],
+          // Kept embedded (resolved) for backward compatibility with the customer
+          // app and walk-in ordering, which read groups off the item.
+          optionGroups: groups,
+          // Lowest add-on a customer must pay (cheapest required options) — lets the
+          // customer app show a correct "from" price without recomputing.
+          minAddOn: minRequiredAddOn(groups),
+          };
+        }),
       };
 
       formData.append('menu', JSON.stringify(menuPayload));
@@ -546,7 +877,7 @@ export default function MenuBuilder() {
 
     const computePreviewPricingForMode = (mode) => {
       const baseForFees = computeBaseForFees({ item: selectedItem, fulfilmentMode: mode });
-      const optionsDelta = computeOptionsDelta({ selectedGroupOptionQtys, item: selectedItem });
+      const optionsDelta = computeOptionsDelta({ selectedGroupOptionQtys, groups: selectedItemGroups });
 
       let fee = 0;
       let feeBreakdown = null;
@@ -594,7 +925,7 @@ export default function MenuBuilder() {
     };
 
     return computePreviewPricingForMode(customerMode);
-  }, [selectedItem, selectedGroupOptionQtys, customerMode, storePricing]);
+  }, [selectedItem, selectedItemGroups, selectedGroupOptionQtys, customerMode, storePricing]);
 
   const canOrderSelectedItem = useMemo(() => {
     if (!selectedItem) return false;
@@ -608,15 +939,20 @@ export default function MenuBuilder() {
   const isPreviewSelectionValid = useMemo(() => {
     if (!selectedItem) return false;
     const sel = selectedGroupOptionQtys ?? {};
-    for (const g of (selectedItem.optionGroups ?? [])) {
+    for (const g of selectedItemGroups) {
       if (!g.required) continue;
-      const requiredPick = normalizeNumber(g.pick ?? 0) > 0 ? normalizeNumber(g.pick ?? 0) : 1;
+      const availableCount = (g.options ?? []).filter((o) => !o.soldOut).length;
+      // Clamp the MUST pick to what's actually orderable so sold-out options can't deadlock the item.
+      const requiredPick = Math.min(
+        normalizeNumber(g.pick ?? 0) > 0 ? normalizeNumber(g.pick ?? 0) : 1,
+        availableCount
+      );
       const gSel = sel[g.id] ?? {};
       const count = Object.values(gSel).reduce((s, q) => s + (q > 0 ? 1 : 0), 0);
       if (count !== requiredPick) return false;
     }
     return true;
-  }, [selectedItem, selectedGroupOptionQtys]);
+  }, [selectedItem, selectedItemGroups, selectedGroupOptionQtys]);
 
   const renderPricingBreakdown = (pricing, mode) => {
     if (!pricing) return null;
@@ -825,7 +1161,7 @@ export default function MenuBuilder() {
                 <>
                   Your release has been approved. It will be released on the date you stated on{' '}
                   <Link href="/app/release/submission">Release Submission Page</Link>.
-                  {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@collbine.com.
+                  {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@homefood.sg.
                 </>
               )
               : null
@@ -887,19 +1223,22 @@ export default function MenuBuilder() {
           <ContentCard>
             <div className={styles.sectionHeader}>
               <FieldHeader
-                title="Shop accepts"
+                title="Order Timing"
                 type="h3"
-                description="Customers can order takeaway only, dine-in only, or both."
+                description="Estimated completion for a new order = buffer time + total avg. make time of the items. Shown on POS orders; you can still adjust each order manually."
               />
             </div>
-
-            <div className={styles.row} style={{ justifyContent: 'space-between' }}>
-              <RadioGroup row value={shopAcceptance} onChange={(e) => { setShopAcceptance(e.target.value); markMenuChanged(); }}>
-                <FormControlLabel value="takeaway" control={<Radio size="small" disabled={!isEdit} />} label="Takeaway only" />
-                <FormControlLabel value="dine-in" control={<Radio size="small" disabled={!isEdit} />} label="Dine-in only" />
-                <FormControlLabel value="both" control={<Radio size="small" disabled={!isEdit} />} label="Both" />
-              </RadioGroup>
-            </div>
+            <TextField
+              type="number"
+              label="Buffer time (minutes)"
+              size="small"
+              value={prepBufferMinutes}
+              disabled={!isEdit}
+              onChange={(e) => { setPrepBufferMinutes(Math.max(0, normalizeNumber(e.target.value))); markMenuChanged(); }}
+              inputProps={{ min: 0, step: 1 }}
+              helperText="Default 5 — covers queueing, packing, and hand-off"
+              style={{ width: 220 }}
+            />
           </ContentCard>
 
           <ContentCard>
@@ -978,7 +1317,61 @@ export default function MenuBuilder() {
           <ContentCard>
             <div className={styles.sectionHeader}>
               <div className={styles.row} style={{ justifyContent: 'space-between' }}>
-                <FieldHeader title="Items" type="h3" description="Add/edit/delete items with photo, pricing, and sold-out/featured toggles." />
+                <FieldHeader
+                  title="Option Groups (Reusable)"
+                  type="h3"
+                  description="Create a group once (e.g. “Combo”, “Drink”, “Add Ons”) and attach it to multiple items. The reference name is only visible to you — customers only see the group name."
+                />
+                <Button variant="contained" sx={{ textTransform: 'none' }} disabled={!isEdit} onClick={() => openNewGroupEditor(false)}>
+                  Add Option Group
+                </Button>
+              </div>
+            </div>
+
+            {optionGroupsLibrary.length === 0 ? (
+              <Typography variant="body2" className={styles.muted}>
+                No option groups yet. Create one here, then attach it to items in the item editor.
+              </Typography>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {optionGroupsLibrary.map((g) => {
+                  const usedBy = groupUsageCountById[g.id] ?? 0;
+                  const soldOutCount = (g.options ?? []).filter((o) => o.soldOut).length;
+                  return (
+                    <div key={g.id} className={styles.categoryRow}>
+                      <div style={{ minWidth: 0 }}>
+                        <Typography variant="subtitle1" style={{ fontWeight: 800 }}>{g.referenceName}</Typography>
+                        <Typography variant="caption" className={styles.muted}>
+                          Customers see: &ldquo;{g.name}&rdquo; · {(g.options ?? []).length} option{(g.options ?? []).length === 1 ? '' : 's'}
+                          {soldOutCount > 0 ? ` (${soldOutCount} sold out)` : ''}
+                          {' · '}Used by {usedBy} item{usedBy === 1 ? '' : 's'}
+                        </Typography>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <IconButton size="small" disabled={!isEdit} onClick={() => openEditGroupEditor(g)} title="Edit group">
+                          <EditOutlinedIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          disabled={!isEdit}
+                          onClick={() => handleDeleteGroup(g)}
+                          title="Delete group"
+                        >
+                          <DeleteOutlineRoundedIcon fontSize="small" />
+                        </IconButton>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </ContentCard>
+
+          <ContentCard>
+            <div className={styles.sectionHeader}>
+              <div className={styles.row} style={{ justifyContent: 'space-between' }}>
+                <FieldHeader title="Items" type="h3" description="Add/edit/delete items with photo, pricing, and avg. make time. Use the arrows to set the order customers see. Manage sold-out in each item's Availability section." />
                 <Button variant="contained" sx={{ textTransform: 'none' }} disabled={!isEdit} onClick={openNewItemEditor}>
                   Add Item
                 </Button>
@@ -1001,7 +1394,7 @@ export default function MenuBuilder() {
                       <Typography variant="body2" className={styles.muted}>No items yet.</Typography>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        {catItems.map((item) => (
+                        {catItems.map((item, idx) => (
                           <div key={item.id} className={styles.itemRow}>
                             <div style={{ display: 'flex', gap: 12, alignItems: 'center', minWidth: 260 }}>
                               {item.photo?.url ? (
@@ -1013,17 +1406,43 @@ export default function MenuBuilder() {
                               <div style={{ minWidth: 190 }}>
                                 <Typography style={{ fontWeight: 900 }}>{item.name}</Typography>
                                 <Typography variant="caption" className={styles.muted}>
-                                  {shopAcceptance !== 'dine-in' && <>Takeaway: {formatMoney(item.takeawayBasePrice)}</>}
-                                  {shopAcceptance === 'both' && ' · '}
-                                  {shopAcceptance !== 'takeaway' && <>Dine-in: {formatMoney(item.dineInPrice)}</>}
+                                  {(() => {
+                                    // Show the customer-facing "from" price: base + cheapest required options.
+                                    const groups = (item.optionGroupIds ?? []).map((gid) => optionGroupsLibrary.find((g) => g.id === gid)).filter(Boolean);
+                                    const addOn = minRequiredAddOn(groups);
+                                    const prefix = groups.length > 0 ? 'From ' : '';
+                                    const takeawayFrom = normalizeNumber(item.takeawayBasePrice) + addOn;
+                                    const dineInFrom = normalizeNumber(item.dineInPrice) + addOn;
+                                    const showTakeaway = shopAcceptance !== 'dine-in';
+                                    const showDineIn = shopAcceptance !== 'takeaway';
+                                    if (showTakeaway && showDineIn) {
+                                      return takeawayFrom === dineInFrom
+                                        ? `${prefix}${formatMoney(takeawayFrom)}`
+                                        : `${prefix}${formatMoney(takeawayFrom)} / ${formatMoney(dineInFrom)}`;
+                                    }
+                                    return `${prefix}${formatMoney(showTakeaway ? takeawayFrom : dineInFrom)}`;
+                                  })()}
                                 </Typography>
                               </div>
                             </div>
 
                             <div className={styles.row} style={{ gap: 10 }}>
-                              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                                <Typography variant="caption" className={styles.muted}>Sold out</Typography>
-                                <Switch checked={!!item.soldOut} disabled={!isEdit} onChange={(e) => handleQuickSoldOut(item.id, e.target.checked)} size="small" />
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 64 }}>
+                                <Typography variant="caption" className={styles.muted}>Avg. time</Typography>
+                                <Typography variant="caption" style={{ fontWeight: 800 }}>
+                                  {item.prepTimeMinutes > 0 ? `${item.prepTimeMinutes} min` : '—'}
+                                </Typography>
+                              </div>
+                              {(!!item.soldOut || !!item.soldOutPreorder) && (
+                                <span className={styles.soldOutBadge}>Sold out</span>
+                              )}
+                              <div style={{ display: 'flex', flexDirection: 'column' }} title="Reorder within this category">
+                                <IconButton size="small" disabled={!isEdit || idx === 0} onClick={() => moveItemInCategory(catItems, idx, -1)} aria-label="Move up" style={{ padding: 2 }}>
+                                  <KeyboardArrowUpRoundedIcon fontSize="small" />
+                                </IconButton>
+                                <IconButton size="small" disabled={!isEdit || idx === catItems.length - 1} onClick={() => moveItemInCategory(catItems, idx, 1)} aria-label="Move down" style={{ padding: 2 }}>
+                                  <KeyboardArrowDownRoundedIcon fontSize="small" />
+                                </IconButton>
                               </div>
                               <IconButton size="small" disabled={!isEdit} onClick={(e) => openItemMenu(e, item.id)}>
                                 <SettingsRoundedIcon fontSize="small" />
@@ -1141,6 +1560,7 @@ export default function MenuBuilder() {
                                     ) : (
                                       isAvailableDineIn ? <>Dine-in: {formatMoney(displayedTotal)}</> : null
                                     )}
+                                    {item.prepTimeMinutes > 0 ? <> · ~{item.prepTimeMinutes} min</> : null}
                                   </Typography>
                                 </div>
                               </div>
@@ -1400,7 +1820,7 @@ export default function MenuBuilder() {
                 .map((ci, idx) => {
                 const item = items.find((x) => x.id === ci.itemId);
                 const selections = ci.selections ?? {};
-                const selectionParts = (item?.optionGroups ?? []).flatMap((g) => {
+                const selectionParts = resolveItemGroups(item).flatMap((g) => {
                   const gSel = selections[g.id] ?? {};
                   const picked = Object.entries(gSel).filter(([, q]) => q > 0);
                   if (!picked.length) return [];
@@ -1478,8 +1898,8 @@ export default function MenuBuilder() {
         <div style={{ padding: '12px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
           {selectedItem ? (
             <>
-              {(selectedItem.optionGroups ?? []).length ? (
-                (selectedItem.optionGroups ?? []).map((g) => {
+              {selectedItemGroups.length ? (
+                selectedItemGroups.map((g) => {
                   const pick = normalizeNumber(g.pick ?? 0);
                   const required = !!g.required;
                   const gSel = selectedGroupOptionQtys[g.id] ?? {};
@@ -1501,10 +1921,12 @@ export default function MenuBuilder() {
                           const qty = gSel[o.id] ?? 0;
                           const maxQty = Math.max(1, normalizeNumber(o.maxQty ?? 1));
 
+                          const isOptionSoldOut = !!o.soldOut;
+
                           const isMust = required && (pick > 0 || required);
                           if (isMust && (pick || 1) > 0) {
                             const checked = qty > 0;
-                            const disableCheck = !checked && !canSelectMore;
+                            const disableCheck = isOptionSoldOut || (!checked && !canSelectMore);
                             return (
                               <FormControlLabel
                                 key={o.id}
@@ -1531,22 +1953,24 @@ export default function MenuBuilder() {
                                   />
                                 }
                                 label={
-                                  <span>
+                                  <span style={isOptionSoldOut ? { opacity: 0.55 } : undefined}>
                                     {o.name}
                                     {o.additionalPrice ? ` (+${formatMoney(o.additionalPrice)})` : ''}
+                                    {isOptionSoldOut ? <span className={styles.soldOutBadge} style={{ marginLeft: 8 }}>Sold out</span> : null}
                                   </span>
                                 }
                               />
                             );
                           }
 
-                          const canIncrease = qty < maxQty && (pick === 0 || selectedCount < pick || qty > 0);
+                          const canIncrease = !isOptionSoldOut && qty < maxQty && (pick === 0 || selectedCount < pick || qty > 0);
                           return (
                             <div key={o.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                              <span style={{ flex: 1 }}>
+                              <span style={{ flex: 1, ...(isOptionSoldOut ? { opacity: 0.55 } : {}) }}>
                                 {o.name}
                                 {o.additionalPrice ? ` (+${formatMoney(o.additionalPrice)} each` : ''}
                                 {o.additionalPrice && maxQty > 1 ? `, Max: ${maxQty})` : o.additionalPrice ? ')' : ''}
+                                {isOptionSoldOut ? <span className={styles.soldOutBadge} style={{ marginLeft: 8 }}>Sold out</span> : null}
                               </span>
                               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                 <Button
@@ -1589,6 +2013,13 @@ export default function MenuBuilder() {
                   No options for this item.
                 </Typography>
               )}
+
+              {selectedItem.prepTimeMinutes > 0 ? (
+                <div className={styles.breakdownLine}>
+                  <span className={styles.muted}>Est. make time</span>
+                  <span style={{ fontWeight: 800 }}>~{selectedItem.prepTimeMinutes} min</span>
+                </div>
+              ) : null}
 
               {previewPricing ? <div>{renderPricingBreakdown(previewPricing, customerMode)}</div> : null}
 
@@ -1687,7 +2118,7 @@ export default function MenuBuilder() {
             {shopAcceptance !== 'takeaway' && (
               <TextField
                 type="number"
-                label="Dine-in Price (SGD $)"
+                label="Price (SGD $)"
                 fullWidth
                 size="small"
                 value={itemEditor.dineInPrice}
@@ -1695,6 +2126,16 @@ export default function MenuBuilder() {
                 inputProps={{ min: 0, step: 0.01 }}
               />
             )}
+            <TextField
+              type="number"
+              label="Avg. make time (minutes)"
+              fullWidth
+              size="small"
+              value={itemEditor.prepTimeMinutes}
+              onChange={(e) => setItemEditorField({ prepTimeMinutes: Math.max(0, normalizeNumber(e.target.value)) })}
+              inputProps={{ min: 0, step: 1 }}
+              helperText="Used to estimate waiting time — not shown to customers"
+            />
           </div>
 
           <div className={styles.dividerLine} />
@@ -1714,217 +2155,401 @@ export default function MenuBuilder() {
 
           <div className={styles.dividerLine} />
 
-          <FieldHeader title="Toggles" type="h4" />
+          <FieldHeader
+            title="Option Groups"
+            type="h4"
+            description="Add choices to this item (e.g. size, add-ons). Create a new group, or add one you've already made — groups can be reused across items."
+          />
 
+          {(() => {
+            const attachedIds = itemEditor.optionGroupIds ?? [];
+            const attached = attachedIds.map((gid) => optionGroupsLibrary.find((g) => g.id === gid)).filter(Boolean);
+            const available = optionGroupsLibrary.filter((g) => !attachedIds.includes(g.id));
+            const attach = (gid) => setItemEditorField({ optionGroupIds: [...attachedIds, gid] });
+            const detach = (gid) => setItemEditorField({ optionGroupIds: attachedIds.filter((x) => x !== gid) });
+            const groupSummary = (g) => {
+              const n = (g.options ?? []).length;
+              const soldOutCount = (g.options ?? []).filter((o) => o.soldOut).length;
+              const min = normalizeNumber(g.min ?? (g.required ? 1 : 0));
+              const max = normalizeNumber(g.pick ?? 0);
+              let rule = '';
+              if (min > 0 && max > 0) rule = min === max ? ` · Choose ${min}` : ` · Choose ${min}–${max}`;
+              else if (min > 0) rule = ` · Choose at least ${min}`;
+              else if (max > 0) rule = ` · Up to ${max}`;
+              return `Customers see: “${g.name}” · ${n} option${n === 1 ? '' : 's'}${soldOutCount > 0 ? ` (${soldOutCount} sold out)` : ''}${rule}`;
+            };
+
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {attached.length === 0 ? (
+                  <Typography variant="body2" className={styles.muted}>No option groups added to this item yet.</Typography>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {attached.map((g) => (
+                      <div key={g.id} style={{ border: '1px solid rgba(0,0,0,0.1)', borderRadius: 10, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, background: '#fafafa' }}>
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
+                          title="Edit this option group"
+                          onClick={() => openEditGroupEditor(g)}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openEditGroupEditor(g); } }}
+                        >
+                          <span style={{ fontWeight: 800 }}>{g.referenceName}</span>
+                          <Typography variant="caption" className={styles.muted} component="span" style={{ display: 'block' }}>{groupSummary(g)}</Typography>
+                        </div>
+                        <IconButton size="small" onClick={() => openEditGroupEditor(g)} title="Edit group">
+                          <EditOutlinedIcon fontSize="small" />
+                        </IconButton>
+                        <Button size="small" color="error" sx={{ textTransform: 'none' }} onClick={() => detach(g.id)}>Remove</Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  {available.length > 0 && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<AddCircleOutlineRoundedIcon fontSize="small" />}
+                      sx={{ textTransform: 'none' }}
+                      onClick={(e) => setAddGroupMenuAnchor(e.currentTarget)}
+                    >
+                      Add existing group
+                    </Button>
+                  )}
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<AddCircleOutlineRoundedIcon fontSize="small" />}
+                    sx={{ textTransform: 'none' }}
+                    onClick={() => openNewGroupEditor(true)}
+                  >
+                    Create new option group
+                  </Button>
+                </div>
+
+                <Menu
+                  anchorEl={addGroupMenuAnchor}
+                  open={!!addGroupMenuAnchor}
+                  onClose={() => setAddGroupMenuAnchor(null)}
+                  slotProps={{ paper: { style: { maxHeight: 340, maxWidth: 440 } } }}
+                >
+                  {available.map((g) => (
+                    <MenuItem
+                      key={g.id}
+                      onClick={() => { attach(g.id); setAddGroupMenuAnchor(null); }}
+                      style={{ display: 'block', whiteSpace: 'normal' }}
+                    >
+                      <div style={{ fontWeight: 700 }}>{g.referenceName}</div>
+                      <Typography variant="caption" className={styles.muted}>{groupSummary(g)}</Typography>
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </div>
+            );
+          })()}
+
+          <div className={styles.dividerLine} />
+
+          <FieldHeader title="Display" type="h4" />
+          <FormControlLabel
+            style={{ margin: 0 }}
+            control={<Switch checked={!!itemEditor.featured} onChange={(e) => setItemEditorField({ featured: e.target.checked })} />}
+            label={'Featured — show a "Popular" badge on this item'}
+          />
+
+          <div className={styles.dividerLine} />
+
+          <FieldHeader
+            title="Availability"
+            type="h4"
+            description="Control when and how this item can be ordered."
+          />
           <div className={styles.row} style={{ gap: 8, flexWrap: 'wrap' }}>
-            <FormControlLabel
-              control={<Switch checked={!!itemEditor.soldOut} onChange={(e) => setItemEditorField({ soldOut: e.target.checked })} />}
-              label="Sold out"
+            {orderMode !== 'preorder_only' && (
+              <FormControlLabel
+                control={<Switch checked={!!itemEditor.soldOut} onChange={(e) => setItemEditorField({ soldOut: e.target.checked })} />}
+                label={orderMode === 'today_and_preorder' ? 'Sold out (today)' : 'Sold out'}
+              />
+            )}
+            {(orderMode === 'today_and_preorder' || orderMode === 'preorder_only') && (
+              <FormControlLabel
+                control={<Switch checked={!!itemEditor.soldOutPreorder} onChange={(e) => setItemEditorField({ soldOutPreorder: e.target.checked })} />}
+                label={orderMode === 'today_and_preorder' ? 'Sold out (pre-order)' : 'Sold out'}
+              />
+            )}
+            {shopAcceptance === 'both' && (
+              <>
+                <FormControlLabel
+                  control={<Switch checked={!!itemEditor.availableTakeaway} onChange={(e) => setItemEditorField({ availableTakeaway: e.target.checked })} />}
+                  label="Available for takeaway"
+                />
+                <FormControlLabel
+                  control={<Switch checked={!!itemEditor.availableDineIn} onChange={(e) => setItemEditorField({ availableDineIn: e.target.checked })} />}
+                  label="Available for dine-in"
+                />
+              </>
+            )}
+          </div>
+
+          <div className={styles.dividerLine} />
+
+          {(() => {
+            const groups = (itemEditor.optionGroupIds ?? []).map((gid) => optionGroupsLibrary.find((g) => g.id === gid)).filter(Boolean);
+            const addOn = minRequiredAddOn(groups);
+            const takeawayFrom = normalizeNumber(itemEditor.takeawayBasePrice) + addOn;
+            const dineInFrom = normalizeNumber(itemEditor.dineInPrice) + addOn;
+            const showTakeaway = shopAcceptance !== 'dine-in';
+            const showDineIn = shopAcceptance !== 'takeaway';
+            return (
+              <div style={{ background: '#f4f8ff', border: '1px solid #FFE6D5', borderRadius: 10, padding: '10px 14px' }}>
+                <Typography variant="caption" className={styles.muted} style={{ fontWeight: 700, display: 'block' }}>
+                  Lowest price customers see{addOn > 0 ? ' — includes the cheapest required options' : ''}
+                </Typography>
+                <Typography style={{ fontWeight: 900, fontSize: '1.05rem' }}>
+                  {showTakeaway && showDineIn
+                    ? `Takeaway from ${formatMoney(takeawayFrom)} · Dine-in from ${formatMoney(dineInFrom)}`
+                    : showTakeaway
+                      ? `From ${formatMoney(takeawayFrom)}`
+                      : `From ${formatMoney(dineInFrom)}`}
+                </Typography>
+              </div>
+            );
+          })()}
+        </div>
+      </DialogPopup>
+
+      <DialogPopup
+        title={groupEditor?.id ? 'Edit Option Group' : 'Add Option Group'}
+        isOpen={isGroupEditorOpen}
+        setIsOpen={setIsGroupEditorOpen}
+        actionTitle="Save"
+        actionDisabled={!groupEditor?.referenceName?.trim() || !groupEditor?.name?.trim()}
+        onSubmit={handleGroupEditorSubmit}
+        maxWidth="md"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, padding: '8px 24px' }}>
+          <FieldHeader
+            title="Group details"
+            type="h4"
+            description="A reusable set of choices (e.g. size, add-ons) you can attach to many items. Customers see the group name and its options."
+          />
+
+          {groupEditor?.id && (groupUsageCountById[groupEditor.id] ?? 0) > 0 ? (
+            <Alert severity="warning">
+              Changes here apply to all {groupUsageCountById[groupEditor.id]} item{(groupUsageCountById[groupEditor.id] ?? 0) === 1 ? '' : 's'} that use this group.
+            </Alert>
+          ) : null}
+
+          <div className={styles.row} style={{ gap: 16 }}>
+            <TextField
+              label="Group name"
+              fullWidth
+              size="small"
+              value={groupEditor.name ?? ''}
+              onChange={(e) => setGroupEditorField({ name: e.target.value })}
+              placeholder="e.g. Choose your size"
+              helperText="Shown to customers"
             />
-            <FormControlLabel
-              control={<Switch checked={!!itemEditor.featured} onChange={(e) => setItemEditorField({ featured: e.target.checked })} />}
-              label="Featured"
+            <TextField
+              label="Internal reference"
+              fullWidth
+              size="small"
+              value={groupEditor.referenceName ?? ''}
+              onChange={(e) => setGroupEditorField({ referenceName: e.target.value })}
+              placeholder="e.g. Size (drinks)"
+              helperText="Only you see this — used to find & reuse the group"
             />
-            <FormControlLabel
-              control={<Switch checked={!!itemEditor.availableTakeaway} onChange={(e) => setItemEditorField({ availableTakeaway: e.target.checked })} />}
-              label="Takeaway"
+          </div>
+
+          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            <TextField
+              type="number"
+              label="Min choices"
+              size="small"
+              value={groupEditor.min ?? 0}
+              onChange={(e) => setGroupEditorField({ min: Math.max(0, normalizeNumber(e.target.value)) })}
+              inputProps={{ min: 0, step: 1 }}
+              style={{ width: 150 }}
+              helperText="0 = optional"
             />
-            <FormControlLabel
-              control={<Switch checked={!!itemEditor.availableDineIn} onChange={(e) => setItemEditorField({ availableDineIn: e.target.checked })} />}
-              label="Dine-in"
+            <TextField
+              type="number"
+              label="Max choices"
+              size="small"
+              value={groupEditor.pick ?? 0}
+              onChange={(e) => setGroupEditorField({ pick: Math.max(0, normalizeNumber(e.target.value)) })}
+              inputProps={{ min: 0, step: 1 }}
+              style={{ width: 150 }}
+              helperText="0 = no limit"
             />
           </div>
 
           <div className={styles.dividerLine} />
 
           <FieldHeader
-            title="Option Groups"
+            title="Options"
             type="h4"
-            description="Create groups like “Combo”, “Drink”, or “Add Ons (Optional)”."
+            description="The choices in this group, in the order customers see them (use the arrows to reorder). Mark one sold out to hide it everywhere this group is used."
           />
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {(itemEditor.optionGroups ?? []).map((g) => (
-              <div key={g.id} style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, padding: 12 }}>
-                <div className={styles.row} style={{ gap: 10, flexWrap: 'wrap', marginBottom: 18 }}>
-                  <TextField
-                    label="Group name"
-                    size="small"
-                    value={g.name ?? ''}
-                    onChange={(e) => {
-                      const name = e.target.value;
-                      setItemEditor((prev) => ({
-                        ...prev,
-                        optionGroups: (prev.optionGroups ?? []).map((x) => (x.id === g.id ? { ...x, name } : x)),
-                      }));
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {(groupEditor.options ?? []).length === 0 ? (
+              <Typography variant="body2" className={styles.muted}>No options yet — add your first choice below.</Typography>
+            ) : (
+              (groupEditor.options ?? []).map((o, idx) => {
+                const patchOption = (patch) => setGroupEditor((prev) => ({
+                  ...prev,
+                  options: (prev.options ?? []).map((y) => (y.id === o.id ? { ...y, ...patch } : y)),
+                }));
+                return (
+                  <div
+                    key={o.id}
+                    style={{
+                      border: '1px solid rgba(0,0,0,0.1)',
+                      borderRadius: 12,
+                      padding: '12px 14px',
+                      display: 'flex',
+                      gap: 12,
+                      alignItems: 'flex-start',
+                      background: '#fafafa',
                     }}
-                    style={{ flex: 1, minWidth: 220, marginBottom: 24 }}
-                  />
-                  <TextField
-                    type="number"
-                    label="Pick"
-                    size="small"
-                    value={g.pick ?? 0}
-                    onChange={(e) => {
-                      const pick = Math.max(0, normalizeNumber(e.target.value));
-                      setItemEditor((prev) => ({
-                        ...prev,
-                        optionGroups: (prev.optionGroups ?? []).map((x) => (x.id === g.id ? { ...x, pick } : x)),
-                      }));
-                    }}
-                    inputProps={{ min: 0, step: 1 }}
-                    style={{ width: 110 }}
-                    helperText="0 = unlimited"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={!!g.required}
-                        onChange={(e) => {
-                          const required = e.target.checked;
-                          setItemEditor((prev) => ({
-                            ...prev,
-                            optionGroups: (prev.optionGroups ?? []).map((x) => (x.id === g.id ? { ...x, required } : x)),
-                          }));
-                        }}
-                      />
-                    }
-                    label="MUST"
-                    style={{ marginBottom: 24 }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
-                  {(g.options ?? []).map((o) => (
-                    <div key={o.id} className={styles.row} style={{ gap: 10, flexWrap: 'nowrap', alignItems: 'center' }}>
+                  >
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 2 }} title="Reorder option">
+                      <IconButton size="small" disabled={idx === 0} onClick={() => moveGroupOption(idx, -1)} aria-label="Move option up" style={{ padding: 2 }}>
+                        <KeyboardArrowUpRoundedIcon fontSize="small" />
+                      </IconButton>
+                      <Typography variant="caption" className={styles.muted} style={{ fontWeight: 800 }}>{idx + 1}</Typography>
+                      <IconButton size="small" disabled={idx === (groupEditor.options ?? []).length - 1} onClick={() => moveGroupOption(idx, 1)} aria-label="Move option down" style={{ padding: 2 }}>
+                        <KeyboardArrowDownRoundedIcon fontSize="small" />
+                      </IconButton>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                       <TextField
                         label="Option name"
                         size="small"
+                        fullWidth
                         value={o.name ?? ''}
-                        onChange={(e) => {
-                          const name = e.target.value;
-                          setItemEditor((prev) => ({
-                            ...prev,
-                            optionGroups: (prev.optionGroups ?? []).map((x) => (
-                              x.id === g.id
-                                ? { ...x, options: (x.options ?? []).map((y) => (y.id === o.id ? { ...y, name } : y)) }
-                                : x
-                            )),
-                          }));
-                        }}
-                        style={{ flex: 1, minWidth: 160 }}
+                        placeholder='e.g. "Large", "Extra shot"'
+                        onChange={(e) => patchOption({ name: e.target.value })}
                       />
+                      <IconButton
+                        size="small"
+                        color="error"
+                        title="Remove option"
+                        style={{ marginTop: 2 }}
+                        onClick={() => setGroupEditor((prev) => ({ ...prev, options: (prev.options ?? []).filter((y) => y.id !== o.id) }))}
+                      >
+                        <DeleteOutlineRoundedIcon fontSize="small" />
+                      </IconButton>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                       <TextField
                         type="number"
-                        label="Additional Price (SGD $)"
+                        label="Extra price (SGD $)"
                         size="small"
                         value={o.additionalPrice ?? 0}
-                        onChange={(e) => {
-                          const additionalPrice = normalizeNumber(e.target.value);
-                          setItemEditor((prev) => ({
-                            ...prev,
-                            optionGroups: (prev.optionGroups ?? []).map((x) => (
-                              x.id === g.id
-                                ? { ...x, options: (x.options ?? []).map((y) => (y.id === o.id ? { ...y, additionalPrice } : y)) }
-                                : x
-                            )),
-                          }));
-                        }}
+                        onChange={(e) => patchOption({ additionalPrice: normalizeNumber(e.target.value) })}
                         inputProps={{ min: 0, step: 0.01 }}
-                        style={{ width: 158 }}
+                        style={{ width: 180 }}
+                        helperText="Added to the item price"
                       />
                       <TextField
                         type="number"
-                        label="Max servings"
+                        label="Max per order"
                         size="small"
                         value={o.maxQty ?? 1}
-                        onChange={(e) => {
-                          const maxQty = Math.max(1, normalizeNumber(e.target.value));
-                          setItemEditor((prev) => ({
-                            ...prev,
-                            optionGroups: (prev.optionGroups ?? []).map((x) => (
-                              x.id === g.id
-                                ? { ...x, options: (x.options ?? []).map((y) => (y.id === o.id ? { ...y, maxQty } : y)) }
-                                : x
-                            )),
-                          }));
-                        }}
+                        onChange={(e) => patchOption({ maxQty: Math.max(1, normalizeNumber(e.target.value)) })}
                         inputProps={{ min: 1, step: 1 }}
-                        style={{ width: 98 }}
-                        helperText=""
+                        style={{ width: 150 }}
+                        helperText="How many a customer can add"
                       />
-                      <Button
-                        size="small"
-                        variant="text"
-                        color="error"
-                        onClick={() => {
-                          setItemEditor((prev) => ({
-                            ...prev,
-                            optionGroups: (prev.optionGroups ?? []).map((x) => (
-                              x.id === g.id ? { ...x, options: (x.options ?? []).filter((y) => y.id !== o.id) } : x
-                            )),
-                          }));
-                        }}
-                      >
-                        Remove
-                      </Button>
                     </div>
-                  ))}
 
-                  <div className={styles.row} style={{ justifyContent: 'space-between' }}>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => {
-                        setItemEditor((prev) => ({
-                          ...prev,
-                          optionGroups: (prev.optionGroups ?? []).map((x) => (
-                            x.id === g.id
-                              ? { ...x, options: [...(x.options ?? []), { id: makeId(), name: '', additionalPrice: 0, maxQty: 1 }] }
-                              : x
-                          )),
-                        }));
-                      }}
-                    >
-                      Add option
-                    </Button>
-
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => {
-                        setItemEditor((prev) => ({
-                          ...prev,
-                          optionGroups: (prev.optionGroups ?? []).filter((x) => x.id !== g.id),
-                        }));
-                      }}
-                      title="Remove group"
-                    >
-                      <DeleteOutlineRoundedIcon fontSize="small" />
-                    </IconButton>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                      <Typography variant="caption" className={styles.muted} style={{ fontWeight: 700 }}>Availability</Typography>
+                      {orderMode !== 'preorder_only' && (
+                        <FormControlLabel
+                          style={{ marginRight: 0 }}
+                          control={<Switch size="small" checked={!!o.soldOut} onChange={(e) => patchOption({ soldOut: e.target.checked })} />}
+                          label={<Typography variant="caption">{orderMode === 'today_and_preorder' ? 'Sold out (today)' : 'Sold out'}</Typography>}
+                        />
+                      )}
+                      {(orderMode === 'today_and_preorder' || orderMode === 'preorder_only') && (
+                        <FormControlLabel
+                          style={{ marginRight: 0 }}
+                          control={<Switch size="small" checked={!!o.soldOutPreorder} onChange={(e) => patchOption({ soldOutPreorder: e.target.checked })} />}
+                          label={<Typography variant="caption">{orderMode === 'today_and_preorder' ? 'Sold out (pre-order)' : 'Sold out'}</Typography>}
+                        />
+                      )}
+                    </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                );
+              })
+            )}
 
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={() => {
-                setItemEditor((prev) => ({
-                  ...prev,
-                  optionGroups: [
-                    ...(prev.optionGroups ?? []),
-                    { id: makeId(), name: '', required: false, pick: 0, options: [] },
-                  ],
-                }));
-              }}
-            >
-              Add option group
-            </Button>
+            <div>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<AddCircleOutlineRoundedIcon fontSize="small" />}
+                onClick={() => {
+                  setGroupEditor((prev) => ({
+                    ...prev,
+                    options: [...(prev.options ?? []), { id: makeId(), name: '', additionalPrice: 0, maxQty: 1, soldOut: false, soldOutPreorder: false }],
+                  }));
+                }}
+              >
+                Add option
+              </Button>
+            </div>
           </div>
         </div>
       </DialogPopup>
+
+      <DialogPopup
+        title="Cannot delete option group"
+        isOpen={!!blockedDeleteGroup}
+        setIsOpen={(open) => { if (!open) setBlockedDeleteGroup(null); }}
+        actionTitle="OK"
+        onSubmit={(e) => { e.preventDefault(); setBlockedDeleteGroup(null); }}
+      >
+        <div style={{ padding: '16px 24px' }}>
+          <Typography variant="body1">
+            <strong>&ldquo;{blockedDeleteGroup?.referenceName}&rdquo;</strong> is still attached to {blockedDeleteGroup?.usedBy} item{blockedDeleteGroup?.usedBy === 1 ? '' : 's'}.
+            Detach it from all items before deleting it.
+          </Typography>
+        </div>
+      </DialogPopup>
+
+      <Dialog open={!!pendingGroupSave} onClose={() => setPendingGroupSave(null)}>
+        <DialogTitle>Update shared option group?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            <strong>&ldquo;{pendingGroupSave?.referenceName}&rdquo;</strong> is used by{' '}
+            {pendingGroupSave ? (groupUsageCountById[pendingGroupSave.id] ?? 0) : 0} item
+            {pendingGroupSave && (groupUsageCountById[pendingGroupSave.id] ?? 0) === 1 ? '' : 's'}.
+            Saving these changes will update <strong>every item</strong> that uses this group.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPendingGroupSave(null)} style={{ textTransform: 'none' }}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            style={{ textTransform: 'none' }}
+            onClick={() => applyGroupSave(pendingGroupSave)}
+          >
+            Update all items
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog open={showPublishConfirm} onClose={() => setShowPublishConfirm(false)}>
         <DialogTitle>Publish Update for Menu</DialogTitle>

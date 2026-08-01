@@ -57,7 +57,7 @@ function YAxisTick({ x, y, payload }) {
 
 /** Distinct colors for bars — one per reward/product. */
 const BAR_COLORS = [
-  '#1976d2', '#2e7d32', '#ed6c02', '#9c27b0', '#0288d1',
+  '#E4550D', '#2e7d32', '#ed6c02', '#9c27b0', '#0288d1',
   '#388e3c', '#d32f2f', '#7b1fa2', '#00796b', '#f57c00',
   '#5d4037', '#455a64', '#c2185b', '#0097a7', '#689f38',
 ];
@@ -106,7 +106,7 @@ function buildMergedChartData(collectedData, redeemedData, rewardIdToName = {}) 
     const collected = collectedMap[key] ?? 0;
     const redeemed = redeemedMap[key] ?? 0; // missing in redeemed response => 0
     // Use a single blue color for all rewards; Redeemed uses same blue with lower opacity.
-    const fill = '#1976d2';
+    const fill = '#E4550D';
     items.push({
       name,
       label,

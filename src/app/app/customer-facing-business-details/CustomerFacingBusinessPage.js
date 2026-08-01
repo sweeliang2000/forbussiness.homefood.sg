@@ -7,6 +7,7 @@ import DragDropImageUploader from '@/components/Form Components/DragDropImageUpl
 import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
 import { TextField, InputAdornment, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 import LocationSection from './LocationSecion';
+import ShopLinkSection from './ShopLinkSection';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
@@ -321,14 +322,16 @@ const CustomerFacingBusinessPage = () => {
                     // Store initial values for comparison
                     initialValuesRef.current = { ...loadedValues };
                     
-                    const loadedThumbnails = data.thumbnail_signedUrl !== "" 
-                        ? [{ name: data.thumbnail_signedUrl, file: null, url: data.thumbnail_signedUrl }]
+                    const thumbnailUrl = sanitize(data.thumbnail_signedUrl);
+                    const loadedThumbnails = thumbnailUrl
+                        ? [{ name: 'Shop thumbnail', file: null, url: thumbnailUrl }]
                         : [];
                     setThumbnailImages(loadedThumbnails);
                     initialThumbnailImagesRef.current = JSON.parse(JSON.stringify(loadedThumbnails));
                     
-                    const loadedBanners = data.banner_signedUrl !== "" 
-                        ? [{ name: data.banner_signedUrl, file: null, url: data.banner_signedUrl }]
+                    const bannerUrl = sanitize(data.banner_signedUrl);
+                    const loadedBanners = bannerUrl
+                        ? [{ name: 'Shop banner', file: null, url: bannerUrl }]
                         : [];
                     setBannerImages(loadedBanners);
                     initialBannerImagesRef.current = JSON.parse(JSON.stringify(loadedBanners));
@@ -564,7 +567,7 @@ const CustomerFacingBusinessPage = () => {
                                 <>
                                     Your release has been approved. It will be released on the date you stated on{' '}
                                     <Link href="/app/release/submission">Release Submission Page</Link>.
-                                    {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@collbine.com.
+                                    {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@homefood.sg.
                                 </>
                             )
                             : null
@@ -644,6 +647,8 @@ const CustomerFacingBusinessPage = () => {
                                         onChange={(event) => { inputChangeHandler(WEBSITE, event.target.value) }}
                                     />
                                 </ContentCard>
+
+                                <ShopLinkSection shopName={enteredValues.displayName} className={styles.content} />
 
                                 <ContentCard className={styles.content}>
                                     <FieldHeader
@@ -765,7 +770,7 @@ const CustomerFacingBusinessPage = () => {
                                     <div className={styles.fieldContainer}>
                                         <FieldHeader
                                             title='Thumbnail / Featured Image'
-                                            description='Aspect ratio: 1:1. Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                                            description='Aspect ratio: 1:1. Include one or more keywords that describe your business. Keywords make HomeFood App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
                                             type='h3'
                                         />
 
@@ -784,7 +789,7 @@ const CustomerFacingBusinessPage = () => {
                                     <div className={styles.fieldContainer}>
                                         <FieldHeader
                                             title='Banner Image'
-                                            description='Aspect ratio: 4:1. Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                                            description='Aspect ratio: 4:1. Include one or more keywords that describe your business. Keywords make HomeFood App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
                                             type='h3'
                                         />
 
@@ -802,7 +807,7 @@ const CustomerFacingBusinessPage = () => {
 
                                     <FormTextField
                                         title="Keywords*"
-                                        subtitle='Include one or more keywords that describe your business. Keywords make Collbine App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
+                                        subtitle='Include one or more keywords that describe your business. Keywords make HomeFood App search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.'
                                         id={KEYWORDS}
                                         name={KEYWORDS}
                                         helperText={helperText.keywords}

@@ -2,30 +2,30 @@ import ContentClient from './pageClient';
 
 /** @type {import('next').Metadata} */
 export const metadata = {
-  title: 'Subscription Dashboard | Collbine for Business',
+  title: 'Subscription Dashboard | HomeFood for Business',
   description:
-    'Get updates and quick information in your Collbine for Business dashboard, including subscription status and a release checklist. Stay on track.',
+    'Get updates and quick information in your HomeFood for Business dashboard, including subscription status and a release checklist. Stay on track.',
   keywords: [
-    'Collbine for Business',
+    'HomeFood for Business',
     'subscription dashboard',
-    'Collbine updates',
+    'HomeFood updates',
     'release checklist',
     'stamp management',
     'loyalty terminal',
     'manage billing',
   ],
   openGraph: {
-    title: 'Subscription Dashboard | Collbine for Business',
+    title: 'Subscription Dashboard | HomeFood for Business',
     description:
-      'Get updates and quick information in your Collbine for Business dashboard, including subscription status and a release checklist. Stay on track.',
-    url: 'https://forbusiness.collbine.com/app',
-    siteName: 'Collbine for Business',
+      'Get updates and quick information in your HomeFood for Business dashboard, including subscription status and a release checklist. Stay on track.',
+    url: 'https://business.homefood.sg/app',
+    siteName: 'HomeFood for Business',
     images: [
       {
-        url: 'https://forbusiness.collbine.com/og-image.png',
+        url: 'https://business.homefood.sg/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Subscription Dashboard | Collbine for Business',
+        alt: 'Subscription Dashboard | HomeFood for Business',
       },
     ],
     type: 'website',
@@ -33,13 +33,13 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Subscription Dashboard | Collbine for Business',
+    title: 'Subscription Dashboard | HomeFood for Business',
     description:
-      'Get updates and quick information in your Collbine for Business dashboard, including subscription status and a release checklist. Stay on track.',
-    images: ['https://forbusiness.collbine.com/og-image.png'],
+      'Get updates and quick information in your HomeFood for Business dashboard, including subscription status and a release checklist. Stay on track.',
+    images: ['https://business.homefood.sg/og-image.png'],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: 'https://forbusiness.collbine.com/app' },
+  alternates: { canonical: 'https://business.homefood.sg/app' },
 };
 
 export default function Content() {

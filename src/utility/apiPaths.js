@@ -66,10 +66,14 @@ export const PUBLISH_SHOP_SETTINGS_UPDATE = '/api/data/publish/shop-settings';
 export const CALENDAR_OVERRIDES = '/api/data/calendarOverrides';
 export const CALENDAR_OVERRIDE = '/api/data/calendarOverride';
 
+export const SHOP_SLUG = '/api/data/shop-slug';
+export const RATINGS = '/api/data/ratings';
+export const ACTIVITY_LOG = '/api/data/activity-log';
 export const PAYMENT_SETTINGS = '/api/data/paymentSettings';
 export const PUBLISH_PAYMENT_SETTINGS_UPDATE = '/api/data/publish/payment-settings';
 
 export const SHOP_ORDERS = '/api/data/shop-orders';
+export const PREORDER_COUNTS = '/api/data/shop-orders/preorder-counts';
 
 // Terminal / POS
 export const WALK_IN_ORDER = '/api/data/walk-in-order';

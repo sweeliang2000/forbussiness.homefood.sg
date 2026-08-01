@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
   DialogActions,
+  FormControlLabel,
   Alert,
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
@@ -71,6 +73,8 @@ export default function PaymentsSetupPage() {
   const [isPublishLoading, setIsPublishLoading] = useState(false);
   const [isPublishSuccess, setIsPublishSuccess] = useState(false);
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+  // Merchant must acknowledge that their PayNow details are correct before publishing.
+  const [ackPaynow, setAckPaynow] = useState(false);
   const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
@@ -151,6 +155,7 @@ export default function PaymentsSetupPage() {
 
   const handleConfirmPublish = async () => {
     setShowPublishConfirm(false);
+    setAckPaynow(false);
     setIsPublishLoading(true);
     setIsPublishSuccess(false);
     try {
@@ -188,7 +193,7 @@ export default function PaymentsSetupPage() {
                 Your release has been approved. It will be released on the date you stated on{' '}
                 <Link href="/app/release/submission">Release Submission Page</Link>. If you wish to
                 change the date, cancel and re-send for approval. For any enquiry or urgent release,
-                please email support@collbine.com.
+                please email support@homefood.sg.
               </>
             ) : null
           }
@@ -220,7 +225,7 @@ export default function PaymentsSetupPage() {
                   loadingPosition="start"
                   startIcon={isPublishSuccess ? <FaCheck /> : undefined}
                   disabled={isPublishSuccess || !hasChanges || hasUnsavedEdits}
-                  onClick={() => setShowPublishConfirm(true)}
+                  onClick={() => { setAckPaynow(false); setShowPublishConfirm(true); }}
                   sx={{ textTransform: 'none' }}
                 >
                   {isPublishSuccess ? 'Update Published' : 'Publish Update'}
@@ -260,13 +265,40 @@ export default function PaymentsSetupPage() {
         />
       </ContentCard>
 
-      <Dialog open={showPublishConfirm} onClose={() => setShowPublishConfirm(false)}>
+      <Dialog open={showPublishConfirm} onClose={() => setShowPublishConfirm(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Publish Payment Settings Update</DialogTitle>
         <DialogContent>
-          <DialogContentText>
+          <DialogContentText sx={{ mb: paymentMethod === 'manual' ? 2 : 0 }}>
             Are you sure you want to publish your payment settings? This will make your latest payment
             configuration live for customers immediately.
           </DialogContentText>
+
+          {paymentMethod === 'manual' && (
+            <>
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                Please double-check your PayNow details below. HomeFood cannot verify them — if the{' '}
+                {paynow.proxyType === 'MOBILE' ? 'mobile number' : 'UEN'} is incorrect, customer payments
+                may go to the wrong account, and any resulting issues are your responsibility.
+              </Alert>
+
+              <div className={styles.confirmDetails}>
+                {paynow.proxyType === 'MOBILE' ? (
+                  <div><strong>PayNow mobile:</strong> +65 {paynow.mobile || '—'}</div>
+                ) : (
+                  <>
+                    <div><strong>PayNow UEN:</strong> {paynow.uen || '—'}</div>
+                    {paynow.companyName ? <div><strong>Company:</strong> {paynow.companyName}</div> : null}
+                  </>
+                )}
+              </div>
+
+              <FormControlLabel
+                sx={{ mt: 1.5, alignItems: 'flex-start' }}
+                control={<Checkbox checked={ackPaynow} onChange={(e) => setAckPaynow(e.target.checked)} sx={{ pt: 0 }} />}
+                label={`I confirm my PayNow ${paynow.proxyType === 'MOBILE' ? 'mobile number' : 'UEN'} above is correct and accept responsibility for it.`}
+              />
+            </>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowPublishConfirm(false)} sx={{ textTransform: 'none' }}>
@@ -275,7 +307,8 @@ export default function PaymentsSetupPage() {
           <Button
             onClick={handleConfirmPublish}
             variant="contained"
-            sx={{ textTransform: 'none', backgroundColor: 'var(--accent-color)', boxShadow: 'none', '&:hover': { backgroundColor: '#0d3d91', boxShadow: 'none' } }}
+            disabled={paymentMethod === 'manual' && !ackPaynow}
+            sx={{ textTransform: 'none', backgroundColor: 'var(--accent-color)', boxShadow: 'none', '&:hover': { backgroundColor: '#C2410C', boxShadow: 'none' } }}
           >
             Publish
           </Button>

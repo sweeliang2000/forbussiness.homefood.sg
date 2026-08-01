@@ -16,14 +16,14 @@
   width: 56px;
   height: 56px;
   border-radius: 18px;
-  background: rgba(37, 99, 235, 0.12);
+  background: rgba(228, 85, 13, 0.12);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .icon {
-  color: var(--accent-color, #2563EB) !important;
+  color: var(--accent-color, #E4550D) !important;
   font-size: 34px !important;
 }
 

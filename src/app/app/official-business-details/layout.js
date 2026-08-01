@@ -1,8 +1,8 @@
 /** @type {import('next').Metadata} */
 export const metadata = {
-  title: 'Official Business Details | Collbine for Business',
+  title: 'Official Business Details | HomeFood for Business',
   description:
-    'Enter your official business details to submit your office information to Collbine for verification. Your data stays securely private during review.',
+    'Enter your official business details to submit your office information to HomeFood for verification. Your data stays securely private during review.',
   keywords: [
     'official business details',
     'merchant verification',
@@ -10,21 +10,21 @@ export const metadata = {
     'company verification',
     'ACRA business address',
     'UEN verification',
-    'Collbine for Business',
+    'HomeFood for Business',
     'merchant onboarding',
   ],
   openGraph: {
-    title: 'Official Business Details | Collbine for Business',
+    title: 'Official Business Details | HomeFood for Business',
     description:
-      'Enter your official business details to submit your office information to Collbine for verification. Your data stays securely private during review.',
-    url: 'https://forbusiness.collbine.com/app/official-business-details',
-    siteName: 'Collbine for Business',
+      'Enter your official business details to submit your office information to HomeFood for verification. Your data stays securely private during review.',
+    url: 'https://business.homefood.sg/app/official-business-details',
+    siteName: 'HomeFood for Business',
     images: [
       {
-        url: 'https://forbusiness.collbine.com/og-image.png',
+        url: 'https://business.homefood.sg/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Official Business Details for Collbine for Business merchants',
+        alt: 'Official Business Details for HomeFood for Business merchants',
       },
     ],
     type: 'website',
@@ -32,14 +32,14 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Official Business Details | Collbine for Business',
+    title: 'Official Business Details | HomeFood for Business',
     description:
-      'Enter your official business details to submit your office information to Collbine for verification. Your data stays securely private during review.',
-    images: ['https://forbusiness.collbine.com/og-image.png'],
+      'Enter your official business details to submit your office information to HomeFood for verification. Your data stays securely private during review.',
+    images: ['https://business.homefood.sg/og-image.png'],
   },
   robots: { index: true, follow: true },
   alternates: {
-    canonical: 'https://forbusiness.collbine.com/app/official-business-details',
+    canonical: 'https://business.homefood.sg/app/official-business-details',
   },
 };
 

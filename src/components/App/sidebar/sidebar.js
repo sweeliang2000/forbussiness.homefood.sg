@@ -16,8 +16,8 @@ import { LuStamp } from 'react-icons/lu';
 import { Submenu } from './submenu/submenu';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import CollbineForBusiness from '../../CollbineForBusiness/CollbineForBusiness';
-import { SUBSCRIPTION_DATA } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
+import HomeFoodForBusiness from '../../HomeFoodForBusiness/HomeFoodForBusiness';
+import { findPlanByLookupKey } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
 import Shimmer from '../../Shimmer/Shimmer';
 import apiClient from '@/utility/api';
 import { CREATE_PORTAL_SESSION, SUBSCRIPTION_END_DATE } from '@/utility/apiPaths';
@@ -42,7 +42,7 @@ export default function Sidebar({
     const section = pathSegments[2]
     const subSection = pathSegments[3];
 
-    const subscriptionPlan = SUBSCRIPTION_DATA.find(plan => plan.lookup_key === subscriptionStatus);
+    const subscriptionPlan = findPlanByLookupKey(subscriptionStatus);
 
     const [sidebarMinimised, setSidebarMinimised] = useState(false);
     const [currentSelection, setCurrentSelection] = useState(MENU_ORDERS_TAB);
@@ -116,7 +116,7 @@ export default function Sidebar({
                 <ul className={`${styles.top} ${cancelDate ? styles.topWithBanner : ''}`}>
                     <li className={styles.logoLi}>
                         <Link className={styles.logoLink} href='/'>
-                            <CollbineForBusiness />
+                            <HomeFoodForBusiness />
                         </Link>
                         {/* <div className={styles.minimiseSidebar} onClick={toggleSidebar}>
                             <FaAnglesLeft className={sidebarMinimised ? styles.rotate : styles.reverseRotate} />
@@ -300,6 +300,20 @@ export default function Sidebar({
                         <Link href='/app/users-and-permissions'>
                             <RiUserSettingsLine className={styles.icon} />
                             <span>Users and permissions</span>
+                        </Link>
+                    </li>
+
+                    <li className={section == 'activity-log' ? styles.active : ''}>
+                        <Link href='/app/activity-log'>
+                            <RiNewspaperLine className={styles.icon} />
+                            <span>Activity Log</span>
+                        </Link>
+                    </li>
+
+                    <li className={section == 'ratings' ? styles.active : ''}>
+                        <Link href='/app/ratings'>
+                            <AiOutlineMessage className={styles.icon} />
+                            <span>Ratings and Reviews</span>
                         </Link>
                     </li>
 

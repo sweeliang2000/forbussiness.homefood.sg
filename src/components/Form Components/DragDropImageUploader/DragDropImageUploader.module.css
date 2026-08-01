@@ -7,14 +7,14 @@
 
 .card p {
     font-weight: bold;
-    color: #0086fe;
+    color: #F96A1B;
 }
 
 .card .dragArea {
     height: 150px;
     border-radius: 5px;
-    border: 2px dashed #0086fe;
-    color: #0086fe;
+    border: 2px dashed #F96A1B;
+    color: #F96A1B;
     background: #f4f3f9;
     display: flex;
     justify-content: center;
@@ -29,11 +29,11 @@
 }
 
 .card .select {
-    color: #5256ad;
+    color: #C2410C;
 }
 
 .card .select {
-    color: #5256ad;
+    color: #C2410C;
     margin-left: 5px;
     cursor: pointer;
     transition: 0.4s;

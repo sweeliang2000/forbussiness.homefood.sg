@@ -5,7 +5,7 @@ const PaymentsSection = () => {
     return (
         <section id="payments" className={styles.paySection}>
             <div className={styles.sectionHead}>
-                <Badge variant="blue">Payments &amp; settlement</Badge>
+                <Badge variant="brand">Payments &amp; settlement</Badge>
                 <h2 className={styles.sectionTitle}>You cook. We handle the money.</h2>
                 <p className={styles.sectionSub}>
                     Customers pay online with the methods they already use. You don&apos;t chase payments, you don&apos;t

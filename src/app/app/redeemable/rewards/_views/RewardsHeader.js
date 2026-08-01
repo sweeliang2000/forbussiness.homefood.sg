@@ -41,7 +41,7 @@ const RewardsHeader = ({
                 <Alert severity="success" className={styles.alert}>
                     Your release has been approved. It will be released on the date you stated on{' '}
                     <Link href="/app/release/submission">Release Submission Page</Link>.
-                    {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@collbine.com.
+                    {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@homefood.sg.
                 </Alert>
             )}
             {showUnderReview && (

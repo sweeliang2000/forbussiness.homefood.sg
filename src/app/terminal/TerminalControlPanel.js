@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { Button, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { IoAdd, IoRemove, IoBackspace } from 'react-icons/io5';
-import { BASE_URL_BACKEND } from '../../../config/config';
 import apiClient from '@/utility/api';
 import styles from './TerminalControlPanel.module.css';
 
@@ -98,9 +97,7 @@ const TerminalControlPanel = ({ phoneNumber, shopId, customerUserId, onSuccess, 
                 return;
             }
             
-            // Ensure proper URL construction (remove trailing slash from BASE_URL_BACKEND if present)
-            const baseUrl = BASE_URL_BACKEND.endsWith('/') ? BASE_URL_BACKEND.slice(0, -1) : BASE_URL_BACKEND;
-            const response = await fetch(`${baseUrl}/api/notifications/send-to-user`, {
+            const response = await fetch('/api/notifications/send-to-user', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -156,7 +153,7 @@ const TerminalControlPanel = ({ phoneNumber, shopId, customerUserId, onSuccess, 
 
                 console.log('Sending request to backend API:', requestBody);
 
-                const response = await fetch(`${BASE_URL_BACKEND}/api/mobile/processStampTransaction`, {
+                const response = await fetch('/api/mobile/processStampTransaction', {
                     method: 'POST',
                     credentials: 'include', // Include cookies for authentication
                     headers: {
@@ -610,4 +607,3 @@ const TerminalControlPanel = ({ phoneNumber, shopId, customerUserId, onSuccess, 
 };
 
 export default TerminalControlPanel;
-

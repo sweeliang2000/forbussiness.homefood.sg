@@ -9,7 +9,7 @@ const PricingSection = () => {
                 <Badge variant="orange">Early adopter offer</Badge>
                 <h2 className={styles.sectionTitle}>Join us early. Keep it free — for life.</h2>
                 <p className={styles.sectionSub}>
-                    Early adopter merchants pay nothing to use the Collbine platform. Ever. The only cost is the standard
+                    Early adopter merchants pay nothing to use the HomeFood platform. Ever. The only cost is the standard
                     payment processing fees — the same ones every online business pays.
                 </p>
             </div>
@@ -40,7 +40,8 @@ const PricingSection = () => {
                         <span className={styles.per}>/ month, forever</span>
                     </div>
                     <div className={styles.strike}>
-                        <s>S$29/mo</s> standard price after early adopter window
+                        <s>S$39.90/mo</s> standard Pro price after the early adopter window
+                        (S$49.90/mo if billed monthly)
                     </div>
                     <div className={styles.feeTable}>
                         <div className={styles.feeRow}>

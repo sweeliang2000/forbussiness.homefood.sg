@@ -77,7 +77,7 @@
 
 .addButton {
     padding: 8px 16px;
-    background-color: #1976d2;
+    background-color: #E4550D;
     color: white;
     border: none;
     border-radius: 4px;
@@ -87,7 +87,7 @@
 }
 
 .addButton:hover:not(:disabled) {
-    background-color: #1565c0;
+    background-color: #C2410C;
 }
 
 .addButton:disabled {

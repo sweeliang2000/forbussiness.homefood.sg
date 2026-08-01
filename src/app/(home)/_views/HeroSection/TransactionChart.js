@@ -56,9 +56,9 @@ const TransactionChart = () => {
                         <Line 
                             type="monotone" 
                             dataKey="transactions" 
-                            stroke="#6366f1" 
+                            stroke="#E4550D" 
                             strokeWidth={3}
-                            dot={{ fill: '#6366f1', r: 4 }}
+                            dot={{ fill: '#E4550D', r: 4 }}
                             activeDot={{ r: 6 }}
                         />
                     </LineChart>

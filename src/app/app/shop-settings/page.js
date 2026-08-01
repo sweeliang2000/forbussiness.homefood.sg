@@ -29,7 +29,7 @@ import { FaCheck } from 'react-icons/fa';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import apiClient from '@/utility/api';
-import { ORDERING_SETTINGS, CALENDAR_OVERRIDES, CALENDAR_OVERRIDE, RELEASE_STATUS, PUBLISH_SHOP_SETTINGS_UPDATE } from '@/utility/apiPaths';
+import { ORDERING_SETTINGS, CALENDAR_OVERRIDES, CALENDAR_OVERRIDE, RELEASE_STATUS, PUBLISH_SHOP_SETTINGS_UPDATE, PREORDER_COUNTS } from '@/utility/apiPaths';
 import Link from 'next/link';
 
 import styles from './ShopSettings.module.css';
@@ -112,8 +112,36 @@ export default function ShopSettingsPage() {
   const [viewMonth, setViewMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const currentMonthLabel = viewMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-  // Pre-orders come from a separate orders endpoint — placeholder until orders API is built
-  const preOrdersByDate = useMemo(() => ({}), []);
+  // Active pre-orders per date key, loaded for each viewed month.
+  const [preOrdersByDate, setPreOrdersByDate] = useState({});
+
+  const loadPreorderCounts = useCallback(async (month) => {
+    try {
+      const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
+      const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0, 23, 59, 59, 999);
+      const res = await apiClient.get(PREORDER_COUNTS, {
+        params: { from: monthStart.toISOString(), to: monthEnd.toISOString() },
+      });
+      const scheduled = res.data?.data?.scheduled ?? [];
+      // Zero out every day of the fetched month, then count — so cancelled
+      // pre-orders don't leave stale counts behind.
+      const monthCounts = {};
+      for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
+        monthCounts[dateKey(d)] = 0;
+      }
+      for (const iso of scheduled) {
+        const key = dateKey(new Date(iso));
+        monthCounts[key] = (monthCounts[key] ?? 0) + 1;
+      }
+      setPreOrdersByDate((prev) => ({ ...prev, ...monthCounts }));
+    } catch {
+      // Non-fatal: calendar still works without pre-order counts
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPreorderCounts(viewMonth);
+  }, [viewMonth, loadPreorderCounts]);
 
   const [calendarOverrides, setCalendarOverrides] = useState({});
 
@@ -144,6 +172,8 @@ export default function ShopSettingsPage() {
         setBookingDaysAhead(loaded.bookingDaysAhead);
         setMinNoticeHours(loaded.minNoticeHours);
         setSavedSettings(loaded);
+        // Show the Publish button as available on load if there are saved-but-unpublished changes.
+        setHasPublishableChanges(!!data?.isChanges);
         if (data?.isEdit !== undefined) setIsEdit(data.isEdit);
       } catch (err) {
         if (err.response?.status === 404) {
@@ -368,7 +398,7 @@ export default function ShopSettingsPage() {
                 <>
                   Your release has been approved. It will be released on the date you stated on{' '}
                   <Link href="/app/release/submission">Release Submission Page</Link>.
-                  {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@collbine.com.
+                  {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@homefood.sg.
                 </>
               )
               : null
@@ -509,6 +539,11 @@ export default function ShopSettingsPage() {
                 <Typography sx={{ fontWeight: 800, fontSize: 14, marginBottom: 1 }}>Order mode</Typography>
                 <RadioGroup value={orderMode} onChange={(e) => setOrderMode(e.target.value)}>
                   <FormControlLabel
+                    value="today_only"
+                    control={<Radio size="small" disabled={!isEdit} />}
+                    label="Order Today"
+                  />
+                  <FormControlLabel
                     value="today_and_preorder"
                     control={<Radio size="small" disabled={!isEdit} />}
                     label="Order Today + Pre-order"
@@ -533,12 +568,14 @@ export default function ShopSettingsPage() {
                 type="number"
                 inputProps={{ min: 1, max: 90 }}
                 value={bookingDaysAhead}
-                disabled={!isEdit}
+                disabled={!isEdit || orderMode === 'today_only'}
                 onChange={(e) => setBookingDaysAhead(Math.max(1, Math.min(90, Number(e.target.value))))}
                 helperText={
-                  orderMode === 'preorder_only'
-                    ? 'Customers can only pre-order within this range'
-                    : 'Default is 90 days (3 months)'
+                  orderMode === 'today_only'
+                    ? 'Not applicable — pre-orders are disabled in Order Today mode'
+                    : orderMode === 'preorder_only'
+                      ? 'Customers can only pre-order within this range'
+                      : 'Default is 90 days (3 months)'
                 }
                 size="small"
               />

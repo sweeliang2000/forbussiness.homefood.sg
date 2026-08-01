@@ -1,11 +1,9 @@
 import axios from 'axios';
-import { BASE_URL_BACKEND } from '../../config/config';
 import { SHOP_SUBSCRIPTION_STATUS, GET_LIST_OF_USERS, REFRESH_USER_COOKIE, DELETE_USER_FROM_SHOP } from './apiPaths';
 
 // Create a centralized utility function for handling API calls. 
 // This makes your code cleaner and easier to maintain.
 const apiClient = axios.create({
-  baseURL: BASE_URL_BACKEND,
   headers: {
     'Content-Type': 'application/json',
   },

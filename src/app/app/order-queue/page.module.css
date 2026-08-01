@@ -83,7 +83,7 @@
 }
 
 .todayBtn:hover {
-    background: rgba(14, 70, 163, 0.06);
+    background: rgba(228, 85, 13, 0.06);
 }
 
 .calGrid {
@@ -139,7 +139,7 @@
 }
 
 .hasOrders {
-    background: rgba(14, 70, 163, 0.05);
+    background: rgba(228, 85, 13, 0.05);
 }
 
 .today .dayNum {
@@ -152,7 +152,7 @@
 
 .selected {
     border-color: var(--accent-color);
-    background: rgba(14, 70, 163, 0.1);
+    background: rgba(228, 85, 13, 0.1);
     box-shadow: inset 0 0 0 1px var(--accent-color);
 }
 
@@ -258,7 +258,7 @@
     color: var(--on-primary-light2);
 }
 
-.stNew { background: #e8f0fe; color: var(--accent-color); }
+.stNew { background: #FFF4ED; color: var(--accent-color); }
 .stPreparing { background: #fff4e5; color: #b26a00; }
 .stReady { background: #e6f4ea; color: #137333; }
 .stCompleted { background: #eef2f6; color: #475569; }

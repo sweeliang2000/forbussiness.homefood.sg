@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './LandingNavbar.module.css';
-import CollbineForBusiness from '@/components/CollbineForBusiness/CollbineForBusiness';
+import HomeFoodForBusiness from '@/components/HomeFoodForBusiness/HomeFoodForBusiness';
 import Abutton from '@/components/Buttons/Abutton';
 import { IoMdClose } from "react-icons/io";
 import { AiOutlineMenu } from "react-icons/ai";
@@ -17,7 +17,7 @@ import apiClient from '@/utility/api';
 import { REFRESH_USER_COOKIE } from '@/utility/apiPaths';
 
 const menuItems = [
-    { label: 'Why Collbine', href: '#why' },
+    { label: 'Why HomeFood', href: '#why' },
     { label: 'What we offer', href: '#offer' },
     { label: 'How it works', href: '#how' },
     { label: 'Payments', href: '#payments' },
@@ -175,7 +175,7 @@ const LandingNavbar = () => {
                 <div className={styles.navContainer}>
                     {/* Logo */}
                     <Link className={styles.logo} href="/">
-                        <CollbineForBusiness />
+                        <HomeFoodForBusiness />
                     </Link>
 
                     {/* Desktop Menu */}
@@ -290,7 +290,7 @@ const LandingNavbar = () => {
                                 <div className={styles.modalSuccessIcon}>🎉</div>
                                 <h2 className={styles.modalSuccessTitle}>You&apos;re on the list!</h2>
                                 <p className={styles.modalSuccessSub}>
-                                    We&apos;ll reach out as soon as we&apos;re ready to set you up on Collbine. Stay tuned!
+                                    We&apos;ll reach out as soon as we&apos;re ready to set you up on HomeFood. Stay tuned!
                                 </p>
                             </div>
                         ) : (

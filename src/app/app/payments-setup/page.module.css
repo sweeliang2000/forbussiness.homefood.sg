@@ -16,14 +16,14 @@
     gap: 16px;
 }
 
-/* ---- Brand-blue all action buttons on this page (app accent #0E46A3) ---- */
+/* ---- Brand-blue all action buttons on this page (app accent #E4550D) ---- */
 .root :global(.MuiButton-contained:not(:disabled)) {
     background-color: var(--accent-color);
     box-shadow: none;
 }
 
 .root :global(.MuiButton-contained:not(:disabled):hover) {
-    background-color: #0d3d91;
+    background-color: #C2410C;
     box-shadow: none;
 }
 
@@ -33,8 +33,8 @@
 }
 
 .root :global(.MuiButton-outlined:not(:disabled):hover) {
-    border-color: #0d3d91;
-    background-color: rgba(14, 70, 163, 0.06);
+    border-color: #C2410C;
+    background-color: rgba(228, 85, 13, 0.06);
 }
 
 /* ---- Section card (Manual / Automatic) ---- */
@@ -91,7 +91,7 @@
     font-weight: 600;
     padding: 2px 8px;
     border-radius: 999px;
-    background: #e8f0fe;
+    background: #FFF4ED;
     color: var(--accent-color);
     white-space: nowrap;
 }
@@ -323,4 +323,15 @@
     .header {
         top: 62px;
     }
+}
+
+.confirmDetails {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.02);
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }

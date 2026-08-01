@@ -195,7 +195,7 @@ const ForgotPassword = () => {
             <section className={styles.rightSection}>
                 <div className={styles.formSection}>
                     <div className={styles.formTitlesSection}>
-                        <h2>Collbine For Business</h2>
+                        <h2>HomeFood For Business</h2>
                         <h1>Reset Password</h1>
                         <p>No worries, we&apos;ll send you OTP code to verify and reset your password.</p>
                     </div>

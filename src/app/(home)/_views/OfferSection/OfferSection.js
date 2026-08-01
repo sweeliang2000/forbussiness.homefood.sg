@@ -5,17 +5,17 @@ import Badge from '@/components/Badge';
 const offers = [
     {
         image: '/images/home/what-we-offer/discovered-home-based-food.png',
-        alt: 'Discover home-based food nearby on Collbine',
+        alt: 'Discover home-based food nearby on HomeFood',
         bgClass: 'a1',
         label: 'Discover',
         title: 'Get discovered by hungry neighbours',
         description:
-            'Your kitchen shows up on the Collbine map with your menu, prep times, and pickup window. New customers can find you — without you paying for ads.',
+            'Your kitchen shows up on the HomeFood map with your menu, prep times, and pickup window. New customers can find you — without you paying for ads.',
         learn: 'Live menu & opening hours →',
     },
     {
         image: '/images/home/what-we-offer/take-orders.png',
-        alt: 'Take orders and pre-orders on Collbine',
+        alt: 'Take orders and pre-orders on HomeFood',
         bgClass: 'a2',
         label: 'Order & pre-order',
         title: 'Take orders and pre-orders in advance',
@@ -25,7 +25,7 @@ const offers = [
     },
     {
         image: '/images/home/what-we-offer/home-pickup.png',
-        alt: 'Home pickup notifications on Collbine',
+        alt: 'Home pickup notifications on HomeFood',
         bgClass: 'a3',
         label: 'Collect at home',
         title: 'Home pickup, done gracefully',
@@ -39,7 +39,7 @@ const OfferSection = () => {
     return (
         <section id="offer" className={styles.offerSection}>
             <div className={styles.sectionHead}>
-                <Badge variant="blue">What we offer</Badge>
+                <Badge variant="brand">What we offer</Badge>
                 <h2 className={styles.sectionTitle}>
                     Three tools. One platform. Zero extra apps.
                 </h2>

@@ -109,7 +109,7 @@ export default function PayNowQrPreview({ payload, validTill, merchantName, amou
         </div>
       </div>
 
-      {/* <Button
+      <Button
         className={styles.downloadBtn}
         variant="outlined"
         size="small"
@@ -118,7 +118,7 @@ export default function PayNowQrPreview({ payload, validTill, merchantName, amou
         sx={{ textTransform: 'none' }}
       >
         Download QR (PNG)
-      </Button> */}
+      </Button>
     </div>
   );
 }

@@ -59,7 +59,7 @@
 .confirmButton {
     padding: 8px 24px;
     text-transform: capitalize;
-    background-color: var(--secondary-color);
+    background-color: var(--accent-color);
 }
 
 .arrowIcon {
@@ -96,5 +96,5 @@
     margin-top: 12px;
     padding: 8px 24px;
     text-transform: capitalize;
-    background-color: var(--secondary-color);
+    background-color: var(--accent-color);
 }

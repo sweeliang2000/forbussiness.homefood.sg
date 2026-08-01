@@ -69,7 +69,7 @@
 }
 
 input:checked + .slider {
-  background-color: #2563EB;
+  background-color: #E4550D;
 }
 
 input:checked + .slider:before {
@@ -84,8 +84,8 @@ input:checked + .slider:before {
 .discount {
   margin-left: 0.5rem;
   padding: 0.25rem 0.5rem;
-  background-color: #DBEAFE;
-  color: #2563EB;
+  background-color: #FFE6D5;
+  color: #E4550D;
   border-radius: 1rem;
   font-size: 0.75rem;
   font-weight: 500;
@@ -165,19 +165,19 @@ input:checked + .slider:before {
 }
 
 .checkIcon {
-  color: #2563EB;
+  color: #E4550D;
 }
 
 .popular .checkIcon {
-  color: #60A5FA;
+  color: #FDA474;
 }
 
 .selectButton {
   width: 100%;
   padding: 0.75rem 1.5rem;
   background-color: white;
-  color: #2563EB;
-  border: 1px solid #2563EB;
+  color: #E4550D;
+  border: 1px solid #E4550D;
   border-radius: 0.5rem;
   font-weight: 500;
   cursor: pointer;
@@ -185,18 +185,18 @@ input:checked + .slider:before {
 }
 
 .selectButton:hover {
-  background-color: #2563EB;
+  background-color: #E4550D;
   color: white;
 }
 
 .popularButton {
-  background-color: #60A5FA;
+  background-color: #FDA474;
   color: white;
   border: none;
 }
 
 .popularButton:hover {
-  background-color: #3B82F6;
+  background-color: #FB7F45;
 }
 
 @media (max-width: 768px) {

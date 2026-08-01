@@ -105,11 +105,11 @@
 .loginButton {
     padding: 8px 24px;
     text-transform: capitalize;
-    background-color: var(--secondary-color);
+    background-color: var(--accent-color);
 }
 
 .loginButton:hover {
-    background-color: var(--secondary-hover-color);
+    background-color: var(--accent-hover-color);
 }
 
 .forgotPasswordBuuton {

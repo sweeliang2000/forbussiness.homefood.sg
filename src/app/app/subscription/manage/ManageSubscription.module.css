@@ -64,7 +64,7 @@
   gap: 4px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #2563eb;
+  color: #E4550D;
   background: none;
   border: none;
   cursor: pointer;
@@ -128,7 +128,7 @@
 }
 
 .upgradeCard.recommended {
-  border-left: 4px solid #2563eb;
+  border-left: 4px solid #E4550D;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
@@ -139,7 +139,7 @@
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  color: #2563eb;
+  color: #E4550D;
 }
 
 .upgradeCardHeader {
@@ -175,7 +175,7 @@
 
 .upgradeButton {
   padding: 10px 20px;
-  background: #2563eb;
+  background: #E4550D;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -186,7 +186,7 @@
 }
 
 .upgradeButton:hover {
-  background: #1d4ed8;
+  background: #C2410C;
 }
 
 .upgradeButton:disabled {
@@ -198,8 +198,8 @@
   display: inline-block;
   padding: 10px 20px;
   background: #fff;
-  color: #2563eb;
-  border: 1px solid #2563eb;
+  color: #E4550D;
+  border: 1px solid #E4550D;
   border-radius: 8px;
   font-weight: 500;
   font-size: 0.875rem;
@@ -210,7 +210,7 @@
 }
 
 .contactUsButton:hover {
-  background: #2563eb;
+  background: #E4550D;
   color: #fff;
 }
 
@@ -273,13 +273,13 @@
 }
 
 .tabButtonActive {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #FFF4ED;
+  color: #E4550D;
 }
 
 .tabButtonActive:hover {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #FFE6D5;
+  color: #C2410C;
 }
 
 .tabButtonDanger:hover,
@@ -331,7 +331,7 @@
   display: inline-flex;
   padding: 4px;
   border-radius: 999px;
-  background: #eef2ff;
+  background: #FFF4ED;
   gap: 4px;
 }
 
@@ -347,7 +347,7 @@
 }
 
 .billingToggleButtonActive {
-  background: #2563eb;
+  background: #E4550D;
   color: #ffffff;
 }
 
@@ -363,7 +363,7 @@
 }
 
 .noPlan a {
-  color: #2563eb;
+  color: #E4550D;
   font-weight: 500;
 }
 
@@ -525,7 +525,7 @@
 .portalLink {
   background: none;
   border: none;
-  color: #2563eb;
+  color: #E4550D;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -564,8 +564,8 @@
 
 .confirmInput:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+  border-color: #E4550D;
+  box-shadow: 0 0 0 2px rgba(228, 85, 13, 0.1);
 }
 
 /* Cancellation end-date banner */
@@ -612,14 +612,14 @@
   gap: 16px;
   margin-top: 16px;
   padding: 14px 20px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background: #FFF4ED;
+  border: 1px solid #FFC9AA;
   border-radius: 10px;
 }
 
 .downgradeBanner p {
   font-size: 0.875rem;
-  color: #1e40af;
+  color: #9A340B;
   margin: 0;
   line-height: 1.5;
 }
@@ -627,7 +627,7 @@
 .downgradeBannerLink {
   background: none;
   border: none;
-  color: #2563eb;
+  color: #E4550D;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -638,7 +638,7 @@
 
 .downgradeBannerLink:hover {
   text-decoration: underline;
-  color: #1d4ed8;
+  color: #C2410C;
 }
 
 /* Locked banner when plan changes are blocked */
@@ -682,21 +682,21 @@
 
 /* Info card for no upgrade options */
 .infoCard {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background: #FFF4ED;
+  border: 1px solid #FFC9AA;
   border-radius: 12px;
   padding: 20px 24px;
 }
 
 .infoCard p {
   font-size: 0.875rem;
-  color: #1e40af;
+  color: #9A340B;
   line-height: 1.6;
   margin: 0;
 }
 
 .infoCard a {
-  color: #2563eb;
+  color: #E4550D;
   font-weight: 600;
   text-decoration: underline;
 }

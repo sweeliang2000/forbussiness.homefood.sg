@@ -29,7 +29,7 @@ const FeaturesSection = () => {
 
             <div className={styles.sectionContainer}>
                 <div className={styles.sectionHeader}>
-                    <Badge variant="blue">Why Choose Collbine?</Badge>
+                    <Badge variant="brand">Why Choose HomeFood?</Badge>
 
                     <div className={styles.sectionContent}>
                         <h2 className={styles.sectionTitle}>Features that make you money.</h2>
@@ -44,7 +44,7 @@ const FeaturesSection = () => {
                 <div className={styles.featureItemSteps}>
                     <div className={styles.featureItemStepsContent}>
                         <div className={styles.featureItemStepsContentItem1}>
-                            <Badge variant="blue" className={styles.smallBadge}>How Collbine Works?</Badge>
+                            <Badge variant="brand" className={styles.smallBadge}>How HomeFood Works?</Badge>
                             <h3>Redeem rewards in seconds at your terminal</h3>
                             <p className={styles.featureItemStepsContentItem1Description}>
                                 No apps to open or QR codes to scan. Find the customer by phone number, apply rewards, and when it&rsquo;s time to redeem, simply select the reward on your terminal and confirm.
@@ -52,7 +52,7 @@ const FeaturesSection = () => {
 
                             <div className={styles.featureItemStepsContentItem1Step}>
                                 <p>1. Find the Customer</p>
-                                <p>Enter their phone number on your Collbine terminal to pull up their rewards instantly.</p>
+                                <p>Enter their phone number on your HomeFood terminal to pull up their rewards instantly.</p>
                             </div>
 
                             <div className={styles.featureItemStepsContentItem1Step}>

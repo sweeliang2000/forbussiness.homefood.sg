@@ -14,34 +14,33 @@ const StarRating = ({ count }) => (
 );
 
 
-const ReviewBox = ({ review }) => {
+const ReviewBox = ({ review, onReply }) => {
   return (
     <div className={styles.reviewBox}>
       <div className={styles.reviewHeader}>
         <StarRating count={review.stars} />
-        <span className={styles.reviewTitle}>{review.title}</span>
+        {review.title ? <span className={styles.reviewTitle}>{review.title}</span> : null}
       </div>
       <div className={styles.reviewMeta}>
         {review.date} — {review.user}
       </div>
-      <div className={styles.reviewText}>{review.text}</div>
+      {review.text ? <div className={styles.reviewText}>{review.text}</div> : null}
       {review.response && (
         <>
           <div className={styles.responseBox}>
-            <p className={styles.responseHeader}>Developer Response - {review.responseDate}</p>
+            <p className={styles.responseHeader}>Your reply{review.responseDate ? ` - ${review.responseDate}` : ''}</p>
             <div>{review.response}</div>
           </div>
         </>
       )}
 
-      <div className={styles.actionButtons}>
-        {review.response ? (
-          <Button className={styles.actionButton} variant="text" color="primary">Edit Response</Button>
-        ) : (
-          <Button className={styles.actionButton} variant="text" color="primary">Reply</Button>
-        )}
-        <Button className={styles.actionButton} variant="text" color="primary">Report a Concern</Button>
-      </div>
+      {onReply ? (
+        <div className={styles.actionButtons}>
+          <Button className={styles.actionButton} variant="text" color="primary" onClick={() => onReply(review)}>
+            {review.response ? 'Edit Reply' : 'Reply'}
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 };

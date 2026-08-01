@@ -32,7 +32,7 @@ const WhyUsSection = () => {
     return (
         <section id="why" className={styles.whySection}>
             <div className={styles.sectionHead}>
-                <Badge variant="blue">Why grow with us</Badge>
+                <Badge variant="brand">Why grow with us</Badge>
                 <h2 className={styles.sectionTitle}>Built around how home kitchens actually work.</h2>
                 <p className={styles.sectionSub}>
                     Not a clone of a restaurant POS. A tool shaped around small batches, limited slots, and a

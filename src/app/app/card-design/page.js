@@ -2,9 +2,9 @@ import CardDesign from "./CardDesign";
 
 /** @type {import('next').Metadata} */
 export const metadata = {
-  title: 'Custom Loyalty Card Design | Collbine for Business',
+  title: 'Custom Loyalty Card Design | HomeFood for Business',
   description:
-    'Design your custom loyalty card design for merchants: choose colours, stamp goals, and rewards in Collbine for Business. Start building your card today.',
+    'Design your custom loyalty card design for merchants: choose colours, stamp goals, and rewards in HomeFood for Business. Start building your card today.',
   keywords: [
     'custom loyalty card design',
     'stamp loyalty card',
@@ -12,17 +12,17 @@ export const metadata = {
     'loyalty rewards',
     'stamp goals',
     'reward card design',
-    'Collbine for Business',
+    'HomeFood for Business',
   ],
   openGraph: {
-    title: 'Custom Loyalty Card Design | Collbine for Business',
+    title: 'Custom Loyalty Card Design | HomeFood for Business',
     description:
-      'Design your custom loyalty card design for merchants: choose colours, stamp goals, and rewards in Collbine for Business. Start building your card today.',
-    url: 'https://forbusiness.collbine.com/app/card-design',
-    siteName: 'Collbine for Business',
+      'Design your custom loyalty card design for merchants: choose colours, stamp goals, and rewards in HomeFood for Business. Start building your card today.',
+    url: 'https://business.homefood.sg/app/card-design',
+    siteName: 'HomeFood for Business',
     images: [
       {
-        url: 'https://forbusiness.collbine.com/og-image.png',
+        url: 'https://business.homefood.sg/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Custom loyalty card design',
@@ -33,13 +33,13 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Custom Loyalty Card Design | Collbine for Business',
+    title: 'Custom Loyalty Card Design | HomeFood for Business',
     description:
-      'Design your custom loyalty card design for merchants: choose colours, stamp goals, and rewards in Collbine for Business. Start building your card today.',
-    images: ['https://forbusiness.collbine.com/og-image.png'],
+      'Design your custom loyalty card design for merchants: choose colours, stamp goals, and rewards in HomeFood for Business. Start building your card today.',
+    images: ['https://business.homefood.sg/og-image.png'],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: 'https://forbusiness.collbine.com/app/card-design' },
+  alternates: { canonical: 'https://business.homefood.sg/app/card-design' },
 };
 
 const Page = () => {

@@ -14,7 +14,7 @@ const HeroSection = () => {
                     Your home kitchen, now <em>discoverable</em>. Orders and pickup, handled.
                 </h1>
                 <p className={styles.heroSub}>
-                    Collbine helps customers discover home-based food nearby,{' '}
+                    HomeFood helps customers discover home-based food nearby,{' '}
                     <strong>order or pre-order from your kitchen</strong>, pay online, and come collect it when
                     you&apos;re done cooking. They get notified when the food is about to be ready — and again when
                     it&apos;s ready. <strong>You just cook.</strong>
@@ -44,7 +44,7 @@ const HeroSection = () => {
                         <span className={styles.tileABadge}>Discover nearby</span>
                         <h3>Home kitchens, 5 min from your door.</h3>
                         <p>
-                            Customers find you on the Collbine map, browse your menu, and place pre-orders for pickup.
+                            Customers find you on the HomeFood map, browse your menu, and place pre-orders for pickup.
                         </p>
                     </div>
                     <div className={styles.heroList}>

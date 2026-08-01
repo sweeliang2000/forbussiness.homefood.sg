@@ -94,9 +94,9 @@ export default function RootLayout({ children }) {
             >
               <FaWhatsapp /> WhatsApp Support
             </a>
-            <a href="mailto:support@collbine.com" className={styles.footerEmail}>support@collbine.com</a>
+            <a href="mailto:support@homefood.sg" className={styles.footerEmail}>support@homefood.sg</a>
           </div>
-          <span className={styles.footerCopy}>© {new Date().getFullYear()} Collbine</span>
+          <span className={styles.footerCopy}>© {new Date().getFullYear()} HomeFood</span>
         </footer>
       </div>
     );

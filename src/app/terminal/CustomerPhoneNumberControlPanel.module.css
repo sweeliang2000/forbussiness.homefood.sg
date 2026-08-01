@@ -135,7 +135,7 @@
 }
 
 .operatorButton:hover {
-    background: #0d3d91 !important;
+    background: #C2410C !important;
 }
 
 .submitButton {
@@ -152,19 +152,19 @@
     background: var(--accent-color) !important;
     color: white !important;
     border-radius: 12px !important;
-    box-shadow: 0 4px 12px rgba(14, 70, 163, 0.3) !important;
+    box-shadow: 0 4px 12px rgba(228, 85, 13, 0.3) !important;
     transition: all 0.15s ease !important;
 }
 
 .button:hover {
-    background: #0d3d91 !important;
+    background: #C2410C !important;
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(14, 70, 163, 0.4) !important;
+    box-shadow: 0 6px 16px rgba(228, 85, 13, 0.4) !important;
 }
 
 .button:active {
     transform: scale(0.98);
-    box-shadow: 0 2px 8px rgba(14, 70, 163, 0.3) !important;
+    box-shadow: 0 2px 8px rgba(228, 85, 13, 0.3) !important;
 }
 
 .button:disabled {

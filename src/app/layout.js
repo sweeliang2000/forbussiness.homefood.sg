@@ -2,10 +2,10 @@ import './globals.css';
 import AuthGuard from '@/components/AuthGuard/AuthGuard';
 
 export const metadata = {
-  title: 'Collbine for Business | Customisable Rewards Systems in Singapore',
-  description: 'Collbine offers scan to win and loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop\'s needs.',
+  title: 'HomeFood for Business | Customisable Rewards Systems in Singapore',
+  description: 'HomeFood offers scan to win and loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop\'s needs.',
   keywords: ['loyalty program', 'customer rewards', 'merchant solutions', 'Singapore business', 'CRM', 'customer engagement', 'points system', 'digital loyalty'],
-  author: 'Collbine Team',
+  author: 'HomeFood Team',
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -20,16 +20,16 @@ export const metadata = {
     shortcut: '/favicon.ico',
   },
   openGraph: {
-    title: 'Collbine for Business | Customisable Rewards Systems in Singapore',
-    description: 'Collbine offers scan to win and loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop\'s needs.',
-    url: 'https://www.collbine.com',
-    siteName: 'Collbine for Business',
+    title: 'HomeFood for Business | Customisable Rewards Systems in Singapore',
+    description: 'HomeFood offers scan to win and loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop\'s needs.',
+    url: 'https://business.homefood.sg',
+    siteName: 'HomeFood for Business',
     images: [
       {
         url: '/android-chrome-512x512.png',
         width: 512,
         height: 512,
-        alt: 'Collbine for Business Logo',
+        alt: 'HomeFood for Business Logo',
       },
     ],
     locale: 'en_SG',
@@ -37,9 +37,9 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@Collbine',
-    title: 'Collbine for Business | Customisable Rewards Systems in Singapore',
-    description: 'Collbine offers scan to win and loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program.',
+    site: '@HomeFood',
+    title: 'HomeFood for Business | Customisable Rewards Systems in Singapore',
+    description: 'HomeFood offers scan to win and loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program.',
     images: ['/android-chrome-512x512.png'],
   },
 };

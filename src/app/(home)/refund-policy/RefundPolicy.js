@@ -134,7 +134,7 @@ const RefundPolicy = () => {
                     <h1 className={styles.title}>Refund &amp; Payment Policy</h1>
                     <p className={styles.subtitle}>
                         How refunds and payment processing fees are handled across each payment
-                        method on Collbine — and what merchants are responsible for.
+                        method on HomeFood — and what merchants are responsible for.
                     </p>
                     <p className={styles.updated}>Last updated {LAST_UPDATED}</p>
                 </div>
@@ -267,8 +267,8 @@ const RefundPolicy = () => {
                             order — shall be borne by the merchant.
                         </Callout>
                         <Callout tone="success" icon={<FaInfoCircle />}>
-                            Only fees resulting directly from a platform error caused by Collbine
-                            will be refunded by Collbine.
+                            Only fees resulting directly from a platform error caused by HomeFood
+                            will be refunded by HomeFood.
                         </Callout>
                     </div>
                 </section>
@@ -615,14 +615,14 @@ const RefundPolicy = () => {
                                 the customer&apos;s financial institution.
                             </li>
                             <li>
-                                Once a refund has been successfully initiated by Collbine or the
+                                Once a refund has been successfully initiated by HomeFood or the
                                 merchant, the actual time taken for the funds to appear in the
-                                customer&apos;s account is outside of Collbine&apos;s control.
+                                customer&apos;s account is outside of HomeFood&apos;s control.
                             </li>
                             <li>
                                 Customers who do not receive their refund within the stated
                                 timeframe should contact their bank, card issuer, or payment
-                                provider before contacting Collbine support.
+                                provider before contacting HomeFood support.
                             </li>
                         </ul>
                     </div>

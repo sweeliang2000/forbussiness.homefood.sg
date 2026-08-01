@@ -279,7 +279,7 @@
     text-transform: uppercase;
     letter-spacing: 0.6px;
     font-family: var(--font-raleway);
-    background: #e8f1fc;
+    background: #FFF4ED;
     color: var(--accent-color);
 }
 
@@ -336,7 +336,7 @@
 
 .modalInput:focus {
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(14, 70, 163, 0.08);
+    box-shadow: 0 0 0 3px rgba(228, 85, 13, 0.08);
 }
 
 .modalInput::placeholder {
@@ -365,7 +365,7 @@
 }
 
 .modalSubmit:hover:not(:disabled) {
-    background: #0d3d91;
+    background: #C2410C;
     transform: translateY(-1px);
 }
 

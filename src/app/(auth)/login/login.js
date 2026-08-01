@@ -74,7 +74,7 @@ const LoginContent = () => {
                         path: '/',
                         secure: isProduction,
                         sameSite: 'Lax',
-                        domain: isProduction ? '.collbine.com' : undefined,
+                        domain: isProduction ? '.homefood.sg' : undefined,
                     });
                 }
                 
@@ -156,7 +156,7 @@ const LoginContent = () => {
             <section className={styles.rightSection}>
                 <div className={styles.formSection}>
                     <div className={styles.formTitlesSection}>
-                        <h2>Collbine For Business</h2>
+                        <h2>HomeFood For Business</h2>
                         <h1>Login</h1>
                         <p>Welcome. Please enter your details.</p>
                     </div>

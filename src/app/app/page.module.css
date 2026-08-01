@@ -10,10 +10,10 @@
 
 /* Purchase Banner */
 .banner {
-    background: linear-gradient(135deg, #0E46A3 0%, #0d3d91 100%);
+    background: linear-gradient(135deg, #E4550D 0%, #C2410C 100%);
     border-radius: 12px;
     padding: 20px 24px;
-    box-shadow: 0 2px 8px rgba(14, 70, 163, 0.2);
+    box-shadow: 0 2px 8px rgba(228, 85, 13, 0.2);
 }
 
 .bannerContent {
@@ -90,14 +90,14 @@
     justify-content: space-between;
     gap: 16px;
     padding: 14px 20px;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
+    background: #FFF4ED;
+    border: 1px solid #FFC9AA;
     border-radius: 10px;
 }
 
 .downgradeBannerText {
     font-size: 0.875rem;
-    color: #1e40af;
+    color: #9A340B;
     margin: 0;
     line-height: 1.5;
 }
@@ -105,7 +105,7 @@
 .downgradeBannerButton {
     background: none;
     border: none;
-    color: #2563eb;
+    color: #E4550D;
     font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
@@ -116,7 +116,7 @@
 
 .downgradeBannerButton:hover {
     text-decoration: underline;
-    color: #1d4ed8;
+    color: #C2410C;
 }
 
 .downgradeBannerButton:disabled {
@@ -425,9 +425,9 @@
 }
 
 .contactButton:hover {
-    background-color: #0d3d91;
+    background-color: #C2410C;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(14, 70, 163, 0.3);
+    box-shadow: 0 4px 8px rgba(228, 85, 13, 0.3);
 }
 
 .contactButtonIcon {

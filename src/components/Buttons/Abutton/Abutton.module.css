@@ -19,7 +19,7 @@
 }
 
 .primary:hover {
-    background-color: #0d3d91;
+    background-color: #C2410C;
     transform: translateY(-1px);
 }
 
@@ -128,7 +128,7 @@
 }
 
 .outline-thin:hover {
-    background-color: rgba(14, 70, 163, 0.1);
+    background-color: rgba(228, 85, 13, 0.1);
     transform: translateY(-1px);
 }
 
@@ -151,7 +151,7 @@
 }
 
 .outline-dashed:hover {
-    background-color: rgba(14, 70, 163, 0.1);
+    background-color: rgba(228, 85, 13, 0.1);
     border-style: solid;
     transform: translateY(-1px);
 }
@@ -186,7 +186,7 @@
 }
 
 .ghost:hover {
-    background-color: rgba(14, 70, 163, 0.1);
+    background-color: rgba(228, 85, 13, 0.1);
 }
 
 .white {
@@ -223,11 +223,11 @@
 
 /* Special styles for enhanced buttons */
 .enhanced {
-    box-shadow: 0 4px 15px rgba(14, 70, 163, 0.3);
+    box-shadow: 0 4px 15px rgba(228, 85, 13, 0.3);
 }
 
 .enhanced:hover {
-    box-shadow: 0 6px 20px rgba(14, 70, 163, 0.4);
+    box-shadow: 0 6px 20px rgba(228, 85, 13, 0.4);
 }
 
 /* Mobile specific styles */

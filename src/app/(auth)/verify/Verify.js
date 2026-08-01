@@ -107,7 +107,7 @@ const Verify = () => {
             const isProduction = process.env.NODE_ENV === 'production';
             Cookies.remove('authStatus', {
                 path: '/',
-                domain: isProduction ? '.collbine.com' : undefined,
+                domain: isProduction ? '.homefood.sg' : undefined,
             });
             setVerifiedConfirmed(true);
         } catch (error) {
@@ -127,7 +127,7 @@ const Verify = () => {
         const isProduction = process.env.NODE_ENV === 'production';
         Cookies.remove('authStatus', {
             path: '/',
-            domain: isProduction ? '.collbine.com' : undefined,
+            domain: isProduction ? '.homefood.sg' : undefined,
         });
         router.replace('/login');
     };

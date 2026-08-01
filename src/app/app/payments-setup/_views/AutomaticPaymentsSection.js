@@ -96,7 +96,7 @@ export default function AutomaticPaymentsSection({ checked, disabled, onToggle, 
           <p className={styles.stripeTitle}>Set Up Payouts</p>
           <p className={styles.stripeDesc}>
             Complete payout setup to accept automatic payments and receive funds from orders placed
-            through Collbine. You&apos;ll be guided through the onboarding steps to get started.
+            through HomeFood. You&apos;ll be guided through the onboarding steps to get started.
           </p>
           <div>
             <Button

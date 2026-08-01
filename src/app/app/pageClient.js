@@ -15,7 +15,7 @@ import ChecklistCell from '@/app/app/release/submission/_views/ChecklistCell';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
-import { SUBSCRIPTION_DATA } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
+import { isProLookupKey } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
 
 export default function Content() {
   const [customerStats] = useState({
@@ -40,7 +40,7 @@ export default function Content() {
 
   useEffect(() => {
     const lookupKey = getSubscriptionLookupKey();
-    const matchesPlan = SUBSCRIPTION_DATA.some(plan => plan.lookup_key === lookupKey);
+    const matchesPlan = isProLookupKey(lookupKey);
     setHasPurchased(matchesPlan);
 
     if (matchesPlan) {
@@ -128,7 +128,7 @@ export default function Content() {
           <div className={styles.bannerContent}>
             <HiOutlineExclamationCircle className={styles.bannerIcon} />
             <p className={styles.bannerText}>
-              You will need to purchase in order for you to release to Collbine up.{' '}
+              You will need to purchase in order for you to release to HomeFood up.{' '}
               <Link href="/app/subscription" className={styles.bannerLink}>Upgrade now</Link>
             </p>
           </div>
@@ -290,15 +290,15 @@ export default function Content() {
 
       {/* Bottom Section */}
       <div className={styles.bottomSection}>
-        {/* Collbine Updates */}
+        {/* HomeFood Updates */}
         <ContentCard className={styles.updatesCard}>
           <div className={styles.updatesHeader}>
             <HiOutlineSpeakerphone className={styles.updatesIcon} />
-            <h3 className={styles.updatesTitle}>Collbine Updates</h3>
+            <h3 className={styles.updatesTitle}>HomeFood Updates</h3>
           </div>
           <div className={styles.updatesContent}>
             <p className={styles.updatesText}>
-              Stay tuned for the latest updates and announcements from Collbine.
+              Stay tuned for the latest updates and announcements from HomeFood.
             </p>
             <div className={styles.updatesList}>
               <div className={styles.updateItem}>
