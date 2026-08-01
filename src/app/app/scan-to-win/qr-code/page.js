@@ -75,7 +75,7 @@ export default function ScanToWinQrCodePage() {
   // Fetch QR codes
   const fetchQrCodes = useCallback(async () => {
     try {
-      const response = await apiClient.get('/api/data/qrCode');
+      const response = await apiClient.get('/api/data/qrcode');
       const apiData = response.data?.data || [];
 
       const mappedQrCodes = apiData.map((qr) => ({
@@ -222,7 +222,7 @@ export default function ScanToWinQrCodePage() {
       setIsBtnLoading(true);
       
       // Call API to create QR code
-      const response = await apiClient.post('/api/data/qrCode', {
+      const response = await apiClient.post('/api/data/qrcode', {
         qr_code_name: name,
       });
       
@@ -278,7 +278,7 @@ export default function ScanToWinQrCodePage() {
       setIsBtnLoading(true);
       
       // Call API to update QR code name
-      await apiClient.put('/api/data/qrCode', {
+      await apiClient.put('/api/data/qrcode', {
         qr_code_id: qr.qrCodeId || qr.id,
         qr_code_name: name,
       });
@@ -329,7 +329,7 @@ export default function ScanToWinQrCodePage() {
     setIsDeleting(true);
 
     try {
-      await apiClient.delete('/api/data/qrCode', {
+      await apiClient.delete('/api/data/qrcode', {
         data: { qr_code_id: qrToDelete.qrCodeId || qrToDelete.id },
       });
       setQrCodes((prev) => prev.filter((code) => code.id !== qrToDelete.id));

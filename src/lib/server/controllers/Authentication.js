@@ -3083,14 +3083,19 @@ export const publishMenuUpdate = asyncHandler(async (req, res) => {
   const menu = JSON.parse(Item.menu.S);
 
   if (Array.isArray(menu.items)) {
-    for (const item of menu.items) {
-      if (!item.photo?.s3Key) continue;
+    // One S3 CopyObject per photo, previously sequential. An 80-item menu meant
+    // 80 serial round trips — minutes of wall clock inside a function that has a
+    // hard timeout. Each copy is independent and moveMenuImageToLiveBucket
+    // already swallows its own failures, so bounded concurrency is safe and
+    // turns that into ~10 rounds.
+    await mapWithConcurrency(menu.items, 8, async (item) => {
+      if (!item.photo?.s3Key) return;
       const liveUrl = await moveMenuImageToLiveBucket(item.photo.s3Key);
       if (liveUrl) {
         item.photo.url = liveUrl;
       }
       delete item.photo.s3Key;
-    }
+    });
   }
 
   if (!supabase) throw createExternalServiceError('Supabase client not initialized');
