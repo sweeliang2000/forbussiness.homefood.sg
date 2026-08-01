@@ -126,10 +126,29 @@ export function createResponseContext() {
 }
 
 /**
+ * Serialize one cookie to a Set-Cookie header string.
+ *
+ * Done by handing it to a throwaway NextResponse rather than building the
+ * string here, so value encoding, the Expires/Max-Age pairing and attribute
+ * casing stay byte-identical to what this adapter emitted before.
+ */
+function serializeCookie(name, value, options) {
+  const carrier = new NextResponse(null);
+  carrier.cookies.set(name, value, options);
+  const headers = carrier.headers.getSetCookie?.() ?? [carrier.headers.get('set-cookie')];
+  return headers[0];
+}
+
+/**
  * Turn the recorded context into a real response.
  *
- * Cookies are applied in the order they were pushed, so a later write of the
- * same name wins — matching Express's Set-Cookie ordering.
+ * Cookies become raw Set-Cookie headers instead of going through
+ * `response.cookies`, because that collection is a map keyed by cookie NAME:
+ * writing the same name twice keeps only the last one, where Express appends a
+ * header per call. That silently broke sign-out once — each cookie was deleted
+ * host-only and then again for a parent domain, and only the second, matching
+ * nothing the browser held, survived. Appending keeps `res.cookie` behaving the
+ * way the controllers were written against.
  */
 export function toNextResponse(ctx) {
   const response =
@@ -138,14 +157,15 @@ export function toNextResponse(ctx) {
       : NextResponse.json(ctx.body, { status: ctx.status });
 
   for (const entry of ctx.cookies) {
-    if (entry.op === 'del') {
-      response.cookies.set(entry.name, '', {
-        ...translateCookieOptions(entry.options),
-        maxAge: 0,
-      });
-    } else {
-      response.cookies.set(entry.name, entry.value, translateCookieOptions(entry.options));
-    }
+    const header =
+      entry.op === 'del'
+        ? serializeCookie(entry.name, '', {
+            ...translateCookieOptions(entry.options),
+            maxAge: 0,
+          })
+        : serializeCookie(entry.name, entry.value, translateCookieOptions(entry.options));
+
+    if (header) response.headers.append('set-cookie', header);
   }
 
   return response;

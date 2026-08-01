@@ -333,7 +333,6 @@ import { getStripe, getConnectStripe, getWebhookSecret } from '../stripe';
 import {
   getCookieOptions,
   setAwaitingVerificationCookies,
-  clearLegacyDomainCookies,
 } from '../cookies';
 import {
   APP_AWS_REGION as REGION,
@@ -475,64 +474,38 @@ function convertInlineClients(code) {
 }
 
 /**
- * Evict parent-domain cookies on every session transition.
+ * Make the sign-out cookie clears host-only.
  *
- * Cookies used to be scoped to `.homefood.sg` so they'd reach the separate API
- * host. They're host-only now, and a Set-Cookie without a `domain` CANNOT
- * overwrite a domain-scoped cookie of the same name — so every existing merchant
- * is carrying a stale `.homefood.sg` accessToken that would shadow the fresh one
- * indefinitely. Symptom: signing in appears to succeed and the next request 401s.
+ * signOutUser and globalSignOut each build a `clearCookieOptions` from
+ * COOKIE_DOMAIN, back when cookies were scoped to `.homefood.sg` to reach a
+ * separate API host. Both the constant and that setup are gone — cookies are
+ * host-only now — so the block has to be dropped, and each clear given an
+ * explicit host-only option that matches how getCookieOptions sets them.
  *
- * Injected here rather than hand-edited into the generated file, because
+ * Done here rather than hand-edited into the generated file, because
  * `npm run migrate:controllers` overwrites that file and would silently revert it.
- *
- * Remove this transform once every 7-day refresh token has rolled over (~2 weeks
- * after cutover), together with LEGACY_COOKIE_DOMAIN.
  */
-function injectLegacyCookieClear(code) {
-  let injected = 0;
-  let result = code;
+function normalizeSignOutCookieClears(code) {
+  let rewritten = 0;
 
-  // signOutUser and globalSignOut each build their own clearCookieOptions from
-  // COOKIE_DOMAIN — a constant that no longer exists, since cookies are host-only
-  // now. Drop the block; the loop below clears with an explicit host-only option.
-  result = result.replace(
+  let result = code.replace(
     / *const clearCookieOptions = process\.env\.NODE_ENV === 'production'\n *\? \{ path: '\/', domain: COOKIE_DOMAIN, secure: true, sameSite: 'None' \}\n *: \{ path: '\/' \};\n\n/g,
     ''
   );
-  result = result.replace(
-    /res\.clearCookie\(cookie, clearCookieOptions\);/g,
-    "res.clearCookie(cookie, { path: '/' });"
-  );
+  result = result.replace(/res\.clearCookie\(cookie, clearCookieOptions\);/g, () => {
+    rewritten++;
+    return "res.clearCookie(cookie, { path: '/' });";
+  });
 
-  // signIn — evict the stale pair before writing the fresh one.
-  result = result.replace(
-    /( *)(const \{ AccessToken, IdToken, RefreshToken \} = data\.AuthenticationResult;\n)/,
-    (_m, indent, line) => {
-      injected++;
-      return `${indent}${line}\n${indent}clearLegacyDomainCookies(res);\n`;
-    }
-  );
-
-  // signOutUser and globalSignOut — the loop above only reaches host-scoped
-  // cookies, so the parent-domain copies would survive a sign-out.
-  result = result.replace(
-    /( *)(Object\.keys\(req\.cookies\)\.forEach\(\(cookie\) => \{\n *res\.clearCookie\(cookie, \{ path: '\/' \}\);\n *\}\);\n)/g,
-    (_m, indent, block) => {
-      injected++;
-      return `${indent}${block}${indent}clearLegacyDomainCookies(res);\n`;
-    }
-  );
-
-  if (injected !== 3) {
+  if (rewritten !== 2) {
     throw new Error(
-      `injectLegacyCookieClear: expected 3 insertion points (signIn, signOutUser, globalSignOut), found ${injected}. ` +
-        'The upstream source changed — re-check before shipping, or stale cookies will lock users out.'
+      `normalizeSignOutCookieClears: expected 2 rewrites (signOutUser, globalSignOut), found ${rewritten}. ` +
+        'The upstream source changed — re-check before shipping, or sign-out will not clear the session.'
     );
   }
 
   if (/COOKIE_DOMAIN/.test(result)) {
-    throw new Error('injectLegacyCookieClear: a reference to COOKIE_DOMAIN survived; it is no longer defined.');
+    throw new Error('normalizeSignOutCookieClears: a reference to COOKIE_DOMAIN survived; it is no longer defined.');
   }
 
   return result;
@@ -633,7 +606,7 @@ for (const spec of FILES) {
   code = convertS3Urls(code);
   code = convertBucketEnv(code);
   code = convertInlineClients(code);
-  if (spec.dst === 'Authentication.js') code = injectLegacyCookieClear(code);
+  if (spec.dst === 'Authentication.js') code = normalizeSignOutCookieClears(code);
   code = removeMulter(code);
   code = convertHardcodedInfra(code);
   code = fixPresignerClient(code);

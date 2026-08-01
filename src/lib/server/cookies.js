@@ -20,9 +20,6 @@ export const COOKIE_NAMES = {
 
 export const ALL_COOKIE_NAMES = Object.values(COOKIE_NAMES);
 
-/** The domain previously used, so we can explicitly evict stale cookies. */
-const LEGACY_COOKIE_DOMAIN = process.env.LEGACY_COOKIE_DOMAIN || '';
-
 /**
  * Express-shaped cookie options, matching the original getCookieOptions().
  * `maxAge` here is MILLISECONDS, as Express expects — translateCookieOptions
@@ -81,25 +78,4 @@ export const setAwaitingVerificationCookies = (res, email, userSub) => {
       httpOnly: false, // the frontend reads this one
     })
   );
-};
-
-/**
- * Evict cookies left over from the parent-domain era.
- *
- * The hazard: a Set-Cookie without a `domain` cannot overwrite an existing
- * domain-scoped cookie of the same name. After cutover the browser holds both,
- * sends both, and the server can't tell them apart — so a stale accessToken can
- * permanently shadow a fresh one and the user looks logged out no matter how
- * often they sign in.
- *
- * Call this during sign-in and sign-out while old parent-domain cookies may
- * still exist. Delete once every 7-day refresh token has rolled over (roughly
- * two weeks after cutover), then remove LEGACY_COOKIE_DOMAIN.
- */
-export const clearLegacyDomainCookies = (res) => {
-  if (!LEGACY_COOKIE_DOMAIN) return;
-
-  for (const name of ALL_COOKIE_NAMES) {
-    res.clearCookie(name, { path: '/', domain: LEGACY_COOKIE_DOMAIN });
-  }
 };
