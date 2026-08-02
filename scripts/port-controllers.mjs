@@ -16,7 +16,7 @@
  * 12,000-line port is in the edits you make, not the ones you don't.
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -330,7 +330,10 @@ import axios from 'axios';
 import { getS3, getDynamo, getSes, getCognito } from '../aws';
 import { getSupabase } from '../supabase';
 import { getStripe, getConnectStripe, getWebhookSecret } from '../stripe';
-import { getCookieOptions, setAwaitingVerificationCookies } from '../cookies';
+import {
+  getCookieOptions,
+  setAwaitingVerificationCookies,
+} from '../cookies';
 import {
   APP_AWS_REGION as REGION,
   COGNITO_CLIENT_ID as CLIENT_ID,
@@ -471,6 +474,44 @@ function convertInlineClients(code) {
 }
 
 /**
+ * Make the sign-out cookie clears host-only.
+ *
+ * signOutUser and globalSignOut each build a `clearCookieOptions` from
+ * COOKIE_DOMAIN, back when cookies were scoped to `.homefood.sg` to reach a
+ * separate API host. Both the constant and that setup are gone — cookies are
+ * host-only now — so the block has to be dropped, and each clear given an
+ * explicit host-only option that matches how getCookieOptions sets them.
+ *
+ * Done here rather than hand-edited into the generated file, because
+ * `npm run migrate:controllers` overwrites that file and would silently revert it.
+ */
+function normalizeSignOutCookieClears(code) {
+  let rewritten = 0;
+
+  let result = code.replace(
+    / *const clearCookieOptions = process\.env\.NODE_ENV === 'production'\n *\? \{ path: '\/', domain: COOKIE_DOMAIN, secure: true, sameSite: 'None' \}\n *: \{ path: '\/' \};\n\n/g,
+    ''
+  );
+  result = result.replace(/res\.clearCookie\(cookie, clearCookieOptions\);/g, () => {
+    rewritten++;
+    return "res.clearCookie(cookie, { path: '/' });";
+  });
+
+  if (rewritten !== 2) {
+    throw new Error(
+      `normalizeSignOutCookieClears: expected 2 rewrites (signOutUser, globalSignOut), found ${rewritten}. ` +
+        'The upstream source changed — re-check before shipping, or sign-out will not clear the session.'
+    );
+  }
+
+  if (/COOKIE_DOMAIN/.test(result)) {
+    throw new Error('normalizeSignOutCookieClears: a reference to COOKIE_DOMAIN survived; it is no longer defined.');
+  }
+
+  return result;
+}
+
+/**
  * Strip multer.
  *
  * Authentication.js built a module-level `upload` (memoryStorage, 10 MB) and
@@ -486,6 +527,19 @@ function removeMulter(code) {
       '// multer removed: withApi({ body: \'form\' }) handles multipart via request.formData().\n'
     )
     .replace(/^\s*upload\.single\('[^']*'\),\n/gm, '');
+}
+
+/**
+ * getSignedUrl needs a REAL S3Client, not the `.send`-only shim.
+ *
+ * The shim works for command dispatch because that's all `client.send(cmd)`
+ * needs. But `getSignedUrl(client, command, opts)` reaches into the client's
+ * resolved config and clones its middleware stack, so handing it `{ send }`
+ * throws at runtime — and only on the five code paths that presign a URL, which
+ * are exactly the ones a smoke test is least likely to cover.
+ */
+function fixPresignerClient(code) {
+  return code.replace(/getSignedUrl\(s3,/g, 'getSignedUrl(getS3(),');
 }
 
 /** Hardcoded infrastructure literals -> env-backed constants. */
@@ -534,6 +588,9 @@ function dropLineRanges(code, ranges) {
 
 mkdirSync(DST, { recursive: true });
 
+const force = process.argv.includes('--force');
+const diverged = [];
+
 let totalIn = 0;
 let totalOut = 0;
 
@@ -549,17 +606,47 @@ for (const spec of FILES) {
   code = convertS3Urls(code);
   code = convertBucketEnv(code);
   code = convertInlineClients(code);
+  if (spec.dst === 'Authentication.js') code = normalizeSignOutCookieClears(code);
   code = removeMulter(code);
   code = convertHardcodedInfra(code);
+  code = fixPresignerClient(code);
   code = fixPlaceholderUrl(code);
   code = tightenGeocodeTimeouts(code);
 
   const output = `${BANNER(spec.src)}\n${spec.header}\n${code.replace(/^\n+/, '')}`;
-  writeFileSync(join(DST, spec.dst), output);
+  const target = join(DST, spec.dst);
+
+  // Divergence guard.
+  //
+  // This codemod is a one-shot migration tool, but it sits behind an npm script,
+  // and once the port lands people start fixing bugs in the ported files. A blind
+  // re-run then silently reverts those fixes — which is how a corrected presigner
+  // client or a cookie-eviction call quietly disappears. Refuse instead, and let
+  // a human diff.
+  if (!force && existsSync(target) && readFileSync(target, 'utf8') !== output) {
+    diverged.push(spec.dst);
+    console.log(`  ${spec.src.padEnd(34)} -> SKIPPED (diverged from generator output)`);
+    continue;
+  }
+
+  writeFileSync(target, output);
   totalOut += output.split('\n').length;
 
   console.log(`  ${spec.src.padEnd(34)} -> controllers/${spec.dst}`);
 }
 
-console.log(`\nPorted ${FILES.length} files (${totalIn} -> ${totalOut} lines).`);
-console.log('Now verify: grep -rn "require(\\|module.exports" src/lib/server/');
+console.log(`\nPorted ${FILES.length - diverged.length} of ${FILES.length} files.`);
+
+if (diverged.length) {
+  console.log(
+    `\n${diverged.length} file(s) have been edited since they were generated and were left alone:`
+  );
+  for (const name of diverged) console.log(`  src/lib/server/controllers/${name}`);
+  console.log(
+    '\nThose edits are probably fixes worth keeping. Diff before doing anything:\n' +
+      '  git diff src/lib/server/controllers/\n' +
+      'Fold anything worth preserving into this script, then re-run with --force.\n' +
+      'Once the Express repo is deleted, delete this script and treat the ported\n' +
+      'controllers as ordinary source.'
+  );
+}

@@ -40,7 +40,6 @@ import { getS3, getDynamo, getSes, getCognito } from '../aws';
 import { getSupabase } from '../supabase';
 import { getStripe, getConnectStripe, getWebhookSecret } from '../stripe';
 import {
-  clearLegacyDomainCookies,
   getCookieOptions,
   setAwaitingVerificationCookies,
 } from '../cookies';
@@ -150,8 +149,6 @@ export const signIn = asyncHandler(async (req, res, next) => {
     }
 
     const { AccessToken, IdToken, RefreshToken } = data.AuthenticationResult;
-
-    clearLegacyDomainCookies(res);
 
     // Set cookies
     res.cookie("accessToken", AccessToken, getCookieOptions({
@@ -551,7 +548,6 @@ export const signOutUser = asyncHandler(async (req, res, next) => {
     Object.keys(req.cookies).forEach((cookie) => {
       res.clearCookie(cookie, { path: '/' });
     });
-    clearLegacyDomainCookies(res);
     res.status(200).json(createSuccessResponse("Signed out successfully"));
   } catch (error) {
     if (error instanceof AppError) {
@@ -597,7 +593,6 @@ export const globalSignOut = asyncHandler(async (req, res, next) => {
     Object.keys(req.cookies).forEach((cookie) => {
       res.clearCookie(cookie, { path: '/' });
     });
-    clearLegacyDomainCookies(res);
 
     res.status(200).json(createSuccessResponse(`User '${userId}' has been globally signed out successfully`));
   } catch (error) {
@@ -3083,14 +3078,19 @@ export const publishMenuUpdate = asyncHandler(async (req, res) => {
   const menu = JSON.parse(Item.menu.S);
 
   if (Array.isArray(menu.items)) {
-    for (const item of menu.items) {
-      if (!item.photo?.s3Key) continue;
+    // One S3 CopyObject per photo, previously sequential. An 80-item menu meant
+    // 80 serial round trips — minutes of wall clock inside a function that has a
+    // hard timeout. Each copy is independent and moveMenuImageToLiveBucket
+    // already swallows its own failures, so bounded concurrency is safe and
+    // turns that into ~10 rounds.
+    await mapWithConcurrency(menu.items, 8, async (item) => {
+      if (!item.photo?.s3Key) return;
       const liveUrl = await moveMenuImageToLiveBucket(item.photo.s3Key);
       if (liveUrl) {
         item.photo.url = liveUrl;
       }
       delete item.photo.s3Key;
-    }
+    });
   }
 
   if (!supabase) throw createExternalServiceError('Supabase client not initialized');
