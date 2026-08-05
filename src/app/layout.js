@@ -1,4 +1,5 @@
 import './globals.css';
+import { Analytics } from '@vercel/analytics/next';
 import AuthGuard from '@/components/AuthGuard/AuthGuard';
 
 export const metadata = {
@@ -50,6 +51,7 @@ export default function RootLayout({ children }) {
     <html lang='en'>
       <body>
         <AuthGuard>{children}</AuthGuard>
+        <Analytics />
       </body>
     </html>
   );
