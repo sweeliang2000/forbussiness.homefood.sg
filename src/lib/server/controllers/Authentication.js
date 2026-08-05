@@ -37,6 +37,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
 import { getS3, getDynamo, getSes, getCognito } from '../aws';
+import { ensureUserProvisioned } from '../user-provisioning';
 import { getSupabase } from '../supabase';
 import { getStripe, getConnectStripe, getWebhookSecret } from '../stripe';
 import {
@@ -150,7 +151,20 @@ export const signIn = asyncHandler(async (req, res, next) => {
 
     const { AccessToken, IdToken, RefreshToken } = data.AuthenticationResult;
 
-    // Set cookies
+    let provisionedUser;
+    try {
+      provisionedUser = await ensureUserProvisioned(username);
+    } catch (provisionError) {
+      throw createDatabaseError(
+        "provision user and shop",
+        provisionError,
+        "exports.signIn"
+      );
+    }
+
+    const { user_id, role, shop_id } = provisionedUser;
+
+    // Set the complete session only after app-level provisioning succeeds.
     res.cookie("accessToken", AccessToken, getCookieOptions({
       httpOnly: true,
       maxAge: 3600 * 1000, // 1 hour
@@ -166,54 +180,16 @@ export const signIn = asyncHandler(async (req, res, next) => {
       maxAge: 7 * 24 * 3600 * 1000, // 7 days
     }));
 
+    res.cookie('userDataHTTP', JSON.stringify({ user_id, role, shop_id }), getCookieOptions({
+      httpOnly: true,
+      maxAge: 3600 * 1000,
+    }));
 
+    res.cookie('userDataNonHTTP', JSON.stringify({ user_id, role, shop_id }), getCookieOptions({
+      httpOnly: false,
+      maxAge: 3600 * 1000,
+    }));
 
-
-
-    // Check if user exists in database, if not create them
-    try {
-      const userExists = await doesUserExist(username);
-      if (!userExists) {
-        console.log("User does not exist in database, creating user...");
-        const insertResult = await exports.insert(username);
-        console.log("Insert result:", insertResult?.message || insertResult);
-      }
-    } catch (insertError) {
-      console.error("Error handling user creation:", insertError);
-      // Don't throw error here, just log it and continue
-    }
-    
-    try {
-      const params = {
-        TableName: 'Users',
-        Key: {
-          user_id: { S: toUserId(username) },
-        },
-      };
-      const command = new GetItemCommand(params);
-      const response = await client.send(command);
-      if (response.Item) {
-        const unmarshalledItem = unmarshall(response.Item);
-        console.log('Retrieved item:', unmarshalledItem);
-
-        const { user_id, role,shop_id } = unmarshalledItem;
-        console.log("shop_id",shop_id)
-        // Set cookies
-        res.cookie('userDataHTTP', JSON.stringify({ user_id, role,shop_id }), getCookieOptions({
-          httpOnly: true, // HTTP-only cookie
-          maxAge: 3600 * 1000, // 1 hour - same as accessToken
-        }));
-
-        res.cookie('userDataNonHTTP', JSON.stringify({ user_id, role,shop_id }), getCookieOptions({
-          httpOnly: false, // Accessible by JavaScript on the client-side
-          maxAge: 3600 * 1000, // 1 hour - same as accessToken
-        }));
-
-      }
-    } catch (retrieveError) {
-      console.error("Error retrieving user data:", retrieveError);
-      throw createDatabaseError("retrieve user data", retrieveError, "exports.signIn");
-    }
     res.status(200).json(createSuccessResponse("Sign-in successful"));
   } catch (err) {
     if (err instanceof AppError) {

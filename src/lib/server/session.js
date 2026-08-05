@@ -1,13 +1,12 @@
 import 'server-only';
 
-import { GetItemCommand } from '@aws-sdk/client-dynamodb';
-import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { InitiateAuthCommand } from '@aws-sdk/client-cognito-identity-provider';
 
-import { getDynamo, getCognito } from './aws';
+import { getCognito } from './aws';
 import { verifyAccessToken, decodeToken } from './cognito';
 import { getCookieOptions, COOKIE_NAMES } from './cookies';
-import { COGNITO_CLIENT_ID, USERS_TABLE } from './env';
+import { COGNITO_CLIENT_ID } from './env';
+import { ensureUserProvisioned } from './user-provisioning';
 import {
   AppError,
   createAuthError,
@@ -36,8 +35,6 @@ import {
 
 export const ROLES = { OWNER: 'Owner', MANAGER: 'Manager', OPERATOR: 'Operator' };
 
-const toUserId = (v) => (typeof v === 'string' ? v.trim().toLowerCase() : v);
-
 const ONE_HOUR_MS = 3600 * 1000;
 const SEVEN_DAYS_MS = 7 * 24 * 3600 * 1000;
 
@@ -64,26 +61,6 @@ function setUserDataCookies(req, res, { user_id, role, shop_id }) {
   if (!req.cookies) req.cookies = {};
   req.cookies[COOKIE_NAMES.USER_DATA_HTTP] = userDataStr;
   req.cookies[COOKIE_NAMES.USER_DATA_NON_HTTP] = userDataStr;
-}
-
-async function lookupUser(userId) {
-  if (!userId) return null;
-
-  const lower = toUserId(userId);
-
-  let response = await getDynamo().send(
-    new GetItemCommand({ TableName: USERS_TABLE, Key: { user_id: { S: lower } } })
-  );
-
-  // The Users table is keyed on the lowercased email, but tolerate rows written
-  // before that was normalised.
-  if (!response.Item && userId !== lower) {
-    response = await getDynamo().send(
-      new GetItemCommand({ TableName: USERS_TABLE, Key: { user_id: { S: userId } } })
-    );
-  }
-
-  return response.Item ? unmarshall(response.Item) : null;
 }
 
 /**
@@ -118,12 +95,18 @@ export async function verifyToken(req, res, next) {
         // can be Cognito's opaque identifier rather than the Users-table email.
         if (!cookieUserData?.user_id || !cookieUserData?.role || !cookieUserData?.shop_id) {
           try {
+            const idPayload = req.cookies[COOKIE_NAMES.ID_TOKEN]
+              ? decodeToken(req.cookies[COOKIE_NAMES.ID_TOKEN])
+              : null;
             const userId =
               cookieUserData?.user_id ||
+              idPayload?.email ||
+              idPayload?.['cognito:username'] ||
+              idPayload?.username ||
               verifiedPayload.email ||
               verifiedPayload.username ||
               verifiedPayload.sub;
-            const user = await lookupUser(userId);
+            const user = await ensureUserProvisioned(userId);
             if (user) {
               setUserDataCookies(req, res, user);
             }
@@ -210,7 +193,7 @@ export async function verifyToken(req, res, next) {
             verifiedPayload.sub ||
             verifiedPayload.email;
 
-          const user = await lookupUser(userId);
+          const user = await ensureUserProvisioned(userId);
           if (user) {
             setUserDataCookies(req, res, user);
           } else {
