@@ -12,7 +12,7 @@ import {
 import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import apiClient from '@/utility/api';
 import { CHECKOUT_SESSION_STRIPE, REDEMPTION_CODE } from '@/utility/apiPaths';
-import { LoadingButton } from '@mui/lab';
+import { Button } from '@mui/material';
 
 export default function ProductDetails() {
   const [currentLookupKey, setCurrentLookupKey] = useState(null);
@@ -197,7 +197,7 @@ export default function ProductDetails() {
             autoComplete="off"
             disabled={isApplyingPromo}
           />
-          <LoadingButton
+          <Button
             className={styles.promoCodeButton}
             type="submit"
             loading={isApplyingPromo}
@@ -206,7 +206,7 @@ export default function ProductDetails() {
             variant="contained"
           >
             {isApplyingPromo ? '' : 'Enter'}
-          </LoadingButton>
+          </Button>
         </div>
         {promoError ? <p className={styles.promoCodeError}>{promoError}</p> : null}
       </form>

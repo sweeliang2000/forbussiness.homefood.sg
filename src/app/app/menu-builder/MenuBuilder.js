@@ -5,7 +5,6 @@ import styles from './MenuBuilder.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import { Button, Checkbox, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, FormControlLabel, IconButton, Menu, MenuItem, Radio, RadioGroup, Select, Switch, TextField, Typography } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
 import Shimmer from '@/components/Shimmer/Shimmer';
 import AddCircleOutlineRoundedIcon from '@mui/icons-material/AddCircleOutlineRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
@@ -1161,7 +1160,7 @@ export default function MenuBuilder() {
           }
           rightActions={
             <>
-              <LoadingButton
+              <Button
                 size="small"
                 variant="contained"
                 loading={isSaving}
@@ -1172,9 +1171,9 @@ export default function MenuBuilder() {
                 sx={{ textTransform: 'none' }}
               >
                 {isSaveSuccess ? 'Saved' : 'Save Menu'}
-              </LoadingButton>
+              </Button>
               {releaseStatus === 'Released' && (
-                <LoadingButton
+                <Button
                   size="small"
                   variant="outlined"
                   color="primary"
@@ -1186,7 +1185,7 @@ export default function MenuBuilder() {
                   sx={{ textTransform: 'none' }}
                 >
                   {isPublishSuccess ? 'Update Published' : 'Publish Update'}
-                </LoadingButton>
+                </Button>
               )}
               <IconButton
                 size="small"

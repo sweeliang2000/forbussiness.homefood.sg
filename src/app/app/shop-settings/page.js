@@ -24,7 +24,6 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
 import { FaCheck } from 'react-icons/fa';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
@@ -410,7 +409,7 @@ export default function ShopSettingsPage() {
           }
           rightActions={
             <>
-              <LoadingButton
+              <Button
                 size="small"
                 variant="contained"
                 loading={isSaving}
@@ -421,9 +420,9 @@ export default function ShopSettingsPage() {
                 sx={{ textTransform: 'none' }}
               >
                 {isSaveSuccess ? 'Saved' : 'Save Settings'}
-              </LoadingButton>
+              </Button>
               {releaseStatus === 'Released' && (
-                <LoadingButton
+                <Button
                   size="small"
                   variant="outlined"
                   color="primary"
@@ -435,7 +434,7 @@ export default function ShopSettingsPage() {
                   sx={{ textTransform: 'none' }}
                 >
                   {isPublishSuccess ? 'Update Published' : 'Publish Update'}
-                </LoadingButton>
+                </Button>
               )}
             </>
           }

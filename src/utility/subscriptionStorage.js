@@ -11,7 +11,9 @@ const SUBSCRIPTION_LOOKUP_KEY = '1_outlet-monthly';
 export const getSubscriptionLookupKey = () => {
   try {
     const lookupKey = localStorage.getItem(SUBSCRIPTION_LOOKUP_KEY);
-    return lookupKey;
+    return lookupKey && lookupKey !== 'null' && lookupKey !== 'undefined'
+      ? lookupKey
+      : null;
   } catch (error) {
     console.error('[SUBSCRIPTION STORAGE] Failed to get lookup key from localStorage:', error);
     return null;
@@ -25,8 +27,11 @@ export const getSubscriptionLookupKey = () => {
  */
 export const setSubscriptionLookupKey = (lookupKey) => {
   try {
-    localStorage.setItem(SUBSCRIPTION_LOOKUP_KEY, lookupKey);
-    console.log('[SUBSCRIPTION STORAGE] Stored lookup key in localStorage:', lookupKey);
+    if (lookupKey == null || lookupKey === '') {
+      localStorage.removeItem(SUBSCRIPTION_LOOKUP_KEY);
+    } else {
+      localStorage.setItem(SUBSCRIPTION_LOOKUP_KEY, lookupKey);
+    }
     return true;
   } catch (error) {
     console.error('[SUBSCRIPTION STORAGE] Failed to store lookup key in localStorage:', error);
@@ -41,7 +46,6 @@ export const setSubscriptionLookupKey = (lookupKey) => {
 export const removeSubscriptionLookupKey = () => {
   try {
     localStorage.removeItem(SUBSCRIPTION_LOOKUP_KEY);
-    console.log('[SUBSCRIPTION STORAGE] Removed lookup key from localStorage');
     return true;
   } catch (error) {
     console.error('[SUBSCRIPTION STORAGE] Failed to remove lookup key from localStorage:', error);

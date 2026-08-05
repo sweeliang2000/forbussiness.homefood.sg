@@ -11,7 +11,6 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
 import ReviewBox from '../../../components/ReviewBox/ReviewBox';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import apiClient from '@/utility/api';
@@ -161,7 +160,7 @@ export default function RatingsPage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setReplyTarget(null)} sx={{ textTransform: 'none' }}>Cancel</Button>
-          <LoadingButton
+          <Button
             variant="contained"
             loading={replySaving}
             disabled={!replyText.trim()}
@@ -169,7 +168,7 @@ export default function RatingsPage() {
             sx={{ textTransform: 'none' }}
           >
             Save reply
-          </LoadingButton>
+          </Button>
         </DialogActions>
       </Dialog>
     </div>

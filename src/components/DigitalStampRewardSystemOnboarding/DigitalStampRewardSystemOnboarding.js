@@ -6,12 +6,11 @@ import { useRouter } from 'next/navigation';
 import styles from './DigitalStampRewardSystemOnboarding.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import Image from 'next/image';
-import { Link as MuiLink } from '@mui/material';
+import { Button, Link as MuiLink } from '@mui/material';
 import { FaRegLightbulb } from 'react-icons/fa6';
 import { PiGear } from 'react-icons/pi';
 import { BsGraphUpArrow } from 'react-icons/bs';
 import { FaRegHand } from 'react-icons/fa6';
-import { LoadingButton } from '@mui/lab';
 import apiClient from '@/utility/api';
 import { STAMP_MANAGEMENT } from '@/utility/apiPaths';
 
@@ -63,7 +62,7 @@ const DigitalStampRewardSystemOnboarding = ({ onSuccess }) => {
                                 <MuiLink href='/' component={Link}><FaRegLightbulb /> Learn more</MuiLink>
                             </div>
                         </div>
-                        <LoadingButton
+                        <Button
                             loading={isEnabling}
                             loadingPosition='start'
                             variant='contained'
@@ -72,7 +71,7 @@ const DigitalStampRewardSystemOnboarding = ({ onSuccess }) => {
                             disabled={isEnabling}
                         >
                             Get Started
-                        </LoadingButton>
+                        </Button>
                     </div>
                     <div className={styles.imageContainer}>
                         <Image

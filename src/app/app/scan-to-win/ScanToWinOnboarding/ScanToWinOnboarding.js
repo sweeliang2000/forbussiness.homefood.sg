@@ -3,7 +3,7 @@
 import styles from './ScanToWinOnboarding.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import Image from 'next/image';
-import { LoadingButton } from '@mui/lab';
+import { Button } from '@mui/material';
 import { PiGear } from 'react-icons/pi';
 import { BsGraphUpArrow } from 'react-icons/bs';
 import { FaRegHand } from 'react-icons/fa6';
@@ -23,7 +23,7 @@ const ScanToWinOnboarding = ({ onGetStarted, isEnabling }) => {
                                 higher spend or visit milestones.
                             </p>
                         </div>
-                        <LoadingButton
+                        <Button
                             loading={isEnabling}
                             loadingPosition="start"
                             variant="contained"
@@ -32,7 +32,7 @@ const ScanToWinOnboarding = ({ onGetStarted, isEnabling }) => {
                             disabled={isEnabling}
                         >
                             Get Started
-                        </LoadingButton>
+                        </Button>
                     </div>
                     <div className={styles.imageContainer}>
                         <Image

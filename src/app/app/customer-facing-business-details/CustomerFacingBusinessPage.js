@@ -15,7 +15,6 @@ import apiClient from '@/utility/api';
 import { CUSTOMER_FACING_INFORMATION, RELEASE_STATUS, STRIPE_CONNECT_ACCOUNT_STATUS, PUBLISH_UPDATE } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
-import { LoadingButton } from '@mui/lab';
 import { FaCheck } from 'react-icons/fa';
 
 const DISPLAY_NAME = 'displayName';
@@ -579,7 +578,7 @@ const CustomerFacingBusinessPage = () => {
                     }
                     rightActions={
                         releaseStatus === 'Released' ? (
-                            <LoadingButton
+                            <Button
                                 size='small'
                                 variant='outlined'
                                 color='primary'
@@ -591,7 +590,7 @@ const CustomerFacingBusinessPage = () => {
                                 style={{ textTransform: 'none' }}
                             >
                                 {isPublishSuccess ? 'Update Published' : 'Publish Update'}
-                            </LoadingButton>
+                            </Button>
                         ) : null
                     }
                 />

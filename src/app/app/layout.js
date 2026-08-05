@@ -18,27 +18,22 @@ export default function RootLayout({ children }) {
   const pathname = usePathname();
   
   useEffect(() => {
-    // TODO: Temporary console.log to verify component mounting
     // TODO: Replace with proper role fetching implementation:
     // 1. Create a new HOC for role management or implement role fetching here
     // 2. Add proper error handling and loading states
     // 3. Consider using Context/Redux for global role state management
     // 4. Implement role-based access control for different sections
-    console.log("[INITIAL SETUP] CALLED INSIDE LAYOUT OF APP")
-    
     // Check if lookup_key exists in localStorage first
     const storedLookupKey = getSubscriptionLookupKey();
     if (storedLookupKey) {
       setSubscriptionStatus(storedLookupKey);
       setIsLoadingSubscription(false);
-      console.log("[SUBSCRIPTION STATUS] Loaded from localStorage:", storedLookupKey);
     }
     
     // Refresh user cookie
     const refreshUserCookie = async () => {
       try {
         await apiClient.get(REFRESH_USER_COOKIE);
-        console.log("[REFRESH USER COOKIE] Successfully refreshed");
       } catch (error) {
         // If user not found (404), redirect to login
         if (error?.response?.status === 404) {
@@ -49,7 +44,6 @@ export default function RootLayout({ children }) {
           return;
         }
         // Silently handle other errors - missing userDataHTTP cookie is expected for unauthenticated users
-        console.log("[REFRESH USER COOKIE] Silent error (expected for unauthenticated users)");
       }
     };
 
@@ -64,7 +58,6 @@ export default function RootLayout({ children }) {
         setSubscriptionLookupKey(lookupKey);
         
         setSubscriptionStatus(lookupKey);
-        console.log("[SUBSCRIPTION STATUS] Loaded:", subscriptionData);
       } catch (error) {
         console.error("[SUBSCRIPTION STATUS] Error:", error);
         setSubscriptionStatus({ lookup_key: null });

@@ -22,8 +22,6 @@ apiClient.interceptors.response.use(
                        currentPath.startsWith('/verify') || 
                        currentPath.startsWith('/forgot-password');
 
-    console.log('requestUrl:', requestUrl);
-
     if (
       error.response &&
       error.response.status === 401 &&
@@ -64,7 +62,6 @@ export const getShopSubscriptionStatus = async () => {
     
     // Save to local storage
     localStorage.setItem(SHOP_SUBSCRIPTION_STORAGE_KEY, JSON.stringify(subscriptionData));
-    console.log('Shop subscription status saved to local storage:', subscriptionData);
     
     return subscriptionData;
   } catch (error) {
@@ -74,7 +71,6 @@ export const getShopSubscriptionStatus = async () => {
     const cachedData = localStorage.getItem(SHOP_SUBSCRIPTION_STORAGE_KEY);
     
     if (cachedData) {
-      console.log('API failed, returning cached data:', JSON.parse(cachedData));
       return JSON.parse(cachedData);
     }
     
@@ -86,7 +82,6 @@ export const getShopSubscriptionStatus = async () => {
 // Function to clear shop subscription status from local storage
 export const clearShopSubscriptionStatus = () => {
   localStorage.removeItem(SHOP_SUBSCRIPTION_STORAGE_KEY);
-  console.log('Shop subscription status cleared from local storage');
 };
 
 // Function to update shop subscription status in local storage
@@ -96,7 +91,6 @@ export const updateShopSubscriptionStatus = (subscriptionData) => {
   };
   
   localStorage.setItem(SHOP_SUBSCRIPTION_STORAGE_KEY, JSON.stringify(dataToStore));
-  console.log('Shop subscription status updated in local storage:', dataToStore);
   return dataToStore;
 };
 

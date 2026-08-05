@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Alert, Button, InputAdornment, TextField, Typography } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
 import { FaCheck } from 'react-icons/fa';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
@@ -108,7 +107,7 @@ export default function ShopLinkSection({ shopName, className }) {
           }}
           style={{ flex: 1, minWidth: 300 }}
         />
-        <LoadingButton
+        <Button
           variant='contained'
           size='small'
           loading={saving}
@@ -118,7 +117,7 @@ export default function ShopLinkSection({ shopName, className }) {
           sx={{ textTransform: 'none', mt: '2px' }}
         >
           {saveSuccess ? 'Saved' : 'Save Link'}
-        </LoadingButton>
+        </Button>
         <Button
           variant='outlined'
           size='small'

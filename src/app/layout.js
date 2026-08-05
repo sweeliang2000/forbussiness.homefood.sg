@@ -2,6 +2,7 @@ import './globals.css';
 import AuthGuard from '@/components/AuthGuard/AuthGuard';
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://business.homefood.sg'),
   title: 'HomeFood for Business | Customisable Rewards Systems in Singapore',
   description: 'HomeFood offers scan to win and loyalty system for Singapore merchants. Empower your business with a unique, flexible rewards program that allows customers to earn and redeem points, tailored to your shop\'s needs.',
   keywords: ['loyalty program', 'customer rewards', 'merchant solutions', 'Singapore business', 'CRM', 'customer engagement', 'points system', 'digital loyalty'],
