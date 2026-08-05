@@ -39,6 +39,18 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - React Icons: https://www.npmjs.com/package/react-icons
 - Mui material @emotion/react @emotion/styled
 
+## Recommended design skills
+
+Install Emil Kowalski's UI design, prototyping, and animation skills locally:
+
+```bash
+npx skills@latest add emilkowalski/skills
+```
+
+The collection includes `animate`, `animation-vocabulary`, `apple-design`,
+`emil-design-eng`, `find-animation-opportunities`, `improve-animations`,
+`pick-ui-library`, `prototype`, and `review-animations`.
+
 ## Sitemap (next-sitemap + Search Console)
 This project uses `next-sitemap` to generate `sitemap.xml` during `next build` (via the `postbuild` script).
 
