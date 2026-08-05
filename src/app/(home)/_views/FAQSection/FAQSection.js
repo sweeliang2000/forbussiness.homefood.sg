@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import styles from './FAQSection.module.css';
 import Badge from '@/components/Badge';
 
@@ -38,6 +39,7 @@ const faqs = [
 
 const FAQSection = () => {
     const [openIndex, setOpenIndex] = useState(null);
+    const reduceMotion = useReducedMotion();
 
     const toggle = (i) => setOpenIndex(openIndex === i ? null : i);
 
@@ -50,13 +52,31 @@ const FAQSection = () => {
             <div className={styles.faqList}>
                 {faqs.map((faq, i) => (
                     <div key={i} className={`${styles.faqItem} ${openIndex === i ? styles.open : ''}`}>
-                        <button className={styles.faqQ} onClick={() => toggle(i)}>
+                        <button
+                            className={styles.faqQ}
+                            onClick={() => toggle(i)}
+                            aria-expanded={openIndex === i}
+                            aria-controls={`faq-answer-${i}`}
+                        >
                             {faq.question}
-                            <span className={styles.faqIcon}>{openIndex === i ? '－' : '＋'}</span>
+                            <span className={styles.faqIcon} aria-hidden="true">＋</span>
                         </button>
-                        <div className={styles.faqA}>
-                            <p>{faq.answer}</p>
-                        </div>
+                        <AnimatePresence initial={false}>
+                            {openIndex === i && (
+                                <motion.div
+                                    id={`faq-answer-${i}`}
+                                    className={styles.faqA}
+                                    initial={{ height: reduceMotion ? 'auto' : 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: reduceMotion ? 'auto' : 0, opacity: 0 }}
+                                    transition={reduceMotion
+                                        ? { height: { duration: 0 }, opacity: { duration: 0.2 } }
+                                        : { duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                                >
+                                    <p>{faq.answer}</p>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 ))}
             </div>

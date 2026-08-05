@@ -1,3 +1,5 @@
+'use client';
+import { motion, useReducedMotion } from 'motion/react';
 import styles from './HowItWorksSection.module.css';
 import Badge from '@/components/Badge';
 
@@ -31,6 +33,30 @@ const steps = [
 ];
 
 const HowItWorksSection = () => {
+    const reduceMotion = useReducedMotion();
+    const gridVariants = {
+        hidden: {},
+        visible: {
+            transition: {
+                staggerChildren: reduceMotion ? 0 : 0.06,
+            },
+        },
+    };
+    const cardVariants = {
+        hidden: {
+            opacity: 0,
+            transform: reduceMotion ? 'none' : 'translateY(12px)',
+        },
+        visible: {
+            opacity: 1,
+            transform: 'translateY(0px)',
+            transition: {
+                duration: reduceMotion ? 0.2 : 0.4,
+                ease: [0.23, 1, 0.32, 1],
+            },
+        },
+    };
+
     return (
         <section id="how" className={styles.howSection}>
             <div className={styles.sectionHead}>
@@ -42,9 +68,19 @@ const HowItWorksSection = () => {
                     A friction-free path for the customer. A clean, predictable shift for you.
                 </p>
             </div>
-            <div className={styles.howGrid}>
+            <motion.div
+                className={styles.howGrid}
+                variants={gridVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: '-100px' }}
+            >
                 {steps.map((step) => (
-                    <div key={step.num} className={`${styles.howCard} ${step.num === 3 ? styles.alertCard : ''}`}>
+                    <motion.div
+                        key={step.num}
+                        className={`${styles.howCard} ${step.num === 3 ? styles.alertCard : ''}`}
+                        variants={cardVariants}
+                    >
                         <div className={styles.howNum}>{step.num}</div>
                         <h4>{step.title}</h4>
                         <p>{step.description}</p>
@@ -55,9 +91,9 @@ const HowItWorksSection = () => {
                             </div>
                         )}
                         <span className={styles.tag}>{step.tag}</span>
-                    </div>
+                    </motion.div>
                 ))}
-            </div>
+            </motion.div>
         </section>
     );
 };

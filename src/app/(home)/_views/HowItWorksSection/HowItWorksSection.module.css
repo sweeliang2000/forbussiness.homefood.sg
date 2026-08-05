@@ -112,6 +112,12 @@
     50% { opacity: 0.5; transform: scale(0.85); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .alertDot {
+        animation: none;
+    }
+}
+
 @media (max-width: 1024px) {
     .howGrid {
         grid-template-columns: repeat(2, 1fr);

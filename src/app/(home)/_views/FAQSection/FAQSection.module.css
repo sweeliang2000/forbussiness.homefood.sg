@@ -49,6 +49,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 16px;
+    transition: color 160ms var(--ease-out);
 }
 
 .faqIcon {
@@ -56,21 +57,36 @@
     font-size: 22px;
     font-weight: 400;
     flex-shrink: 0;
+    transform: rotate(0deg);
+    transition: transform 200ms var(--ease-in-out);
 }
 
 .faqA {
-    max-height: 0;
     overflow: hidden;
-    transition: max-height 0.4s ease;
     padding: 0 22px;
     color: var(--on-primary-light2);
     font-size: 15px;
     line-height: 1.6;
 }
 
-.open .faqA {
-    max-height: 400px;
+.faqA p {
     padding-bottom: 20px;
+}
+
+.open .faqIcon {
+    transform: rotate(45deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .faqQ:hover {
+        color: var(--accent-color);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .faqIcon {
+        transition: none;
+    }
 }
 
 @media (max-width: 640px) {

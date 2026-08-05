@@ -54,7 +54,8 @@
 
 /* Art area: gradient background + phone image */
 .offerArt {
-    height: 240px;
+    width: 100%;
+    aspect-ratio: 4 / 3;
     border-radius: 16px;
     position: relative;
     overflow: hidden;
@@ -93,8 +94,8 @@
 }
 
 .phoneImg {
-    object-fit: contain;
-    object-position: bottom center;
+    object-fit: cover;
+    object-position: center;
 }
 
 .offerCard h3 {

@@ -1,45 +1,89 @@
 'use client';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'motion/react';
 import styles from './HeroSection.module.css';
 
 const HeroSection = () => {
+    const reduceMotion = useReducedMotion();
+    const enterItem = {
+        hidden: {
+            opacity: 0,
+            transform: reduceMotion ? 'none' : 'translateY(12px)',
+        },
+        visible: {
+            opacity: 1,
+            transform: 'translateY(0px)',
+            transition: {
+                duration: reduceMotion ? 0.2 : 0.5,
+                ease: [0.23, 1, 0.32, 1],
+            },
+        },
+    };
+    const copySequence = {
+        hidden: {},
+        visible: {
+            transition: {
+                staggerChildren: reduceMotion ? 0 : 0.07,
+            },
+        },
+    };
+    const tileSequence = {
+        hidden: {},
+        visible: {
+            transition: {
+                delayChildren: reduceMotion ? 0 : 0.16,
+                staggerChildren: reduceMotion ? 0 : 0.07,
+            },
+        },
+    };
+
     return (
         <section id="top" className={styles.hero}>
             {/* Left / top: centered copy */}
-            <div className={styles.heroLeft}>
-                <div className={styles.heroKicker}>
+            <motion.div
+                className={styles.heroLeft}
+                variants={copySequence}
+                initial="hidden"
+                animate="visible"
+            >
+                <motion.div className={styles.heroKicker} variants={enterItem}>
                     <span className={styles.badge}>For home-based food sellers</span>
-                </div>
-                <h1 className={styles.heroTitle}>
+                </motion.div>
+                <motion.h1 className={styles.heroTitle} variants={enterItem}>
                     Your home kitchen, now <em>discoverable</em>. Orders and pickup, handled.
-                </h1>
-                <p className={styles.heroSub}>
+                </motion.h1>
+                <motion.p className={styles.heroSub} variants={enterItem}>
                     HomeFood helps customers discover home-based food nearby,{' '}
                     <strong>order or pre-order from your kitchen</strong>, pay online, and come collect it when
                     you&apos;re done cooking. They get notified when the food is about to be ready — and again when
                     it&apos;s ready. <strong>You just cook.</strong>
-                </p>
-                <div className={styles.heroBtns}>
+                </motion.p>
+                <motion.div className={styles.heroBtns} variants={enterItem}>
                     <Link href="/early-adopter" className={`${styles.btn} ${styles.primary} ${styles.large}`}>
                         Grow with us — it&apos;s free
                     </Link>
                     <Link href="#how" className={`${styles.btn} ${styles.outline} ${styles.large}`}>
                         See how it works
                     </Link>
-                </div>
-                <div className={styles.heroTrust}>
+                </motion.div>
+                <motion.div className={styles.heroTrust} variants={enterItem}>
                     <span className={styles.trustDot}></span>
                     <span>
                         Early adopter program —{' '}
                         <strong>platform subscription free for life</strong>
                     </span>
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
 
             {/* Right / bottom: 4-col single-row tile grid */}
-            <div className={styles.heroRight}>
+            <motion.div
+                className={styles.heroRight}
+                variants={tileSequence}
+                initial="hidden"
+                animate="visible"
+            >
                 {/* Tile A: Discover nearby — spans 2 of 4 columns */}
-                <div className={`${styles.heroTile} ${styles.tileA}`}>
+                <motion.div className={`${styles.heroTile} ${styles.tileA}`} variants={enterItem}>
                     <div>
                         <span className={styles.tileABadge}>Discover nearby</span>
                         <h3>Home kitchens, 5 min from your door.</h3>
@@ -73,10 +117,10 @@ const HeroSection = () => {
                             <span className={styles.heroItemPill}>Hot</span>
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Tile B: Live order status — column 3 */}
-                <div className={`${styles.heroTile} ${styles.tileB}`}>
+                <motion.div className={`${styles.heroTile} ${styles.tileB}`} variants={enterItem}>
                     <div>
                         <div className={styles.tileTitle}>🔔 Live order status</div>
                         <div className={styles.tileSub}>Order #A-2041 · Butter Chicken × 2</div>
@@ -103,10 +147,10 @@ const HeroSection = () => {
                     <div className={styles.orderNow}>
                         ⏱ Customer notified — 3 min to ready. Be at the door.
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Tile C: Customer pays online — column 4 */}
-                <div className={`${styles.heroTile} ${styles.tileC}`}>
+                <motion.div className={`${styles.heroTile} ${styles.tileC}`} variants={enterItem}>
                     <div>
                         <div className={styles.tileTitle}>💳 Customer pays online</div>
                         <div className={styles.tileSub}>You never handle the money.</div>
@@ -128,8 +172,8 @@ const HeroSection = () => {
                     <div className={styles.paySettle}>
                         <b>Monthly payout.</b> We settle refunds, chargebacks &amp; fees.
                     </div>
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
         </section>
     );
 };

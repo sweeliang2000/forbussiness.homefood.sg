@@ -11,13 +11,32 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 160ms var(--ease-out),
+    box-shadow 160ms var(--ease-out);
   z-index: 1000;
 }
 
-.whatsappFloating:hover {
-  transform: scale(1.08);
-  box-shadow: 0 6px 16px rgba(37, 211, 102, 0.5);
+.whatsappFloating:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .whatsappFloating:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 16px rgba(37, 211, 102, 0.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .whatsappFloating {
+    transition: box-shadow 160ms var(--ease-out);
+  }
+
+  .whatsappFloating:hover,
+  .whatsappFloating:active {
+    transform: none;
+  }
 }
 
 .whatsappFloatingIcon {
@@ -38,4 +57,3 @@
     height: 30px;
   }
 }
-

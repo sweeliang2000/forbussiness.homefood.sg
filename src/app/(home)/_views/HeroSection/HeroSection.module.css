@@ -58,7 +58,7 @@
 .heroSub {
     font-size: 18px;
     color: var(--on-primary-light2);
-    max-width: 46ch;
+    max-width: 72ch;
     line-height: 1.55;
     margin: 0 auto;
 }
@@ -88,17 +88,16 @@
     border-radius: 200px;
     padding: 12px 24px;
     font-size: 16px;
-    transition: all 0.3s ease;
+    transition:
+        background-color 160ms var(--ease-out),
+        border-color 160ms var(--ease-out),
+        color 160ms var(--ease-out),
+        transform 160ms var(--ease-out);
 }
 
 .primary {
     background: var(--accent-color);
     color: #fff;
-}
-
-.primary:hover {
-    background: #C2410C;
-    transform: translateY(-1px);
 }
 
 .outline {
@@ -107,10 +106,21 @@
     border: 1px solid var(--accent-color);
 }
 
-.outline:hover {
-    background: var(--accent-color);
-    color: #fff;
-    transform: translateY(-2px);
+.btn:active {
+    transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .primary:hover {
+        background: #C2410C;
+        transform: translateY(-1px);
+    }
+
+    .outline:hover {
+        background: var(--accent-color);
+        color: #fff;
+        transform: translateY(-2px);
+    }
 }
 
 .large {
@@ -314,15 +324,17 @@
 .orderBar::after {
     content: '';
     position: absolute;
-    inset: 0 40% 0 0;
+    inset: 0;
     background: linear-gradient(90deg, #f59e0b, #fbbf24);
     border-radius: 999px;
-    animation: barPulse 3s ease-in-out infinite;
+    transform: scaleX(0.6);
+    transform-origin: left;
+    animation: statusProgress 900ms var(--ease-out) 650ms both;
 }
 
-@keyframes barPulse {
-    0%, 100% { inset: 0 65% 0 0; }
-    50% { inset: 0 25% 0 0; }
+@keyframes statusProgress {
+    from { transform: scaleX(0.2); }
+    to { transform: scaleX(0.6); }
 }
 
 .orderSteps {
@@ -466,5 +478,24 @@
 
     .heroSub {
         font-size: 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn {
+        transition:
+            background-color 160ms var(--ease-out),
+            border-color 160ms var(--ease-out),
+            color 160ms var(--ease-out);
+    }
+
+    .btn:active,
+    .primary:hover,
+    .outline:hover {
+        transform: none;
+    }
+
+    .orderBar::after {
+        animation: none;
     }
 }
