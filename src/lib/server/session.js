@@ -100,10 +100,29 @@ export async function verifyToken(req, res, next) {
         const verifiedPayload = await verifyAccessToken(accessToken);
         req.user = verifiedPayload;
 
-        if (!req.cookies[COOKIE_NAMES.USER_DATA_HTTP]) {
+        const rawUserData = req.cookies[COOKIE_NAMES.USER_DATA_HTTP];
+        let cookieUserData = null;
+        if (rawUserData) {
+          try {
+            cookieUserData = JSON.parse(rawUserData);
+          } catch {
+            // A malformed user-data cookie is treated like a missing one and
+            // replaced from the authoritative Users table below.
+          }
+        }
+
+        // Older sessions can contain a valid userDataHTTP cookie without the
+        // shop_id added by newer login responses. Repair incomplete cookies on
+        // the first authenticated request instead of forcing the user to log in
+        // again. Prefer the cookie's user_id because the access-token username
+        // can be Cognito's opaque identifier rather than the Users-table email.
+        if (!cookieUserData?.user_id || !cookieUserData?.role || !cookieUserData?.shop_id) {
           try {
             const userId =
-              verifiedPayload.username || verifiedPayload.sub || verifiedPayload.email;
+              cookieUserData?.user_id ||
+              verifiedPayload.email ||
+              verifiedPayload.username ||
+              verifiedPayload.sub;
             const user = await lookupUser(userId);
             if (user) {
               setUserDataCookies(req, res, user);

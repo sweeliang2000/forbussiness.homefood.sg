@@ -7555,9 +7555,10 @@ export const addStamps = asyncHandler(async (req, res, next) => {
 });
 
 export const PostMenu = asyncHandler(async (req, res, next) => {
-  const { shop_id, menu: menuStr } = req.body;
+  const { menu: menuStr } = req.body;
+  const shop_id = req.session?.shopId;
 
-  if (!shop_id) throw createValidationError("shop_id is required");
+  if (!shop_id) throw createValidationError("Shop ID is unavailable for this account");
   if (!menuStr) throw createValidationError("menu is required");
 
   let menu;
@@ -7627,9 +7628,9 @@ export const PostMenu = asyncHandler(async (req, res, next) => {
 });
 
 export const GetMenu = asyncHandler(async (req, res, next) => {
-  const { shop_id } = req.query;
+  const shop_id = req.session?.shopId;
 
-  if (!shop_id) throw createValidationError("shop_id is required");
+  if (!shop_id) throw createValidationError("Shop ID is unavailable for this account");
 
   let menuItem;
   try {

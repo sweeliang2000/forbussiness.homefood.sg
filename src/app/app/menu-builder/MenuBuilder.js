@@ -21,7 +21,6 @@ import { Alert } from '@mui/material';
 import apiClient from '@/utility/api';
 import { MENU, RELEASE_STATUS, PUBLISH_MENU_UPDATE, ORDERING_SETTINGS } from '@/utility/apiPaths';
 import { FaCheck } from 'react-icons/fa';
-import { getUserDataFromCookie } from '@/utility/cookieUtils';
 import Link from 'next/link';
 
 const makeId = () => Math.random().toString(36).slice(2, 10);
@@ -411,27 +410,24 @@ export default function MenuBuilder() {
   }, [items, selectedItemId]);
 
   useEffect(() => {
-    const userData = getUserDataFromCookie();
-    const shopId = userData?.shop_id;
-    if (!shopId) {
-      setLoadError('Shop ID not found. Please re-login.');
-      setIsLoading(false);
-      return;
-    }
-
     apiClient
-      .get(`${MENU}?shop_id=${shopId}`)
+      .get(MENU)
       .then((res) => {
         const data = res.data?.data;
-        if (!data) {
+
+        // A new shop has no Menus row yet. The API still returns release
+        // metadata, so `data` is present but there are no menu collections.
+        // Initialize a usable draft instead of treating that valid empty state
+        // as a missing shop/session.
+        if (!Array.isArray(data?.categories)) {
           setCategories([
             { id: makeId(), name: 'For You', isVisible: true },
             { id: makeId(), name: 'Main', isVisible: true },
           ]);
-          return;
-        }
-        if (data.categories) setCategories(data.categories);
-        {
+          setItems([]);
+          setOptionGroupsLibrary([]);
+        } else {
+          setCategories(data.categories);
           const rawLibrary = (data.optionGroupsLibrary ?? []).map(mapApiGroupToState);
           const rawItems = (data.items ?? []).map(mapApiItemToState);
           const { items: migratedItems, library, didMigrate } = migrateMenuToLibrary(rawItems, rawLibrary);
@@ -441,15 +437,15 @@ export default function MenuBuilder() {
           // migrated structure gets persisted.
           if (didMigrate) setHasUnsavedEdits(true);
         }
-        if (data.shopAcceptance) setShopAcceptance(data.shopAcceptance);
-        if (Number.isFinite(Number(data.prepBufferMinutes))) setPrepBufferMinutes(Math.max(0, Number(data.prepBufferMinutes)));
-        if (data.isEdit !== undefined) setIsEdit(data.isEdit);
-        if (data.releaseStatus) setReleaseStatus(data.releaseStatus);
+        if (data?.shopAcceptance) setShopAcceptance(data.shopAcceptance);
+        if (Number.isFinite(Number(data?.prepBufferMinutes))) setPrepBufferMinutes(Math.max(0, Number(data.prepBufferMinutes)));
+        if (data?.isEdit !== undefined) setIsEdit(data.isEdit);
+        if (data?.releaseStatus) setReleaseStatus(data.releaseStatus);
         // Show the Publish button as available on load if there are saved-but-unpublished changes.
-        if (data.isChanges !== undefined) setHasChanges(!!data.isChanges);
+        if (data?.isChanges !== undefined) setHasChanges(!!data.isChanges);
       })
       .catch((err) => {
-        setLoadError(err?.response?.data?.message ?? 'Failed to load menu. Please refresh.');
+        setLoadError(err?.response?.data?.error?.message ?? 'Failed to load menu. Please refresh.');
       })
       .finally(() => {
         setIsLoading(false);
@@ -734,19 +730,11 @@ export default function MenuBuilder() {
   };
 
   const handlePublishMenu = async (status = 'published') => {
-    const userData = getUserDataFromCookie();
-    const shopId = userData?.shop_id;
-    if (!shopId) {
-      setSaveError('Shop ID not found. Please re-login.');
-      return;
-    }
-
     setIsSaving(true);
     setSaveError(null);
 
     try {
       const formData = new FormData();
-      formData.append('shop_id', shopId);
       formData.append('status', status);
 
       // Denormalized snapshot of an item's attached groups. Only the customer-facing
@@ -2570,4 +2558,3 @@ export default function MenuBuilder() {
     </div>
   );
 }
-
