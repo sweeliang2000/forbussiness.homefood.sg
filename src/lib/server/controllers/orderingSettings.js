@@ -21,7 +21,6 @@ import {
   ERROR_TYPES,
   createSuccessResponse,
   createValidationError,
-  createNotFoundError,
   createDatabaseError,
   createExternalServiceError,
   asyncHandler,
@@ -46,6 +45,23 @@ const client = { send: (command) => getDynamo().send(command) };
 const ORDER_SETTINGS_TABLE = 'Order_Settings';
 const CALENDAR_OVERRIDE_TABLE = 'Order_Calendar_Override';
 
+const DEFAULT_ORDER_SETTINGS = {
+  hours: [
+    { enabled: false, open: '09:00', close: '22:00' },
+    { enabled: true, open: '09:00', close: '22:00' },
+    { enabled: true, open: '09:00', close: '22:00' },
+    { enabled: true, open: '09:00', close: '22:00' },
+    { enabled: true, open: '09:00', close: '22:00' },
+    { enabled: true, open: '09:00', close: '22:00' },
+    { enabled: true, open: '10:00', close: '23:00' },
+  ],
+  orderMode: 'today_and_preorder',
+  defaultDailyQuota: 50,
+  bookingDaysAhead: 90,
+  minNoticeHours: 0.5,
+  isChanges: false,
+};
+
 // GET /api/data/orderingSettings
 export const getOrderSettings = asyncHandler(async (req, res) => {
   const shop_id = JSON.parse(req.cookies.userDataHTTP).shop_id;
@@ -62,15 +78,16 @@ export const getOrderSettings = asyncHandler(async (req, res) => {
     throw createDatabaseError('get order settings', err, 'getOrderSettings');
   }
 
-  if (!response.Item) {
-    throw createNotFoundError('Order settings');
-  }
-
-  const data = unmarshall(response.Item);
+  const data = response.Item
+    ? unmarshall(response.Item)
+    : { ...DEFAULT_ORDER_SETTINGS };
   if (data.isChanges === undefined) data.isChanges = false;
   data.isEdit = !["pending", "scheduled_released_cancelled", "approved_scheduled"].includes(req.releaseStatus);
   data.releaseStatus = req.releaseStatus || null;
-  res.status(200).json(createSuccessResponse('Order settings retrieved', data));
+  res.status(200).json(createSuccessResponse(
+    response.Item ? 'Order settings retrieved' : 'No saved order settings; defaults returned',
+    data
+  ));
 });
 
 // PUT /api/data/orderingSettings
