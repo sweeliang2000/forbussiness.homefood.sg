@@ -1,225 +1,330 @@
 .pricingSection {
     background: #fff;
-    padding: 80px var(--side-spacing);
+    padding: 96px var(--side-spacing);
 }
 
 .sectionHead {
-    text-align: center;
-    margin-bottom: 48px;
+    max-width: 760px;
+    margin: 0 auto 48px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
     align-items: center;
+    gap: 18px;
+    text-align: center;
 }
 
 .sectionTitle {
-    font-size: 40px;
     color: var(--on-primary);
-    letter-spacing: -0.015em;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.06;
+    letter-spacing: -0.035em;
     text-wrap: balance;
 }
 
 .sectionSub {
-    font-size: 19px;
+    max-width: 670px;
     color: var(--on-primary-light2);
-    max-width: 640px;
-    margin: 0 auto;
-    line-height: 1.55;
-}
-
-.pricingShell {
-    max-width: 1000px;
-    margin: 0 auto;
-    background: var(--background);
-    border-radius: 28px;
-    padding: 28px;
-    display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 28px;
-}
-
-.pricingCopy {
-    padding: 20px 8px 20px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    justify-content: center;
-}
-
-.pricingCopy h2 {
-    font-size: 40px;
-    letter-spacing: -0.015em;
-    line-height: 1.1;
+    font-size: 1.125rem;
+    line-height: 1.65;
     text-wrap: balance;
 }
 
-.accentText {
-    color: var(--accent-color);
+.earlyOffer {
+    max-width: 1100px;
+    margin: 0 auto 24px;
+    padding: 28px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    overflow: hidden;
+    position: relative;
+    color: #fff;
+    background: linear-gradient(120deg, #25201d 0%, #3b2a20 58%, #7f3512 100%);
+    border-radius: 24px;
+    box-shadow: 0 18px 50px rgba(65, 36, 21, 0.16);
 }
 
-.pricingCopy p {
-    color: var(--on-primary-light2);
-    font-size: 16px;
+.earlyOffer::after {
+    content: '';
+    position: absolute;
+    right: -70px;
+    top: -110px;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: rgba(249, 106, 27, 0.3);
+    filter: blur(10px);
+    pointer-events: none;
+}
+
+.offerCopy {
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+}
+
+.offerEyebrow {
+    color: #ffb789;
+    font-family: var(--font-raleway);
+    font-size: 0.75rem;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.offerCopy h3 {
+    color: #fff;
+    font-size: clamp(1.5rem, 3vw, 2.125rem);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+}
+
+.offerCopy p {
+    color: rgba(255, 255, 255, 0.76);
+    font-size: 0.9375rem;
     line-height: 1.55;
 }
 
-.bullets {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 6px;
-    list-style: none;
-    padding: 0;
-}
-
-.bullets li {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    color: var(--on-primary-light2);
-    font-size: 15.5px;
-    line-height: 1.5;
-}
-
-.bullets li::before {
-    content: '✓';
-    color: #0a8754;
-    font-weight: 800;
-    flex-shrink: 0;
-    margin-top: 1px;
-}
-
-.pricingCard {
-    background: #fff;
-    border-radius: 20px;
-    padding: 28px;
-    border: 2px solid var(--accent-color);
+.offerButton {
+    min-height: 48px;
+    padding: 0 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
     position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    box-shadow: 0 8px 28px rgba(228, 85, 13, 0.08);
+    z-index: 1;
+    color: #2b1c14;
+    background: #fff;
+    border-radius: 999px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    transition: transform 160ms var(--ease-out), background-color 160ms ease;
 }
 
-.popularBadge {
-    position: absolute;
-    top: -14px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--accent-color);
-    color: #fff;
-    font-weight: 700;
-    font-size: 12.5px;
-    padding: 6px 14px;
+.offerButton:hover {
+    color: #2b1c14;
+    background: #fff7f2;
+    transform: translateY(-1px);
+}
+
+.offerButton:active {
+    transform: scale(0.98);
+    transition-duration: 80ms;
+}
+
+.planGrid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.planCard {
+    min-height: 100%;
+    padding: 34px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    background: #f7f8f9;
+    border: 1px solid #e7e8ea;
+    border-radius: 24px;
+}
+
+.proCard {
+    background: #fffaf7;
+    border-color: var(--brand-200);
+    box-shadow: 0 12px 36px rgba(228, 85, 13, 0.08);
+}
+
+.planTopline {
+    min-height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.planName {
+    color: var(--on-primary);
+    font-family: var(--font-raleway);
+    font-size: 1.25rem;
+    font-weight: 750;
+}
+
+.valueBadge {
+    padding: 6px 10px;
+    color: var(--brand-700);
+    background: var(--brand-100);
     border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 750;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    font-family: var(--font-raleway);
-    white-space: nowrap;
-}
-
-.pricingCard h3 {
-    font-size: 20px;
-    letter-spacing: -0.005em;
 }
 
 .priceRow {
     display: flex;
     align-items: baseline;
-    gap: 6px;
+    gap: 7px;
 }
 
-.amt {
-    font-size: 52px;
-    font-weight: 800;
-    color: var(--accent-color);
-    font-family: var(--font-raleway);
-    letter-spacing: -0.02em;
-}
-
-.per {
-    color: var(--on-primary-light2);
-    font-size: 14px;
-}
-
-.strike {
+.promoLine {
+    min-height: 19px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     color: var(--on-primary-light);
-    font-size: 13px;
+    font-size: 0.75rem;
 }
 
-.strike s {
-    margin-right: 6px;
+.promoLine span {
+    color: var(--brand-700);
+    font-weight: 700;
 }
 
-.feeTable {
+.amount {
+    color: var(--on-primary);
+    font-family: var(--font-raleway);
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+}
+
+.proCard .amount {
+    color: var(--brand-600);
+}
+
+.cadence {
+    color: var(--on-primary-light2);
+    font-size: 0.875rem;
+}
+
+.planDescription {
+    min-height: 48px;
+    color: var(--on-primary-light2);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+}
+
+.featureList {
+    padding: 20px 0 0;
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--border-color);
-    border-radius: 14px;
-    overflow: hidden;
+    gap: 14px;
+    border-top: 1px solid rgba(36, 36, 39, 0.1);
+    list-style: none;
 }
 
-.feeRow {
+.featureList li {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 14px;
-    font-size: 14px;
-}
-
-.feeRow + .feeRow {
-    border-top: 1px solid var(--border-color);
-}
-
-.feeLabel {
-    color: var(--on-primary);
-    font-weight: 600;
-}
-
-.feeVal {
-    color: var(--accent-color);
-    font-weight: 700;
-    font-family: var(--font-raleway);
-}
-
-.feeNote {
-    font-size: 12.5px;
-    color: var(--on-primary-light2);
+    align-items: flex-start;
+    gap: 11px;
+    color: #454545;
+    font-size: 0.9375rem;
     line-height: 1.5;
 }
 
-.feeNote b { color: var(--on-primary); }
-
-.applyBtn {
-    display: flex;
+.check {
+    width: 21px;
+    height: 21px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent-color);
-    color: #fff;
-    border-radius: 200px;
-    padding: 13px 24px;
-    font-size: 16px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: background 0.3s, transform 0.2s;
+    flex: 0 0 auto;
+    color: #08784b;
+    background: #e8f6ef;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 800;
 }
 
-.applyBtn:hover {
-    background: #C2410C;
-    transform: translateY(-1px);
+.pricingFooter {
+    max-width: 1100px;
+    margin: 24px auto 0;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    color: var(--on-primary-light2);
+    font-size: 0.875rem;
 }
 
-@media (max-width: 1024px) {
-    .pricingShell {
+.detailsLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    color: var(--brand-700);
+    font-weight: 700;
+}
+
+.detailsLink:hover {
+    color: var(--brand-800);
+}
+
+@media (max-width: 800px) {
+    .pricingSection {
+        padding: 72px var(--side-spacing);
+    }
+
+    .earlyOffer {
+        padding: 26px;
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .planGrid {
         grid-template-columns: 1fr;
     }
 
-    .pricingCopy {
-        padding: 20px;
+    .planDescription {
+        min-height: auto;
     }
 }
 
-@media (max-width: 640px) {
-    .sectionTitle { font-size: 30px; }
-    .pricingCopy h2 { font-size: 30px; }
+@media (max-width: 560px) {
+    .sectionHead {
+        margin-bottom: 36px;
+    }
+
+    .sectionSub {
+        font-size: 1rem;
+    }
+
+    .planCard {
+        padding: 26px 22px;
+        border-radius: 20px;
+    }
+
+    .promoLine {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .pricingFooter {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .offerButton {
+        transition: none;
+    }
+
+    .offerButton:hover,
+    .offerButton:active {
+        transform: none;
+    }
 }

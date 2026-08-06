@@ -17,12 +17,12 @@ import apiClient from '@/utility/api';
 import { REFRESH_USER_COOKIE } from '@/utility/apiPaths';
 
 const menuItems = [
-    { label: 'Why HomeFood', href: '#why' },
-    { label: 'What we offer', href: '#offer' },
-    { label: 'How it works', href: '#how' },
-    { label: 'Payments', href: '#payments' },
-    { label: 'Pricing', href: '#pricing' },
-    { label: 'FAQ', href: '#faq' },
+    { label: 'Why HomeFood', href: '/#why' },
+    { label: 'What we offer', href: '/#offer' },
+    { label: 'How it works', href: '/#how' },
+    { label: 'Payments', href: '/#payments' },
+    { label: 'Pricing', href: '/pricing' },
+    { label: 'FAQ', href: '/#faq' },
 ];
 
 const login = { label: 'Log in', href: '/login' };

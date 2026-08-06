@@ -17,7 +17,7 @@ const LandingFooter = () => {
                     <ul>
                         <li><Link href="/#offer">What we offer</Link></li>
                         <li><Link href="/#how">How it works</Link></li>
-                        <li><Link href="/#pricing">Pricing</Link></li>
+                        <li><Link href="/pricing">Pricing</Link></li>
                     </ul>
                 </div>
                 <div>

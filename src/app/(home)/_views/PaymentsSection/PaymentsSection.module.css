@@ -114,6 +114,34 @@
     margin-top: auto;
 }
 
+.pricingLink {
+    min-height: 44px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    align-self: flex-start;
+    color: var(--brand-700);
+    background: var(--brand-50);
+    border: 1px solid var(--brand-200);
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    transition: background-color 160ms ease, transform 160ms var(--ease-out);
+}
+
+.pricingLink:hover {
+    color: var(--brand-800);
+    background: var(--brand-100);
+    transform: translateY(-1px);
+}
+
+.pricingLink:active {
+    transform: scale(0.98);
+    transition-duration: 80ms;
+}
+
 /* --- Settlement --- */
 .settleList {
     display: flex;
@@ -188,4 +216,23 @@
 
 @media (max-width: 640px) {
     .sectionTitle { font-size: 30px; }
+
+    .payCard {
+        padding: 26px 22px;
+    }
+
+    .pricingLink {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pricingLink {
+        transition: none;
+    }
+
+    .pricingLink:hover,
+    .pricingLink:active {
+        transform: none;
+    }
 }

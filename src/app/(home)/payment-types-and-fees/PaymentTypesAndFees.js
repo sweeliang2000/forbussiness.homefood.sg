@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import styles from '../refund-policy/RefundPolicy.module.css';
 import {
     FaBolt,
@@ -16,7 +17,7 @@ import {
 const WHATSAPP_URL =
     'https://api.whatsapp.com/send/?phone=6588678978&text&type=phone_number&app_absent=0';
 
-const LAST_UPDATED = '13 June 2026';
+const LAST_UPDATED = '6 August 2026';
 
 const sections = [
     { id: 'options', label: 'Payment Options' },
@@ -29,13 +30,13 @@ const sections = [
 
 const paymentOptions = [
     ['Manual PayNow (Screenshot Verification)', '0%'],
-    ['Automatic PayNow', '3%'],
-    ['Credit Card (Visa, Mastercard, AMEX and supported cards)', '6%'],
-    ['Other Digital Payments (Apple Pay, Google Pay, GrabPay and supported wallets)', '6%'],
+    ['Automatic PayNow & PayLah!', '3% Pro / 6% Free'],
+    ['Credit Card (Visa and Mastercard)', '6% + S$0.50 Pro / 8% + S$0.50 Free'],
+    ['Other Digital Payments (supported wallets)', 'Varies by method'],
 ];
 
 const comparisonRows = [
-    ['Processing Fee', '0%', '3%', '6%', '6%'],
+    ['Processing Fee', '0%', '3% Pro / 6% Free', '6% + S$0.50 Pro / 8% + S$0.50 Free', 'Varies'],
     ['Screenshot Upload Required', 'Yes', 'No', 'No', 'No'],
     ['Automatic Payment Confirmation', 'No', 'Yes', 'Yes', 'Yes'],
     ['Merchant Manual Verification', 'Recommended', 'No', 'No', 'No'],
@@ -73,6 +74,9 @@ const PaymentTypesAndFees = () => {
                         responsibilities before choosing how customers pay your shop.
                     </p>
                     <p className={styles.updated}>Last updated {LAST_UPDATED}</p>
+                    <Link href="/pricing" className={styles.heroPricingLink}>
+                        Compare Free and Pro pricing <span aria-hidden="true">→</span>
+                    </Link>
                 </div>
             </header>
 
@@ -213,8 +217,8 @@ const PaymentTypesAndFees = () => {
                         <span className={styles.sectionIcon}>
                             <FaBolt />
                         </span>
-                        <h2 className={styles.sectionTitle}>Automatic PayNow</h2>
-                        <span className={`${styles.feeBadge} ${styles.fee3}`}>3% fee</span>
+                        <h2 className={styles.sectionTitle}>Automatic PayNow &amp; PayLah!</h2>
+                        <span className={`${styles.feeBadge} ${styles.fee3}`}>Pro 3% · Free 6%</span>
                     </div>
                     <div className={styles.body}>
                         <p>
@@ -270,7 +274,7 @@ const PaymentTypesAndFees = () => {
                             <FaRegCreditCard />
                         </span>
                         <h2 className={styles.sectionTitle}>Credit Card Payments</h2>
-                        <span className={`${styles.feeBadge} ${styles.fee6}`}>6% fee</span>
+                        <span className={`${styles.feeBadge} ${styles.fee6}`}>Pro 6% · Free 8% + S$0.50</span>
                     </div>
                     <div className={styles.body}>
                         <p>
@@ -347,7 +351,7 @@ const PaymentTypesAndFees = () => {
                             <FaWallet />
                         </span>
                         <h2 className={styles.sectionTitle}>Other Digital Payments</h2>
-                        <span className={`${styles.feeBadge} ${styles.fee6}`}>6% fee</span>
+                        <span className={`${styles.feeBadge} ${styles.fee6}`}>Varies by method</span>
                     </div>
                     <div className={styles.body}>
                         <p>

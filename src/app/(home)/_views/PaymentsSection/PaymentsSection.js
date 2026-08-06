@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import styles from './PaymentsSection.module.css';
 import Badge from '@/components/Badge';
 
@@ -54,6 +55,9 @@ const PaymentsSection = () => {
                         Every order is paid before you start cooking. No &ldquo;pay on collection&rdquo;, no awkward
                         conversations at the door.
                     </p>
+                    <Link href="/pricing" className={styles.pricingLink}>
+                        Compare Free and Pro payment fees <span aria-hidden="true">→</span>
+                    </Link>
                 </div>
 
                 {/* Settlement */}

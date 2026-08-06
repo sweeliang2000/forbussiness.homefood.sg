@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/utility/firebaseClient';
 import styles from './EarlyAdopter.module.css';
@@ -50,12 +51,46 @@ const EarlyAdopter = () => {
 
     return (
         <div className={styles.page}>
-            <div className={styles.card}>
+            <div className={styles.layout}>
+                <section className={styles.offerPanel}>
+                    <span className={styles.badge}>Limited-time early adopter offer</span>
+                    <h1 className={styles.offerTitle}>Pro tools. No platform subscription. For life.</h1>
+                    <p className={styles.offerSub}>
+                        Approved early adopters receive the S$39.90/month Pro plan with a S$0 monthly
+                        platform subscription—forever. Payment transaction fees still apply.
+                    </p>
+
+                    <div className={styles.offerPrice}>
+                        <span className={styles.wasPrice}>Yearly rate S$39.90/month</span>
+                        <div>
+                            <strong>S$0.00</strong>
+                            <span>/ month for life</span>
+                        </div>
+                    </div>
+
+                    <ul className={styles.benefits}>
+                        <li><span aria-hidden="true">✓</span> PayNow &amp; PayLah! at 3%</li>
+                        <li><span aria-hidden="true">✓</span> Visa &amp; Mastercard at 6% + S$0.50</li>
+                        <li><span aria-hidden="true">✓</span> An ad-free public shop-details page</li>
+                        <li><span aria-hidden="true">✓</span> Eligibility for Homebase Verified</li>
+                    </ul>
+
+                    <p className={styles.verificationNote}>
+                        Verification is not automatic. The badge is awarded only after identity and business
+                        checks, plus an anonymous purchase and food sample.
+                    </p>
+
+                    <Link href="/pricing" className={styles.pricingLink}>
+                        See the full Free and Pro comparison <span aria-hidden="true">→</span>
+                    </Link>
+                </section>
+
+                <section className={styles.card}>
                 <div className={styles.header}>
-                    <span className={styles.badge}>Early Access</span>
-                    <h1 className={styles.title}>Join early adopters</h1>
+                    <span className={styles.formEyebrow}>Request early access</span>
+                    <h2 className={styles.title}>Apply for lifetime Pro</h2>
                     <p className={styles.sub}>
-                        Be among the first to get set up on HomeFood. Fill in your details and we&apos;ll reach out once we&apos;re ready for you.
+                        Tell us where to reach you. We&apos;ll contact you when your home kitchen is ready for onboarding.
                     </p>
                 </div>
                 <form className={styles.form} onSubmit={handleSubmit}>
@@ -104,9 +139,10 @@ const EarlyAdopter = () => {
                         className={styles.submit}
                         disabled={loading}
                     >
-                        {loading ? 'Submitting…' : 'Join the waitlist →'}
+                        {loading ? 'Submitting…' : 'Apply for early access →'}
                     </button>
                 </form>
+                </section>
             </div>
         </div>
     );
