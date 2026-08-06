@@ -166,7 +166,7 @@ Terminal 2 — forward only the events this integration handles:
 
 ```bash
 stripe listen \
-  --events checkout.session.completed,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted,invoice.paid,invoice.payment_failed \
+  --events checkout.session.completed,checkout.session.expired,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted,invoice.paid,invoice.payment_failed \
   --forward-to http://localhost:3001/api/subscription/webhook
 ```
 
@@ -211,6 +211,7 @@ https://business.homefood.sg/api/subscription/webhook
 Subscribe only to:
 
 - `checkout.session.completed`
+- `checkout.session.expired`
 - `customer.subscription.created`
 - `customer.subscription.updated`
 - `customer.subscription.deleted`
