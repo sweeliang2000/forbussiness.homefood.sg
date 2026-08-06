@@ -1,9 +1,9 @@
 import Image from 'next/image';
 import styles from './HomeFoodForBusiness.module.css';
 
-const HomeFoodForBusiness = () => {
+const HomeFoodForBusiness = ({ sidebar = false }) => {
     return(
-        <div className={styles.logoDiv}>
+        <div className={`${styles.logoDiv} ${sidebar ? styles.sidebarLockup : ''}`}>
             <Image
                 className={styles.mark}
                 src="/logo.png"
