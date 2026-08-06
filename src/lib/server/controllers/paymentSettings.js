@@ -19,6 +19,7 @@ import {
   ERROR_TYPES,
   createSuccessResponse,
   createValidationError,
+  createAuthorizationError,
   createDatabaseError,
   createExternalServiceError,
   asyncHandler,
@@ -26,6 +27,8 @@ import {
 import { getDynamo } from '../aws';
 import { getSupabase } from '../supabase';
 import { recordActivity } from './activityLog';
+import { getAuthoritativeUser } from '../authoritative-user';
+import { hasProEntitlement } from '../subscriptions/repository';
 
 const supabase = new Proxy(
   {},
@@ -69,7 +72,7 @@ function sanitizePayNow(input = {}) {
 
 // GET /api/data/paymentSettings
 export const getPaymentSettings = asyncHandler(async (req, res) => {
-  const shop_id = JSON.parse(req.cookies.userDataHTTP).shop_id;
+  const { shop_id } = await getAuthoritativeUser(req);
 
   let response;
   try {
@@ -96,7 +99,7 @@ export const getPaymentSettings = asyncHandler(async (req, res) => {
 
 // PUT /api/data/paymentSettings
 export const upsertPaymentSettings = asyncHandler(async (req, res) => {
-  const shop_id = JSON.parse(req.cookies.userDataHTTP).shop_id;
+  const { shop_id } = await getAuthoritativeUser(req);
   const { paymentMethod } = req.body;
 
   if (paymentMethod != null && !VALID_METHODS.includes(paymentMethod)) {
@@ -107,6 +110,9 @@ export const upsertPaymentSettings = asyncHandler(async (req, res) => {
 
   // When manual is the active method, require a usable PayNow proxy.
   if (paymentMethod === 'manual') {
+    if (!(await hasProEntitlement(shop_id))) {
+      throw createAuthorizationError('Manual PayNow requires an active Pro subscription.');
+    }
     if (paynow.proxyType === 'UEN' && !paynow.uen) {
       throw createValidationError('UEN is required for manual PayNow.');
     }
@@ -138,7 +144,7 @@ export const publishPaymentSettingsUpdate = asyncHandler(async (req, res) => {
     throw createAuthorizationError('Shop must be Released before publishing updates.');
   }
 
-  const shop_id = JSON.parse(req.cookies.userDataHTTP).shop_id;
+  const { shop_id } = await getAuthoritativeUser(req);
 
   const { Item } = await client.send(new GetItemCommand({
     TableName: PAYMENT_SETTINGS_TABLE,
@@ -150,6 +156,10 @@ export const publishPaymentSettingsUpdate = asyncHandler(async (req, res) => {
   }
 
   const data = unmarshall(Item);
+
+  if (data.paymentMethod === 'manual' && !(await hasProEntitlement(shop_id))) {
+    throw createAuthorizationError('Manual PayNow requires an active Pro subscription.');
+  }
 
   if (!data.isChanges) {
     return res.status(200).json(createSuccessResponse('No unpublished changes', null));

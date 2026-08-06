@@ -102,11 +102,9 @@ function checkCognitoConfig() {
 /**
  * The reason this endpoint exists.
  *
- * The old backend used STRIPE_SECRET_KEY_LIVE for subscriptions and a separate
- * STRIPE_SECRET_KEY for Connect. Nobody knows whether they're the same account,
- * and if the Connect key is a test key then merchant onboarding has been running
- * in test mode. Compare the two account IDs here before deciding whether to
- * collapse them into one variable.
+ * Billing and Connect are deliberately separate configurations. Reporting both
+ * account IDs makes an accidental test/live mismatch visible without exposing
+ * either secret.
  */
 async function checkStripe(getClient, keyEnvName) {
   try {
@@ -141,7 +139,7 @@ export async function GET(request) {
     checkDynamo(),
     checkS3(),
     checkSupabase(),
-    checkStripe(getStripe, 'STRIPE_SECRET_KEY_LIVE'),
+    checkStripe(getStripe, 'STRIPE_BILLING_SECRET_KEY'),
     checkStripe(getConnectStripe, 'STRIPE_SECRET_KEY'),
   ]);
 
@@ -152,7 +150,7 @@ export async function GET(request) {
 
   return NextResponse.json({
     region: APP_AWS_REGION,
-    hasWebhookSecret: Boolean(process.env.STRIPE_WEBHOOK_SECRET_KEY_LIVE),
+    hasWebhookSecret: Boolean(process.env.STRIPE_BILLING_WEBHOOK_SECRET),
     dynamo,
     s3,
     supabase,
@@ -160,8 +158,8 @@ export async function GET(request) {
     stripe: {
       platform: stripePlatform,
       connect: stripeConnect,
-      // true  -> safe to collapse to a single STRIPE_SECRET_KEY_LIVE
-      // false -> two accounts; keep both variables and find out why
+      // Informational only. Billing and Connect variables stay separate even
+      // when both clients belong to the same Stripe account.
       sameAccount: sameStripeAccount,
     },
   });

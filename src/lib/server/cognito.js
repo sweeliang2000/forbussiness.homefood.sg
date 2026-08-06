@@ -68,6 +68,28 @@ export async function verifyAccessToken(token) {
   }
 }
 
+/** Verify an ID token before using its email claim for authorization. */
+export async function verifyIdToken(token) {
+  try {
+    const { payload } = await jwtVerify(token, getJwks(), {
+      issuer: ISSUER,
+      audience: COGNITO_CLIENT_ID || undefined,
+      algorithms: ['RS256'],
+    });
+
+    if (payload.token_use !== 'id') {
+      throw new Error('Token verification failed: not an ID token');
+    }
+    return payload;
+  } catch (err) {
+    if (err?.code === 'ERR_JWT_EXPIRED' || err?.name === 'JWTExpired') {
+      throw new Error('Token has expired');
+    }
+    if (err?.message?.startsWith('Token verification failed')) throw err;
+    throw new Error(`Token verification failed: ${err.message}`);
+  }
+}
+
 /**
  * Decode without verifying. Used only to read claims off an ID token that
  * Cognito just handed us over TLS, never as an authorization decision.

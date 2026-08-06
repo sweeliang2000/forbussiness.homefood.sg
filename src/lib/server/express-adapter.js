@@ -75,6 +75,7 @@ export function makeReq(request, { params = {}, body = null, files = null, file 
 
     // Slots that middleware fills in and handlers read back out.
     user: null,
+    identity: null,
     role: null,
     session: null,
     releaseStatus: undefined,

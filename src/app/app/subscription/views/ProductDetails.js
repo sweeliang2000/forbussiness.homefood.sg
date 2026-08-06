@@ -11,16 +11,12 @@ import {
 } from '../data/SUBSCRIPTION_DATA';
 import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import apiClient from '@/utility/api';
-import { CHECKOUT_SESSION_STRIPE, REDEMPTION_CODE } from '@/utility/apiPaths';
-import { Button } from '@mui/material';
+import { CHECKOUT_SESSION_STRIPE } from '@/utility/apiPaths';
 
 export default function ProductDetails() {
   const [currentLookupKey, setCurrentLookupKey] = useState(null);
   const [billingInterval, setBillingInterval] = useState('year'); // 'month' | 'year'
-  const [promoCode, setPromoCode] = useState('');
-  const [promoTrialPeriodDays, setPromoTrialPeriodDays] = useState(null);
-  const [promoError, setPromoError] = useState(null);
-  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [checkoutError, setCheckoutError] = useState(null);
 
   useEffect(() => {
     setCurrentLookupKey(getSubscriptionLookupKey());
@@ -50,6 +46,7 @@ export default function ProductDetails() {
       description: proPlan.description,
       features: proPlan.features,
       lookupKey: proPlan.lookup_key,
+      billingKey: proPlan.billingKey,
       isFree: false,
       isPopular: true,
       isCurrentPlan: currentLookupKey === proPlan.lookup_key,
@@ -62,81 +59,29 @@ export default function ProductDetails() {
     return [freeCard, proCard].filter(Boolean);
   }, [proPlan, isYearly, isOnPro, currentLookupKey]);
 
-  const startCheckout = async (lookupKey, promoOverride = null) => {
+  const startCheckout = async (billingKey) => {
     try {
-      const trialPeriodDaysToUse = promoOverride?.trialPeriodDays ?? promoTrialPeriodDays;
-      const lookupKeyToUse = promoOverride?.lookupKey ?? lookupKey;
-
-      const payload = {
-        lookup_key: lookupKeyToUse,
-        ...(trialPeriodDaysToUse !== null && trialPeriodDaysToUse !== undefined
-          ? { trial_period_days: trialPeriodDaysToUse }
-          : {}),
-      };
-
-      const response = await apiClient.post(CHECKOUT_SESSION_STRIPE, payload);
+      setCheckoutError(null);
+      const response = await apiClient.post(CHECKOUT_SESSION_STRIPE, { plan: billingKey });
 
       if (response.data?.data?.url) {
         window.location.href = response.data.data.url;
         return true;
       }
-      if (promoOverride) setPromoError('Unable to create checkout session');
       return false;
     } catch (error) {
       const errorData = error?.response?.data;
       const message =
         errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
       console.error(`Error creating checkout session: ${message}`);
-      if (promoOverride) {
-        setPromoTrialPeriodDays(null);
-        setPromoError(message);
-      }
+      setCheckoutError(message);
       return false;
     }
   };
 
   const handlePlanSelect = (card) => {
     if (card.isFree || card.isCurrentPlan) return;
-    startCheckout(card.lookupKey);
-  };
-
-  const handleApplyPromo = async (e) => {
-    e.preventDefault();
-    const code = promoCode.trim();
-    if (!code) return;
-
-    setIsApplyingPromo(true);
-    setPromoError(null);
-    setPromoTrialPeriodDays(null);
-
-    try {
-      const redemptionRes = await apiClient.get(REDEMPTION_CODE, {
-        params: { redemption_id: code },
-      });
-
-      const trialDays = redemptionRes?.data?.data?.trial_days ?? redemptionRes?.data?.trial_days;
-      if (trialDays === undefined || trialDays === null) {
-        setPromoError(redemptionRes?.data?.message || 'No redemption code found');
-        setIsApplyingPromo(false);
-        return;
-      }
-
-      const lookupKeyFromCode =
-        redemptionRes?.data?.data?.lookup_key ?? redemptionRes?.data?.lookup_key;
-
-      setPromoTrialPeriodDays(Number(trialDays));
-
-      const redirected = await startCheckout(proPlan?.lookup_key, {
-        lookupKey: lookupKeyFromCode || proPlan?.lookup_key,
-        trialPeriodDays: Number(trialDays),
-      });
-
-      if (!redirected) setIsApplyingPromo(false);
-    } catch (err) {
-      setPromoTrialPeriodDays(null);
-      setPromoError(err?.message || 'Failed to apply promo code');
-      setIsApplyingPromo(false);
-    }
+    startCheckout(card.billingKey);
   };
 
   return (
@@ -185,31 +130,10 @@ export default function ProductDetails() {
         ))}
       </div>
 
-      <form className={styles.promoCodeRow} onSubmit={handleApplyPromo}>
-        <div className={styles.promoCodeControls}>
-          <input
-            id="promo-code"
-            className={styles.promoCodeInput}
-            type="text"
-            value={promoCode}
-            onChange={(e) => setPromoCode(e.target.value)}
-            placeholder="Enter promo code"
-            autoComplete="off"
-            disabled={isApplyingPromo}
-          />
-          <Button
-            className={styles.promoCodeButton}
-            type="submit"
-            loading={isApplyingPromo}
-            loadingPosition="start"
-            disabled={isApplyingPromo}
-            variant="contained"
-          >
-            {isApplyingPromo ? '' : 'Enter'}
-          </Button>
-        </div>
-        {promoError ? <p className={styles.promoCodeError}>{promoError}</p> : null}
-      </form>
+      <p className={styles.promoCodeRow}>
+        Founding Seller? Enter your promotion code securely on the Stripe checkout page.
+      </p>
+      {checkoutError ? <p className={styles.promoCodeError}>{checkoutError}</p> : null}
     </div>
   );
 }

@@ -2,7 +2,7 @@
  * HomeFood has exactly two subscription plans:
  *
  *   Free — every merchant is on this by default. No card required.
- *   Pro  — S$39.90/month billed yearly, or S$49.90/month billed monthly.
+ *   Pro  — S$39.90/month billed yearly, or S$47.88/month billed monthly.
  *
  * The plans do NOT differ on console features: menu builder, orders,
  * pre-orders, terminal, loyalty, ratings and analytics are all in Free.
@@ -14,16 +14,16 @@
  *   Pro  — Manual PayNow (0%), Automatic PayNow (3%), cards and wallets (6%),
  *          plus AI verification of manual PayNow screenshots.
  *
- * During the early adopter window every merchant is put on Pro at S$0 via a
- * 100%-off forever Stripe coupon, so nobody is restricted to Free yet.
- * See readme_update_stripe.md.
+ * Eligible Founding Sellers receive Pro at S$0 through a Stripe-managed
+ * 100%-off-forever promotion code. Eligibility and redemption limits are
+ * configured in Stripe, never supplied as client-controlled trial data.
  */
 
 // ---------------------------------------------------------------------------
 // Pricing
 // ---------------------------------------------------------------------------
 
-export const PRO_MONTHLY_PRICE = 49.9;        // billed every month
+export const PRO_MONTHLY_PRICE = 47.88;       // billed every month (20% above yearly equivalent)
 export const PRO_YEARLY_MONTHLY_PRICE = 39.9; // effective per-month rate when billed yearly
 export const PRO_YEARLY_PRICE = Number((PRO_YEARLY_MONTHLY_PRICE * 12).toFixed(2)); // 478.80
 
@@ -45,7 +45,7 @@ export const YEARLY_SAVING = Number(((PRO_MONTHLY_PRICE - PRO_YEARLY_MONTHLY_PRI
 const PRO_MANUAL_PAYNOW_RATE = 0;
 const PRO_AUTO_PAYNOW_RATE = 3;
 const PRO_CARD_RATE = 6;
-const FREE_AUTO_PAYNOW_RATE = 5;
+const FREE_AUTO_PAYNOW_RATE = 6;
 const FREE_CARD_RATE = 8;
 
 /** How much cheaper each method is on Pro, in percentage points. */
@@ -120,6 +120,7 @@ export const SUBSCRIPTION_DATA = [
     FREE_PLAN,
     {
         name: 'Pro (Monthly)',
+        billingKey: 'pro_monthly',
         lookup_key: PRO_MONTHLY_LOOKUP_KEY,
         price: PRO_MONTHLY_PRICE,
         monthlyEquivalent: PRO_MONTHLY_PRICE,
@@ -130,6 +131,7 @@ export const SUBSCRIPTION_DATA = [
     },
     {
         name: 'Pro (Yearly)',
+        billingKey: 'pro_yearly',
         lookup_key: PRO_YEARLY_LOOKUP_KEY,
         price: PRO_YEARLY_PRICE,
         monthlyEquivalent: PRO_YEARLY_MONTHLY_PRICE,

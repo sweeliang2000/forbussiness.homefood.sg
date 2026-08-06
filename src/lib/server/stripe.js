@@ -15,24 +15,26 @@ import Stripe from 'stripe';
  * during `next build`'s module-graph pass. A missing key would fail the build
  * rather than the request. Everything below is therefore lazy.
  *
- * On the two keys: the platform key (subscriptions, webhook) and the Connect key
- * (merchant onboarding and payouts) are separate variables in the existing
- * deployment and may or may not be the same Stripe account. Do not collapse them
- * without checking — /api/_selftest reports both key prefixes and account IDs.
- * If STRIPE_SECRET_KEY turns out to be a test key, Connect onboarding has been
- * running in test mode and merging would change live behaviour.
+ * Billing and Connect are separate concerns and deliberately use separate
+ * environment variables. This prevents merchant payout configuration from
+ * silently selecting the account used for HomeFood platform subscriptions.
  */
 
 const cache = (globalThis.__homefoodStripe ??= {});
 
-/** Platform account: subscriptions, checkout, billing portal, webhook. */
+/** Platform account: subscriptions, Checkout, Billing Portal and webhooks. */
 export function getStripe() {
   if (cache.platform) return cache.platform;
 
-  const key = process.env.STRIPE_SECRET_KEY_LIVE;
-  if (!key) throw new Error('STRIPE_SECRET_KEY_LIVE is not set');
+  const key = process.env.STRIPE_BILLING_SECRET_KEY;
+  if (!key) throw new Error('STRIPE_BILLING_SECRET_KEY is not set');
 
-  cache.platform = new Stripe(key);
+  cache.platform = new Stripe(key, {
+    apiVersion: '2026-07-29.dahlia',
+    maxNetworkRetries: 2,
+    timeout: 10_000,
+    appInfo: { name: 'HomeFood for Business', version: '1.0.0' },
+  });
   return cache.platform;
 }
 
@@ -54,7 +56,7 @@ export function getConnectStripe() {
  * obvious that rotating the secret only needs a redeploy.
  */
 export function getWebhookSecret() {
-  const secret = process.env.STRIPE_WEBHOOK_SECRET_KEY_LIVE;
-  if (!secret) throw new Error('STRIPE_WEBHOOK_SECRET_KEY_LIVE is not set');
+  const secret = process.env.STRIPE_BILLING_WEBHOOK_SECRET;
+  if (!secret) throw new Error('STRIPE_BILLING_WEBHOOK_SECRET is not set');
   return secret;
 }

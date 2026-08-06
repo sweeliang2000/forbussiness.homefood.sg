@@ -83,6 +83,22 @@ const LONG_RUNNING_PATHS = new Set([
   '/data/publish/customer-facing-business-details',
 ]);
 
+// Rebuilt independently from the retired Express subscription controller.
+// These route files are maintained by src/lib/server/subscriptions and must not
+// be replaced by a future mechanical migration run.
+const HANDWRITTEN_ROUTE_DIRS = new Set([
+  'data/shopSubscriptionStatus',
+  'subscription/cancel-schedule',
+  'subscription/create-checkout-session',
+  'subscription/create-portal-session',
+  'subscription/downgrade',
+  'subscription/end-date',
+  'subscription/preview-upgrade',
+  'subscription/upgrade',
+  'subscription/upgrade-status',
+  'subscription/webhook',
+]);
+
 /** Not ported, with reasons. */
 const EXCLUDED = new Map([
   [
@@ -315,6 +331,7 @@ if (isCheck) {
   }
 
   for (const [dir, group] of byPath) {
+    if (HANDWRITTEN_ROUTE_DIRS.has(dir)) continue;
     const target = join(API_DIR, dir);
     mkdirSync(target, { recursive: true });
     writeFileSync(join(target, 'route.js'), renderRouteFile(dir, group));

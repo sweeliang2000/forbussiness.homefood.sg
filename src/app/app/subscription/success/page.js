@@ -1,4 +1,5 @@
 import SuccessClient from './SuccessClient';
+import { Suspense } from 'react';
 
 /** @type {import('next').Metadata} */
 export const metadata = {
@@ -44,5 +45,9 @@ export const metadata = {
 };
 
 export default function Success() {
-  return <SuccessClient />;
-} 
+  return (
+    <Suspense fallback={null}>
+      <SuccessClient />
+    </Suspense>
+  );
+}

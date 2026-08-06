@@ -1,5 +1,7 @@
 # Migration setup — what to create by hand
 
+> **Stripe subscription setup has been superseded.** Ignore the Stripe sections and legacy Stripe environment-variable names in this migration record. Follow [`STRIPE_SETUP_GUIDE.md`](./STRIPE_SETUP_GUIDE.md) for the current billing implementation.
+
 Everything in this file has to be done in a console (AWS, Stripe, Supabase, Vercel). It's the
 manual prerequisite for the code migration; do it before Phase 1.
 

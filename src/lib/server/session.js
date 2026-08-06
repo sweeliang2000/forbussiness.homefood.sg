@@ -3,7 +3,7 @@ import 'server-only';
 import { InitiateAuthCommand } from '@aws-sdk/client-cognito-identity-provider';
 
 import { getCognito } from './aws';
-import { verifyAccessToken, decodeToken } from './cognito';
+import { verifyAccessToken, verifyIdToken, decodeToken } from './cognito';
 import { getCookieOptions, COOKIE_NAMES } from './cookies';
 import { COGNITO_CLIENT_ID } from './env';
 import { ensureUserProvisioned } from './user-provisioning';
@@ -76,6 +76,15 @@ export async function verifyToken(req, res, next) {
       try {
         const verifiedPayload = await verifyAccessToken(accessToken);
         req.user = verifiedPayload;
+        if (req.cookies[COOKIE_NAMES.ID_TOKEN]) {
+          try {
+            req.identity = await verifyIdToken(req.cookies[COOKIE_NAMES.ID_TOKEN]);
+          } catch {
+            // The verified access token still authenticates the request. Routes
+            // requiring an email identity will fail closed if no safe claim is
+            // available rather than trusting the unsigned shop cookie.
+          }
+        }
 
         const rawUserData = req.cookies[COOKIE_NAMES.USER_DATA_HTTP];
         let cookieUserData = null;
@@ -180,6 +189,9 @@ export async function verifyToken(req, res, next) {
 
         const verifiedPayload = await verifyAccessToken(AccessToken);
         req.user = verifiedPayload;
+        if (IdToken) {
+          req.identity = await verifyIdToken(IdToken);
+        }
 
         try {
           // Prefer the ID token's email: the Users table is keyed on it, and the

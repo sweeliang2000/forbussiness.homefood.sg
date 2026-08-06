@@ -63,6 +63,7 @@ const NOT_PORTED = new Map([
 const NEW_ROUTES = new Set([
   'GET /selftest',
   'GET /selftest/whoami',
+  'GET /subscription/checkout-status',
 ]);
 
 // --- expected: parse the Express router -------------------------------------

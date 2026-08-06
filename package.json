@@ -12,7 +12,8 @@
     "migrate:controllers": "node scripts/port-controllers.mjs",
     "migrate:routes": "node scripts/generate-api-routes.mjs",
     "migrate:routes:check": "node scripts/generate-api-routes.mjs --check",
-    "verify:routes": "node scripts/verify-route-parity.mjs"
+    "verify:routes": "node scripts/verify-route-parity.mjs",
+    "stripe:check": "node scripts/verify-stripe-setup.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.1101.0",
