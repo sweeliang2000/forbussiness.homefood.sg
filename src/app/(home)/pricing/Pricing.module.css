@@ -451,6 +451,15 @@
     font-size: 0.625rem;
 }
 
+.unavailableFeature {
+    color: #8f2d22 !important;
+}
+
+.unavailableFeature .featureIcon {
+    color: #b42318;
+    background: #fff0ed;
+}
+
 .tableShell {
     max-width: 1000px;
     margin: 0 auto;
@@ -498,6 +507,18 @@
     color: var(--brand-700);
     background: #fff8f4;
     font-weight: 700;
+}
+
+.tableUnavailable {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #b42318;
+    font-weight: 650;
+}
+
+.tableUnavailable svg {
+    font-size: 0.75rem;
 }
 
 .tablePromotion {

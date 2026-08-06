@@ -29,14 +29,14 @@ const sections = [
 ];
 
 const paymentOptions = [
-    ['Manual PayNow (Screenshot Verification)', '0%'],
+    ['Manual PayNow (Screenshot Verification)', '0% — Pro only'],
     ['Automatic PayNow & PayLah!', '3% Pro / 6% Free'],
     ['Credit Card (Visa and Mastercard)', '6% + S$0.50 Pro / 8% + S$0.50 Free'],
     ['Other Digital Payments (supported wallets)', 'Varies by method'],
 ];
 
 const comparisonRows = [
-    ['Processing Fee', '0%', '3% Pro / 6% Free', '6% + S$0.50 Pro / 8% + S$0.50 Free', 'Varies'],
+    ['Processing Fee', '0% — Pro only', '3% Pro / 6% Free', '6% + S$0.50 Pro / 8% + S$0.50 Free', 'Varies'],
     ['Screenshot Upload Required', 'Yes', 'No', 'No', 'No'],
     ['Automatic Payment Confirmation', 'No', 'Yes', 'Yes', 'Yes'],
     ['Merchant Manual Verification', 'Recommended', 'No', 'No', 'No'],
@@ -137,18 +137,17 @@ const PaymentTypesAndFees = () => {
                             Manual PayNow
                             <span className={styles.titleSub}>Screenshot Verification</span>
                         </h2>
-                        <span className={`${styles.feeBadge} ${styles.fee0}`}>0% fee</span>
+                        <span className={`${styles.feeBadge} ${styles.fee0}`}>0% fee · Pro only</span>
                     </div>
                     <div className={styles.body}>
                         <p>
-                            Manual PayNow is designed for merchants who want to accept PayNow
-                            payments without payment processing fees.
+                            Manual PayNow is available exclusively on the Pro plan for merchants who
+                            want to accept PayNow payments without payment processing fees.
                         </p>
                         <Callout tone="info" icon={<FaInfoCircle />}>
-                            Using Manual PayNow will result in ads being shown on the merchant&apos;s
-                            shop page.
+                            Manual PayNow is not available on the Free plan. Free-plan sellers use
+                            automatic PayNow, PayLah!, card or supported digital payment methods.
                         </Callout>
-
                         <h3 className={styles.subhead}>How It Works</h3>
                         <ul className={styles.noteList}>
                             {[

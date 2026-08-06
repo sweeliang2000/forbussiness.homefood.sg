@@ -4,6 +4,7 @@ export const FREE_PLAN = {
     cadence: '/ month',
     description: 'A straightforward way to start selling without a platform subscription.',
     features: [
+        'Manual PayNow: Not available',
         'PayNow & PayLah!: 6% per transaction',
         'Visa & Mastercard: 8% + S$0.50 per transaction',
         'HomeFood ads appear on your public shop-details page',
@@ -17,6 +18,7 @@ export const PRO_PLAN = {
     cadence: '/ month, billed yearly',
     description: 'Lower transaction fees and a more trusted, distraction-free storefront.',
     features: [
+        'Manual PayNow: 0%',
         'PayNow & PayLah!: 3% per transaction',
         'Visa & Mastercard: 6% + S$0.50 per transaction',
         'Ad-free public shop-details page',
@@ -29,6 +31,11 @@ export const PRICING_COMPARISON = [
         label: 'Platform subscription',
         free: 'S$0 / month',
         pro: 'S$39.90 / month',
+    },
+    {
+        label: 'Manual PayNow',
+        free: 'Not available',
+        pro: '0%',
     },
     {
         label: 'PayNow & PayLah!',

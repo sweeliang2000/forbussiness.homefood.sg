@@ -246,6 +246,16 @@
     font-weight: 800;
 }
 
+.unavailableFeature {
+    color: #8f2d22 !important;
+}
+
+.unavailableFeature .check {
+    color: #b42318;
+    background: #fff0ed;
+    font-size: 0.9375rem;
+}
+
 .pricingFooter {
     max-width: 1100px;
     margin: 24px auto 0;

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { FaCheck } from 'react-icons/fa';
+import { FaCheck, FaTimes } from 'react-icons/fa';
 import {
     FREE_PLAN,
     PRICING_COMPARISON,
@@ -34,12 +34,18 @@ const FreePlan = () => (
 
 const FeatureList = ({ features }) => (
     <ul className={styles.planFeatures}>
-        {features.map((feature) => (
-            <li key={feature}>
-                <span className={styles.featureIcon} aria-hidden="true"><FaCheck /></span>
+        {features.map((feature) => {
+            const unavailable = feature.includes('Not available') || feature.startsWith('Not eligible');
+
+            return (
+            <li key={feature} className={unavailable ? styles.unavailableFeature : ''}>
+                <span className={styles.featureIcon} aria-hidden="true">
+                    {unavailable ? <FaTimes /> : <FaCheck />}
+                </span>
                 <span>{feature}</span>
             </li>
-        ))}
+            );
+        })}
     </ul>
 );
 
@@ -130,7 +136,13 @@ export default function PricingPlansClient() {
                             {PRICING_COMPARISON.map((row) => (
                                 <tr key={row.label}>
                                     <th scope="row">{row.label}</th>
-                                    <td>{row.free}</td>
+                                    <td>
+                                        {row.free === 'Not available' || row.free === 'Not included' ? (
+                                            <span className={styles.tableUnavailable}>
+                                                <FaTimes aria-hidden="true" /> {row.free}
+                                            </span>
+                                        ) : row.free}
+                                    </td>
                                     <td className={styles.proColumn}>
                                         {row.label === 'Platform subscription' ? (
                                             <span className={styles.tablePromotion}>

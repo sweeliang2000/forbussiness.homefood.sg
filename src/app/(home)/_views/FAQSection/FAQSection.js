@@ -13,7 +13,7 @@ const faqs = [
     {
         question: 'How do the payment fees actually work?',
         answer:
-            "For Founding Sellers on Pro, PayNow / PayLah! is 3%, and Visa / Mastercard is 6% + S$0.50. The fee is deducted automatically before payout. A S$20 PayNow order nets S$19.40, while a S$20 card order nets S$18.30. Founding Sellers pay no monthly membership fee; transaction fees still apply.",
+            "Pro includes Manual PayNow at 0%. For automatic payments on Pro, PayNow / PayLah! is 3%, and Visa / Mastercard is 6% + S$0.50. Manual PayNow is not available on Free; its automatic rates are 6% for PayNow / PayLah! and 8% + S$0.50 for cards. Fees are deducted automatically before payout, except Manual PayNow payments, which sellers verify directly.",
     },
     {
         question: 'When do I actually get paid?',

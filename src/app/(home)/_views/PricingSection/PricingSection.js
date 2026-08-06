@@ -22,8 +22,15 @@ const PlanCard = ({ plan, featured = false }) => (
         <p className={styles.planDescription}>{plan.description}</p>
         <ul className={styles.featureList}>
             {plan.features.map((feature) => (
-                <li key={feature}>
-                    <span className={styles.check} aria-hidden="true">✓</span>
+                <li
+                    key={feature}
+                    className={feature.includes('Not available') || feature.startsWith('Not eligible')
+                        ? styles.unavailableFeature
+                        : ''}
+                >
+                    <span className={styles.check} aria-hidden="true">
+                        {feature.includes('Not available') || feature.startsWith('Not eligible') ? '×' : '✓'}
+                    </span>
                     <span>{feature}</span>
                 </li>
             ))}
