@@ -101,12 +101,12 @@ export default function PricingPlansClient() {
                             <span className={styles.proPill}>Limited time</span>
                         </div>
                         <p className={styles.promotionNote}>
-                            Apply during the early-adopter offer and keep the Pro platform subscription free for life.
+                            Apply during the Founding Seller offer and keep the Pro platform subscription free for life.
                         </p>
                         <p className={styles.planDescription}>{PRO_PLAN.description}</p>
                         <FeatureList features={PRO_PLAN.features} />
                         <Link href="/early-adopter" className={styles.primaryCta}>
-                            Get Pro free for life
+                            Apply as a Founding Seller
                         </Link>
                     </article>
                 </div>
@@ -135,7 +135,7 @@ export default function PricingPlansClient() {
                                         {row.label === 'Platform subscription' ? (
                                             <span className={styles.tablePromotion}>
                                                 <s>{regularPrice} / month</s>
-                                                <strong>S$0.00 / month, limited time</strong>
+                                                <strong>S$0.00 / month, Founding Seller offer</strong>
                                             </span>
                                         ) : row.pro}
                                     </td>
@@ -148,7 +148,7 @@ export default function PricingPlansClient() {
                     {isYearly
                         ? `The regular Pro yearly rate is ${PRO_YEARLY_TOTAL}, equivalent to ${PRO_YEARLY_MONTHLY_PRICE} per month.`
                         : `The regular Pro month-to-month rate is ${PRO_MONTHLY_PRICE} per month.`}{' '}
-                    Approved early adopters pay S$0.00 for the platform subscription. Transaction fees still apply.
+                    Eligible Founding Sellers pay S$0.00 for the platform subscription. Transaction fees still apply.
                 </p>
             </section>
         </>

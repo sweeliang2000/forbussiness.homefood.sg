@@ -60,16 +60,16 @@ const HeroSection = () => {
                 </motion.p>
                 <motion.div className={styles.heroBtns} variants={enterItem}>
                     <Link href="/early-adopter" className={`${styles.btn} ${styles.primary} ${styles.large}`}>
-                        Grow with us — it&apos;s free
+                        Join as a Founding Seller
                     </Link>
-                    <Link href="#how" className={`${styles.btn} ${styles.outline} ${styles.large}`}>
-                        See how it works
+                    <Link href="/founding-sellers" className={`${styles.btn} ${styles.outline} ${styles.large}`}>
+                        Why join now
                     </Link>
                 </motion.div>
                 <motion.div className={styles.heroTrust} variants={enterItem}>
                     <span className={styles.trustDot}></span>
                     <span>
-                        Early adopter program —{' '}
+                        Founding Seller offer —{' '}
                         <strong>platform subscription free for life</strong>
                     </span>
                 </motion.div>

@@ -9,7 +9,7 @@ import styles from './Pricing.module.css';
 export const metadata = {
     title: 'Pricing | HomeFood for Business',
     description:
-        'Compare HomeFood Free and Pro plans, transaction fees, storefront ads and Homebase Verified eligibility. Early adopters can receive Pro free for life.',
+        'Compare HomeFood Free and Pro plans, transaction fees, storefront ads and Homebase Verified eligibility. Founding Sellers can receive Pro free for life.',
     robots: { index: true, follow: true },
     alternates: { canonical: 'https://business.homefood.sg/pricing' },
 };
@@ -27,7 +27,7 @@ export default function PricingPage() {
                     </p>
                     <div className={styles.heroActions}>
                         <Link href="/early-adopter" className={styles.heroPrimary}>
-                            Apply as an early adopter <FaArrowRight aria-hidden="true" />
+                            Apply as a Founding Seller <FaArrowRight aria-hidden="true" />
                         </Link>
                         <a href="#compare" className={styles.heroSecondary}>Compare plans</a>
                     </div>
@@ -39,13 +39,13 @@ export default function PricingPage() {
                     <div className={styles.offerPrice} aria-hidden="true">
                         <span className={styles.oldPrice}>Yearly rate S$39.90 / month</span>
                         <strong>S$0.00</strong>
-                        <span>limited-time early adopter rate</span>
+                        <span>limited-time Founding Seller rate</span>
                     </div>
                     <div className={styles.offerContent}>
-                        <span className={styles.offerLabel}>Early adopter offer</span>
+                        <span className={styles.offerLabel}>Founding Seller offer</span>
                         <h2 id="early-offer-title">Your Pro platform subscription stays free for life.</h2>
                         <p>
-                            Approved early adopters receive the Pro plan without the S$39.90 monthly subscription.
+                            Eligible Founding Sellers receive the Pro plan without the S$39.90 monthly subscription.
                             You keep the lower Pro transaction fees, ad-free shop details and verification eligibility.
                             Payment transaction fees still apply.
                         </p>
@@ -102,7 +102,7 @@ export default function PricingPage() {
                     <p>Keep the platform subscription free for life. Only transaction fees apply.</p>
                 </div>
                 <Link href="/early-adopter" className={styles.finalButton}>
-                    Become an early adopter <FaArrowRight aria-hidden="true" />
+                    Apply as a Founding Seller <FaArrowRight aria-hidden="true" />
                 </Link>
             </section>
         </main>

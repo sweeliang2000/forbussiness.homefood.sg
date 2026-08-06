@@ -17,7 +17,7 @@ import apiClient from '@/utility/api';
 import { REFRESH_USER_COOKIE } from '@/utility/apiPaths';
 
 const menuItems = [
-    { label: 'Why HomeFood', href: '/#why' },
+    { label: 'Why join now', href: '/founding-sellers' },
     { label: 'What we offer', href: '/#offer' },
     { label: 'How it works', href: '/#how' },
     { label: 'Payments', href: '/#payments' },
@@ -26,7 +26,7 @@ const menuItems = [
 ];
 
 const login = { label: 'Log in', href: '/login' };
-const signup = { label: 'Join early adopters', href: '/early-adopter' };
+const signup = { label: 'Founding Seller', href: '/early-adopter' };
 const consoleCta = { label: 'Console', href: '/app' };
 
 const LandingNavbar = () => {

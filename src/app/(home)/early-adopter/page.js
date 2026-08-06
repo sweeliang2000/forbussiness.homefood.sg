@@ -2,9 +2,9 @@ import EarlyAdopter from './EarlyAdopter';
 
 /** @type {import('next').Metadata} */
 export const metadata = {
-  title: 'Get Pro Free for Life | HomeFood Early Adopters',
+  title: 'Apply as a Founding Seller | HomeFood.sg',
   description:
-    'Apply as a HomeFood early adopter and receive the S$39.90/month Pro platform subscription free for life. Payment transaction fees still apply.',
+    'Apply as a HomeFood.sg Founding Seller for free membership for life, launch support, a permanent badge and free onboarding. Transaction fees still apply.',
   robots: { index: true, follow: true },
   alternates: { canonical: 'https://business.homefood.sg/early-adopter' },
 };

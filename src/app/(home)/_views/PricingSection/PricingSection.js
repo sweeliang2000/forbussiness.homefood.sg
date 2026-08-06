@@ -12,7 +12,7 @@ const PlanCard = ({ plan, featured = false }) => (
         {featured && (
             <div className={styles.promoLine}>
                 <s>{plan.price} / month, billed yearly</s>
-                <span>Limited-time early adopter offer</span>
+                <span>Limited-time Founding Seller offer</span>
             </div>
         )}
         <div className={styles.priceRow}>
@@ -45,15 +45,15 @@ const PricingSection = () => {
 
             <div className={styles.earlyOffer}>
                 <div className={styles.offerCopy}>
-                    <span className={styles.offerEyebrow}>Limited-time early adopter benefit</span>
+                    <span className={styles.offerEyebrow}>Limited-time Founding Seller benefit</span>
                     <h3>Get the Pro platform subscription free for life.</h3>
                     <p>
-                        Approved early adopters keep every Pro benefit with a S$0 monthly platform subscription.
+                        Eligible Founding Sellers keep every Pro benefit with a S$0 monthly platform subscription.
                         That saves {EARLY_ADOPTER_SAVINGS} every year. Transaction fees still apply.
                     </p>
                 </div>
                 <Link href="/early-adopter" className={styles.offerButton}>
-                    Apply for lifetime Pro
+                    Apply as a Founding Seller
                 </Link>
             </div>
 

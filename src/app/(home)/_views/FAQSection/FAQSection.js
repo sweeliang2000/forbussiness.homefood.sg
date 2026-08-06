@@ -13,7 +13,7 @@ const faqs = [
     {
         question: 'How do the payment fees actually work?',
         answer:
-            "For every paid order, PayNow / PayLah! is 2%, and Visa / Mastercard is 4% + S$0.50. The fee is deducted automatically before we pay you out. So a S$20 PayNow order nets you S$19.60, and a S$20 card order nets you S$18.70. No other fees during the early adopter window.",
+            "For Founding Sellers on Pro, PayNow / PayLah! is 3%, and Visa / Mastercard is 6% + S$0.50. The fee is deducted automatically before payout. A S$20 PayNow order nets S$19.40, while a S$20 card order nets S$18.30. Founding Sellers pay no monthly membership fee; transaction fees still apply.",
     },
     {
         question: 'When do I actually get paid?',
@@ -28,7 +28,7 @@ const faqs = [
     {
         question: 'Will the platform really stay free?',
         answer:
-            "Yes. Early adopter accounts are grandfathered — you keep the free plan for the lifetime of your HomeFood account, even after we start charging new sign-ups. This offer is intentionally limited to our first cohort so we can grow with you.",
+            "Yes. Eligible Founding Sellers are grandfathered into a S$0 monthly platform membership for the lifetime of their HomeFood account. Standard transaction fees still apply. Places are intentionally limited to our founding cohort so we can onboard and support each seller properly.",
     },
     {
         question: 'Do I need a POS or card reader?',
