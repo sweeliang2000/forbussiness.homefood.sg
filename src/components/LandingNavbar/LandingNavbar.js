@@ -174,7 +174,7 @@ const LandingNavbar = () => {
 
                 <div className={styles.navContainer}>
                     {/* Logo */}
-                    <Link className={styles.logo} href="/">
+                    <Link className={styles.logo} href="/" aria-label="HomeFood for Business home">
                         <HomeFoodForBusiness />
                     </Link>
 

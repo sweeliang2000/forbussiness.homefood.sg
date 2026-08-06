@@ -28,6 +28,9 @@
 .logo {
     display: flex;
     align-items: center;
+    color: inherit;
+    border-radius: 12px;
+    outline-offset: 4px;
 }
 
 .desktopMenu {

@@ -1,11 +1,21 @@
+import Image from 'next/image';
 import styles from './HomeFoodForBusiness.module.css';
 
 const HomeFoodForBusiness = () => {
     return(
         <div className={styles.logoDiv}>
-            <p className={styles.brand}>HomeFood</p>
-            <p>For</p>
-            <p>Business</p>
+            <Image
+                className={styles.mark}
+                src="/logo.png"
+                alt=""
+                width={36}
+                height={36}
+                priority
+            />
+            <span className={styles.wordmark}>
+                <span className={styles.brand}>HomeFood</span>
+                <span className={styles.business}>For Business</span>
+            </span>
         </div>
     );
 };

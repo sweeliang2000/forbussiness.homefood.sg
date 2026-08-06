@@ -1,23 +1,62 @@
 .logoDiv {
     display: flex;
-    font-family: var(--font-dongle);
-    align-items: flex-end;
+    align-items: center;
+    gap: 10px;
+    min-width: max-content;
+    color: var(--on-primary);
 }
 
-.logoDiv .brand {
-    /* Define the gradient */
-    background: var(--brand-gradient);
-  
-    /* Clip the background to the text */
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  
-    /* Often necessary so the text wraps to the background properly */
-    display: inline-block;
-    font-weight: bold;
+.mark {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(228, 85, 13, 0.16);
 }
 
-.logoDiv p {
-    font-size: 32px;
+.wordmark {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-raleway);
+    line-height: 1;
+    white-space: nowrap;
 }
-  
+
+.brand {
+    color: var(--brand-600);
+    font-size: 1.125rem;
+    font-weight: 750;
+    letter-spacing: -0.035em;
+}
+
+.business {
+    padding-left: 10px;
+    border-left: 1px solid rgba(36, 36, 39, 0.18);
+    color: var(--on-primary-light2);
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+}
+
+@media only screen and (max-width: 480px) {
+    .logoDiv,
+    .wordmark {
+        gap: 8px;
+    }
+
+    .mark {
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+    }
+
+    .brand {
+        font-size: 1rem;
+    }
+
+    .business {
+        padding-left: 8px;
+        font-size: 0.6875rem;
+    }
+}
