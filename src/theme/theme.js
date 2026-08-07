@@ -622,6 +622,24 @@ const theme = createTheme({
           opacity: 1,
           transition: `background-color 260ms ${EASE_STANDARD}`,
         },
+        /*
+          The root above pins an explicit 51x31, which silently killed
+          `size="small"` everywhere it was used — the dense sold-out
+          toggles in the terminal and menu builder were all rendering at
+          full size. Small gets its own proportions back.
+        */
+        sizeSmall: {
+          width: 40,
+          height: 24,
+          '& .MuiSwitch-switchBase': {
+            padding: 2,
+            '&.Mui-checked': { transform: 'translateX(16px)' },
+          },
+          '& .MuiSwitch-thumb': {
+            width: 20,
+            height: 20,
+          },
+        },
       },
     },
 
@@ -667,18 +685,30 @@ const theme = createTheme({
       },
     },
 
+    /*
+      Segmented control: a recessed grey track with the selected segment
+      raised out of it as a white pill. Tinting the selected segment
+      instead reads as "highlighted", not as "this one is on top" — the
+      lift is what makes the choice obvious at a glance.
+    */
     MuiToggleButton: {
       styleOverrides: {
         root: {
           textTransform: 'none',
           fontWeight: 600,
           borderRadius: 9,
-          borderColor: 'rgba(60, 60, 67, 0.18)',
+          border: 'none',
+          paddingInline: 16,
+          color: label.secondary,
+          transition: `background-color 200ms ${EASE_STANDARD}, color 200ms ${EASE_STANDARD}, box-shadow 200ms ${EASE_STANDARD}`,
+          '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.5)' },
           '&.Mui-selected': {
-            backgroundColor: 'rgba(228, 85, 13, 0.12)',
+            backgroundColor: '#FFFFFF',
             color: brand[700],
-            '&:hover': { backgroundColor: 'rgba(228, 85, 13, 0.18)' },
+            boxShadow: '0 1px 3px rgba(16, 24, 40, 0.12), 0 0 0 0.5px rgba(16, 24, 40, 0.04)',
+            '&:hover': { backgroundColor: '#FFFFFF' },
           },
+          '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
         },
       },
     },

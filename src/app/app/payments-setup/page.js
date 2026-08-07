@@ -58,8 +58,15 @@ export default function PaymentsSetupPage() {
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [paynow, setPaynow] = useState(DEFAULT_FORM);
 
+  // Manual PayNow is a Pro feature. The server is the authority — it rejects a
+  // manual save or publish without entitlement — this flag only decides how the
+  // section presents itself.
+  const [isPro, setIsPro] = useState(true);
+
   // Which section is expanded (accordion-style: only one open at a time).
-  const [expanded, setExpanded] = useState('manual');
+  // Both start closed: auto-opening one pushed the other section far enough
+  // down the page that people didn't realise there was a second option.
+  const [expanded, setExpanded] = useState(null);
 
   const [isEdit, setIsEdit] = useState(true);
   const [releaseStatus, setReleaseStatus] = useState(null);
@@ -82,8 +89,9 @@ export default function PaymentsSetupPage() {
         const res = await apiClient.get(PAYMENT_SETTINGS);
         const data = res.data?.data ?? res.data ?? {};
         setPaymentMethod(data.paymentMethod ?? null);
-        // Auto-open the active method (default to Manual when none is set).
-        setExpanded(data.paymentMethod ?? 'manual');
+        // Default to gated until the server says otherwise, so a failed or slow
+        // entitlement check never briefly presents Manual PayNow as available.
+        setIsPro(data.isPro === true);
         let form = toForm(data.paynow);
 
         // Best-effort prefill of UEN / company from saved business info.
@@ -104,6 +112,7 @@ export default function PaymentsSetupPage() {
       } catch {
         // Resilient: still render the generator so the merchant can test it out.
         setPaynow(DEFAULT_FORM);
+        setIsPro(false);
       } finally {
         setIsLoading(false);
       }
@@ -122,6 +131,9 @@ export default function PaymentsSetupPage() {
   };
 
   const handleManualToggle = (checked) => {
+    // Turning it on is a Pro action; turning it off must always be possible,
+    // otherwise a lapsed subscriber is stuck with a method they can't publish.
+    if (checked && !isPro) return;
     setPaymentMethod((prev) => (checked ? 'manual' : prev === 'manual' ? null : prev));
     if (checked) setExpanded('manual'); // turning one on opens it (and collapses the other)
     markChanged();
@@ -134,6 +146,12 @@ export default function PaymentsSetupPage() {
   };
 
   const handleSave = async () => {
+    // Mirrors the server rule so the failure is explained here rather than
+    // arriving as a bare 403 after the request round-trips.
+    if (paymentMethod === 'manual' && !isPro) {
+      setSaveError('Manual PayNow requires an active Pro subscription. Upgrade to turn it on.');
+      return;
+    }
     setIsSaving(true);
     setSaveError('');
     try {
@@ -211,7 +229,6 @@ export default function PaymentsSetupPage() {
                 startIcon={isSaveSuccess ? <FaCheck /> : undefined}
                 disabled={!isEdit || !hasUnsavedEdits}
                 onClick={handleSave}
-                sx={{ textTransform: 'none' }}
               >
                 {isSaveSuccess ? 'Saved' : 'Save'}
               </Button>
@@ -225,7 +242,6 @@ export default function PaymentsSetupPage() {
                   startIcon={isPublishSuccess ? <FaCheck /> : undefined}
                   disabled={isPublishSuccess || !hasChanges || hasUnsavedEdits}
                   onClick={() => { setAckPaynow(false); setShowPublishConfirm(true); }}
-                  sx={{ textTransform: 'none' }}
                 >
                   {isPublishSuccess ? 'Update Published' : 'Publish Update'}
                 </Button>
@@ -247,6 +263,7 @@ export default function PaymentsSetupPage() {
           paynow={paynow}
           setField={setField}
           disabled={!isEdit}
+          isPro={isPro}
           checked={paymentMethod === 'manual'}
           onToggle={handleManualToggle}
           expanded={expanded === 'manual'}
@@ -300,14 +317,13 @@ export default function PaymentsSetupPage() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowPublishConfirm(false)} sx={{ textTransform: 'none' }}>
+          <Button onClick={() => setShowPublishConfirm(false)}>
             Cancel
           </Button>
           <Button
             onClick={handleConfirmPublish}
             variant="contained"
             disabled={paymentMethod === 'manual' && !ackPaynow}
-            sx={{ textTransform: 'none', backgroundColor: 'var(--accent-color)', boxShadow: 'none', '&:hover': { backgroundColor: '#C2410C', boxShadow: 'none' } }}
           >
             Publish
           </Button>

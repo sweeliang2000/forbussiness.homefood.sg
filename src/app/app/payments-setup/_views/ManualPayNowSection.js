@@ -1,21 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
-  Switch,
   Radio,
   RadioGroup,
   FormControlLabel,
   Button,
   Alert,
-  Collapse,
   InputAdornment,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SectionToggle from '@/components/App/SectionToggle/SectionToggle';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { FaCheckCircle, FaQrcode } from 'react-icons/fa';
+import { FaQrcode, FaLock } from 'react-icons/fa';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import {
   buildPayNowPayload,
@@ -29,7 +28,7 @@ import {
 import PayNowQrPreview from './PayNowQrPreview';
 import styles from '../page.module.css';
 
-export default function ManualPayNowSection({ paynow, setField, disabled, checked, onToggle, expanded, onToggleExpand }) {
+export default function ManualPayNowSection({ paynow, setField, disabled, isPro, checked, onToggle, expanded, onToggleExpand }) {
   const [touched, setTouched] = useState({});
   const touch = (name) => setTouched((t) => ({ ...t, [name]: true }));
 
@@ -85,35 +84,72 @@ export default function ManualPayNowSection({ paynow, setField, disabled, checke
   const amountLabel = testAmount && Number(testAmount) > 0 ? `SGD ${Number(testAmount).toFixed(2)}` : '';
 
   return (
-    <div className={styles.section}>
-      <div className={styles.sectionHeader} onClick={onToggleExpand} role="button" tabIndex={0}>
-        <Switch
-          checked={checked}
-          disabled={disabled}
-          onClick={(e) => e.stopPropagation()}
-          onChange={(e) => onToggle(e.target.checked)}
-        />
-        <div className={styles.sectionHeaderText}>
-          <div className={styles.sectionTitleRow}>
-            <span className={styles.sectionTitle}>Manual PayNow</span>
+    <SectionToggle
+        title="Manual PayNow"
+        summary="Your own PayNow QR — customers upload a screenshot, AI verifies it."
+        badges={
+          <>
             <span className={`${styles.feeBadge} ${styles.feeBadgeGreen}`}>0% fee</span>
-            {checked && (
-              <span className={styles.activePill}>
-                <FaCheckCircle size={12} /> Active
+            {/* The lock states the rule up front, rather than letting someone
+                fill in the form and discover it on save. */}
+            {!isPro && (
+              <span className={styles.proBadge}>
+                <FaLock size={9} /> Pro
               </span>
             )}
-          </div>
-        </div>
-        <ExpandMoreIcon className={`${styles.chevron} ${expanded ? styles.chevronOpen : ''}`} />
-      </div>
-
-      <Collapse in={expanded}>
-        <div className={styles.collapseInner}>
+          </>
+        }
+        checked={checked}
+        onToggle={onToggle}
+        switchDisabled={disabled || !isPro}
+        switchTooltip={isPro ? '' : 'Available on Pro'}
+        switchAriaLabel="Enable Manual PayNow"
+        showActivePill={isPro}
+        expanded={expanded}
+        onToggleExpand={onToggleExpand}
+      >
+          {/* Picks up where the collapsed summary leaves off instead of
+              repeating it. */}
           <p className={styles.sectionDesc}>
-            Show customers your own PayNow QR. They pay and upload a payment screenshot, which
-            HomeFood&apos;s AI verifies. You confirm funds and handle any refunds.
+            Money goes straight into your own account, so you confirm the funds have arrived and
+            handle any refunds yourself.
           </p>
 
+          {/*
+            A shop that was on manual and then lapsed keeps the selection, but
+            it can't be published any more. Say so here rather than letting it
+            fail at the publish step.
+          */}
+          {!isPro && checked && (
+            <Alert severity="warning">
+              Manual PayNow is still selected from a previous Pro subscription, but it can no longer
+              be saved or published. Renew Pro to keep using it, or switch to Automatic Payments.
+            </Alert>
+          )}
+
+          {!isPro ? (
+            <div className={styles.proGate}>
+              <div className={styles.proGateIcon}>
+                <FaLock size={17} />
+              </div>
+              <div className={styles.proGateBody}>
+                <p className={styles.proGateTitle}>Manual PayNow is part of Pro</p>
+                <p className={styles.proGateText}>
+                  Take PayNow straight into your own account at a 0% fee, with AI checking each
+                  payment screenshot for you. On Free you can still accept payments through
+                  Automatic Payments below.
+                </p>
+                <div className={styles.proGateActions}>
+                  <Button variant="contained" size="small" component={Link} href="/app/subscription">
+                    Upgrade to Pro
+                  </Button>
+                  <Button variant="text" size="small" component={Link} href="/payment-types-and-fees">
+                    Compare fees
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
           <div className={styles.manualBody}>
             {/* LEFT: saved PayNow identity */}
             <div className={styles.formColumn}>
@@ -213,7 +249,6 @@ export default function ManualPayNowSection({ paynow, setField, disabled, checke
                 size="small"
                 startIcon={<FaQrcode />}
                 onClick={handleGenerateTest}
-                sx={{ textTransform: 'none' }}
               >
                 Generate Test QR Code
               </Button>
@@ -234,8 +269,7 @@ export default function ManualPayNowSection({ paynow, setField, disabled, checke
               />
             </div>
           </div>
-        </div>
-      </Collapse>
-    </div>
+      )}
+    </SectionToggle>
   );
 }
