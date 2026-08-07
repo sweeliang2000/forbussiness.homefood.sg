@@ -164,8 +164,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    font-size: 14px;
+}
+
+/* Class doubled to out-specify MUI's runtime-injected
+   .MuiSvgIcon-root font-size, which is otherwise equal specificity
+   and wins on document order. */
+.checkGlyph.checkGlyph {
+    font-size: 17px;
 }
 
 .ct {

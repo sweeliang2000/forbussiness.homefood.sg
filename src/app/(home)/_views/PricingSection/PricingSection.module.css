@@ -242,8 +242,13 @@
     color: #08784b;
     background: #e8f6ef;
     border-radius: 50%;
-    font-size: 0.75rem;
-    font-weight: 800;
+}
+
+/* Class doubled to out-specify MUI's runtime-injected
+   .MuiSvgIcon-root font-size, which is otherwise equal specificity
+   and wins on document order. */
+.checkGlyph.checkGlyph {
+    font-size: 14px;
 }
 
 .unavailableFeature {
@@ -253,7 +258,6 @@
 .unavailableFeature .check {
     color: #b42318;
     background: #fff0ed;
-    font-size: 0.9375rem;
 }
 
 .pricingFooter {

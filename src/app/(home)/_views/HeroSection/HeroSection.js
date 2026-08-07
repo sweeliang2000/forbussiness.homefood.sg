@@ -1,6 +1,12 @@
 'use client';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'motion/react';
+import RamenDiningRoundedIcon from '@mui/icons-material/RamenDiningRounded';
+import TapasRoundedIcon from '@mui/icons-material/TapasRounded';
+import CakeRoundedIcon from '@mui/icons-material/CakeRounded';
+import NotificationsActiveRoundedIcon from '@mui/icons-material/NotificationsActiveRounded';
+import TimerRoundedIcon from '@mui/icons-material/TimerRounded';
+import CreditCardRoundedIcon from '@mui/icons-material/CreditCardRounded';
 import styles from './HeroSection.module.css';
 
 const HeroSection = () => {
@@ -93,7 +99,9 @@ const HeroSection = () => {
                     </div>
                     <div className={styles.heroList}>
                         <div className={styles.heroItem}>
-                            <div className={styles.heroItemIcon}>🍜</div>
+                            <div className={styles.heroItemIcon}>
+                                <RamenDiningRoundedIcon className={styles.heroItemGlyph} aria-hidden="true" />
+                            </div>
                             <div className={styles.heroItemMeta}>
                                 <span className={styles.heroItemName}>Auntie May&apos;s Laksa</span>
                                 <span className={styles.heroItemDetail}>0.4 km · Ready in 25 min</span>
@@ -101,7 +109,9 @@ const HeroSection = () => {
                             <span className={styles.heroItemPill}>Open</span>
                         </div>
                         <div className={styles.heroItem}>
-                            <div className={styles.heroItemIcon}>🥟</div>
+                            <div className={styles.heroItemIcon}>
+                                <TapasRoundedIcon className={styles.heroItemGlyph} aria-hidden="true" />
+                            </div>
                             <div className={styles.heroItemMeta}>
                                 <span className={styles.heroItemName}>Dim Sum by Kevin</span>
                                 <span className={styles.heroItemDetail}>0.9 km · Pre-order · Fri</span>
@@ -109,7 +119,9 @@ const HeroSection = () => {
                             <span className={styles.heroItemPill}>Pre-order</span>
                         </div>
                         <div className={styles.heroItem}>
-                            <div className={styles.heroItemIcon}>🍰</div>
+                            <div className={styles.heroItemIcon}>
+                                <CakeRoundedIcon className={styles.heroItemGlyph} aria-hidden="true" />
+                            </div>
                             <div className={styles.heroItemMeta}>
                                 <span className={styles.heroItemName}>Sab&apos;s Basque Cakes</span>
                                 <span className={styles.heroItemDetail}>1.2 km · 3 slots left</span>
@@ -122,7 +134,10 @@ const HeroSection = () => {
                 {/* Tile B: Live order status — column 3 */}
                 <motion.div className={`${styles.heroTile} ${styles.tileB}`} variants={enterItem}>
                     <div>
-                        <div className={styles.tileTitle}>🔔 Live order status</div>
+                        <div className={styles.tileTitle}>
+                            <NotificationsActiveRoundedIcon className={styles.tileGlyph} aria-hidden="true" />
+                            Live order status
+                        </div>
                         <div className={styles.tileSub}>Order #A-2041 · Butter Chicken × 2</div>
                     </div>
                     <div className={styles.orderBar}></div>
@@ -145,14 +160,18 @@ const HeroSection = () => {
                         </div>
                     </div>
                     <div className={styles.orderNow}>
-                        ⏱ Customer notified — 3 min to ready. Be at the door.
+                        <TimerRoundedIcon className={styles.tileGlyph} aria-hidden="true" />
+                        Customer notified — 3 min to ready. Be at the door.
                     </div>
                 </motion.div>
 
                 {/* Tile C: Customer pays online — column 4 */}
                 <motion.div className={`${styles.heroTile} ${styles.tileC}`} variants={enterItem}>
                     <div>
-                        <div className={styles.tileTitle}>💳 Customer pays online</div>
+                        <div className={styles.tileTitle}>
+                            <CreditCardRoundedIcon className={styles.tileGlyph} aria-hidden="true" />
+                            Customer pays online
+                        </div>
                         <div className={styles.tileSub}>You never handle the money.</div>
                     </div>
                     <div className={styles.payRow}>

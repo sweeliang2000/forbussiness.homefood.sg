@@ -259,7 +259,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+/* Class doubled to out-specify MUI's runtime-injected
+   .MuiSvgIcon-root font-size, which is otherwise equal specificity
+   and wins on document order. */
+.heroItemGlyph.heroItemGlyph {
+    font-size: 17px;
+}
+
+/* Sized to the cap height of the label beside it, so the glyph reads as
+   part of the line rather than as a separate object next to it. */
+.tileGlyph.tileGlyph {
+    font-size: 15px;
     flex-shrink: 0;
 }
 

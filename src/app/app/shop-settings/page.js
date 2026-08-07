@@ -26,6 +26,9 @@ import {
 } from '@mui/material';
 import { FaCheck } from 'react-icons/fa';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import BoltRoundedIcon from '@mui/icons-material/BoltRounded';
+import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
+import FiberManualRecordRoundedIcon from '@mui/icons-material/FiberManualRecordRounded';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import apiClient from '@/utility/api';
 import { ORDERING_SETTINGS, CALENDAR_OVERRIDES, CALENDAR_OVERRIDE, RELEASE_STATUS, PUBLISH_SHOP_SETTINGS_UPDATE, PREORDER_COUNTS } from '@/utility/apiPaths';
@@ -399,7 +402,7 @@ export default function ShopSettingsPage() {
 
   const dayPopoverWarning = useMemo(() => {
     if (!popoverDerived || draftStatus !== 'closed' || popoverDerived.preOrders <= 0) return '';
-    return `⚠️ Closing this date will affect ${popoverDerived.preOrders} existing pre-orders.`;
+    return `Closing this date will affect ${popoverDerived.preOrders} existing pre-orders.`;
   }, [popoverDerived, draftStatus]);
 
   if (isLoading) {
@@ -704,7 +707,9 @@ export default function ShopSettingsPage() {
                       {!isClosed ? (
                         <div className={styles.badgeQuota}>
                           {remainingSlots} slots
-                          {derived.isQuotaOverridden ? <span className={styles.badgeBolt}>⚡</span> : null}
+                          {derived.isQuotaOverridden ? (
+                            <BoltRoundedIcon className={styles.badgeBolt} aria-label="Custom quota" />
+                          ) : null}
                         </div>
                       ) : null}
 
@@ -733,10 +738,28 @@ export default function ShopSettingsPage() {
 
                 {isLegendOpen ? (
                   <div className={styles.legend}>
-                    <div>🟢 Open: Date is available for ordering.</div>
-                    <div>🔴 Closed: Date is not available for ordering.</div>
-                    <div>🟢 Has pre-orders: There are existing orders on this date.</div>
-                    <div>⚡ Quota overridden: This date uses a custom quota, not the default.</div>
+                    <div className={styles.legendRow}>
+                      <FiberManualRecordRoundedIcon
+                        className={`${styles.legendDot} ${styles.legendOpen}`}
+                        aria-hidden="true"
+                      />
+                      <span><b>Open</b> — date is available for ordering.</span>
+                    </div>
+                    <div className={styles.legendRow}>
+                      <FiberManualRecordRoundedIcon
+                        className={`${styles.legendDot} ${styles.legendClosed}`}
+                        aria-hidden="true"
+                      />
+                      <span><b>Closed</b> — date is not available for ordering.</span>
+                    </div>
+                    <div className={styles.legendRow}>
+                      <span className={styles.legendPill} aria-hidden="true">3 orders</span>
+                      <span><b>Has pre-orders</b> — there are existing orders on this date.</span>
+                    </div>
+                    <div className={styles.legendRow}>
+                      <BoltRoundedIcon className={styles.legendBolt} aria-hidden="true" />
+                      <span><b>Quota overridden</b> — this date uses a custom quota, not the default.</span>
+                    </div>
                   </div>
                 ) : null}
               </div>
@@ -816,7 +839,8 @@ export default function ShopSettingsPage() {
               ) : null}
 
               <Typography variant="caption" className={styles.popHint} sx={{ marginTop: 4 }}>
-                ⚠️ {popoverDerived.preOrders} pre-orders on this day
+                <WarningAmberRoundedIcon className={styles.popHintGlyph} aria-hidden="true" />
+                {popoverDerived.preOrders} pre-orders on this day
               </Typography>
 
               <div className={styles.popActions}>

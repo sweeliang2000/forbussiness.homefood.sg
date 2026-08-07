@@ -118,18 +118,21 @@
     line-height: 1.45;
 }
 
-.benefits li span {
+/* Class doubled to out-specify MUI's runtime-injected
+   .MuiSvgIcon-root font-size, which is otherwise equal specificity
+   and wins on document order. */
+.benefitGlyph.benefitGlyph {
     width: 21px;
     height: 21px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    padding: 3px;
+    box-sizing: border-box;
     flex: 0 0 auto;
     color: #c9f4df;
     background: rgba(64, 185, 125, 0.18);
     border-radius: 50%;
-    font-size: 0.6875rem;
-    font-weight: 800;
+    /* Nudged down to sit on the first line's optical centre, since the list
+       item aligns to flex-start for multi-line entries. */
+    margin-top: 1px;
 }
 
 .verificationNote {
@@ -272,9 +275,14 @@
 }
 
 .successIcon {
+    display: flex;
+    justify-content: center;
     margin-bottom: 12px;
+    color: var(--accent-color, #FE4A0C);
+}
+
+.successGlyph.successGlyph {
     font-size: 3.25rem;
-    text-align: center;
 }
 
 .successTitle {

@@ -30,12 +30,12 @@ const NotificationDemo = () => {
     };
 
     const notificationExamples = [
-        { variant: 'success', message: '🎉 Success! Your account has been created successfully!' },
-        { variant: 'info', message: 'ℹ️ New features are now available in your dashboard!' },
-        { variant: 'warning', message: '⚠️ Your subscription expires in 3 days. Renew now!' },
-        { variant: 'error', message: '❌ Error: Unable to save changes. Please try again.' },
-        { variant: 'light', message: '📢 Maintenance scheduled for tonight 11 PM - 1 AM EST' },
-        { variant: 'dark', message: '🌟 Premium features unlocked! Explore new possibilities.' }
+        { variant: 'success', message: 'Success! Your account has been created successfully!' },
+        { variant: 'info', message: 'New features are now available in your dashboard!' },
+        { variant: 'warning', message: 'Your subscription expires in 3 days. Renew now!' },
+        { variant: 'error', message: 'Error: Unable to save changes. Please try again.' },
+        { variant: 'light', message: 'Maintenance scheduled for tonight 11 PM - 1 AM EST' },
+        { variant: 'dark', message: 'Premium features unlocked! Explore new possibilities.' }
     ];
 
     return (
@@ -81,7 +81,7 @@ const NotificationDemo = () => {
             <div className={styles.codeExample}>
                 <h3>Usage Example:</h3>
                 <pre><code>{`<Notification 
-  message="🎉 Success! Your action was completed!" 
+  message="Success! Your action was completed!" 
   href="/dashboard"
   variant="success"
   onClose={() => console.log('Notification closed')}

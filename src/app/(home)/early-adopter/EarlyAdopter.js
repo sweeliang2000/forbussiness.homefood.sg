@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import CelebrationRoundedIcon from '@mui/icons-material/CelebrationRounded';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/utility/firebaseClient';
 import styles from './EarlyAdopter.module.css';
@@ -39,7 +41,9 @@ const EarlyAdopter = () => {
         return (
             <div className={styles.page}>
                 <div className={styles.card}>
-                    <div className={styles.successIcon}>🎉</div>
+                    <div className={styles.successIcon}>
+                        <CelebrationRoundedIcon className={styles.successGlyph} aria-hidden="true" />
+                    </div>
                     <h1 className={styles.successTitle}>You&apos;re on the list!</h1>
                     <p className={styles.successSub}>
                         We&apos;ll reach out as soon as we&apos;re ready to set you up on HomeFood. Stay tuned!
@@ -69,11 +73,11 @@ const EarlyAdopter = () => {
                     </div>
 
                     <ul className={styles.benefits}>
-                        <li><span aria-hidden="true">✓</span> PayNow &amp; PayLah! at 3%</li>
-                        <li><span aria-hidden="true">✓</span> Visa &amp; Mastercard at 6% + S$0.50</li>
-                        <li><span aria-hidden="true">✓</span> An ad-free public shop-details page</li>
-                        <li><span aria-hidden="true">✓</span> Eligibility for Homebase Verified</li>
-                        <li><span aria-hidden="true">✓</span> A permanent Founding Seller badge</li>
+                        <li><CheckRoundedIcon className={styles.benefitGlyph} aria-hidden="true" /> PayNow &amp; PayLah! at 3%</li>
+                        <li><CheckRoundedIcon className={styles.benefitGlyph} aria-hidden="true" /> Visa &amp; Mastercard at 6% + S$0.50</li>
+                        <li><CheckRoundedIcon className={styles.benefitGlyph} aria-hidden="true" /> An ad-free public shop-details page</li>
+                        <li><CheckRoundedIcon className={styles.benefitGlyph} aria-hidden="true" /> Eligibility for Homebase Verified</li>
+                        <li><CheckRoundedIcon className={styles.benefitGlyph} aria-hidden="true" /> A permanent Founding Seller badge</li>
                     </ul>
 
                     <p className={styles.verificationNote}>

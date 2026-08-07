@@ -8,6 +8,7 @@ import { IoMdClose } from "react-icons/io";
 import { AiOutlineMenu } from "react-icons/ai";
 import { FaAngleRight, FaTiktok, FaFacebookF, FaInstagram } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
+import CelebrationRoundedIcon from '@mui/icons-material/CelebrationRounded';
 import Notification from '@/components/Notification';
 import { motion } from 'motion/react';
 import { getNotificationConfig, db } from '@/utility/firebaseClient';
@@ -287,7 +288,9 @@ const LandingNavbar = () => {
 
                         {waitlistSubmitted ? (
                             <div className={styles.modalSuccess}>
-                                <div className={styles.modalSuccessIcon}>🎉</div>
+                                <div className={styles.modalSuccessIcon}>
+                                    <CelebrationRoundedIcon className={styles.modalSuccessGlyph} aria-hidden="true" />
+                                </div>
                                 <h2 className={styles.modalSuccessTitle}>You&apos;re on the list!</h2>
                                 <p className={styles.modalSuccessSub}>
                                     We&apos;ll reach out as soon as we&apos;re ready to set you up on HomeFood. Stay tuned!

@@ -278,6 +278,9 @@
     font-weight: 500;
     color: #6c757d;
     text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     transition: all 0.15s ease;
     display: flex;
     align-items: center;
@@ -287,6 +290,27 @@
 .notesToggle:hover {
     background: #e9ecef;
     border-color: #dee2e6;
+}
+
+/* Class doubled to out-specify MUI's runtime-injected
+   .MuiSvgIcon-root font-size, which is otherwise equal specificity
+   and wins on document order. */
+.notesChevron.notesChevron {
+    font-size: 20px;
+    flex-shrink: 0;
+    /* Disclosure sits in the "occasional" tier, so 200ms keeps it legible
+       without ever making the panel feel slow to open. */
+    transition: transform var(--duration-fast, 200ms) var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+.notesChevronOpen {
+    transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .notesChevron.notesChevron {
+        transition: none;
+    }
 }
 
 .notesInputContainer {

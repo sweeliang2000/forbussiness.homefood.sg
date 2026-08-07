@@ -282,6 +282,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Placeholder for a missing item photo; muted so it reads as absence
+       rather than as content. */
+    color: var(--label-quaternary);
+}
+
+/* Class doubled to out-specify MUI's runtime-injected
+   .MuiSvgIcon-root font-size, which is otherwise equal specificity
+   and wins on document order. */
+.itemImgGlyph.itemImgGlyph {
     font-size: 34px;
 }
 

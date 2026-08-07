@@ -57,7 +57,10 @@
   margin-bottom: 1.5rem;
 }
 
-.glyph {
+/* Class doubled to out-specify MUI's runtime-injected
+   .MuiSvgIcon-root font-size, which is otherwise equal specificity
+   and wins on document order. */
+.glyph.glyph {
   font-size: 2.75rem;
   /* Delight budget: a small overshoot, and only after the headline has
      started resolving, so the eye reads the words first. */
@@ -203,7 +206,7 @@
 @media (prefers-reduced-motion: reduce) {
   .card,
   .result,
-  .glyph,
+  .glyph.glyph,
   .actionLabel {
     animation-duration: var(--duration-fast);
     animation-timing-function: ease;
@@ -211,7 +214,7 @@
 
   .card,
   .result,
-  .glyph {
+  .glyph.glyph {
     animation-name: fade;
   }
 

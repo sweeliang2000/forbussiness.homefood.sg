@@ -25,6 +25,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
+import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -606,7 +607,9 @@ function NewOrderTab({ shopId, onPlaced }) {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={it.photo.url} alt={it.name} className={styles.itemImg} />
                 ) : (
-                  <div className={styles.itemImgPh}>🍽️</div>
+                  <div className={styles.itemImgPh}>
+                    <RestaurantRoundedIcon className={styles.itemImgGlyph} aria-hidden="true" />
+                  </div>
                 )}
                 <span className={styles.itemNm}>{it.name}</span>
                 <span className={styles.itemPr}>${basePrice(it, orderType).toFixed(2)}</span>

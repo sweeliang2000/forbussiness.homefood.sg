@@ -293,3 +293,13 @@
     border-radius: var(--radius-sm);
     border: 0.5px solid var(--separator);
 }
+
+/* Sized to the cap height of the ETA label it precedes, so the pill reads as
+   one object rather than an icon sitting next to some text. */
+/* Class doubled to out-specify MUI's runtime-injected
+   .MuiSvgIcon-root font-size, which is otherwise equal specificity
+   and wins on document order. */
+.etaGlyph.etaGlyph {
+    font-size: 13px;
+    flex-shrink: 0;
+}

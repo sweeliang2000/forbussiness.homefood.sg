@@ -1,7 +1,12 @@
 import Link from 'next/link';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import Badge from '@/components/Badge';
 import { EARLY_ADOPTER_SAVINGS, FREE_PLAN, PRO_PLAN } from '@/utility/pricingPlans';
 import styles from './PricingSection.module.css';
+
+const isExcluded = (feature) =>
+    feature.includes('Not available') || feature.startsWith('Not eligible');
 
 const PlanCard = ({ plan, featured = false }) => (
     <article className={`${styles.planCard} ${featured ? styles.proCard : ''}`}>
@@ -24,12 +29,14 @@ const PlanCard = ({ plan, featured = false }) => (
             {plan.features.map((feature) => (
                 <li
                     key={feature}
-                    className={feature.includes('Not available') || feature.startsWith('Not eligible')
-                        ? styles.unavailableFeature
-                        : ''}
+                    className={isExcluded(feature) ? styles.unavailableFeature : ''}
                 >
                     <span className={styles.check} aria-hidden="true">
-                        {feature.includes('Not available') || feature.startsWith('Not eligible') ? '×' : '✓'}
+                        {isExcluded(feature) ? (
+                            <CloseRoundedIcon className={styles.checkGlyph} />
+                        ) : (
+                            <CheckRoundedIcon className={styles.checkGlyph} />
+                        )}
                     </span>
                     <span>{feature}</span>
                 </li>

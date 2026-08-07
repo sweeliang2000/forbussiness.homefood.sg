@@ -388,7 +388,41 @@
 }
 
 .modalSuccessIcon {
+    display: flex;
+    justify-content: center;
+    color: var(--accent-color);
+}
+
+/* Rare, one-off moment, so a small overshoot is affordable here in a way it
+   would not be on anything seen daily. */
+/* Class doubled to out-specify MUI's runtime-injected
+   .MuiSvgIcon-root font-size, which is otherwise equal specificity
+   and wins on document order. */
+.modalSuccessGlyph.modalSuccessGlyph {
     font-size: 52px;
+    animation: successStamp var(--duration-slow) var(--ease-spring) both;
+}
+
+@keyframes successStamp {
+    from {
+        opacity: 0;
+        transform: scale(0.86);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .modalSuccessGlyph.modalSuccessGlyph {
+        animation: successFade var(--duration-fast) ease both;
+    }
+}
+
+@keyframes successFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .modalSuccessTitle {
