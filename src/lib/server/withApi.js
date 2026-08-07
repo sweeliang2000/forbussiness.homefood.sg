@@ -106,7 +106,7 @@ export function withApi(handler, options = {}) {
             );
 
       if (!(err instanceof AppError)) {
-        console.error('🚨 Unhandled error:', {
+        console.error('Unhandled error:', {
           message: err?.message,
           stack: err?.stack,
           method: request.method,

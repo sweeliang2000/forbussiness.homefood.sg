@@ -116,7 +116,7 @@ export const createConflictError = (message = 'Resource already exists') =>
 
 export const createDatabaseError = (operation, originalError, functionName = null) => {
   const context = functionName ? `${functionName}: ${operation}` : operation;
-  console.error(`🚨 Database error during ${context}:`, {
+  console.error(`Database error during ${context}:`, {
     function: functionName,
     operation,
     error: originalError?.message ?? String(originalError ?? ''),
@@ -145,14 +145,14 @@ export const createExternalServiceError = (
   functionName = null
 ) => {
   if (operation === undefined && originalError === undefined) {
-    console.error(`🚨 External service error: ${service}`);
+    console.error(`External service error: ${service}`);
     return new AppError(service, ERROR_TYPES.EXTERNAL_SERVICE_ERROR, 502);
   }
 
   const context = functionName
     ? `${functionName}: ${service} ${operation}`
     : `${service} ${operation}`;
-  console.error(`🚨 External service error during ${context}:`, {
+  console.error(`External service error during ${context}:`, {
     function: functionName,
     service,
     operation,
