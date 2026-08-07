@@ -26,10 +26,10 @@ import {
   acquireWebhookEvent,
   attachCheckoutSession,
   completeWebhookEvent,
+  failWebhookEvent,
   getShop,
   releaseCheckoutLock,
   releaseCheckoutSession,
-  releaseWebhookEvent,
   saveStripeCustomer,
   saveSubscriptionProjection,
 } from './repository';
@@ -103,18 +103,116 @@ async function activeStripeSubscription(stripe, shop) {
   }
 }
 
+/**
+ * Marks a failure that will recur identically on every redelivery, so the
+ * webhook can stop Stripe retrying for three days over something no retry can
+ * fix. Anything not marked is assumed transient and left to retry.
+ */
+function permanentWebhookError(message) {
+  const error = new Error(message);
+  error.webhookPermanent = true;
+  return error;
+}
+
+function isPermanentWebhookError(error) {
+  if (error?.webhookPermanent) return true;
+  // A Stripe 4xx means the request itself is wrong — except 429, which is the
+  // one 4xx that a later attempt can succeed at.
+  const status = error?.statusCode;
+  if (typeof status === 'number' && status >= 400 && status < 500 && status !== 429) {
+    return true;
+  }
+  // A malformed DynamoDB request will be just as malformed next time.
+  if (error?.name === 'ValidationException') return true;
+  return false;
+}
+
+/**
+ * The stored/incoming pairs behind each write guard, with the stored type
+ * included: a legacy row holding a number as a string compares false in
+ * DynamoDB while still looking correct in a log line.
+ */
+function describeGuardInputs(shop, projection) {
+  const stored = (value) => ({ value: value ?? null, type: typeof value });
+  return {
+    shop_id: stored(shop.shop_id),
+    StripeCustomerID: { ...stored(shop.StripeCustomerID), incoming: projection.customerId },
+    subscription_id: { ...stored(shop.subscription_id), incoming: projection.subscriptionId },
+    subscription_created_at: {
+      ...stored(shop.subscription_created_at),
+      incoming: projection.subscriptionCreatedAt,
+    },
+    subscription_updated_at: {
+      ...stored(shop.subscription_updated_at),
+      incoming: projection.updatedAt,
+    },
+  };
+}
+
+/** Re-evaluates each guard in JS so the thrown message names the failing one. */
+function summarizeGuardMismatch(shop, projection) {
+  const failing = [];
+
+  if (!shop.shop_id) failing.push('shop row has no shop_id');
+
+  if (shop.StripeCustomerID && shop.StripeCustomerID !== projection.customerId) {
+    failing.push(
+      `StripeCustomerID stored=${shop.StripeCustomerID} incoming=${projection.customerId}`
+    );
+  }
+
+  const storedCreated = shop.subscription_created_at;
+  if (
+    storedCreated !== undefined &&
+    shop.subscription_id !== projection.subscriptionId &&
+    !(Number(storedCreated) <= projection.subscriptionCreatedAt)
+  ) {
+    failing.push(
+      `subscription_created_at stored=${storedCreated} incoming=${projection.subscriptionCreatedAt}`
+    );
+  }
+
+  const storedUpdated = shop.subscription_updated_at;
+  if (storedUpdated !== undefined && !(Number(storedUpdated) <= projection.updatedAt)) {
+    failing.push(
+      `subscription_updated_at stored=${storedUpdated} incoming=${projection.updatedAt}`
+    );
+  }
+
+  if (!failing.length) {
+    // Every guard passes against the row we just read, so the row must have
+    // changed between the failed write and this read.
+    return 'no guard fails on re-read; the row changed concurrently';
+  }
+  return failing.join('; ');
+}
+
+async function stripeCustomerIsGone(stripe, customerId) {
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+    return Boolean(customer?.deleted);
+  } catch (error) {
+    if (error?.statusCode === 404) return true;
+    throw error;
+  }
+}
+
 function subscriptionProjection(subscription) {
   const item = subscription.items?.data?.[0];
   const priceId = stripeId(item?.price);
   const plan = findPlanByPriceId(priceId);
   if (!plan) {
-    throw new Error(`Subscription ${subscription.id} uses an unconfigured Price`);
+    throw permanentWebhookError(
+      `Subscription ${subscription.id} uses an unconfigured Price (${priceId || 'unknown'})`
+    );
   }
 
   const customerId = stripeId(subscription.customer);
   const shopId = subscription.metadata?.shop_id;
   if (!customerId || !shopId) {
-    throw new Error(`Subscription ${subscription.id} is missing HomeFood metadata`);
+    throw permanentWebhookError(
+      `Subscription ${subscription.id} is missing HomeFood metadata`
+    );
   }
 
   return {
@@ -140,8 +238,73 @@ async function syncSubscription(stripe, subscriptionOrId) {
         })
       : subscriptionOrId;
   const projection = subscriptionProjection(subscription);
-  await saveSubscriptionProjection(projection.shopId, projection);
-  return projection;
+
+  let result = await saveSubscriptionProjection(projection.shopId, projection);
+  if (result.written) return projection;
+
+  // The write was refused by its guards. Work out which guard, because most of
+  // the reasons are benign and only one of them is a real fault.
+  const shop = result.shop;
+  if (!shop) {
+    throw permanentWebhookError(
+      `Subscription ${subscription.id} names shop ${projection.shopId}, which does not exist`
+    );
+  }
+
+  // A concurrent handler already wrote state it read at least as recently as
+  // ours. Ours is redundant, not failed.
+  if (Number(shop.subscription_updated_at || 0) >= projection.updatedAt) {
+    return projection;
+  }
+
+  // The row has moved on to a subscription created after this one; a late
+  // event must not resurrect the superseded subscription.
+  if (
+    shop.subscription_id &&
+    shop.subscription_id !== projection.subscriptionId &&
+    Number(shop.subscription_created_at || 0) > projection.subscriptionCreatedAt
+  ) {
+    return projection;
+  }
+
+  const storedCustomer = shop.StripeCustomerID;
+  if (storedCustomer && storedCustomer !== projection.customerId) {
+    // Deleting a customer in the Stripe dashboard strands its id on the shop
+    // row, and the customer guard then rejects every subsequent event for that
+    // shop — forever, since nothing else clears the field. Adopt the new
+    // customer only once the stored one is proven gone; reassigning a live
+    // customer is exactly what the guard exists to prevent.
+    if (!(await stripeCustomerIsGone(stripe, storedCustomer))) {
+      throw permanentWebhookError(
+        `Shop ${projection.shopId} is linked to live Stripe customer ${storedCustomer}, but ` +
+          `subscription ${subscription.id} belongs to ${projection.customerId}. ` +
+          'Refusing to reassign; this needs manual reconciliation.'
+      );
+    }
+
+    console.warn(
+      `[Stripe webhook] Shop ${projection.shopId}: stored customer ${storedCustomer} no longer ` +
+        `exists in Stripe; adopting ${projection.customerId} from subscription ${subscription.id}.`
+    );
+    result = await saveSubscriptionProjection(projection.shopId, projection, {
+      adoptCustomer: true,
+    });
+    if (result.written) return projection;
+  }
+
+  // Nothing above explains the rejection. Report the guard inputs rather than
+  // just the fact of failure — a bare "refused" leaves no way to tell a lost
+  // race from a type mismatch in a legacy row.
+  console.error(
+    `[Stripe subscription] Projection refused for shop ${projection.shopId}`,
+    describeGuardInputs(shop, projection)
+  );
+  // Left transient: the likeliest cause is the row changing between the write
+  // and the re-read, which a retry settles.
+  throw new Error(
+    `Subscription projection for shop ${projection.shopId} was refused by its write guards ` +
+      `(${summarizeGuardMismatch(shop, projection)})`
+  );
 }
 
 async function recoverExistingCheckout(stripe, user, plan, shop) {
@@ -393,59 +556,126 @@ export async function getSubscriptionEndDate(req, res) {
   );
 }
 
+const HANDLED_WEBHOOK_EVENTS = new Set([
+  'checkout.session.completed',
+  'checkout.session.expired',
+  'customer.subscription.created',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
+  'invoice.paid',
+  'invoice.payment_failed',
+]);
+
+/** Runs one event and reports the shop it touched, for the ledger. */
+async function processWebhookEvent(stripe, event) {
+  switch (event.type) {
+    case 'checkout.session.completed': {
+      const session = event.data.object;
+      if (session.mode === 'subscription' && session.subscription) {
+        const projection = await syncSubscription(stripe, stripeId(session.subscription));
+        return projection.shopId;
+      }
+      return session.metadata?.shop_id || null;
+    }
+    case 'checkout.session.expired': {
+      const session = event.data.object;
+      const shopId = session.metadata?.shop_id;
+      if (session.mode === 'subscription' && shopId) {
+        await releaseCheckoutSession(shopId, session.id);
+      }
+      return shopId || null;
+    }
+    case 'customer.subscription.created':
+    case 'customer.subscription.updated':
+    case 'customer.subscription.deleted': {
+      const projection = await syncSubscription(stripe, event.data.object.id);
+      return projection.shopId;
+    }
+    case 'invoice.paid':
+    case 'invoice.payment_failed': {
+      const subscriptionId = subscriptionIdFromInvoice(event.data.object);
+      if (!subscriptionId) return null;
+      const projection = await syncSubscription(stripe, subscriptionId);
+      return projection.shopId;
+    }
+    default:
+      return null;
+  }
+}
+
 export async function handleStripeWebhook(req, res) {
   const signature = req.headers['stripe-signature'];
-  if (!signature || !Buffer.isBuffer(req.body)) return res.sendStatus(400);
+  if (!signature || !Buffer.isBuffer(req.body)) {
+    // Previously silent, which made a misrouted or misparsed delivery
+    // indistinguishable from no delivery at all.
+    console.error(
+      '[Stripe webhook] Rejected before verification:',
+      !signature ? 'missing stripe-signature header' : 'body was not a raw Buffer'
+    );
+    return res.sendStatus(400);
+  }
 
   let event;
   try {
     event = getStripe().webhooks.constructEvent(req.body, signature, getWebhookSecret());
-  } catch {
+  } catch (error) {
+    // Nearly always STRIPE_BILLING_WEBHOOK_SECRET not matching the endpoint
+    // that sent this event. The message says which; the payload is never
+    // logged, since an unverified body is untrusted input.
+    console.error('[Stripe webhook] Signature verification failed:', error?.message);
     return res.sendStatus(400);
+  }
+
+  // Checked before the ledger: an endpoint subscribed to more types than these
+  // would otherwise spend a row, and a 90-day TTL, on every event we ignore.
+  if (!HANDLED_WEBHOOK_EVENTS.has(event.type)) {
+    return res.status(200).json({ received: true, ignored: true });
   }
 
   let acquired = false;
   try {
-    acquired = await acquireWebhookEvent(event);
-    if (!acquired) return res.status(200).json({ received: true, duplicate: true });
-
-    const stripe = getStripe();
-    switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object;
-        if (session.mode === 'subscription' && session.subscription) {
-          await syncSubscription(stripe, stripeId(session.subscription));
-        }
-        break;
-      }
-      case 'checkout.session.expired': {
-        const session = event.data.object;
-        const shopId = session.metadata?.shop_id;
-        if (session.mode === 'subscription' && shopId) {
-          await releaseCheckoutSession(shopId, session.id);
-        }
-        break;
-      }
-      case 'customer.subscription.created':
-      case 'customer.subscription.updated':
-      case 'customer.subscription.deleted':
-        await syncSubscription(stripe, event.data.object.id);
-        break;
-      case 'invoice.paid':
-      case 'invoice.payment_failed': {
-        const subscriptionId = subscriptionIdFromInvoice(event.data.object);
-        if (subscriptionId) await syncSubscription(stripe, subscriptionId);
-        break;
-      }
-      default:
-        break;
+    const lease = await acquireWebhookEvent(event);
+    acquired = lease.acquired;
+    if (!acquired) {
+      return res.status(200).json({ received: true, duplicate: true });
+    }
+    if (lease.attempts > 1) {
+      console.warn(
+        `[Stripe webhook] Retrying ${event.type} ${event.id} (attempt ${lease.attempts}).`
+      );
     }
 
-    await completeWebhookEvent(event.id);
+    const shopId = await processWebhookEvent(getStripe(), event);
+    await completeWebhookEvent(event.id, { shopId });
     return res.status(200).json({ received: true });
   } catch (error) {
-    if (acquired) await releaseWebhookEvent(event.id).catch(() => {});
-    console.error('[Stripe webhook] Processing failed:', event.id, event.type, error?.message);
+    const permanent = isPermanentWebhookError(error);
+
+    if (acquired) {
+      // Recording the failure must not mask it. If this write fails the row
+      // keeps its lease and expires into a retry, so the event is not lost.
+      await failWebhookEvent(event.id, { permanent, message: error?.message }).catch(
+        (ledgerError) => {
+          console.error(
+            `[Stripe webhook] Could not record failure for ${event.id}:`,
+            ledgerError?.message
+          );
+        }
+      );
+    }
+
+    console.error(
+      `[Stripe webhook] ${permanent ? 'Permanent' : 'Transient'} failure on ` +
+        `${event.type} ${event.id}:`,
+      error
+    );
+
+    if (permanent) {
+      // Retrying cannot change the outcome, and three days of redeliveries
+      // would bury the transient failures that are worth reacting to. Ack it;
+      // the ledger row holds the reason under failed_permanent.
+      return res.status(200).json({ received: true, failed: true });
+    }
     return res.status(500).json({ error: 'Webhook processing failed' });
   }
 }
