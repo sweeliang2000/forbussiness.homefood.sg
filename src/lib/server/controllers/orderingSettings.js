@@ -28,6 +28,11 @@ import {
 import { getDynamo } from '../aws';
 import { getSupabase } from '../supabase';
 import { recordActivity } from './activityLog';
+import {
+  DEFAULT_DELIVERY,
+  normalizeDelivery,
+  validateDelivery,
+} from '@/utility/deliveryZones';
 
 const supabase = new Proxy(
   {},
@@ -59,6 +64,7 @@ const DEFAULT_ORDER_SETTINGS = {
   defaultDailyQuota: 50,
   bookingDaysAhead: 90,
   minNoticeHours: 0.5,
+  delivery: { ...DEFAULT_DELIVERY },
   isChanges: false,
 };
 
@@ -82,6 +88,9 @@ export const getOrderSettings = asyncHandler(async (req, res) => {
     ? unmarshall(response.Item)
     : { ...DEFAULT_ORDER_SETTINGS };
   if (data.isChanges === undefined) data.isChanges = false;
+  // Records written before delivery existed have no `delivery` key at all, so
+  // normalise on read rather than making every consumer handle the gap.
+  data.delivery = normalizeDelivery(data.delivery);
   data.isEdit = !["pending", "scheduled_released_cancelled", "approved_scheduled"].includes(req.releaseStatus);
   data.releaseStatus = req.releaseStatus || null;
   res.status(200).json(createSuccessResponse(
@@ -94,6 +103,15 @@ export const getOrderSettings = asyncHandler(async (req, res) => {
 export const upsertOrderSettings = asyncHandler(async (req, res) => {
   const shop_id = JSON.parse(req.cookies.userDataHTTP).shop_id;
   const { hours, orderMode, defaultDailyQuota, bookingDaysAhead, minNoticeHours } = req.body;
+
+  // Delivery is validated with the same module the merchant console uses to
+  // price the test lookup, so the console can never accept something the API
+  // would reject.
+  const delivery = normalizeDelivery(req.body.delivery);
+  const deliveryErrors = validateDelivery(delivery);
+  if (deliveryErrors.length) {
+    throw createValidationError(deliveryErrors.join(' '));
+  }
 
   if (!hours || !Array.isArray(hours) || hours.length !== 7) {
     throw createValidationError('hours must be an array of 7 day objects');
@@ -118,6 +136,7 @@ export const upsertOrderSettings = asyncHandler(async (req, res) => {
     defaultDailyQuota,
     bookingDaysAhead,
     minNoticeHours,
+    delivery,
     updatedAt: new Date().toISOString(),
     isChanges: true,
   });
@@ -295,12 +314,19 @@ export const publishOrderingSettingsUpdate = asyncHandler(async (req, res) => {
 
   if (!supabase) throw createExternalServiceError('Supabase client not initialized');
 
+  const delivery = normalizeDelivery(data.delivery);
+
   const supabasePayload = {
     order_mode:          data.orderMode          ?? null,
     min_notice_hours:    data.minNoticeHours     ?? null,
     booking_days_ahead:  data.bookingDaysAhead   ?? null,
     default_daily_quota: data.defaultDailyQuota  ?? null,
     order_hours:         data.hours              ?? null,
+    // Kept as one jsonb blob so the pricing shape can change without a
+    // migration, plus a flat boolean so the storefront can filter shops that
+    // deliver without unpacking the json.
+    delivery_enabled:    delivery.enabled,
+    delivery_settings:   delivery,
   };
 
   const { error: supabaseError } = await supabase

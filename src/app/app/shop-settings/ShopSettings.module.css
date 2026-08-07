@@ -284,3 +284,330 @@
     -webkit-backdrop-filter: none;
   }
 }
+
+/* ===========================================================================
+   Delivery
+   =========================================================================== */
+
+.deliveryWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+}
+
+
+
+
+
+
+
+.deliveryField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.deliveryLabel {
+  font-size: var(--text-subhead) !important;
+  font-weight: 600 !important;
+  letter-spacing: var(--text-subhead-tracking) !important;
+  color: var(--label-primary) !important;
+}
+
+.deliveryHint {
+  font-size: var(--text-footnote) !important;
+  letter-spacing: var(--text-footnote-tracking) !important;
+  line-height: var(--text-footnote-leading) !important;
+  color: var(--label-secondary) !important;
+  max-width: 66ch;
+}
+
+/* Segmented control — sized to its content rather than stretching the row. */
+.modeGroup {
+  align-self: flex-start;
+}
+
+/* ---- Region pricing grid ------------------------------------------------ */
+/*
+  One card per region, each carrying the areas it covers. Naming the areas is
+  what makes the price meaningful — "North" alone doesn't tell a merchant
+  whether Punggol is in it.
+*/
+.zoneGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.zoneCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 0.5px solid var(--separator);
+  background: var(--surface-elevated);
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.zoneCard:focus-within {
+  border-color: var(--brand-a35);
+}
+
+/* The whole title row is the coverage control — a much larger target than
+   a toggle, and it leaves the card's visual weight on the region itself. */
+.zoneCardHead {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 2px;
+  margin: -2px;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-xs);
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.zoneCardHead:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.zoneCardHead:not(:disabled):hover .zoneCheck {
+  border-color: var(--brand-600);
+}
+
+/* A filled tick when covered, an empty ring when not — the same shape in
+   both states, so the row doesn't jump as it toggles. */
+.zoneCheck {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--label-quaternary);
+  background: transparent;
+  color: #fff;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+
+.zoneCard:not(.zoneCardOff) .zoneCheck {
+  background: var(--brand-600);
+  border-color: var(--brand-600);
+}
+
+
+.zoneName {
+  font-size: var(--text-subhead);
+  font-weight: 600;
+  letter-spacing: var(--text-subhead-tracking);
+  color: var(--label-primary);
+}
+
+.zoneAreas {
+  font-size: var(--text-caption);
+  letter-spacing: var(--text-caption-tracking);
+  line-height: 1.45;
+  color: var(--label-secondary);
+  min-height: 2.9em;
+}
+
+/* ---- Tester ------------------------------------------------------------- */
+/*
+  Sits on a sunken tray so it reads as a tool acting on the settings above,
+  not as another setting.
+*/
+
+
+
+
+.testerIdle {
+  font-size: var(--text-footnote);
+  letter-spacing: var(--text-footnote-tracking);
+  line-height: var(--text-footnote-leading);
+  color: var(--label-secondary);
+}
+
+/*
+  The answer. It appears the moment a valid code is typed — no button, no
+  spinner, because the whole computation is local.
+*/
+.testerResult {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-elevated);
+  border: 0.5px solid var(--separator);
+}
+
+.testerResultMain {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.testerArea {
+  font-size: var(--text-footnote);
+  letter-spacing: var(--text-footnote-tracking);
+  color: var(--label-secondary);
+}
+
+/* The number is the answer, so it carries the most weight in the row. */
+.testerFee {
+  font-size: var(--text-title-3);
+  font-weight: 700;
+  letter-spacing: var(--text-title-3-tracking);
+  color: var(--label-primary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.testerAlert {
+  padding-block: 4px !important;
+}
+
+.testerFootnote {
+  font-size: var(--text-caption);
+  letter-spacing: var(--text-caption-tracking);
+  color: var(--label-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+  Region pills. Four hues that stay distinct for the common colour-vision
+  types, each paired with its written name so colour is never the only signal.
+*/
+.regionPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.region_north {
+  background: #EAF3FE;
+  border-color: #BBD9F7;
+  color: #0857AC;
+}
+
+.region_south {
+  background: var(--brand-50);
+  border-color: var(--brand-200);
+  color: var(--brand-700);
+}
+
+.region_east {
+  background: var(--success-soft);
+  border-color: var(--success-border);
+  color: #186B2C;
+}
+
+.region_west {
+  background: #F1ECFE;
+  border-color: #DDD1FA;
+  color: #5B21B6;
+}
+
+@media (max-width: 640px) {
+  .zoneAreas {
+    min-height: 0;
+  }
+}
+
+/* Matches the MUI Accordion siblings on this page so the delivery section
+   reads as part of the same stack, despite using the shared SectionToggle. */
+.toggleCard {
+  background: var(--surface-elevated);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-1);
+  border: 0.5px solid var(--separator);
+  padding: 16px;
+}
+
+/* A region that isn't delivered to recedes but stays legible — it's still a
+   control the merchant needs to find and switch back on. */
+.zoneCardOff {
+  background: var(--fill-quaternary);
+  border-style: dashed;
+}
+
+.zoneCardOff .zoneName,
+.zoneCardOff .zoneAreas {
+  color: var(--label-tertiary);
+}
+
+.zoneOffNote {
+  font-size: var(--text-footnote);
+  font-weight: 600;
+  color: var(--label-tertiary);
+  padding: 8px 0 9px;
+}
+
+.termsBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: var(--text-subhead);
+  line-height: var(--text-subhead-leading);
+  color: var(--label-secondary);
+}
+
+.termsBody strong {
+  color: var(--label-primary);
+}
+
+.testerDialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+/* Fee and time sit side by side inside a covered region's card. */
+.zoneInputs {
+  display: flex;
+  gap: 8px;
+}
+
+.zoneInputs > * {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Price leads, time follows — the fee is the number being set, the wait is
+   the consequence. */
+.testerFigures {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  white-space: nowrap;
+}
+
+.testerEta {
+  font-size: var(--text-footnote);
+  letter-spacing: var(--text-footnote-tracking);
+  color: var(--label-secondary);
+  font-variant-numeric: tabular-nums;
+}
