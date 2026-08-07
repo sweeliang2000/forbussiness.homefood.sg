@@ -116,7 +116,7 @@ export default function Sidebar({
                 <ul className={`${styles.top} ${cancelDate ? styles.topWithBanner : ''}`}>
                     <li className={styles.logoLi}>
                         <Link className={styles.logoLink} href='/'>
-                            <HomeFoodForBusiness />
+                            <HomeFoodForBusiness sidebar />
                         </Link>
                         {/* <div className={styles.minimiseSidebar} onClick={toggleSidebar}>
                             <FaAnglesLeft className={sidebarMinimised ? styles.rotate : styles.reverseRotate} />

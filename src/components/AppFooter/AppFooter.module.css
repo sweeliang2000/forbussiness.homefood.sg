@@ -1,18 +1,44 @@
+/*
+  Terminal chrome for the page. It should recede — it's the last thing
+  anyone needs — so it sits on the canvas rather than on its own painted
+  band, and separates with a hairline instead of a colour change.
+*/
 .footer {
-    background-color: #F1F3F6;
-    padding: 32px var(--side-spacing);
-    margin-top: 24px;
+    padding: 28px var(--side-spacing) 32px;
+    margin-top: 32px;
+    border-top: 0.5px solid var(--separator);
+}
+
+.footer > a {
+    display: inline-flex;
+    align-items: center;
+    font-size: var(--text-subhead);
+    font-weight: 600;
+    color: var(--label-secondary);
+    padding: 6px 10px;
+    margin-left: -10px;
+    border-radius: var(--radius-sm);
+    transition:
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard);
+}
+
+.footer > a:hover {
+    color: var(--brand-700);
+    background: var(--brand-a08);
 }
 
 .bottom {
-    border-top: 1px solid #d2d4d7;
-    margin-top: 12px;
-    padding-top: 12px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 0.5px solid var(--separator);
 }
 
-.bottom ul{
+.bottom ul {
     display: flex;
-    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 20px;
 }
 
 .bottom ul li {
@@ -21,19 +47,39 @@
 }
 
 .footer li,
-.footer a {
-    font-size: 0.75rem;
-    color: gray;
+.footer .bottom a {
+    font-size: var(--text-caption);
+    letter-spacing: var(--text-caption-tracking);
+    color: var(--label-secondary);
 }
 
-.footer a:hover {
-    color: var(--link-hover-color);
-    text-decoration: underline;
+.footer .bottom a:hover {
+    color: var(--brand-700);
 }
 
+/*
+  The old build faked dividers with ::after borders and margin, which
+  broke as soon as the list wrapped. Flex gap plus a real divider
+  element survives wrapping.
+*/
 .leftBorder::after {
-    content: ' ';
-    border-left: 1px solid #d2d4d7;
+    content: '';
+    display: inline-block;
+    width: 1px;
+    height: 10px;
     margin-left: 20px;
-    padding-right: 8px;
+    vertical-align: -1px;
+    background: var(--separator-opaque);
+}
+
+@media (max-width: 640px) {
+    .leftBorder::after {
+        display: none;
+    }
+
+    .bottom ul {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
 }

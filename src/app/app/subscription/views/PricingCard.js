@@ -15,23 +15,31 @@ const PricingCard = ({
   isFree = false,
   billingNote = null,
   savingNote = null,
+  isLoading = false,
   onSelect,
 }) => {
   const getButtonText = () => {
+    if (isLoading) return 'Opening Stripe…';
     if (isCurrentPlan) return 'Current Plan';
     if (isFree) return 'Included';
-    return 'Upgrade Now';
+    return 'Upgrade to Pro';
   };
 
   return (
-    <div className={`${styles.pricingCard} ${isPopular ? styles.popular : ''}`}>
-      {isPopular && <div className={styles.popularBadge}>Most Popular</div>}
+    <div className={`${styles.pricingCard} ${isPopular ? styles.popular : ''} ${isCurrentPlan ? styles.current : ''}`}>
+      <div className={styles.cardTopline}>
+        <span className={styles.planLabel}>{isFree ? 'Essentials' : 'Lower payment fees'}</span>
+        <span className={styles.badges}>
+          {isPopular && <span className={styles.popularBadge}>Best value</span>}
+          {isCurrentPlan && <span className={styles.currentBadge}>Your plan</span>}
+        </span>
+      </div>
 
       <h2 className={styles.planTitle}>{title}</h2>
 
       <div className={styles.price}>
         <span className={styles.amount}>
-          {price === 0 ? 'Free' : `SGD $${Number(price).toFixed(2)}`}
+          {price === 0 ? 'Free' : `S$${Number(price).toFixed(2)}`}
         </span>
         {price !== 0 && <span className={styles.period}>/month</span>}
       </div>
@@ -65,9 +73,11 @@ const PricingCard = ({
       <button
         className={`${styles.selectButton} ${isPopular ? styles.popularButton : ''} ${isCurrentPlan ? styles.currentPlanButton : ''}`}
         onClick={onSelect}
-        disabled={isCurrentPlan || isFree}
+        disabled={isCurrentPlan || isFree || isLoading}
+        aria-busy={isLoading}
       >
-        {getButtonText()}
+        {isLoading ? <span className={styles.spinner} aria-hidden="true" /> : null}
+        <span>{getButtonText()}</span>
       </button>
     </div>
   );
@@ -90,6 +100,7 @@ PricingCard.propTypes = {
   isFree: PropTypes.bool,
   billingNote: PropTypes.string,
   savingNote: PropTypes.string,
+  isLoading: PropTypes.bool,
   onSelect: PropTypes.func.isRequired,
 };
 

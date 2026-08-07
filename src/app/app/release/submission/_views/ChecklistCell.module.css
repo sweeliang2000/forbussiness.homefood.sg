@@ -2,95 +2,137 @@
     text-decoration: none;
     color: inherit;
     display: block;
+    border-radius: var(--radius-md);
+    -webkit-tap-highlight-color: transparent;
 }
 
-.checklistItemLink:hover .checklistItem {
-    background-color: rgba(228, 85, 13, 0.05);
-    border-radius: 8px;
-    padding: 12px 12px 24px 12px;
-    margin-left: -12px;
-    margin-right: -12px;
-    margin-top: -12px;
-}
-
+/*
+  The row keeps one fixed padding in every state. The previous version
+  grew its padding and pulled its margins on hover, which animated
+  layout on a property that forces reflow — the row visibly shifted
+  under the cursor. Only the background and a transform move now.
+*/
 .checklistItem {
     display: flex;
-    gap: 16px;
-    border-bottom: 1px solid rgb(217, 217, 217);
-    padding-bottom: 24px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, padding 0.2s ease, margin 0.2s ease;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px;
+    margin: 0 -12px;
+    border-radius: var(--radius-md);
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
 }
 
+.interactive {
+    cursor: pointer;
+}
+
+.checklistItemLink:hover .interactive {
+    background-color: var(--brand-a04);
+}
+
+.checklistItemLink:active .interactive {
+    background-color: var(--brand-a08);
+    transform: scale(0.99);
+}
+
+/* Done: a filled green tick. */
 .checkedContainer {
-    background-color: rgb(40, 160, 74);
-    width: 32px;
-    height: 32px;
+    background-color: var(--success);
+    width: 26px;
+    height: 26px;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 80px;
+    border-radius: var(--radius-pill);
     flex-shrink: 0;
+    margin-top: 1px;
 }
 
 .checkedContainer .checked {
-    margin-left: -2px;
     color: white;
 }
 
-.crossContainer {
-    background-color: #D84040;
-    width: 32px;
-    height: 32px;
+/* Not done: an empty ring. Absence of a tick is the message — a red
+   cross would claim something has failed. */
+.pendingContainer {
+    width: 26px;
+    height: 26px;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 80px;
+    border-radius: var(--radius-pill);
+    border: 1.5px dashed var(--label-quaternary);
     flex-shrink: 0;
+    margin-top: 1px;
 }
 
-.crossContainer .cross {
-    color: white;
+.pendingDot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--label-quaternary);
 }
 
 .rightContainer {
     display: flex;
-    align-items: flex-end;
-    justify-content: center;
+    align-items: flex-start;
     gap: 12px;
     flex: 1;
+    min-width: 0;
 }
 
 .checklistItemContent {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
+    min-width: 0;
 }
 
-.checklistItemContent h2 {
-    margin: -1px;
-    font-weight: 800;
-    font-size: 16px;
+.itemTitle {
+    margin: 0;
+    font-weight: 600;
+    font-size: var(--text-headline);
+    letter-spacing: var(--text-headline-tracking);
+    line-height: var(--text-headline-leading);
+    color: var(--label-primary);
 }
 
-.checklistItemContent p {
-    color: rgb(88, 88, 88);
-    font-size: 14px;
+.itemDescription {
+    color: var(--label-secondary);
+    font-size: var(--text-footnote);
+    letter-spacing: var(--text-footnote-tracking);
+    line-height: var(--text-footnote-leading);
 }
 
-.correct {
-    color: rgb(40, 160, 74);
+.chevron {
+    flex-shrink: 0;
+    align-self: center;
+    font-size: 17px;
+    color: var(--label-quaternary);
+    transition:
+        transform var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard);
 }
 
-.error {
-    color: #D84040;
+.checklistItemLink:hover .chevron {
+    color: var(--brand-600);
+    transform: translateX(3px);
 }
 
+/* Navigating to fix an item isn't destructive, so it stopped being red. */
 .editButton {
-    padding: 4px 8px !important;
+    flex-shrink: 0;
     text-transform: none !important;
-    border-radius: 100px !important;
+    border-radius: var(--radius-pill) !important;
     box-shadow: none !important;
-    background-color: #D84040 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .checklistItemLink:active .interactive,
+    .checklistItemLink:hover .chevron {
+        transform: none;
+    }
 }

@@ -28,6 +28,7 @@ import {
   completeWebhookEvent,
   getShop,
   releaseCheckoutLock,
+  releaseCheckoutSession,
   releaseWebhookEvent,
   saveStripeCustomer,
   saveSubscriptionProjection,
@@ -143,6 +144,72 @@ async function syncSubscription(stripe, subscriptionOrId) {
   return projection;
 }
 
+async function recoverExistingCheckout(stripe, user, plan, shop) {
+  const lockId = shop?.subscription_checkout_lock;
+  const sessionId = shop?.subscription_checkout_session_id;
+
+  if (sessionId) {
+    let session;
+    try {
+      session = await stripe.checkout.sessions.retrieve(sessionId);
+    } catch (error) {
+      if (error?.statusCode !== 404) throw error;
+      await releaseCheckoutSession(user.shop_id, sessionId);
+      return null;
+    }
+
+    if (
+      session.client_reference_id !== user.shop_id ||
+      session.metadata?.shop_id !== user.shop_id
+    ) {
+      throw new Error('Stored Checkout Session does not belong to this shop');
+    }
+
+    if (session.status === 'open') {
+      if (session.metadata?.plan_key === plan.key && session.url) {
+        return { url: session.url, resumed: true };
+      }
+
+      // The merchant changed billing interval. Invalidate the old page before
+      // replacing it so that two subscription Checkouts cannot remain usable.
+      await stripe.checkout.sessions.expire(session.id);
+      await releaseCheckoutSession(user.shop_id, session.id);
+      return null;
+    }
+
+    if (session.status === 'complete' && session.subscription) {
+      await syncSubscription(stripe, session.subscription);
+      return {
+        url: `${applicationBaseUrl()}/app/subscription/success?session_id=${encodeURIComponent(session.id)}`,
+        resumed: true,
+      };
+    }
+
+    await releaseCheckoutSession(user.shop_id, session.id);
+    return null;
+  }
+
+  if (lockId) {
+    const expiresAt = Number(shop.subscription_checkout_lock_expires_at || 0);
+    if (expiresAt >= Math.floor(Date.now() / 1000)) {
+      // Session creation is between the atomic lock and Stripe returning its ID.
+      return { pending: true };
+    }
+    await releaseCheckoutLock(user.shop_id, lockId);
+  }
+
+  return null;
+}
+
+function sendCheckoutRecovery(res, recovery) {
+  return res.status(200).json(
+    createSuccessResponse(
+      recovery.resumed ? 'Existing checkout resumed' : 'Checkout session created',
+      { url: recovery.url, resumed: Boolean(recovery.resumed) }
+    )
+  );
+}
+
 export async function createCheckoutSession(req, res) {
   assertTrustedOrigin(req);
   const user = await getAuthoritativeUser(req, { ownerOnly: true });
@@ -160,13 +227,31 @@ export async function createCheckoutSession(req, res) {
       throw createConflictError('This shop already has an active subscription. Use the billing portal to change it.');
     }
 
+    const existingCheckout = await recoverExistingCheckout(stripe, user, plan, shop);
+    if (existingCheckout?.url) return sendCheckoutRecovery(res, existingCheckout);
+    if (existingCheckout?.pending) {
+      throw createConflictError('Checkout is opening. Please try again in a few seconds.');
+    }
+
     const price = await resolveAndValidateStripePrice(stripe, plan);
     const lockId = randomUUID();
     const now = Math.floor(Date.now() / 1000);
     const expiresAt = now + CHECKOUT_LIFETIME_SECONDS;
-    const acquired = await acquireCheckoutLock(user.shop_id, lockId, expiresAt);
+    let acquired = await acquireCheckoutLock(user.shop_id, lockId, expiresAt);
     if (!acquired) {
-      throw createConflictError('A checkout is already in progress. Complete it or try again in 30 minutes.');
+      // Another request may have created the session between our first read and
+      // lock attempt. Recover it once instead of making the merchant wait.
+      const latestShop = await getShop(user.shop_id);
+      const concurrentCheckout = await recoverExistingCheckout(stripe, user, plan, latestShop);
+      if (concurrentCheckout?.url) return sendCheckoutRecovery(res, concurrentCheckout);
+      if (concurrentCheckout?.pending) {
+        throw createConflictError('Checkout is opening. Please try again in a few seconds.');
+      }
+
+      acquired = await acquireCheckoutLock(user.shop_id, lockId, expiresAt);
+      if (!acquired) {
+        throw createConflictError('Checkout is opening. Please try again in a few seconds.');
+      }
     }
 
     try {
@@ -198,9 +283,7 @@ export async function createCheckoutSession(req, res) {
       );
 
       await attachCheckoutSession(user.shop_id, lockId, session.id);
-      return res.status(200).json(
-        createSuccessResponse('Checkout session created', { url: session.url })
-      );
+      return sendCheckoutRecovery(res, { url: session.url, resumed: false });
     } catch (error) {
       await releaseCheckoutLock(user.shop_id, lockId);
       throw error;
@@ -332,6 +415,14 @@ export async function handleStripeWebhook(req, res) {
         const session = event.data.object;
         if (session.mode === 'subscription' && session.subscription) {
           await syncSubscription(stripe, stripeId(session.subscription));
+        }
+        break;
+      }
+      case 'checkout.session.expired': {
+        const session = event.data.object;
+        const shopId = session.metadata?.shop_id;
+        if (session.mode === 'subscription' && shopId) {
+          await releaseCheckoutSession(shopId, session.id);
         }
         break;
       }

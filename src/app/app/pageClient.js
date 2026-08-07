@@ -2,8 +2,9 @@
 import styles from './page.module.css';
 import Link from 'next/link';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
-import { FaMobileAlt, FaChartLine, FaWhatsapp } from 'react-icons/fa';
-import { LuStamp } from 'react-icons/lu';
+import { FaMobileAlt, FaWhatsapp } from 'react-icons/fa';
+import { LuUtensils, LuClipboardList } from 'react-icons/lu';
+import { FiChevronRight } from 'react-icons/fi';
 import { PiCashRegister } from 'react-icons/pi';
 import { HiOutlineSpeakerphone, HiOutlineExclamationCircle } from 'react-icons/hi';
 import { MdOutlineNotificationsNone, MdOutlineEmail, MdOutlineReportProblem } from 'react-icons/md';
@@ -16,6 +17,39 @@ import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import { isProLookupKey } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
+
+/*
+  Quick links name their destination rather than a vague umbrella —
+  "Order Queue" is predictable in a way "Overview Stats" isn't. The
+  stats card used to link to /app, which is this page, so it was a
+  dead end; it now points at the queue people actually open next.
+*/
+const QUICK_LINKS = [
+  {
+    href: '/app/release/submission',
+    icon: FaMobileAlt,
+    title: 'Releases',
+    description: 'Submit your shop for review and track its status',
+  },
+  {
+    href: '/app/menu-builder',
+    icon: LuUtensils,
+    title: 'Menu Builder',
+    description: 'Edit items, prices and availability',
+  },
+  {
+    href: '/app/order-queue',
+    icon: LuClipboardList,
+    title: 'Order Queue',
+    description: 'See and manage incoming orders',
+  },
+  {
+    href: '/app/terminal',
+    icon: PiCashRegister,
+    title: 'Terminal / POS',
+    description: 'Take payments and look up customers in store',
+  },
+];
 
 export default function Content() {
   const [customerStats] = useState({
@@ -170,45 +204,19 @@ export default function Content() {
         <div className={styles.quickLinksSection}>
           <h2 className={styles.sectionTitle}>Quick Links</h2>
           <div className={styles.quickLinksGrid}>
-            <Link href="/app/release/submission" className={styles.quickLinkCard}>
-              <div className={styles.quickLinkIcon}>
-                <FaMobileAlt />
-              </div>
-              <div className={styles.quickLinkContent}>
-                <h3 className={styles.quickLinkTitle}>Releases</h3>
-                <p className={styles.quickLinkDescription}>Manage your app releases</p>
-              </div>
-            </Link>
-
-            <Link href="/app/stamp-management" className={styles.quickLinkCard}>
-              <div className={styles.quickLinkIcon}>
-                <LuStamp />
-              </div>
-              <div className={styles.quickLinkContent}>
-                <h3 className={styles.quickLinkTitle}>Stamp Management</h3>
-                <p className={styles.quickLinkDescription}>Configure your stamp system</p>
-              </div>
-            </Link>
-
-            <Link href="/app" className={styles.quickLinkCard}>
-              <div className={styles.quickLinkIcon}>
-                <FaChartLine />
-              </div>
-              <div className={styles.quickLinkContent}>
-                <h3 className={styles.quickLinkTitle}>Overview Stats</h3>
-                <p className={styles.quickLinkDescription}>View analytics and insights</p>
-              </div>
-            </Link>
-
-            <Link href="/terminal" className={styles.quickLinkCard}>
-              <div className={styles.quickLinkIcon}>
-                <PiCashRegister />
-              </div>
-              <div className={styles.quickLinkContent}>
-                <h3 className={styles.quickLinkTitle}>Loyalty Terminal</h3>
-                <p className={styles.quickLinkDescription}>Manage customer loyalty transactions</p>
-              </div>
-            </Link>
+            {QUICK_LINKS.map(({ href, icon: Icon, title, description }) => (
+              <Link key={href} href={href} className={styles.quickLinkCard}>
+                <div className={styles.quickLinkIcon}>
+                  <Icon />
+                </div>
+                <div className={styles.quickLinkContent}>
+                  <h3 className={styles.quickLinkTitle}>{title}</h3>
+                  <p className={styles.quickLinkDescription}>{description}</p>
+                </div>
+                {/* Points the way the tap is about to take you. */}
+                <FiChevronRight className={styles.quickLinkChevron} aria-hidden="true" />
+              </Link>
+            ))}
           </div>
         </div>
 

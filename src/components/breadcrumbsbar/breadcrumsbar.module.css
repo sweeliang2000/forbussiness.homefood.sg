@@ -1,33 +1,102 @@
+/*
+  A floating toolbar rather than a painted band. The material lets page
+  content show through as it scrolls under, and the scroll edge fades
+  the transition instead of drawing a rule across the page.
+*/
 .nav {
+    position: sticky;
+    /* Sits below the mobile navbar rather than under it. */
+    top: var(--chrome-top);
+    z-index: 20;
     display: flex;
-    text-align: center;
-    height: 4rem;
-    background-color: #F1F3F6;
+    align-items: center;
+    height: var(--breadcrumb-height);
     padding: 0 var(--side-spacing);
+    background: var(--material-thin-bg);
+    backdrop-filter: var(--material-thin-blur);
+    -webkit-backdrop-filter: var(--material-thin-blur);
+}
+
+.nav::after {
+    content: '';
+    position: absolute;
+    inset: 100% 0 auto 0;
+    height: 14px;
+    pointer-events: none;
+    background: linear-gradient(
+        to bottom,
+        rgba(16, 24, 40, 0.045),
+        rgba(16, 24, 40, 0)
+    );
 }
 
 .breadcrumbs {
     display: flex;
-    text-align: center;
+    align-items: center;
+    font-size: var(--text-footnote);
+    letter-spacing: var(--text-footnote-tracking);
 }
 
 .dashboard {
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .rightArrow {
-    color: #A7B4C4;
-    font-size: 0.75rem;
+    color: var(--label-quaternary);
+    font-size: 0.625rem;
 }
 
+/*
+  Vibrancy: text over a translucent surface needs more contrast and a
+  little more weight than it would on a solid card, or it dissolves into
+  whatever is scrolling behind it.
+*/
 .breadcrumbs .link {
-    color: #A7B4C4;
+    display: inline-flex;
+    align-items: center;
+    color: var(--label-secondary);
+    font-weight: 500;
+    padding: 4px 8px;
+    margin: -4px -2px;
+    border-radius: var(--radius-xs);
+    transition:
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.breadcrumbs .link:hover {
+    color: var(--brand-700);
+    background: var(--brand-a08);
+}
+
+.breadcrumbs .link:active {
+    background: var(--brand-a12);
 }
 
 .breadcrumbs .lastPath {
-    color: #212E3F;
+    color: var(--label-primary);
     font-weight: 600;
+    letter-spacing: 0.002em;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .nav {
+        background: #fff;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border-bottom: 1px solid var(--separator);
+    }
+
+    .nav::after {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .breadcrumbs .link {
+        transition: none;
+    }
 }

@@ -12,6 +12,7 @@ import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import { FiChevronRight } from 'react-icons/fi';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -92,7 +93,10 @@ const HistoryView = () => {
 
                 {releaseHistory.length === 0 ? (
                     <div className={styles.emptyState}>
-                        <p>No release history available.</p>
+                        <p>No releases yet.</p>
+                        <p className={styles.emptyStateHint}>
+                            Once you submit your shop for review, each release will be listed here.
+                        </p>
                     </div>
                 ) : (
                     <div className={styles.tableWrap}>
@@ -115,7 +119,10 @@ const HistoryView = () => {
                                             <td className={styles.historyTd}>{hasStamp ? 'Yes' : '—'}</td>
                                             <td className={styles.historyTd}>{hasScanToWin ? 'Yes' : '—'}</td>
                                             <td className={styles.historyTd}>
-                                                <Link href={`/app/release/history/${index}`} className={styles.viewMoreLink}>View More &gt;</Link>
+                                                <Link href={`/app/release/history/${index}`} className={styles.viewMoreLink}>
+                                                    View more
+                                                    <FiChevronRight aria-hidden="true" />
+                                                </Link>
                                             </td>
                                         </tr>
                                     );

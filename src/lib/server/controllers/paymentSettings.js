@@ -94,6 +94,12 @@ export const getPaymentSettings = asyncHandler(async (req, res) => {
   data.isEdit = !['pending', 'scheduled_released_cancelled', 'approved_scheduled'].includes(req.releaseStatus);
   data.releaseStatus = req.releaseStatus || null;
 
+  // Manual PayNow is Pro-only, and that rule is enforced on write below. The
+  // client is told the entitlement here purely so it can present the gate up
+  // front instead of letting someone fill in the whole form and then hit a
+  // 403 on save. This is a hint for the UI, never the authorisation itself.
+  data.isPro = await hasProEntitlement(shop_id);
+
   res.status(200).json(createSuccessResponse('Payment settings retrieved', data));
 });
 

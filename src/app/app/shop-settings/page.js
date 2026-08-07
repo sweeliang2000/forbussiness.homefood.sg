@@ -30,6 +30,8 @@ import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import apiClient from '@/utility/api';
 import { ORDERING_SETTINGS, CALENDAR_OVERRIDES, CALENDAR_OVERRIDE, RELEASE_STATUS, PUBLISH_SHOP_SETTINGS_UPDATE, PREORDER_COUNTS } from '@/utility/apiPaths';
 import Link from 'next/link';
+import DeliverySection from './_views/DeliverySection';
+import { DEFAULT_DELIVERY, normalizeDelivery, validateDelivery } from '@/utility/deliveryZones';
 
 import styles from './ShopSettings.module.css';
 
@@ -92,6 +94,10 @@ export default function ShopSettingsPage() {
   const [bookingDaysAhead, setBookingDaysAhead] = useState(90);
   const [minNoticeHours, setMinNoticeHours] = useState(0.5);
 
+  // SECTION 2b — Delivery
+  const [delivery, setDelivery] = useState(DEFAULT_DELIVERY);
+  const [deliveryExpanded, setDeliveryExpanded] = useState(false);
+
   // Snapshot of last-saved (or loaded) values — used to detect unsaved changes
   const [savedSettings, setSavedSettings] = useState(null);
 
@@ -102,9 +108,16 @@ export default function ShopSettingsPage() {
       orderMode !== savedSettings.orderMode ||
       defaultDailyQuota !== savedSettings.defaultDailyQuota ||
       bookingDaysAhead !== savedSettings.bookingDaysAhead ||
-      minNoticeHours !== savedSettings.minNoticeHours
+      minNoticeHours !== savedSettings.minNoticeHours ||
+      // Compared normalised so "5" and 5 don't read as a change — the fee
+      // inputs hold strings while they're being typed.
+      JSON.stringify(normalizeDelivery(delivery)) !==
+        JSON.stringify(normalizeDelivery(savedSettings.delivery))
     );
-  }, [hours, orderMode, defaultDailyQuota, bookingDaysAhead, minNoticeHours, savedSettings]);
+  }, [hours, orderMode, defaultDailyQuota, bookingDaysAhead, minNoticeHours, delivery, savedSettings]);
+
+  // Same rules the API enforces, surfaced before the request goes out.
+  const deliveryErrors = useMemo(() => validateDelivery(delivery), [delivery]);
 
   // SECTION 3 — Ordering Calendar
   const today = useMemo(() => startOfDay(new Date()), []);
@@ -164,12 +177,14 @@ export default function ShopSettingsPage() {
           defaultDailyQuota: data?.defaultDailyQuota ?? 50,
           bookingDaysAhead: data?.bookingDaysAhead ?? 90,
           minNoticeHours: data?.minNoticeHours ?? 0.5,
+          delivery: normalizeDelivery(data?.delivery),
         };
         setHours(loaded.hours);
         setOrderMode(loaded.orderMode);
         setDefaultDailyQuota(loaded.defaultDailyQuota);
         setBookingDaysAhead(loaded.bookingDaysAhead);
         setMinNoticeHours(loaded.minNoticeHours);
+        setDelivery(loaded.delivery);
         setSavedSettings(loaded);
         // Show the Publish button as available on load if there are saved-but-unpublished changes.
         setHasPublishableChanges(!!data?.isChanges);
@@ -183,6 +198,7 @@ export default function ShopSettingsPage() {
             defaultDailyQuota: 50,
             bookingDaysAhead: 90,
             minNoticeHours: 0.5,
+            delivery: DEFAULT_DELIVERY,
           });
         } else {
           showToast('Failed to load ordering settings', 'error');
@@ -224,17 +240,31 @@ export default function ShopSettingsPage() {
   }, [viewMonth, loadCalendarOverrides]);
 
   const handleSaveSettings = async () => {
+    if (deliveryErrors.length) {
+      showToast(deliveryErrors[0], 'error');
+      return;
+    }
     setIsSaving(true);
     try {
-      const payload = { hours, orderMode, defaultDailyQuota, bookingDaysAhead, minNoticeHours };
+      // Normalised on the way out so the fee inputs' in-progress strings are
+      // stored as numbers, and so what we snapshot matches what the API keeps.
+      const payload = {
+        hours,
+        orderMode,
+        defaultDailyQuota,
+        bookingDaysAhead,
+        minNoticeHours,
+        delivery: normalizeDelivery(delivery),
+      };
       await apiClient.put(ORDERING_SETTINGS, payload);
+      setDelivery(payload.delivery);
       setSavedSettings(payload);
       setIsSaveSuccess(true);
       setHasPublishableChanges(true);
       setIsPublishSuccess(false);
       showToast('Settings saved successfully');
-    } catch {
-      showToast('Failed to save settings', 'error');
+    } catch (err) {
+      showToast(err?.response?.data?.message ?? 'Failed to save settings', 'error');
     } finally {
       setIsSaving(false);
     }
@@ -415,7 +445,7 @@ export default function ShopSettingsPage() {
                 loading={isSaving}
                 loadingPosition="start"
                 startIcon={isSaveSuccess ? <FaCheck /> : undefined}
-                disabled={isSaving || !hasChanges || !isEdit || isSaveSuccess}
+                disabled={isSaving || !hasChanges || !isEdit || isSaveSuccess || deliveryErrors.length > 0}
                 onClick={handleSaveSettings}
                 sx={{ textTransform: 'none' }}
               >
@@ -591,6 +621,20 @@ export default function ShopSettingsPage() {
             </div>
           </AccordionDetails>
         </Accordion>
+
+        {/* Delivery carries a switch in its header, so it uses the shared
+            SectionToggle rather than a plain Accordion — same disclosure
+            behaviour as the sections on Payments Setup. The card wrapper keeps
+            it looking like its Accordion siblings on this page. */}
+        <div className={styles.toggleCard}>
+          <DeliverySection
+            delivery={delivery}
+            setDelivery={setDelivery}
+            disabled={!isEdit}
+            expanded={deliveryExpanded}
+            onToggleExpand={() => setDeliveryExpanded((v) => !v)}
+          />
+        </div>
 
         <Accordion defaultExpanded>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>

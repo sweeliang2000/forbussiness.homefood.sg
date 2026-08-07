@@ -1,50 +1,77 @@
+/*
+  A settings row: what it does on the left, the control that does it on
+  the right. Placing the control next to the thing it affects is what
+  makes the row readable without a legend.
+*/
 .cell {
     display: flex;
     align-items: center;
     gap: 24px;
-    padding: 16px 0;
+    padding: 14px 0;
 }
 
 .cell .left {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 3px;
+    min-width: 0;
 }
 
 .cell .left .title {
     font-family: var(--font-open-sans);
-    font-size: 16px;
-    color: var(--on-primary) !important;
+    font-size: var(--text-headline);
+    font-weight: 600;
+    letter-spacing: var(--text-headline-tracking);
+    line-height: var(--text-headline-leading);
+    color: var(--label-primary) !important;
 }
 
-/* .cell.underline {
-    border-bottom: 1px solid #d8a3a3;
-} */
+.cell .left .description {
+    font-size: var(--text-footnote);
+    letter-spacing: var(--text-footnote-tracking);
+    line-height: var(--text-footnote-leading);
+    color: var(--label-secondary);
+    max-width: 64ch;
+}
+
+/* The component already passes this class for every row but the last;
+   it was commented out, so the rows ran together with no separation. */
+.cell.underline {
+    border-bottom: 0.5px solid var(--separator);
+}
 
 .button {
     box-shadow: none !important;
     text-transform: none !important;
-    font-size: 14px;
-    font-weight: bold !important;
+    flex-shrink: 0;
 }
 
-/* .primaryButton {
-    background-color: 'black';
-    color: white !important;
-    border: none !important;
-}
-
-.primaryButton:hover {
-    background-color: var(--primary-color-dark) !important;
-} */
-
+/*
+  Destructive actions read as outlined-red rather than filled-red: a
+  filled red button competes for attention with whatever the person
+  actually came here to do, and makes deletion look like the primary
+  path.
+*/
 .dangerButton {
-    background-color: rgb(247, 247, 247) !important;
-    color: var(--error-color) !important;
-    border: 1px solid var(--error-color) !important;
+    background-color: transparent !important;
+    color: var(--danger) !important;
+    border: 1px solid rgba(212, 32, 32, 0.32) !important;
 }
 
 .dangerButton:hover {
-    background-color: #ffe6e6 !important;
+    background-color: rgba(212, 32, 32, 0.07) !important;
+    border-color: var(--danger) !important;
+}
+
+@media (max-width: 640px) {
+    .cell {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .button {
+        width: 100%;
+    }
 }

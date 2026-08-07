@@ -2,38 +2,43 @@
     display: flex;
     flex-direction: column;
     gap: 32px;
-    padding: 24px;
+    padding: 20px 0 8px;
     max-width: var(--max-width);
     margin: 0 auto;
     width: 100%;
 }
 
-/* Purchase Banner */
+/* ---------------------------------------------------------------
+   Banners. These interrupt, so they earn their weight — but only the
+   upgrade prompt is a brand moment; the billing notices are status,
+   and status shouldn't shout louder than the thing it's about.
+   --------------------------------------------------------------- */
 .banner {
-    background: linear-gradient(135deg, #E4550D 0%, #C2410C 100%);
-    border-radius: 12px;
-    padding: 20px 24px;
-    box-shadow: 0 2px 8px rgba(228, 85, 13, 0.2);
+    background: var(--brand-gradient);
+    border-radius: var(--radius-lg);
+    padding: 18px 22px;
+    box-shadow: var(--elevation-brand);
 }
 
 .bannerContent {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
 }
 
 .bannerIcon {
-    font-size: 24px;
+    font-size: 22px;
     color: white;
     flex-shrink: 0;
 }
 
 .bannerText {
     color: white;
-    font-size: 1rem;
+    font-size: var(--text-subhead);
     font-weight: 500;
+    letter-spacing: var(--text-subhead-tracking);
+    line-height: var(--text-subhead-leading);
     margin: 0;
-    line-height: 1.5;
 }
 
 .bannerLink {
@@ -41,82 +46,79 @@
     font-weight: 700;
     text-decoration: underline;
     text-underline-offset: 3px;
+    text-decoration-thickness: 1.5px;
 }
 
 .bannerLink:hover {
-    opacity: 0.85;
+    color: white;
+    opacity: 0.82;
 }
 
-/* Cancel subscription banner */
-.cancelBanner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 14px 20px;
-    background: #fefce8;
-    border: 1px solid #fde68a;
-    border-radius: 10px;
-}
-
-.cancelBannerText {
-    font-size: 0.875rem;
-    color: #92400e;
-    margin: 0;
-    line-height: 1.5;
-}
-
-.cancelBannerButton {
-    background: none;
-    border: none;
-    color: #d97706;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 0;
-    white-space: nowrap;
-    font-family: inherit;
-}
-
-.cancelBannerButton:hover {
-    text-decoration: underline;
-    color: #b45309;
-}
-
-/* Scheduled downgrade banner */
+.cancelBanner,
 .downgradeBanner {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 14px 20px;
-    background: #FFF4ED;
-    border: 1px solid #FFC9AA;
-    border-radius: 10px;
+    padding: 13px 18px;
+    border-radius: var(--radius-md);
+}
+
+.cancelBanner {
+    background: var(--warning-soft);
+    border: 1px solid var(--warning-border);
+}
+
+.downgradeBanner {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-soft-border);
+}
+
+.cancelBannerText,
+.downgradeBannerText {
+    font-size: var(--text-footnote);
+    letter-spacing: var(--text-footnote-tracking);
+    line-height: var(--text-footnote-leading);
+    margin: 0;
+}
+
+.cancelBannerText {
+    color: var(--warning);
 }
 
 .downgradeBannerText {
-    font-size: 0.875rem;
-    color: #9A340B;
-    margin: 0;
-    line-height: 1.5;
+    color: var(--brand-800);
 }
 
+.cancelBannerButton,
 .downgradeBannerButton {
     background: none;
     border: none;
-    color: #E4550D;
-    font-size: 0.875rem;
+    font-size: var(--text-footnote);
     font-weight: 600;
     cursor: pointer;
-    padding: 0;
+    padding: 4px 2px;
     white-space: nowrap;
     font-family: inherit;
+    transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.cancelBannerButton {
+    color: var(--warning);
+}
+
+.cancelBannerButton:hover {
+    text-decoration: underline;
+    color: #8A3E00;
+}
+
+.downgradeBannerButton {
+    color: var(--brand-600);
 }
 
 .downgradeBannerButton:hover {
     text-decoration: underline;
-    color: #C2410C;
+    color: var(--brand-700);
 }
 
 .downgradeBannerButton:disabled {
@@ -124,15 +126,18 @@
     cursor: not-allowed;
 }
 
-/* Section Titles */
+/* ---------------------------------------------------------------
+   Section titles
+   --------------------------------------------------------------- */
 .sectionTitle {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--on-primary);
-    margin: 0 0 20px 0;
+    font-size: var(--text-title-2);
+    font-weight: 700;
+    letter-spacing: var(--text-title-2-tracking);
+    line-height: var(--text-title-2-leading);
+    color: var(--label-primary);
+    margin: 0 0 14px 0;
 }
 
-/* Quick Links and Checklist Section */
 .quickLinksAndChecklistSection {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -140,30 +145,30 @@
     align-items: stretch;
 }
 
-/* Quick Links Section */
 .quickLinksSection {
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-width: 0;
 }
 
 .quickLinksGrid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 10px;
     flex: 1;
 }
 
-/* Release Checklist Section */
 .checklistSection {
     display: flex;
     flex-direction: column;
     gap: 0;
     height: 100%;
+    min-width: 0;
 }
 
 .checklistCard {
-    padding: 16px 24px 24px 24px !important;
+    padding: 20px !important;
     margin-top: 0;
     height: 100%;
     display: flex;
@@ -181,58 +186,114 @@
 .checklistList {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 4px;
     flex: 1;
-    margin-top: 16px;
+    margin-top: 12px;
 }
 
+.checklistList > * + * {
+    border-top: 0.5px solid var(--separator);
+    padding-top: 4px;
+}
+
+/*
+  Quick links. A destination row responds on press rather than only on
+  hover, so it feels the same under a finger as under a cursor. The
+  chevron slides toward the direction of travel to telegraph where the
+  tap is about to take you.
+*/
 .quickLinkCard {
-    background-color: var(--primary);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 16px 20px;
+    background-color: var(--surface-elevated);
+    border: 0.5px solid var(--separator);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
     text-decoration: none;
-    transition: all 0.3s ease;
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
+    box-shadow: var(--elevation-1);
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        box-shadow var(--duration-fast) var(--ease-standard),
+        border-color var(--duration-fast) var(--ease-standard);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .quickLinkCard:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-color: var(--accent-color);
+    box-shadow: var(--elevation-2);
+    border-color: var(--brand-a35);
 }
 
+.quickLinkCard:active {
+    transform: scale(0.99);
+    box-shadow: var(--elevation-1);
+}
+
+/* Icon sits in its own tinted tile so the row has a stable left rhythm
+   regardless of which glyph it carries. */
 .quickLinkIcon {
-    font-size: 24px;
-    color: var(--accent-color);
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
     flex-shrink: 0;
+    border-radius: 11px;
+    font-size: 19px;
+    color: var(--brand-600);
+    background: var(--brand-a08);
 }
 
 .quickLinkContent {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 1px;
     flex: 1;
+    min-width: 0;
 }
 
 .quickLinkTitle {
-    font-size: 1rem;
+    font-size: var(--text-headline);
     font-weight: 600;
-    color: var(--on-primary);
+    letter-spacing: var(--text-headline-tracking);
+    line-height: var(--text-headline-leading);
+    color: var(--label-primary);
     margin: 0;
 }
 
 .quickLinkDescription {
-    font-size: 0.85rem;
-    color: var(--on-primary-light2);
+    font-size: var(--text-footnote);
+    letter-spacing: var(--text-footnote-tracking);
+    line-height: var(--text-footnote-leading);
+    color: var(--label-secondary);
     margin: 0;
-    line-height: 1.4;
 }
 
-/* Customer Stats Section */
+/* Drifts toward the destination on hover — intermediate motion should
+   telegraph the outcome, not just sit there. */
+.quickLinkChevron {
+    flex-shrink: 0;
+    font-size: 18px;
+    color: var(--label-quaternary);
+    transition:
+        transform var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard);
+}
+
+.quickLinkCard:hover .quickLinkChevron {
+    color: var(--brand-600);
+    transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quickLinkCard:hover .quickLinkChevron {
+        transform: none;
+    }
+}
+
+/* ---------------------------------------------------------------
+   Stats (currently commented out in the page, kept in step anyway)
+   --------------------------------------------------------------- */
 .statsSection {
     display: flex;
     flex-direction: column;
@@ -242,15 +303,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
 .viewMoreLink {
-    color: var(--accent-color);
+    color: var(--brand-700);
     text-decoration: none;
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: color 0.2s ease;
+    font-weight: 600;
+    font-size: var(--text-subhead);
+    transition: color var(--duration-fast) var(--ease-standard);
 }
 
 .viewMoreLink:hover {
@@ -261,180 +322,172 @@
 .statsGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    gap: 16px;
 }
 
 .statCard {
-    padding: 24px !important;
+    padding: 20px !important;
 }
 
 .statContent {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
 }
 
 .statLabel {
-    font-size: 0.9rem;
-    color: var(--on-primary-light2);
+    font-size: var(--text-footnote);
+    letter-spacing: var(--text-footnote-tracking);
+    color: var(--label-secondary);
     margin: 0;
     font-weight: 500;
 }
 
+/* Numbers want tabular figures so a column of them doesn't jitter. */
 .statValue {
-    font-size: 2rem;
+    font-size: var(--text-display);
     font-weight: 700;
-    color: var(--on-primary);
+    letter-spacing: var(--text-display-tracking);
+    line-height: var(--text-display-leading);
+    color: var(--label-primary);
     margin: 0;
     font-family: var(--font-raleway);
+    font-variant-numeric: tabular-nums;
 }
 
-/* Bottom Section */
+/* ---------------------------------------------------------------
+   Bottom row
+   --------------------------------------------------------------- */
 .bottomSection {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
 }
 
-/* Updates Card */
-.updatesCard {
-    padding: 24px !important;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.updatesHeader {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.updatesIcon {
-    font-size: 24px;
-    color: var(--accent-color);
-}
-
-.updatesTitle {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--on-primary);
-    margin: 0;
-}
-
-.updatesContent {
+.updatesCard,
+.contactCard {
+    padding: 22px !important;
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-.updatesText {
-    font-size: 0.95rem;
-    color: var(--on-primary-light2);
+.updatesHeader,
+.contactHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.updatesIcon,
+.contactIcon {
+    font-size: 20px;
+    color: var(--brand-600);
+    flex-shrink: 0;
+}
+
+.updatesTitle,
+.contactTitle {
+    font-size: var(--text-title-3);
+    font-weight: 600;
+    letter-spacing: var(--text-title-3-tracking);
+    line-height: var(--text-title-3-leading);
+    color: var(--label-primary);
     margin: 0;
-    line-height: 1.6;
+}
+
+.updatesContent,
+.contactContent {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.updatesText,
+.contactText {
+    font-size: var(--text-subhead);
+    letter-spacing: var(--text-subhead-tracking);
+    line-height: var(--text-subhead-leading);
+    color: var(--label-secondary);
+    margin: 0;
 }
 
 .updatesList {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
+/* Empty state sits on a sunken fill so it reads as "nothing here yet"
+   rather than as a live item. */
 .updateItem {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    padding: 12px;
-    background-color: var(--background);
-    border-radius: 8px;
+    gap: 10px;
+    padding: 12px 14px;
+    background-color: var(--fill-quaternary);
+    border-radius: var(--radius-sm);
 }
 
 .updateItemIcon {
-    font-size: 20px;
-    color: var(--accent-color);
+    font-size: 18px;
+    color: var(--label-tertiary);
     flex-shrink: 0;
-    margin-top: 2px;
+    margin-top: 1px;
 }
 
 .updateItemText {
-    font-size: 0.9rem;
-    color: var(--on-primary-light2);
+    font-size: var(--text-footnote);
+    letter-spacing: var(--text-footnote-tracking);
+    line-height: var(--text-footnote-leading);
+    color: var(--label-secondary);
     margin: 0;
-    line-height: 1.5;
-}
-
-/* Contact Card */
-.contactCard {
-    padding: 24px !important;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.contactHeader {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.contactIcon {
-    font-size: 24px;
-    color: var(--accent-color);
-}
-
-.contactTitle {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--on-primary);
-    margin: 0;
-}
-
-.contactContent {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.contactText {
-    font-size: 0.95rem;
-    color: var(--on-primary-light2);
-    margin: 0;
-    line-height: 1.6;
 }
 
 .contactActions {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
+/*
+  Three parallel support routes, none of which is the "main" one — so
+  they're secondary buttons rather than three competing filled bars.
+*/
 .contactButton {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px 20px;
-    background-color: var(--accent-color);
-    color: white;
+    padding: 10px 16px;
+    background-color: var(--brand-a08);
+    color: var(--brand-700);
     text-decoration: none;
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: var(--text-subhead);
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .contactButton:hover {
-    background-color: #C2410C;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(228, 85, 13, 0.3);
+    background-color: var(--brand-a12);
+    color: var(--brand-800);
+}
+
+.contactButton:active {
+    transform: scale(0.97);
 }
 
 .contactButtonIcon {
-    font-size: 20px;
+    font-size: 17px;
 }
 
-/* Responsive Design */
+/* ---------------------------------------------------------------
+   Responsive
+   --------------------------------------------------------------- */
 @media (max-width: 1024px) {
     .quickLinksAndChecklistSection {
         grid-template-columns: 1fr;
@@ -443,22 +496,13 @@
 
 @media (max-width: 768px) {
     .container {
-        padding: 16px;
+        padding: 12px 0 8px;
         gap: 24px;
     }
 
-    .quickLinksAndChecklistSection {
-        grid-template-columns: 1fr;
-    }
-
-    .quickLinksGrid {
-        grid-template-columns: 1fr;
-    }
-
-    .statsGrid {
-        grid-template-columns: 1fr;
-    }
-
+    .quickLinksAndChecklistSection,
+    .quickLinksGrid,
+    .statsGrid,
     .bottomSection {
         grid-template-columns: 1fr;
     }
@@ -475,14 +519,25 @@
         gap: 12px;
     }
 
-    .bannerText {
-        font-size: 0.9rem;
-    }
-
     .cancelBanner,
     .downgradeBanner {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
+    }
+
+    .contactActions {
+        flex-direction: column;
+    }
+
+    .contactButton {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quickLinkCard:active,
+    .contactButton:active {
+        transform: none;
     }
 }

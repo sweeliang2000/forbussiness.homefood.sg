@@ -1,36 +1,37 @@
 .container {
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    min-height: 100vh;
+    gap: 20px;
+    padding-top: 20px;
 }
 
 .container .content {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 24px;
 }
 
 .header {
     position: -webkit-sticky;
     position: sticky !important;
-    top: 0;
-    z-index: 97;
 }
 
 .description {
     margin-top: 12px;
 }
 
+/* The theme already gives contained buttons the brand fill and
+   sentence case, so this no longer has to force either. */
 .button {
     box-shadow: none;
-    text-transform: capitalize !important;
-    background-color: var(--accent-color) !important;
 }
 
 .usersHeader {
     display: flex;
+    align-items: center;
     justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .invitationBanner {
@@ -39,24 +40,32 @@
     width: 100%;
 }
 
+/*
+  `overflow-x: scroll` showed a permanent scrollbar gutter even when the
+  table fitted. `auto` only scrolls when there's something to scroll to.
+*/
 .tableContainer {
-    overflow-x: scroll;
-    background-color: var(--primary);
-    border-radius: 12px;
+    overflow-x: auto;
+    background-color: var(--surface-elevated);
+    border: 0.5px solid var(--separator);
+    box-shadow: var(--elevation-1);
+    border-radius: var(--radius-lg);
     max-width: var(--max-width);
-    margin:  0 auto;
+    margin: 0 auto;
     width: 100%;
 }
 
+/* Grouped-list header: the label that names a section of rows. */
 .sectionHeaderIos {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #535356;
-  letter-spacing: 0.04em;
-  padding: 16px 0 4px 0;
-  margin: 0 auto;
-  margin-bottom: 4px;
-  background: none;
-  border: none;
-  max-width: 75rem;
+    font-size: var(--text-caption);
+    font-weight: 700;
+    color: var(--label-secondary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 16px 0 4px 0;
+    margin: 0 auto 4px;
+    background: none;
+    border: none;
+    max-width: var(--max-width);
+    width: 100%;
 }

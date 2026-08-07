@@ -1,18 +1,21 @@
 .container {
-  max-width: 75rem;
+  max-width: var(--max-width);
   margin: 0 auto;
-  padding: 24px;
-  height: auto;
-  min-height: unset;
+  width: 100%;
+  padding: 20px 0 8px;
 }
 
 .title {
   margin-bottom: 24px;
 }
 
+/*
+  Masonry columns keep uneven review lengths from leaving big gaps.
+  `break-inside: avoid` on the cards themselves does the rest.
+*/
 .reviewsGrid {
   column-count: 2;
-  column-gap: 12px;
+  column-gap: 14px;
 }
 
 @media (max-width: 900px) {
@@ -23,15 +26,15 @@
 
 .summaryCard {
   display: flex;
-  gap: 40px;
+  gap: 36px;
   align-items: center;
   flex-wrap: wrap;
-  border: 1px solid #eee;
-  border-radius: 12px;
-  background: #fff;
+  border: 0.5px solid var(--separator);
+  border-radius: var(--radius-lg);
+  background: var(--surface-elevated);
   padding: 24px 28px;
-  margin: 16px 0 20px;
-  box-shadow: 0 2px 8px #f0f0f0;
+  margin: 20px 0;
+  box-shadow: var(--elevation-1);
 }
 
 .summaryScore {
@@ -41,25 +44,33 @@
   min-width: 120px;
 }
 
+/* The headline number. Tight leading and negative tracking so it reads
+   as one object rather than three loose glyphs. */
 .avgNumber {
-  font-size: 48px;
+  font-size: 3rem;
   font-weight: 800;
   line-height: 1;
+  letter-spacing: -0.03em;
+  font-family: var(--font-raleway);
+  color: var(--label-primary);
+  font-variant-numeric: tabular-nums;
 }
 
 .avgStars {
   font-size: 20px;
-  color: #f5a623;
-  margin-top: 4px;
+  color: #F5A623;
+  margin-top: 6px;
+  letter-spacing: 0.06em;
 }
 
 .avgStarsMuted {
-  color: #d9d9d9;
+  color: var(--label-quaternary);
 }
 
 .avgCount {
-  font-size: 13px;
-  color: #888;
+  font-size: var(--text-footnote);
+  letter-spacing: var(--text-footnote-tracking);
+  color: var(--label-secondary);
   margin-top: 6px;
 }
 
@@ -68,7 +79,7 @@
   min-width: 240px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
 
 .distRow {
@@ -78,45 +89,71 @@
 }
 
 .distLabel {
-  width: 28px;
-  font-size: 13px;
-  color: #555;
+  width: 30px;
+  font-size: var(--text-footnote);
+  color: var(--label-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .distTrack {
   flex: 1;
   height: 8px;
-  background: #f0f0f0;
-  border-radius: 999px;
+  background: var(--fill-tertiary);
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
 .distFill {
   height: 100%;
-  background: #f5a623;
-  border-radius: 999px;
+  background: #F5A623;
+  border-radius: var(--radius-pill);
+  /* Grows into place when the data lands, rather than snapping. */
+  transition: width var(--duration-slow) var(--ease-standard);
 }
 
 .distCount {
   width: 28px;
   text-align: right;
-  font-size: 13px;
-  color: #555;
+  font-size: var(--text-footnote);
+  color: var(--label-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
+/* An empty state should explain what will fill it, not just report a
+   count of zero. */
 .emptyState {
   text-align: center;
   padding: 64px 24px;
-  color: #888;
+  color: var(--label-secondary);
+  background: var(--surface-elevated);
+  border: 0.5px solid var(--separator);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-1);
+  margin-top: 20px;
 }
 
 .emptyStars {
   font-size: 40px;
-  color: #e0e0e0;
+  color: var(--fill-primary);
   margin-bottom: 8px;
+  letter-spacing: 0.06em;
 }
 
 .emptyState h3 {
   margin: 8px 0 4px;
-  color: #333;
+  color: var(--label-primary);
+  font-size: var(--text-title-3);
+  letter-spacing: var(--text-title-3-tracking);
+}
+
+.emptyState p {
+  font-size: var(--text-subhead);
+  max-width: 42ch;
+  margin-inline: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .distFill {
+    transition: none;
+  }
 }

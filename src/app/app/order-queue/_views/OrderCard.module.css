@@ -1,12 +1,18 @@
+/*
+  One order. This is the densest surface in the product — a kitchen
+  glances at it mid-service — so hierarchy is carried by weight and
+  colour rather than by size alone, and every status has a distinct
+  tint that clears contrast on its own background.
+*/
 .orderCard {
-    background: var(--primary);
-    border: 1px solid var(--border-color);
-    border-radius: 14px;
+    background: var(--surface-elevated);
+    border: 0.5px solid var(--separator);
+    border-radius: var(--radius-lg);
     padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    gap: 11px;
+    box-shadow: var(--elevation-1);
 }
 
 .cardHead {
@@ -17,14 +23,18 @@
 }
 
 .orderRef {
-    font-weight: 800;
-    font-size: 15px;
+    font-weight: 700;
+    font-size: var(--text-subhead);
+    letter-spacing: var(--text-subhead-tracking);
+    color: var(--label-primary);
     margin-right: 8px;
 }
 
 .orderTime {
-    font-size: 12px;
-    color: var(--on-primary-light2);
+    font-size: var(--text-caption);
+    letter-spacing: var(--text-caption-tracking);
+    color: var(--label-secondary);
+    font-variant-numeric: tabular-nums;
 }
 
 .badges {
@@ -34,66 +44,96 @@
     justify-content: flex-end;
 }
 
+/*
+  Status pills. Uppercase needs extra tracking to stay readable, and
+  each pill carries a dot so state survives for anyone who can't
+  separate the hues.
+*/
 .badge {
-    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: var(--text-caption-2);
     font-weight: 700;
     padding: 3px 9px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.05em;
     white-space: nowrap;
+    border: 1px solid transparent;
+}
+
+.badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: var(--radius-pill);
+    background: currentColor;
+    flex-shrink: 0;
 }
 
 .typeBadge {
-    background: #f1f5f9;
-    color: var(--on-primary-light2);
+    background: var(--fill-tertiary);
+    color: var(--label-secondary);
 }
 
-.stNew { background: #FFF4ED; color: var(--accent-color); }
-.stPreparing { background: #fff4e5; color: #b26a00; }
-.stReady { background: #e6f4ea; color: #137333; }
-.stCompleted { background: #eef2f6; color: #475569; }
-.stCancelled { background: #fdecec; color: #c62828; }
+.typeBadge::before {
+    display: none;
+}
+
+.stNew        { background: var(--brand-50);      border-color: var(--brand-200);        color: var(--brand-700); }
+.stPreparing  { background: var(--warning-soft);  border-color: var(--warning-border);   color: #8A3E00; }
+.stReady      { background: var(--success-soft);  border-color: var(--success-border);   color: #186B2C; }
+.stCompleted  { background: var(--fill-tertiary); border-color: transparent;             color: var(--label-secondary); }
+.stCancelled  { background: var(--danger-soft);   border-color: var(--danger-border);    color: #A81818; }
 
 .items {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-    padding: 10px 0;
+    gap: 5px;
+    border-top: 0.5px solid var(--separator);
+    border-bottom: 0.5px solid var(--separator);
+    padding: 11px 0;
 }
 
 .itemRow {
     display: flex;
     justify-content: space-between;
     gap: 10px;
-    font-size: 13px;
+    font-size: var(--text-footnote);
+    letter-spacing: var(--text-footnote-tracking);
 }
 
 .itemName {
-    color: var(--on-primary);
+    color: var(--label-primary);
 }
 
 .itemOptions {
-    color: var(--on-primary-light2);
-    font-size: 12px;
+    color: var(--label-secondary);
+    font-size: var(--text-caption);
 }
 
+/* A note from the customer is an instruction to the kitchen, so it gets
+   a tint rather than being italicised into the background. */
 .itemNote {
-    color: #7a4b00;
-    font-size: 12px;
-    font-style: italic;
+    color: #8A3E00;
+    background: var(--warning-soft);
+    border-radius: var(--radius-xs);
+    padding: 2px 6px;
+    display: inline-block;
+    font-size: var(--text-caption);
+    margin-top: 2px;
 }
 
 .itemPrice {
-    color: var(--on-primary-light2);
+    color: var(--label-secondary);
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
 .notes {
-    font-size: 12px;
-    color: var(--on-primary-light2);
+    font-size: var(--text-caption);
+    color: var(--label-secondary);
     font-style: italic;
 }
 
@@ -105,36 +145,49 @@
 }
 
 .payMethod {
-    font-size: 12px;
+    font-size: var(--text-caption);
     font-weight: 600;
-    color: var(--on-primary-light2);
+    color: var(--label-secondary);
 }
 
 .payBadge {
-    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: var(--text-caption-2);
     font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 999px;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.03em;
+    border: 1px solid transparent;
 }
 
-.pyPending { background: #fff4e5; color: #b26a00; }
-.pyPaid { background: #e6f4ea; color: #137333; }
-.pyFailed { background: #fdecec; color: #c62828; }
+.pyPending { background: var(--warning-soft); border-color: var(--warning-border); color: #8A3E00; }
+.pyPaid    { background: var(--success-soft); border-color: var(--success-border); color: #186B2C; }
+.pyFailed  { background: var(--danger-soft);  border-color: var(--danger-border);  color: #A81818; }
 
 .linkBtn {
     background: none;
     border: none;
-    color: var(--accent-color);
-    font-size: 12px;
+    color: var(--brand-700);
+    font-size: var(--text-caption);
     font-weight: 600;
     cursor: pointer;
+    padding: 3px 6px;
+    margin: -3px -6px;
+    border-radius: var(--radius-xs);
+    font-family: inherit;
+    transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.linkBtn:hover {
+    background: var(--brand-a08);
     text-decoration: underline;
-    padding: 0;
 }
 
 .mutedNote {
-    font-size: 12px;
-    color: var(--on-primary-light2);
+    font-size: var(--text-caption);
+    color: var(--label-secondary);
     font-weight: 600;
 }
 
@@ -147,8 +200,11 @@
 }
 
 .total {
-    font-size: 16px;
-    font-weight: 800;
+    font-size: var(--text-title-3);
+    font-weight: 700;
+    letter-spacing: var(--text-title-3-tracking);
+    color: var(--label-primary);
+    font-variant-numeric: tabular-nums;
 }
 
 .actions {
@@ -163,59 +219,77 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
+    font-size: var(--text-footnote);
     margin: 2px 0;
 }
 
 .etaLabel {
-    color: var(--on-primary-light2);
+    color: var(--label-secondary);
     font-weight: 600;
 }
 
 .etaValue {
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
 }
 
 .etaOverdue {
-    color: #c62828;
+    color: #A81818;
 }
 
+/*
+  The queue number is what gets called out across a counter, so it's the
+  single loudest element on the card.
+*/
 .queueNo {
     display: inline-block;
-    font-size: 15px;
-    font-weight: 900;
+    font-size: var(--text-headline);
+    font-weight: 800;
     color: #fff;
-    background: var(--accent-color);
-    border-radius: 8px;
+    background: var(--brand-600);
+    border-radius: var(--radius-sm);
     padding: 2px 9px;
     margin-right: 8px;
+    font-variant-numeric: tabular-nums;
 }
 
 .walkinBadge {
-    background: #ede9fe;
-    color: #6d28d9;
+    background: #F1ECFE;
+    border-color: #DDD1FA;
+    color: #5B21B6;
 }
 
 .etaTag {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 12.5px;
+    font-size: var(--text-caption);
     font-weight: 700;
-    background: #e6f4ea;
-    color: #137333;
+    background: var(--success-soft);
+    border: 1px solid var(--success-border);
+    color: #186B2C;
     padding: 3px 10px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
 .etaTagOverdue {
-    background: #fdecec;
-    color: #c62828;
+    background: var(--danger-soft);
+    border-color: var(--danger-border);
+    color: #A81818;
 }
 
 .preorderBadge {
-    background: #fff4e5;
-    color: #b26a00;
+    background: var(--warning-soft);
+    border-color: var(--warning-border);
+    color: #8A3E00;
     text-transform: none;
+    letter-spacing: 0.01em;
+}
+
+.screenshotFull {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--separator);
 }

@@ -92,9 +92,31 @@ export async function releaseCheckoutLock(shopId, lockId) {
         TableName: SHOPS_TABLE,
         Key: { shop_id: { S: String(shopId) } },
         UpdateExpression:
-          'REMOVE subscription_checkout_lock, subscription_checkout_lock_expires_at',
+          'REMOVE subscription_checkout_lock, subscription_checkout_lock_expires_at, subscription_checkout_session_id',
         ConditionExpression: 'subscription_checkout_lock = :lock',
         ExpressionAttributeValues: { ':lock': { S: lockId } },
+      })
+    );
+  } catch (error) {
+    if (error?.name !== 'ConditionalCheckFailedException') throw error;
+  }
+}
+
+/**
+ * Releases only the lock that belongs to a particular Checkout Session. This
+ * condition prevents a delayed expiration webhook from clearing a newer
+ * checkout that the merchant has already started.
+ */
+export async function releaseCheckoutSession(shopId, sessionId) {
+  try {
+    await getDynamo().send(
+      new UpdateItemCommand({
+        TableName: SHOPS_TABLE,
+        Key: { shop_id: { S: String(shopId) } },
+        UpdateExpression:
+          'REMOVE subscription_checkout_lock, subscription_checkout_lock_expires_at, subscription_checkout_session_id',
+        ConditionExpression: 'subscription_checkout_session_id = :session',
+        ExpressionAttributeValues: { ':session': { S: String(sessionId) } },
       })
     );
   } catch (error) {
@@ -118,15 +140,20 @@ export async function saveSubscriptionProjection(shopId, projection) {
   let updateExpression =
     'SET StripeCustomerID = :customer, subscription_id = :subscription, subscription_created_at = :subscriptionCreated, subscription_plan_key = :plan, lookup_key = :lookup, SubscriptionStatus = :status, StripeCustomerSubscriptionStatus = :status, subscription_status = :status, subscription_entitled = :entitled, subscription_cancel_at_period_end = :cancelAtEnd, subscription_updated_at = :updated';
 
+  const attributesToRemove = [
+    'subscription_checkout_lock',
+    'subscription_checkout_lock_expires_at',
+    'subscription_checkout_session_id',
+  ];
+
   if (projection.currentPeriodEnd) {
     updateExpression += ', subscription_current_period_end = :periodEnd';
     values[':periodEnd'] = { N: String(projection.currentPeriodEnd) };
   } else {
-    updateExpression += ' REMOVE subscription_current_period_end';
+    attributesToRemove.unshift('subscription_current_period_end');
   }
 
-  updateExpression +=
-    ', subscription_checkout_lock, subscription_checkout_lock_expires_at, subscription_checkout_session_id';
+  updateExpression += ` REMOVE ${attributesToRemove.join(', ')}`;
 
   await getDynamo().send(
     new UpdateItemCommand({

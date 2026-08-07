@@ -2,15 +2,20 @@
   max-width: var(--max-width);
   margin: 0 auto;
   width: 100%;
-  padding: 16px 0;
+  padding: 20px 0 8px;
 }
 
+/* Filters sit on a sunken tray so they read as controls acting on the
+   table below, rather than as another row of content. */
 .filters {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   flex-wrap: wrap;
-  margin: 12px 0 16px;
+  margin: 16px 0;
+  padding: 12px 14px;
+  background: var(--fill-quaternary);
+  border-radius: var(--radius-md);
 }
 
 .tableWrap {
@@ -20,49 +25,74 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--text-subhead);
 }
 
 .table th,
 .table td {
   text-align: left;
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 11px 12px;
+  border-bottom: 0.5px solid var(--separator);
   vertical-align: top;
 }
 
+/* Headers are labels for the column, not data — quiet, tracked, small. */
 .table th {
-  font-weight: 700;
-  color: rgba(0, 0, 0, 0.6);
+  font-weight: 600;
+  font-size: var(--text-caption);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--label-secondary);
   white-space: nowrap;
 }
 
+/* No rule under the final row — a trailing hairline makes a finished
+   list look cut off. */
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr {
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.table tbody tr:hover {
+  background: var(--fill-quaternary);
+}
+
+/* Timestamps line up in a column when the digits are tabular. */
 .nowrap {
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--label-secondary);
 }
 
 .actor {
   font-weight: 600;
+  color: var(--label-primary);
 }
 
 .role {
   display: inline-block;
   margin-left: 8px;
-  font-size: 11px;
+  font-size: var(--text-caption-2);
   font-weight: 700;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #6d28d9;
-  background: #ede9fe;
+  color: #5B21B6;
+  background: #F1ECFE;
+  border: 1px solid #DDD1FA;
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .detail {
-  color: rgba(0, 0, 0, 0.7);
+  color: var(--label-secondary);
 }
 
 .empty {
   text-align: center;
-  color: rgba(0, 0, 0, 0.5);
-  padding: 24px 0;
+  color: var(--label-secondary);
+  padding: 32px 0;
+  font-size: var(--text-subhead);
 }

@@ -1,18 +1,55 @@
+/*
+  Section header inside a card. Hierarchy comes from weight and leading
+  as a set, not from size alone — bumping only the size makes a heading
+  loud without making it read as a different level.
+*/
 .container {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 4px;
+    gap: 2px;
 }
 
 .container h1,
 .container h2,
 .container h3,
 .container h4 {
-    margin-bottom: 8px;
+    margin-bottom: 0;
+    color: var(--label-primary);
+}
+
+.container h1 {
+    font-size: var(--text-title-1);
+    font-weight: 700;
+    letter-spacing: var(--text-title-1-tracking);
+    line-height: var(--text-title-1-leading);
+}
+
+.container h2 {
+    font-size: var(--text-title-3);
+    font-weight: 600;
+    letter-spacing: var(--text-title-3-tracking);
+    line-height: var(--text-title-3-leading);
+}
+
+.container h3 {
+    font-size: var(--text-headline);
+    font-weight: 600;
+    letter-spacing: var(--text-headline-tracking);
+    line-height: var(--text-headline-leading);
 }
 
 .description {
-    font-size: 0.75rem;
-    color: #5b6264;
+    font-size: var(--text-footnote);
+    letter-spacing: var(--text-footnote-tracking);
+    line-height: var(--text-footnote-leading);
+    color: var(--label-secondary);
+    max-width: 72ch;
+}
+
+/* An empty title still rendered an <h2> with margins, leaving a phantom
+   gap above descriptions on cards that only wanted the helper text. */
+.container h1:empty,
+.container h2:empty,
+.container h3:empty {
+    display: none;
 }

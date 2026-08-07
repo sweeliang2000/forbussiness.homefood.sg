@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Switch, Button, CircularProgress, Alert, Collapse } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { FaCheckCircle } from 'react-icons/fa';
+import { Button, CircularProgress, Alert } from '@mui/material';
+import SectionToggle from '@/components/App/SectionToggle/SectionToggle';
 import apiClient from '@/utility/api';
 import {
   STRIPE_CONNECT_ACCOUNT_STATUS,
@@ -102,7 +101,6 @@ export default function AutomaticPaymentsSection({ checked, disabled, onToggle, 
             <Button
               variant="contained"
               size="small"
-              sx={{ textTransform: 'none' }}
               onClick={handleConnect}
               disabled={actionLoading || disabled}
               startIcon={actionLoading ? <CircularProgress size={14} color="inherit" /> : null}
@@ -126,7 +124,6 @@ export default function AutomaticPaymentsSection({ checked, disabled, onToggle, 
             <Button
               variant="contained"
               size="small"
-              sx={{ textTransform: 'none' }}
               onClick={handleContinueOnboarding}
               disabled={actionLoading || disabled}
               startIcon={actionLoading ? <CircularProgress size={14} color="inherit" /> : null}
@@ -149,7 +146,6 @@ export default function AutomaticPaymentsSection({ checked, disabled, onToggle, 
           <Button
             variant="contained"
             size="small"
-            sx={{ textTransform: 'none' }}
             onClick={handleViewDashboard}
             disabled={actionLoading}
             startIcon={actionLoading ? <CircularProgress size={14} color="inherit" /> : null}
@@ -162,53 +158,37 @@ export default function AutomaticPaymentsSection({ checked, disabled, onToggle, 
   };
 
   return (
-    <div className={styles.section}>
-      <div className={styles.sectionHeader} onClick={onToggleExpand} role="button" tabIndex={0}>
-        <Switch
-          checked={checked}
-          disabled={disabled}
-          onClick={(e) => e.stopPropagation()}
-          onChange={(e) => onToggle(e.target.checked)}
-        />
-        <div className={styles.sectionHeaderText}>
-          <div className={styles.sectionTitleRow}>
-            <span className={styles.sectionTitle}>Automatic Payments</span>
-            <span className={styles.feeBadge}>3% fee</span>
-            {checked && (
-              <span className={styles.activePill}>
-                <FaCheckCircle size={12} /> Active
-              </span>
-            )}
-          </div>
-        </div>
-        <ExpandMoreIcon className={`${styles.chevron} ${expanded ? styles.chevronOpen : ''}`} />
+    <SectionToggle
+      title="Automatic Payments"
+      summary="Cards, wallets and PayNow — verified automatically, orders auto-confirm."
+      badges={<span className={styles.feeBadge}>3% fee</span>}
+      checked={checked}
+      onToggle={onToggle}
+      switchDisabled={disabled}
+      switchAriaLabel="Enable Automatic Payments"
+      expanded={expanded}
+      onToggleExpand={onToggleExpand}
+    >
+      <p className={styles.sectionDesc}>
+        The platform handles verification and refunds for you. Accepts:
+      </p>
+
+      <div className={styles.methodBadges}>
+        {ACCEPTED_METHODS.map((m) => (
+          <span className={styles.methodBadge} key={m.alt}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={encodeURI(m.src)} alt={m.alt} title={m.alt} />
+          </span>
+        ))}
       </div>
 
-      <Collapse in={expanded}>
-        <div className={styles.collapseInner}>
-          <p className={styles.sectionDesc}>
-            Payments are verified automatically by the provider and orders auto-confirm. The platform
-            manages refunds. Supports multiple payment methods:
-          </p>
+      {error && (
+        <Alert severity="error" onClose={() => setError('')}>
+          {error}
+        </Alert>
+      )}
 
-          <div className={styles.methodBadges}>
-            {ACCEPTED_METHODS.map((m) => (
-              <span className={styles.methodBadge} key={m.alt}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={encodeURI(m.src)} alt={m.alt} title={m.alt} />
-              </span>
-            ))}
-          </div>
-
-          {error && (
-            <Alert severity="error" onClose={() => setError('')}>
-              {error}
-            </Alert>
-          )}
-
-          {renderOnboarding()}
-        </div>
-      </Collapse>
-    </div>
+      {renderOnboarding()}
+    </SectionToggle>
   );
 }

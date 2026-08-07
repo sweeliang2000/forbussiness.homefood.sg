@@ -21,7 +21,28 @@
         margin-top: 56px;
     }
 
+    /*
+      The drawer enters from the left edge it's anchored to, so it reads
+      as sliding out from under the menu button rather than appearing.
+      It's a short, critically damped move — no overshoot, because no
+      gesture carried momentum into it.
+    */
     .sidebar.open {
         display: block;
+        animation: drawerIn var(--duration-standard) var(--ease-standard);
     }
 }
+
+@keyframes drawerIn {
+    from {
+        transform: translateX(-100%);
+        opacity: 0.6;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* The global prefers-reduced-motion rule in globals.css collapses this
+   animation to zero duration, so the drawer simply appears. */

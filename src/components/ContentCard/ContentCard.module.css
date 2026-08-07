@@ -1,12 +1,32 @@
+/*
+  The elevated surface everything on a page sits on. It reads as a sheet
+  of material laid on the canvas: a hairline to define the edge and a
+  soft contact shadow to lift it, rather than a hard border.
+*/
 .card {
-    background-color: white;
+    background-color: var(--surface-elevated);
     padding: 24px;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     max-width: var(--max-width);
-    margin:  0 auto;
+    margin: 0 auto;
     width: 100%;
+    border: 0.5px solid var(--separator);
+    box-shadow: var(--elevation-1);
 }
 
 .noMaxWidth {
     max-width: none;
+}
+
+@media (max-width: 640px) {
+    .card {
+        padding: 18px 16px;
+        border-radius: var(--radius-md);
+    }
+}
+
+@media (prefers-contrast: more) {
+    .card {
+        border-color: rgba(0, 0, 0, 0.4);
+    }
 }
