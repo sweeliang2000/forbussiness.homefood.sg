@@ -3,15 +3,45 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, CircularProgress } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
+import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
+import ScheduleRoundedIcon from '@mui/icons-material/ScheduleRounded';
+import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 
 import apiClient from '@/utility/api';
 import { CREATE_PORTAL_SESSION } from '@/utility/apiPaths';
 import { setSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import styles from './page.module.css';
+
+/**
+ * Copy and tone per state, kept as data rather than nested ternaries so the
+ * four outcomes can be read side by side. `pending` is deliberately its own
+ * tone: checkout succeeded, so showing the error treatment would tell a
+ * merchant their payment failed when it hasn't.
+ */
+const VIEWS = {
+  verifying: {
+    tone: 'pending',
+    title: 'Confirming your subscription',
+    body: 'We’re checking the payment with Stripe. This usually takes a moment.',
+  },
+  success: {
+    tone: 'success',
+    title: 'You’re on Pro',
+    body: 'Stripe confirmed the payment. Your Pro features are active right now.',
+  },
+  pending: {
+    tone: 'pending',
+    title: 'Payment still processing',
+    body: 'Checkout went through, but Stripe hasn’t confirmed the subscription yet. The billing portal has the payment details.',
+  },
+  failed: {
+    tone: 'failed',
+    title: 'We couldn’t confirm this',
+    body: 'This checkout session couldn’t be verified. Head back to subscriptions, or contact support if you were charged.',
+  },
+};
 
 export default function SuccessClient() {
   const router = useRouter();
@@ -55,43 +85,62 @@ export default function SuccessClient() {
     }
   };
 
-  const successful = state === 'success';
   const waiting = state === 'verifying';
+  const view = VIEWS[state] ?? VIEWS.failed;
 
   return (
     <div className={styles.container}>
-      <section className={styles.successSection}>
-        <ContentCard className={styles.successBox}>
-          <h1 className={styles.successTitle}>
-            {waiting ? 'VERIFYING SUBSCRIPTION' : successful ? 'SUBSCRIPTION ACTIVE' : 'SUBSCRIPTION NOT CONFIRMED'}
-          </h1>
-          <p className={styles.successDescription}>
-            {waiting
-              ? 'We are securely confirming the Checkout Session with Stripe.'
-              : successful
-                ? 'Stripe confirmed your subscription. Your Pro benefits are now active.'
-                : state === 'pending'
-                  ? 'Checkout completed, but the subscription is not active yet. Check the Billing Portal for payment details.'
-                  : 'We could not verify this Checkout Session. Return to subscriptions or contact support.'}
-          </p>
+      <section className={styles.cardWrap}>
+        <ContentCard className={styles.card}>
+          {/* Keyed on state so the resolved content mounts fresh and replays
+              its entrance — the swap out of `verifying` is the one moment
+              this page visibly stutters. */}
+          <div className={styles.result} key={state}>
+            <div
+              className={`${styles.medallion} ${styles[view.tone]}`}
+              role="img"
+              aria-label={view.title}
+            >
+              {waiting ? (
+                <CircularProgress size={34} thickness={4} color="inherit" />
+              ) : state === 'success' ? (
+                <CheckCircleRoundedIcon className={styles.glyph} />
+              ) : state === 'pending' ? (
+                <ScheduleRoundedIcon className={styles.glyph} />
+              ) : (
+                <ErrorOutlineRoundedIcon className={styles.glyph} />
+              )}
+            </div>
 
-          <div className={styles.successIcon}>
-            {waiting ? <CircularProgress size={72} /> : successful ? (
-              <CheckCircleIcon sx={{ fontSize: 100, color: '#2DD4BF' }} />
-            ) : (
-              <ErrorOutlineIcon sx={{ fontSize: 92, color: '#B42318' }} />
-            )}
-          </div>
+            <h1 className={styles.title}>{view.title}</h1>
+            <p className={styles.body}>{view.body}</p>
 
-          <div className={styles.buttonContainer}>
-            <Button variant="outlined" size="large" onClick={() => router.push('/app/subscription')} startIcon={<KeyboardBackspaceIcon />}>
-              Back to subscriptions
-            </Button>
-            {!waiting ? (
-              <Button variant="contained" size="large" onClick={handleManageBilling} disabled={portalLoading}>
-                {portalLoading ? 'Opening…' : 'Manage billing securely'}
+            <div className={styles.actions}>
+              <Button
+                className={styles.action}
+                variant="outlined"
+                size="large"
+                onClick={() => router.push('/app/subscription')}
+                startIcon={<KeyboardBackspaceRoundedIcon />}
+              >
+                Back to subscriptions
               </Button>
-            ) : null}
+              {!waiting ? (
+                <Button
+                  className={styles.action}
+                  variant="contained"
+                  size="large"
+                  onClick={handleManageBilling}
+                  disabled={portalLoading}
+                >
+                  {/* Keyed so the label cross-fades instead of teleporting;
+                      the button keeps its width so nothing reflows. */}
+                  <span className={styles.actionLabel} key={portalLoading ? 'busy' : 'idle'}>
+                    {portalLoading ? 'Opening…' : 'Manage billing'}
+                  </span>
+                </Button>
+              ) : null}
+            </div>
           </div>
         </ContentCard>
       </section>

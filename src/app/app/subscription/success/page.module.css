@@ -1,78 +1,244 @@
+/*
+  Subscription outcome screen.
+
+  Seen once per subscription, so it sits in the rare/first-time tier where a
+  little motion is affordable. It stays restrained anyway: this is a receipt,
+  and the feeling to land is "settled", not "celebration".
+
+  Everything here draws on the shared tokens — an earlier version hardcoded
+  #111827/#6B7280/#2DD4BF and re-declared the surface that ContentCard
+  already provides.
+*/
+
 .container {
-  max-width: 1200px;
+  max-width: var(--max-width);
   margin: 0 auto;
-  padding: 4rem 1rem;
+  padding: 4rem var(--side-spacing);
 }
 
-.successSection {
+.cardWrap {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 60vh;
 }
 
-.successBox {
-  background-color: white;
-  border-radius: 1rem;
+/* Width lives on the wrapper so the card doesn't have to !important its way
+   past ContentCard's max-width. */
+.card {
+  max-width: 27.5rem;
   text-align: center;
-  max-width: 480px !important;
-  width: 100%;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem 2rem;
+  /* Arrives as a sheet of material rather than appearing fully formed —
+     the same idiom as PricingCard, since the user lands here from Stripe's
+     redirect and the page would otherwise just be *there*. */
+  transform-origin: center bottom;
+  animation: materialize var(--duration-slow) var(--ease-out) both;
 }
 
-.successIcon {
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: resolve 260ms var(--ease-out) both;
+}
+
+/* ---------- Status medallion ---------- */
+
+/* A tinted disc reads as a status object; a bare 100px glyph just reads as a
+   big glyph. The disc also keeps the slot a fixed size, so the spinner and
+   the resolved icon don't shift the layout between them. */
+.medallion {
+  display: grid;
+  place-items: center;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: var(--radius-pill);
   margin-bottom: 1.5rem;
 }
 
-.successTitle {
-  font-size: 1.5rem;
+.glyph {
+  font-size: 2.75rem;
+  /* Delight budget: a small overshoot, and only after the headline has
+     started resolving, so the eye reads the words first. */
+  animation: stamp var(--duration-slow) var(--ease-spring) 60ms both;
+}
+
+.success {
+  background: var(--success-soft);
+  color: var(--success);
+  box-shadow: inset 0 0 0 1px var(--success-border);
+}
+
+.pending {
+  background: var(--warning-soft);
+  color: var(--warning);
+  box-shadow: inset 0 0 0 1px var(--warning-border);
+}
+
+.failed {
+  background: var(--danger-soft);
+  color: var(--danger);
+  box-shadow: inset 0 0 0 1px var(--danger-border);
+}
+
+/* ---------- Type ---------- */
+
+.title {
+  font-size: var(--text-title-2);
+  line-height: var(--text-title-2-leading);
+  /* Negative tracking, because large text reads too loose as it grows.
+     The previous +0.05em on an uppercase title had this backwards. */
+  letter-spacing: var(--text-title-2-tracking);
   font-weight: 600;
-  color: #111827;
-  margin-bottom: 1rem;
-  margin-top: 32px;
-  letter-spacing: 0.05em;
+  color: var(--label-primary);
+  margin: 0 0 0.5rem;
+  text-wrap: balance;
 }
 
-.successDescription {
-  color: #6B7280;
-  margin-bottom: 2.5rem;
-  font-size: 1rem;
-  line-height: 1.5;
+.body {
+  font-size: var(--text-subhead);
+  line-height: var(--text-subhead-leading);
+  letter-spacing: var(--text-subhead-tracking);
+  color: var(--label-secondary);
+  /* Holds the measure near 40 characters so the text doesn't run the full
+     card width at the widest breakpoint. */
+  max-width: 32ch;
+  margin: 0 0 2rem;
+  text-wrap: pretty;
 }
 
-.buttonContainer {
+/* ---------- Actions ---------- */
+
+.actions {
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
-  margin-bottom: 32px;
+  width: 100%;
 }
 
-.buttonContainer :global(.MuiButton-root) {
+.actions :global(.MuiButton-root) {
   text-transform: none;
-  min-width: 160px;
+  min-width: 10rem;
+  border-radius: var(--radius-sm);
+  letter-spacing: var(--text-subhead-tracking);
+  /* Press feedback on pointer-down, matching PricingCard. */
+  transition: transform var(--duration-press) ease-out;
 }
 
-@media (max-width: 768px) {
-  .successBox {
-    padding: 2rem;
-    margin: 1rem;
+.actions :global(.MuiButton-root):active {
+  transform: scale(0.985);
+}
+
+.actionLabel {
+  display: inline-block;
+  animation: resolve 160ms var(--ease-out) both;
+}
+
+/* ---------- Motion ---------- */
+
+@keyframes materialize {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.992);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes resolve {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---------- Adaptation ---------- */
+
+@media (max-width: 640px) {
+  .container {
+    padding: 2rem 1rem;
   }
 
-  .successTitle {
-    font-size: 1.25rem;
+  .card {
+    padding: 2rem 1.25rem;
   }
 
-  .successDescription {
-    font-size: 0.875rem;
+  .title {
+    font-size: var(--text-title-3);
+    line-height: var(--text-title-3-leading);
+    letter-spacing: var(--text-title-3-tracking);
   }
 
-  .buttonContainer {
+  .actions {
     flex-direction: column-reverse;
     align-items: stretch;
   }
 
-  .buttonContainer :global(.MuiButton-root) {
+  .actions :global(.MuiButton-root) {
     width: 100%;
   }
-} 
+}
+
+/* Gentler, not zero: the fades still explain that state changed, the
+   travel and the overshoot go. */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .result,
+  .glyph,
+  .actionLabel {
+    animation-duration: var(--duration-fast);
+    animation-timing-function: ease;
+  }
+
+  .card,
+  .result,
+  .glyph {
+    animation-name: fade;
+  }
+
+  .actions :global(.MuiButton-root) {
+    transition: none;
+  }
+
+  .actions :global(.MuiButton-root):active {
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .body {
+    color: var(--label-primary);
+  }
+
+  .medallion {
+    box-shadow: inset 0 0 0 2px currentColor;
+  }
+}
