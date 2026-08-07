@@ -1,8 +1,8 @@
-.dropdownBtn{
-    border-radius: 12px;
-    padding: 12px;
+.dropdownBtn {
+    border-radius: 10px;
+    padding: 9px 12px;
     text-decoration: none;
-    color: black;
+    color: var(--label-primary);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -11,12 +11,24 @@
     text-align: left;
     background: none;
     font: inherit;
+    font-size: var(--text-subhead);
+    letter-spacing: var(--text-subhead-tracking);
+    font-weight: 500;
     cursor: pointer;
     border: 0;
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .dropdownBtn:hover {
-    background-color: #e7f2f6;
+    background-color: var(--fill-quaternary);
+}
+
+.dropdownBtn:active {
+    transform: scale(0.985);
+    background-color: var(--fill-tertiary);
 }
 
 .dropdownBtn span {
@@ -24,50 +36,104 @@
 }
 
 .icon {
-    color: #013445;
+    color: var(--label-secondary);
     flex-shrink: 0;
-    font-size: 1.5rem;
-    margin-right: 4px;
+    font-size: 1.25rem;
+    transition: color var(--duration-fast) var(--ease-standard);
 }
 
+/* The chevron points where the section is going: down when it's about
+   to open, up when it's about to close. */
 .downicon {
-    font-size: 12px;
+    font-size: 11px;
+    color: var(--label-tertiary);
+    transition: rotate var(--duration-standard) var(--ease-standard);
 }
 
 .submenu {
     display: grid !important;
     grid-template-rows: 0fr;
-    transition: 300ms ease-in-out;
+    transition: grid-template-rows var(--duration-standard) var(--ease-standard);
 }
 
-.submenu.show{
+.submenu.show {
     grid-template-rows: 1fr;
 }
 
 .submenuContainer {
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 2px;
 }
 
+/* Children are indented and hung off a hairline rail, so the nesting is
+   legible without a second icon column. */
 .submenuContainer li {
-    padding-left: 12px !important;
-    padding-right: 0px !important;
+    padding-left: 24px !important;
+    padding-right: 0 !important;
+    position: relative;
+}
+
+.submenuContainer li::before {
+    content: '';
+    position: absolute;
+    left: 22px;
+    top: 0;
+    bottom: 0;
+    width: 1.5px;
+    background: var(--separator);
+}
+
+.submenuContainer li:first-child::before {
+    top: 4px;
+}
+
+.submenuContainer li:last-child::before {
+    bottom: 4px;
 }
 
 .rotate {
     rotate: 180deg;
-    transition: 200ms ease;
 }
 
 .link {
     margin-left: 0;
+    font-size: var(--text-subhead);
+    color: var(--label-secondary) !important;
+}
+
+.link:hover {
+    color: var(--label-primary) !important;
 }
 
 .active a {
-    color: #013445;
-    font-weight: bold;
-    background-color: #F2FBFE;
+    color: var(--brand-700) !important;
+    font-weight: 600;
+    background-color: var(--brand-a08);
+}
+
+.active a:hover {
+    background-color: var(--brand-a12);
+}
+
+.active::before {
+    background: var(--brand-600) !important;
 }
 
 .active .icon {
-    color: #013445;
+    color: var(--brand-600);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dropdownBtn,
+    .downicon,
+    .submenu {
+        transition: none;
+    }
+
+    .dropdownBtn:active {
+        transform: none;
+    }
 }

@@ -44,10 +44,13 @@ const SignOutAllSessionCell = () => {
                         to sign in again to use any of those sessions. Please note that any open sessions 
                         may continue to work until they naturally expire, usually within an hour.
                     </p>
+                    {/* Destructive confirm — it ends every session, so it
+                        carries the error colour rather than the brand's. */}
                     <Button
                         className={styles.LoadingButton}
-                        fullWidth 
+                        fullWidth
                         variant='contained'
+                        color='error'
                         onClick={signoutAllSessionHandler}
                         loading={isButtonLoading}
                     >

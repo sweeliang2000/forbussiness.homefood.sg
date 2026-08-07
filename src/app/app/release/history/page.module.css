@@ -1,13 +1,11 @@
 .form {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
 }
 
 .header {
     position: sticky !important;
-    top: 0;
-    z-index: 97;
 }
 
 .informationCard {
@@ -17,15 +15,6 @@
     gap: 12px;
 }
 
-.form h2 {
-    font-size: 1.25rem;
-    margin-bottom: 24px;
-}
-
-.form h3 {
-    font-size: 16px;
-}
-
 .noDescriptionTitle {
     margin-bottom: 16px;
 }
@@ -33,7 +22,7 @@
 .form .content {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 12px;
 }
 
 .addressFields {
@@ -48,24 +37,34 @@
     justify-content: flex-start;
 }
 
+/* The table scrolls inside its own box so a wide row never forces the
+   whole page sideways. */
 .tableWrap {
     overflow-x: auto;
     width: 100%;
-    margin-top: 12px;
+    margin-top: 14px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--separator);
 }
 
 .historyTable {
     width: 100%;
     border-collapse: collapse;
-    min-width: 320px;
+    min-width: 420px;
 }
 
+/* Column headers are labels, not content — small, tracked, quiet. */
 .historyTh {
     text-align: left;
     padding: 10px 14px;
     font-weight: 600;
-    color: #333;
-    border-bottom: 2px solid #e0e0e0;
+    font-size: var(--text-caption);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--label-secondary);
+    background: var(--fill-quaternary);
+    border-bottom: 0.5px solid var(--separator);
+    white-space: nowrap;
 }
 
 .historyTable th:last-child,
@@ -75,40 +74,63 @@
 }
 
 .historyTr {
-    border-bottom: 1px solid #eee;
+    transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.historyTr:not(:last-child) .historyTd {
+    border-bottom: 0.5px solid var(--separator);
 }
 
 .historyTr:hover {
-    background-color: #fafafa;
+    background-color: var(--fill-quaternary);
 }
 
 .historyTd {
     padding: 12px 14px;
     vertical-align: middle;
-    font-size: 1rem;
-    color: #242427;
+    font-size: var(--text-subhead);
+    color: var(--label-primary);
+    font-variant-numeric: tabular-nums;
 }
 
 .viewMoreLink {
-    color: var(--accent-color, #E4550D);
-    font-size: 0.875rem;
-    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--brand-700);
+    font-size: var(--text-footnote);
+    font-weight: 600;
     text-decoration: none;
+    padding: 5px 10px;
+    margin: -5px -10px;
+    border-radius: var(--radius-xs);
+    transition:
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard);
 }
 
 .viewMoreLink:hover {
-    text-decoration: underline;
+    background: var(--brand-a08);
+    color: var(--brand-800);
 }
 
+/* An empty state should say what will appear here, not just "none". */
 .emptyState {
-    padding: 40px 20px;
+    padding: 44px 20px;
     text-align: center;
-    color: #5b6264;
-    font-size: 0.9375rem;
+    color: var(--label-primary);
+    font-size: var(--text-headline);
+    font-weight: 600;
+    background: var(--fill-quaternary);
+    border-radius: var(--radius-md);
+    margin-top: 14px;
 }
 
-@media only screen and (max-width: 820px) {
-    .header {
-        top: 62px;
-    }
+.emptyStateHint {
+    margin-top: 5px;
+    font-size: var(--text-subhead);
+    font-weight: 400;
+    color: var(--label-secondary);
+    max-width: 42ch;
+    margin-inline: auto;
 }

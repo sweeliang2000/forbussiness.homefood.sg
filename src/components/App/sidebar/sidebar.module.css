@@ -1,20 +1,25 @@
+/*
+  The sidebar is structural chrome, so it takes a heavier material than
+  the content beside it. Content scrolls under the sticky logo header and
+  the subscription footer rather than being clipped by them.
+*/
 .sidebar {
-    background: rgba(255, 255, 255, 0.94);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    background: var(--material-thick-bg);
+    backdrop-filter: var(--material-thick-blur);
+    -webkit-backdrop-filter: var(--material-thick-blur);
     display: flex;
     flex-direction: column;
     height: 100vh;
     height: 100dvh;
-    width: 256px;
-    border-right: 1px solid rgba(24, 24, 27, 0.08);
-    
-    /* This is to make it fix without using position fix */
+    width: 264px;
+    border-right: 0.5px solid var(--separator);
+
+    /* Sticky rather than fixed so the grid still reserves its column. */
     position: sticky;
     top: 0;
     align-self: start;
 
-    transition: width 300ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: width var(--duration-standard) var(--ease-standard);
     overflow: hidden;
 }
 
@@ -42,6 +47,8 @@
     padding-bottom: 16px;
 }
 
+/* Sticky logo row: a lighter material sitting on the sidebar's heavier
+   one, with a soft scroll edge instead of a hard rule. */
 .sidebar > ul > li:first-child {
     top: 0;
     position: sticky;
@@ -51,20 +58,20 @@
     justify-content: space-between;
     min-height: 72px;
     padding: 9px 12px;
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: 0 1px 0 rgba(24, 24, 27, 0.055);
+    background: var(--material-regular-bg);
+    backdrop-filter: var(--material-regular-blur);
+    -webkit-backdrop-filter: var(--material-regular-blur);
+    box-shadow: 0 8px 12px -8px rgba(16, 24, 40, 0.08);
 }
 
 .sidebar ul li:not(.logoLi) {
-    padding: 0 16px; 
+    padding: 0 12px;
 }
 
 .sidebar ul {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 2px;
 }
 
 .logoLi .logoLink {
@@ -72,15 +79,15 @@
     width: 100%;
     min-width: 0;
     padding: 7px 9px;
-    border-radius: 14px;
+    border-radius: var(--radius-lg);
     transform-origin: left center;
     transition:
-        transform 100ms ease-out,
-        background-color 160ms ease-out;
+        transform var(--duration-press) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
 }
 
 .logoLi .logoLink:hover {
-    background-color: rgba(228, 85, 13, 0.055);
+    background-color: var(--brand-a04);
 }
 
 .logoLi .logoLink:active {
@@ -91,18 +98,25 @@
     font-family: 600;
 }
 
+/* Section labels. Small text needs positive tracking to stay legible,
+   and uppercase needs more of it still. */
 .labelLi {
-    margin-top: 16px;
+    margin-top: 18px;
+    margin-bottom: 2px;
 }
 
 .labelLi .label {
+    display: block;
     margin-left: 12px;
-    font-size: 12px;
+    font-size: var(--text-caption-2);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--label-secondary);
 }
 
 .hiddenLogo {
     display: none !important;
-    background-color: #e7f2f6;
 }
 
 .minimiseSidebar {
@@ -110,44 +124,48 @@
     align-items: center;
     justify-content: space-between;
     padding: 8px;
-    border-radius: 4px;
-    transition: rotate 150ms ease;
+    border-radius: var(--radius-sm);
+    transition: rotate var(--duration-fast) var(--ease-standard);
 }
 
 .rotate {
     rotate: 180deg;
-    transition: 200ms ease;
+    transition: rotate var(--duration-fast) var(--ease-standard);
 }
 
 .reverseRotate {
     rotate: 0deg;
-    transition: 200ms ease;
+    transition: rotate var(--duration-fast) var(--ease-standard);
 }
 
 .minimiseSidebar:hover {
-    background-color: antiquewhite;
+    background-color: var(--fill-quaternary);
 }
 
-.sidebar ul li.active a {
-    color: #013445;
-    font-weight: bold;
-    background-color: #F2FBFE;
-}
-
-.sidebar ul li.active .icon {
-    color: #013445;
-}
-
+/*
+  Rows. Feedback is on :active — pointer-down — so pressing a nav item
+  acknowledges you before the route has even started resolving.
+*/
 .sidebar a,
 .sidebar .dropdownBtn,
 .sidebar .logo {
-    border-radius: 12px;
-    padding: 12px;
+    border-radius: 10px;
+    padding: 9px 12px;
     text-decoration: none;
-    color: black;
+    color: var(--label-primary);
     display: flex;
     align-items: center;
     gap: 12px;
+    font-size: var(--text-subhead);
+    letter-spacing: var(--text-subhead-tracking);
+    line-height: var(--text-subhead-leading);
+    font-weight: 500;
+    position: relative;
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .dropdownBtn {
@@ -161,27 +179,64 @@
 
 .sidebar .icon {
     flex-shrink: 0;
-    font-size: 1.5rem;
-    margin-right: 4px;
+    font-size: 1.25rem;
+    color: var(--label-secondary);
+    transition: color var(--duration-fast) var(--ease-standard);
 }
 
 .sidebar a span,
 .sidebar .dropdownBtn span {
     flex-grow: 1;
+    min-width: 0;
 }
 
-.sidebar a:hover, 
+.sidebar a:hover,
 .sidebar .dropdownBtn:hover {
-    background-color: #e7f2f6;
+    background-color: var(--fill-quaternary);
+    color: var(--label-primary);
+}
+
+.sidebar a:active,
+.sidebar .dropdownBtn:active {
+    transform: scale(0.985);
+    background-color: var(--fill-tertiary);
+}
+
+/* Active row: a brand-tinted pill with a leading marker, so "where am
+   I" is answered by shape as well as colour. */
+.sidebar ul li.active a {
+    color: var(--brand-700);
+    font-weight: 600;
+    background-color: var(--brand-a08);
+}
+
+.sidebar ul li.active a::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    width: 3px;
+    height: 18px;
+    border-radius: 0 3px 3px 0;
+    background: var(--brand-600);
+    transform: translateY(-50%);
+}
+
+.sidebar ul li.active a:hover {
+    background-color: var(--brand-a12);
+}
+
+.sidebar ul li.active .icon {
+    color: var(--brand-600);
 }
 
 .sidebar .submenu {
     display: grid;
     grid-template-rows: 0fr;
-    transition: 300ms ease-in-out;
+    transition: grid-template-rows var(--duration-standard) var(--ease-standard);
 }
 
-.sidebar .submenu.show{
+.sidebar .submenu.show {
     grid-template-rows: 1fr;
 }
 
@@ -189,45 +244,52 @@
     overflow: hidden;
 }
 
+/*
+  Subscription footer. Lifted off the list with a shadow rather than a
+  border so it reads as a layer floating above the scroll, not a
+  partition welded into it.
+*/
 .subscriptionContainer {
     position: relative;
     z-index: 3;
     flex: 0 0 auto;
     width: 100%;
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: var(--material-regular-bg);
+    backdrop-filter: var(--material-regular-blur);
+    -webkit-backdrop-filter: var(--material-regular-blur);
     display: flex;
     flex-direction: column;
-    border-top: 1px solid rgba(24, 24, 27, 0.1);
-    box-shadow: 0 -8px 24px rgba(31, 41, 55, 0.035);
+    border-top: 0.5px solid var(--separator);
+    box-shadow: 0 -10px 20px -10px rgba(16, 24, 40, 0.08);
 }
 
 .subscriptionRow {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 24px;
+    gap: 12px;
+    padding: 14px 20px;
 }
 
 .cancelStrip {
-    background: #fef2f2;
-    padding: 8px 24px;
-    border-top: 1px solid #fecaca;
+    background: var(--danger-soft);
+    padding: 10px 20px;
+    border-top: 1px solid var(--danger-border);
 }
 
 .cancelStrip p {
-    font-size: 13px;
+    font-size: var(--text-footnote);
+    letter-spacing: var(--text-footnote-tracking);
     color: #991b1b;
     margin: 0 0 4px 0;
-    line-height: 1.4;
+    line-height: var(--text-footnote-leading);
 }
 
 .cancelStripButton {
     background: none;
     border: none;
-    color: #dc2626;
-    font-size: 13px;
+    color: var(--danger);
+    font-size: var(--text-footnote);
     font-weight: 600;
     cursor: pointer;
     padding: 0;
@@ -244,28 +306,49 @@
 }
 
 .subscriptionContainer .title {
-    font-size: 14px;
-    margin-bottom: 4px;
+    font-size: var(--text-subhead);
+    font-weight: 600;
+    letter-spacing: var(--text-subhead-tracking);
+    color: var(--label-primary);
+    margin-bottom: 1px;
 }
 
 .subscriptionContainer .cost {
-    font-size: 12px;
+    font-size: var(--text-caption);
+    letter-spacing: var(--text-caption-tracking);
+    color: var(--label-secondary);
 }
 
+/* Was 10px blue text with no hit area. It's a real control now. */
 .subscriptionContainer .button {
+    flex-shrink: 0;
     text-transform: none;
-    font-size: 10px;
-    padding: 4px;
-    color: blue;
-    background: none;
+    font-size: var(--text-footnote);
+    font-weight: 600;
+    padding: 6px 14px;
+    color: var(--brand-700);
+    background: var(--brand-a08);
     border: none;
-    font: inherit;
+    font-family: inherit;
     cursor: pointer;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: var(--radius-pill);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.subscriptionContainer .button:hover {
+    background: var(--brand-a12);
+    color: var(--brand-800);
+}
+
+.subscriptionContainer .button:active {
+    transform: scale(0.95);
 }
 
 .subscriptionContainer .button:disabled {
@@ -277,8 +360,8 @@
     display: inline-block;
     width: 16px;
     height: 16px;
-    border: 2px solid rgba(0, 0, 255, 0.2);
-    border-top-color: blue;
+    border: 2px solid var(--brand-a20);
+    border-top-color: var(--brand-600);
     border-radius: 50%;
     animation: spin 0.6s linear infinite;
 }
@@ -305,19 +388,30 @@
     margin-bottom: 0;
 }
 
+/* Scrim for the mobile drawer. Dimming the background is what makes the
+   drawer read as a modal task rather than a parallel panel. */
 .overlay {
     position: fixed;
+    inset: 0;
     z-index: 98;
     height: 100%;
     width: 100%;
-    background-color: #3e4548;
-    opacity: 0.6;
+    background-color: var(--scrim);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    animation: scrimIn var(--duration-fast) var(--ease-standard);
+}
+
+@keyframes scrimIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @media only screen and (max-width: 820px) {
     .sidebar {
         height: calc(100vh - 56px);
         height: calc(100dvh - 56px);
+        box-shadow: var(--elevation-3);
     }
 
     .sidebar .top {
@@ -336,8 +430,21 @@
 
 @media (prefers-reduced-motion: reduce) {
     .sidebar,
-    .logoLi .logoLink {
-        transition: none;
+    .logoLi .logoLink,
+    .sidebar a,
+    .sidebar .dropdownBtn {
+        transition: background-color 120ms linear;
+    }
+
+    .sidebar a:active,
+    .sidebar .dropdownBtn:active,
+    .logoLi .logoLink:active,
+    .subscriptionContainer .button:active {
+        transform: none;
+    }
+
+    .overlay {
+        animation: none;
     }
 }
 
@@ -346,6 +453,11 @@
     .sidebar > ul > li:first-child,
     .subscriptionContainer {
         background: #fff;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    .overlay {
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
     }
@@ -358,5 +470,10 @@
 
     .sidebar > ul > li:first-child {
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.22);
+    }
+
+    .sidebar ul li.active a {
+        background-color: var(--brand-a20);
+        color: var(--brand-800);
     }
 }

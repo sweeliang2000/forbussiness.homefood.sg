@@ -1,6 +1,7 @@
 import './globals.css';
 import { Analytics } from '@vercel/analytics/next';
 import AuthGuard from '@/components/AuthGuard/AuthGuard';
+import ThemeRegistry from '@/theme/ThemeRegistry';
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://business.homefood.sg'),
@@ -50,7 +51,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang='en'>
       <body>
-        <AuthGuard>{children}</AuthGuard>
+        <ThemeRegistry>
+          <AuthGuard>{children}</AuthGuard>
+        </ThemeRegistry>
         <Analytics />
       </body>
     </html>

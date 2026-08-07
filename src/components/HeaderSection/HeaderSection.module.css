@@ -1,25 +1,91 @@
+/*
+  The page's title bar. Most pages pin this so the primary action stays
+  reachable down a long form, so it's built as floating chrome: a
+  translucent layer that page content passes *under*, rather than the
+  opaque white slab with a 2px grey rule it used to be — that read as
+  heavy furniture and competed with the content cards below it.
+
+  Pages opt into pinning with `position: sticky` from their own module;
+  the offset comes from --app-header-offset so it lands below the
+  breadcrumb bar instead of on top of it.
+*/
 .informationCard {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    border-radius: 0 !important;
-    border-bottom: 2px solid rgb(160, 166, 180);
+    gap: 0;
+    position: sticky;
+    /* !important because several page modules still hardcode `top: 0`,
+       which would park this on top of the breadcrumb bar. */
+    top: var(--app-header-offset) !important;
+    /* Below the breadcrumb bar (20) so the two never fight. */
+    z-index: 15;
+    background: var(--material-regular-bg) !important;
+    backdrop-filter: var(--material-regular-blur);
+    -webkit-backdrop-filter: var(--material-regular-blur);
+    border: 0.5px solid var(--separator) !important;
+    box-shadow: var(--elevation-2) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 16px 20px !important;
+}
+
+/* Scroll edge: content dissolves as it slides under the bar instead of
+   being chopped by a hard line. */
+.informationCard::after {
+    content: '';
+    position: absolute;
+    inset: 100% 0 auto 0;
+    height: 14px;
+    pointer-events: none;
+    background: linear-gradient(
+        to bottom,
+        rgba(16, 24, 40, 0.05),
+        rgba(16, 24, 40, 0)
+    );
 }
 
 .titleSection {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
+    gap: 16px;
 }
 
+/*
+  Large text needs negative tracking and tight leading — the same
+  spacing that keeps 13px legible makes a 28px title look loose.
+  Vibrancy: over a translucent surface the label carries a touch more
+  weight than it would on solid white, so it doesn't dissolve into
+  whatever is scrolling behind it.
+*/
 .title {
-    font-size: 2rem;
-    font-weight: 600;
+    font-size: var(--text-title-1);
+    font-weight: 700;
+    letter-spacing: var(--text-title-1-tracking);
+    line-height: var(--text-title-1-leading);
+    color: var(--label-primary);
+    min-width: 0;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    /* Optically aligns the button cap-height with the title's baseline. */
+    margin-top: 4px;
 }
 
 .description {
-    font-size: 0.75rem;
-    margin-top: 8px;
+    font-size: var(--text-subhead);
+    letter-spacing: var(--text-subhead-tracking);
+    line-height: var(--text-subhead-leading);
+    color: var(--label-secondary);
+    margin-top: 6px;
+    max-width: 68ch;
+}
+
+.description:empty {
+    display: none;
 }
 
 .loadingButton {
@@ -27,16 +93,90 @@
     text-transform: none;
 }
 
+/* Alerts inside a pinned bar could grow it without limit, so the stack
+   scrolls once it gets tall rather than eating the viewport. */
+.alerts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 14px;
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
 .alert {
-    margin-top: 8px;
+    margin-top: 0;
+    flex-shrink: 0;
 }
 
 .checked {
     margin-right: 8px;
 }
+
+/*
+  Saved state. Completion feedback should read as "done", not as another
+  button waiting to be pressed — so it goes quiet and green rather than
+  staying a filled primary action.
+*/
 .successfull {
-    border: 1px solid black;
-    background-color: transparent !important;
-    color: rgb(112, 112, 112) !important;
-    font-weight: bold;
+    background-color: var(--success-soft) !important;
+    border: 1px solid var(--success-border) !important;
+    color: var(--success) !important;
+    font-weight: 600;
+}
+
+/*
+  On narrow screens the actions used to drop onto their own full-width
+  row, which pushed the Save button in between the title and the
+  description it belongs to. Keeping the row intact preserves the
+  large-title-left / action-top-right shape: the title wraps, the button
+  holds its corner.
+*/
+@media (max-width: 700px) {
+    .titleSection {
+        gap: 12px;
+    }
+
+    .title {
+        font-size: var(--text-title-2);
+        letter-spacing: var(--text-title-2-tracking);
+        line-height: var(--text-title-2-leading);
+    }
+
+    .actions {
+        margin-top: 2px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .informationCard {
+        padding: 14px 16px !important;
+        border-radius: var(--radius-md) !important;
+    }
+}
+
+/* Below this the title and a pair of buttons genuinely can't share a
+   line, so the actions go full width rather than being squeezed. */
+@media (max-width: 420px) {
+    .titleSection {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .actions {
+        margin-top: 0;
+        justify-content: stretch;
+    }
+
+    .actions > * {
+        flex: 1;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .informationCard {
+        background: #fff !important;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
 }

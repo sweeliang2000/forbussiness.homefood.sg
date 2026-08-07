@@ -1,39 +1,77 @@
+/*
+  Contents of a modal task sheet. It gets generous padding and a large
+  corner radius because it's a big surface — a card and the chip inside
+  it should not share a radius.
+*/
 .card {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 30px;
-    border-radius: 24px !important;
+    gap: 10px;
+    padding: 26px;
+    border-radius: var(--radius-xl) !important;
 }
 
 .card .title {
-    font-size: 24px;
+    font-size: var(--text-title-2);
     font-weight: 700;
+    letter-spacing: var(--text-title-2-tracking);
+    line-height: var(--text-title-2-leading);
+    color: var(--label-primary);
+    /* Leaves room for the close control in the corner. */
+    padding-right: 32px;
 }
 
 .card .description {
-    color: rgb(77, 77, 77);
+    color: var(--label-secondary);
+    font-size: var(--text-subhead);
+    letter-spacing: var(--text-subhead-tracking);
+    line-height: var(--text-subhead-leading);
 }
 
 .card .LoadingButton {
-    margin-top: 12px;
+    margin-top: 14px;
     text-transform: none;
     box-shadow: none;
-    font-size: 16px !important;
-    background-color: var(--error-color);
 }
 
+/*
+  Close control. It was an 22px glyph with no padding, so the target was
+  barely bigger than the icon; it's now a proper 34px button that
+  responds on press.
+*/
 .close {
     cursor: pointer;
     position: absolute;
-    right: 12px;
-    top: 12px;
-    font-size: 22px;
-    color: rgb(137, 137, 137);
+    right: 14px;
+    top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    box-sizing: content-box;
+    padding: 0;
+    font-size: 20px;
+    color: var(--label-secondary);
+    border-radius: var(--radius-sm);
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .close:hover {
-    background-color: rgb(229, 229, 229);
-    color: rgb(85, 85, 85);
-    border-radius: 4px;
+    background-color: var(--fill-tertiary);
+    color: var(--label-primary);
+}
+
+.close:active {
+    transform: scale(0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .close:active {
+        transform: none;
+    }
 }

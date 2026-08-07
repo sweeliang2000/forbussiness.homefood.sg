@@ -43,7 +43,7 @@ export const HeaderSection = ({
             <div className={styles.titleSection}>
                 <h1 className={styles.title}>{title}</h1>
 
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div className={styles.actions}>
                     {showCancelButton && (
                         <Button
                             size='small'
@@ -74,59 +74,59 @@ export const HeaderSection = ({
             </div>
             <div className={styles.description}>{description}</div>
 
-            {warningMessage && (
-                <Alert
-                    className={styles.alert}
-                    severity="warning"
-                >
-                    {warningMessage}
-                </Alert>
-            )}
+            {(warningMessage || infoMessage || shouldShowSuccess || isError) && (
+                <div className={styles.alerts} role="status" aria-live="polite">
+                    {warningMessage && (
+                        <Alert className={styles.alert} severity="warning">
+                            {warningMessage}
+                        </Alert>
+                    )}
 
-            {infoMessage && (
-                <Alert
-                    className={styles.alert}
-                    severity="info"
-                >
-                    {infoMessage}
-                </Alert>
-            )}
+                    {infoMessage && (
+                        <Alert className={styles.alert} severity="info">
+                            {infoMessage}
+                        </Alert>
+                    )}
 
-            {shouldShowSuccess && (
-                <Alert
-                    className={styles.alert}
-                    severity="success"
-                    action={
-                        <IconButton
-                            aria-label="close"
-                            color="inherit"
-                            size="small"
-                            onClick={() => handleSetShowSuccess(false)}
+                    {shouldShowSuccess && (
+                        <Alert
+                            className={styles.alert}
+                            severity="success"
+                            action={
+                                <IconButton
+                                    aria-label="Dismiss"
+                                    color="inherit"
+                                    size="small"
+                                    onClick={() => handleSetShowSuccess(false)}
+                                >
+                                    <CloseIcon fontSize="inherit" />
+                                </IconButton>
+                            }
                         >
-                            <CloseIcon fontSize="inherit" />
-                        </IconButton>
-                    }
-                >
-                    {successMessage}
-                </Alert>
-            )}
+                            {successMessage}
+                        </Alert>
+                    )}
 
-            { isError && <Alert
-                className={styles.alert}
-                severity="error"
-                action={
-                    <IconButton
-                        aria-label="close"
-                        color="inherit"
-                        size="small"
-                        onClick={() => setShowError(false)}
-                    >
-                        <CloseIcon fontSize="inherit" />
-                    </IconButton>
-                }
-            >
-                {errorMessage}
-            </Alert>}
+                    {isError && (
+                        <Alert
+                            className={styles.alert}
+                            severity="error"
+                            action={
+                                <IconButton
+                                    aria-label="Dismiss"
+                                    color="inherit"
+                                    size="small"
+                                    onClick={() => setShowError(false)}
+                                >
+                                    <CloseIcon fontSize="inherit" />
+                                </IconButton>
+                            }
+                        >
+                            {errorMessage}
+                        </Alert>
+                    )}
+                </div>
+            )}
         </ContentCard>
     );
 };

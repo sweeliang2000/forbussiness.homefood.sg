@@ -1,6 +1,16 @@
+/*
+  Rows are separated by hairlines drawn between them rather than a
+  bottom border on each row — a trailing rule under the last item makes
+  a list look truncated.
+*/
 .list {
-    margin-top: 8px;
+    margin-top: 12px;
     display: flex;
     flex-direction: column;
-    gap: 24px
+    gap: 4px;
+}
+
+.list > * + * {
+    border-top: 0.5px solid var(--separator);
+    padding-top: 4px;
 }

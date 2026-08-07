@@ -25,14 +25,16 @@
     justify-content: space-between;
     gap: 14px;
     flex-wrap: wrap;
-    background: var(--primary);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
+    background: var(--material-regular-bg);
+    backdrop-filter: var(--material-regular-blur);
+    -webkit-backdrop-filter: var(--material-regular-blur);
+    border: 0.5px solid var(--separator);
+    border-radius: var(--radius-lg);
     padding: 16px 20px;
     position: sticky;
     top: 0;
-    z-index: 97;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    z-index: 30;
+    box-shadow: var(--elevation-2);
 }
 
 .topLeft {
@@ -52,7 +54,16 @@
     color: var(--on-primary);
     background: var(--background);
     flex-shrink: 0;
-    transition: all 0.12s ease;
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        border-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.backBtn:active {
+    transform: scale(0.92);
 }
 
 .backBtn:hover {
@@ -62,7 +73,7 @@
 
 .topTitle {
     font-size: 24px;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.2;
 }
 
@@ -91,7 +102,16 @@
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.12s ease;
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        border-color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.catChip:active {
+    transform: scale(0.96);
 }
 
 .catChip:hover {
@@ -112,6 +132,7 @@
     padding: 1px 8px;
     min-width: 22px;
     text-align: center;
+    font-variant-numeric: tabular-nums;
 }
 
 .catChipActive .catCount {
@@ -196,11 +217,20 @@
     border: none;
     cursor: pointer;
     text-align: left;
-    transition: background 0.12s ease;
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 .itemMain:hover:not(:disabled) {
-    background: rgba(228, 85, 13, 0.05);
+    background: var(--brand-a04);
+}
+
+.itemMain:active:not(:disabled) {
+    transform: scale(0.97);
+    background: var(--brand-a12);
 }
 
 .itemMain:disabled {
@@ -217,6 +247,7 @@
     font-size: 16px;
     font-weight: 700;
     color: var(--accent-color);
+    font-variant-numeric: tabular-nums;
 }
 
 .itemImg {
@@ -230,7 +261,7 @@
     width: 100%;
     height: 124px;
     border-radius: 10px;
-    background: #f1f5f9;
+    background: var(--fill-tertiary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -240,8 +271,8 @@
 .soldBadge {
     font-size: 12px;
     font-weight: 700;
-    color: #c62828;
-    background: #fdecec;
+    color: #A81818;
+    background: var(--danger-soft);
     padding: 2px 9px;
     border-radius: 999px;
 }
@@ -277,7 +308,7 @@
 
 .cartTitle {
     font-size: 19px;
-    font-weight: 800;
+    font-weight: 700;
     margin-bottom: 12px;
 }
 
@@ -338,7 +369,7 @@
 .cartItemNote {
     font-size: 13px;
     line-height: 1.35;
-    color: #7a4b00;
+    color: #8A3E00;
     overflow-wrap: anywhere;
 }
 
@@ -351,6 +382,7 @@
     font-size: 15px;
     color: var(--on-primary-light2);
     margin-top: 2px;
+    font-variant-numeric: tabular-nums;
 }
 
 .qty {
@@ -361,28 +393,47 @@
 }
 
 .qty button {
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--border-color);
-    background: var(--primary);
-    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    border: 0.5px solid var(--separator);
+    background: var(--surface-elevated);
+    border-radius: var(--radius-sm);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: var(--on-primary);
+    color: var(--label-primary);
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard),
+        border-color var(--duration-fast) var(--ease-standard);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
+.qty button:hover {
+    border-color: var(--brand-a35);
+    background: var(--brand-a04);
+}
+
+.qty button:active {
+    transform: scale(0.9);
+    background: var(--brand-a12);
+}
+
+/* A count that shifts width as it ticks 9 -> 10 is exactly the kind of
+   jitter tabular figures exist to prevent. */
 .qty span {
-    min-width: 22px;
+    min-width: 24px;
     text-align: center;
     font-weight: 700;
     font-size: 17px;
+    font-variant-numeric: tabular-nums;
 }
 
 .removeBtn {
     color: var(--error-color) !important;
-    border-color: #f3c2c2 !important;
+    border-color: var(--danger-border) !important;
 }
 
 .cartTotalRow {
@@ -391,6 +442,7 @@
     align-items: center;
     margin-top: 14px;
     font-size: 18px;
+    font-variant-numeric: tabular-nums;
 }
 
 .cartTotalRow strong {
@@ -482,16 +534,26 @@
 }
 
 .itemQuantityControl button {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--border-color);
-    border-radius: 9px;
-    background: var(--primary);
-    color: var(--on-primary);
+    border: 0.5px solid var(--separator);
+    border-radius: 10px;
+    background: var(--surface-elevated);
+    color: var(--label-primary);
     cursor: pointer;
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.itemQuantityControl button:not(:disabled):active {
+    transform: scale(0.9);
+    background: var(--brand-a12);
 }
 
 .itemQuantityControl button:disabled {
@@ -503,7 +565,8 @@
     min-width: 24px;
     text-align: center;
     font-size: 18px;
-    font-weight: 800;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
 }
 
 .cartEtaRow {
@@ -512,7 +575,8 @@
     align-items: center;
     margin-top: 12px;
     font-size: 14px;
-    color: var(--on-primary-light2);
+    color: var(--label-secondary);
+    font-variant-numeric: tabular-nums;
 }
 
 .cartEtaRow strong {
@@ -536,16 +600,27 @@
     border: 1px solid var(--border-color);
     border-radius: 10px;
     cursor: pointer;
-    transition: border-color 0.15s ease, background-color 0.15s ease;
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        border-color var(--duration-fast) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 .paymentChoice:hover {
-    border-color: var(--accent-color);
+    border-color: var(--brand-a35);
+    background: var(--brand-a04);
+}
+
+.paymentChoice:active {
+    transform: scale(0.985);
 }
 
 .paymentChoiceSelected {
-    border-color: var(--accent-color);
-    background: color-mix(in srgb, var(--accent-color) 8%, white);
+    border-color: var(--brand-600);
+    background: var(--brand-a08);
+    box-shadow: inset 0 0 0 1px var(--brand-600);
 }
 
 .paymentIcon {
@@ -582,8 +657,9 @@
     justify-content: space-between;
     margin-top: 14px;
     padding-top: 14px;
-    border-top: 1px solid var(--border-color);
+    border-top: 0.5px solid var(--separator);
     font-size: 16px;
+    font-variant-numeric: tabular-nums;
 }
 
 .paymentTotal strong {
@@ -695,7 +771,7 @@
 
 .prepTitle {
     font-size: 17px;
-    font-weight: 800;
+    font-weight: 700;
     margin-bottom: 2px;
 }
 
@@ -722,7 +798,7 @@
 }
 
 .prepQty {
-    font-weight: 800;
+    font-weight: 700;
     color: #b26a00;
     min-width: 36px;
 }
@@ -741,7 +817,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 15px;
     margin-top: 6px;
 }
@@ -783,7 +859,7 @@
 
 .preorderQ {
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 700;
     color: #fff;
     background: var(--accent-color);
     border-radius: 6px;
@@ -802,7 +878,7 @@
 }
 
 .preorderItemNote {
-    color: #7a4b00;
+    color: #8A3E00;
     font-size: 13px;
     font-style: italic;
 }
@@ -831,6 +907,29 @@
 }
 
 .preorderTotal {
-    font-weight: 800;
+    font-weight: 700;
     font-size: 15px;
+}
+
+/*
+  Reduced motion: the press cues stop moving but don't disappear —
+  they become a colour change, so the till still acknowledges every tap.
+*/
+@media (prefers-reduced-motion: reduce) {
+    .backBtn:active,
+    .catChip:active,
+    .itemMain:active:not(:disabled),
+    .qty button:active,
+    .itemQuantityControl button:not(:disabled):active,
+    .paymentChoice:active {
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .topbar {
+        background: #fff;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
 }
