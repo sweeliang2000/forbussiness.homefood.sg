@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import Link from 'next/link';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import styles from './ProductDetails.module.css';
 import PricingCard from './PricingCard';
 import {
@@ -12,17 +13,35 @@ import {
 import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import apiClient from '@/utility/api';
 import { CHECKOUT_SESSION_STRIPE } from '@/utility/apiPaths';
-import { IoShieldCheckmarkOutline, IoSparklesOutline } from 'react-icons/io5';
+import {
+  IoArrowForward,
+  IoShieldCheckmarkOutline,
+  IoSparklesOutline,
+  IoTicketOutline,
+} from 'react-icons/io5';
 
 export default function ProductDetails() {
   const [currentLookupKey, setCurrentLookupKey] = useState(null);
   const [billingInterval, setBillingInterval] = useState('year'); // 'month' | 'year'
   const [checkoutError, setCheckoutError] = useState(null);
   const [checkoutLoadingKey, setCheckoutLoadingKey] = useState(null);
+  const [checkoutPrompt, setCheckoutPrompt] = useState(null);
+  const checkoutDialogRef = useRef(null);
 
   useEffect(() => {
     setCurrentLookupKey(getSubscriptionLookupKey());
   }, []);
+
+  useEffect(() => {
+    const dialog = checkoutDialogRef.current;
+    if (!dialog) return;
+
+    if (checkoutPrompt && !dialog.open) {
+      dialog.showModal();
+    } else if (!checkoutPrompt && dialog.open) {
+      dialog.close();
+    }
+  }, [checkoutPrompt]);
 
   const isOnPro = isProLookupKey(currentLookupKey);
   const proPlan = useMemo(() => getProPlan(billingInterval), [billingInterval]);
@@ -91,7 +110,18 @@ export default function ProductDetails() {
 
   const handlePlanSelect = (card) => {
     if (card.isFree || card.isCurrentPlan) return;
-    startCheckout(card.billingKey);
+    setCheckoutError(null);
+    setCheckoutPrompt(card);
+  };
+
+  const closeCheckoutPrompt = () => {
+    if (checkoutLoadingKey) return;
+    setCheckoutPrompt(null);
+  };
+
+  const continueToStripe = () => {
+    if (!checkoutPrompt?.billingKey) return;
+    startCheckout(checkoutPrompt.billingKey);
   };
 
   return (
@@ -108,7 +138,13 @@ export default function ProductDetails() {
             <strong>Founding Seller offer</strong>
             Eligible early sellers can redeem Pro at S$0 for life during secure checkout.
           </span>
-          <span className={styles.promoValue}>S$0 for life</span>
+          <span className={styles.promoActions}>
+            <span className={styles.promoValue}>S$0 for life</span>
+            <Link className={styles.promoApplyButton} href="/early-adopter">
+              Apply for the offer
+              <IoArrowForward aria-hidden="true" />
+            </Link>
+          </span>
         </div>
         <div className={styles.billingControl}>
           <span className={styles.billingLabel}>Billing cycle</span>
@@ -160,6 +196,74 @@ export default function ProductDetails() {
         </p>
       </div>
       {checkoutError ? <p className={styles.promoCodeError} role="alert">{checkoutError}</p> : null}
+
+      <dialog
+        ref={checkoutDialogRef}
+        className={styles.checkoutDialog}
+        aria-labelledby="checkout-dialog-title"
+        onCancel={(event) => {
+          event.preventDefault();
+          closeCheckoutPrompt();
+        }}
+        onClose={() => {
+          if (!checkoutLoadingKey) setCheckoutPrompt(null);
+        }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) closeCheckoutPrompt();
+        }}
+      >
+        <div className={styles.checkoutDialogContent}>
+          <span className={styles.checkoutDialogIcon} aria-hidden="true">
+            <IoTicketOutline />
+          </span>
+          <p className={styles.checkoutDialogEyebrow}>Before Stripe opens</p>
+          <h2 id="checkout-dialog-title" className={styles.checkoutDialogTitle}>
+            Have a Founding Seller promo code?
+          </h2>
+          <p className={styles.checkoutDialogDescription}>
+            In Stripe Checkout, select <strong>Add promotion code</strong> and enter the code you received.
+            Check that the total shows <strong>S$0.00</strong> before completing checkout.
+          </p>
+
+          <div className={styles.checkoutInstruction}>
+            <span className={styles.checkoutInstructionNumber}>1</span>
+            <span>Continue to Stripe</span>
+            <IoArrowForward aria-hidden="true" />
+            <span className={styles.checkoutInstructionNumber}>2</span>
+            <span>Select “Add promotion code”</span>
+          </div>
+
+          {checkoutError ? (
+            <p className={styles.checkoutDialogError} role="alert">{checkoutError}</p>
+          ) : null}
+
+          <div className={styles.checkoutDialogActions}>
+            <button
+              type="button"
+              className={styles.checkoutBackButton}
+              onClick={closeCheckoutPrompt}
+              disabled={Boolean(checkoutLoadingKey)}
+            >
+              Go back
+            </button>
+            <button
+              type="button"
+              className={styles.checkoutContinueButton}
+              onClick={continueToStripe}
+              disabled={Boolean(checkoutLoadingKey)}
+              aria-busy={Boolean(checkoutLoadingKey)}
+            >
+              {checkoutLoadingKey ? <span className={styles.dialogSpinner} aria-hidden="true" /> : null}
+              {checkoutLoadingKey ? 'Opening Stripe…' : 'Continue to Stripe'}
+            </button>
+          </div>
+
+          <Link className={styles.checkoutApplyLink} href="/early-adopter">
+            Not approved yet? Apply as a Founding Seller
+            <IoArrowForward aria-hidden="true" />
+          </Link>
+        </div>
+      </dialog>
     </div>
   );
 }
