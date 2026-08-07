@@ -23,6 +23,7 @@ import {
 import { getDynamo } from '../aws';
 import { getSupabase } from '../supabase';
 import { recordActivity } from './activityLog';
+import { isWithinHours, sgtParts, sgtDateStr } from '@/utility/orderingSchedule';
 
 const supabase = new Proxy(
   {},
@@ -330,13 +331,19 @@ export const toggleMenuSoldOut = asyncHandler(async (req, res) => {
   ));
 });
 
-const pad2 = (n) => String(n).padStart(2, '0');
-
-// Effective shop status = manual is_open flag ∧ today's ordering hours ∧ today's
-// calendar override. The manual switch stays authoritative for the merchant at the
-// POS; `effectiveOpen` is what customer-facing surfaces should honor.
+// Effective shop status.
+//
+// The merchant's switch is the whole answer: a shop is taking orders right now
+// if, and only if, someone opened it. Ordering hours do not open a shop and do
+// not close one — a shop sitting inside its hours that nobody opened is not
+// staffed, and customers get the pre-order path instead of a walk-in order that
+// no one is there to cook.
+//
+// Hours and the calendar are still computed and returned, because the POS uses
+// them to know when to prompt the merchant, and to explain the current state
+// back to them. They are context, not authority.
 async function computeEffectiveShopStatus(shop_id) {
-  let isOpen = true;
+  let isOpen = false;
   let hours = null;
 
   if (supabase) {
@@ -346,7 +353,9 @@ async function computeEffectiveShopStatus(shop_id) {
       .eq('shop_id', shop_id)
       .maybeSingle();
     if (data) {
-      isOpen = data.is_open !== false;
+      // Strict `=== true`: a null is_open means the switch was never touched,
+      // which is not the same as someone opening the shop.
+      isOpen = data.is_open === true;
       if (Array.isArray(data.order_hours) && data.order_hours.length === 7) hours = data.order_hours;
     }
   }
@@ -367,26 +376,16 @@ async function computeEffectiveShopStatus(shop_id) {
     }
   }
 
-  const now = new Date();
-
-  // No hours configured at all → don't restrict.
-  let withinHours = true;
-  let hoursToday = null;
-  if (hours) {
-    const h = hours[now.getDay()];
-    hoursToday = h ?? null;
-    if (!h || !h.enabled) {
-      withinHours = false;
-    } else {
-      const current = `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
-      withinHours = current >= h.open && current < h.close;
-    }
-  }
+  // Hours are merchant wall-clock times in Singapore, so they have to be read
+  // in SGT — this used to use the server's local clock, which is UTC in
+  // production and put every window 8 hours out.
+  const withinHours = isWithinHours(hours, Date.now());
+  const hoursToday = hours ? hours[sgtParts().weekday] ?? null : null;
 
   let calendarClosed = false;
   let calendarReason = '';
   try {
-    const todayKey = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
+    const todayKey = sgtDateStr();
     const result = await dynamo.send(new GetItemCommand({
       TableName: 'Order_Calendar_Override',
       Key: { shopId: { S: shop_id }, date: { S: todayKey } },
@@ -406,9 +405,14 @@ async function computeEffectiveShopStatus(shop_id) {
     isOpen,
     withinHours,
     hoursToday,
+    // The full week, so the POS can work out when the next window starts or
+    // ends without a second round trip.
+    hours,
     calendarClosed,
     calendarReason,
-    effectiveOpen: isOpen && withinHours && !calendarClosed,
+    // Deliberately just the switch. Kept as a separate field so callers keep
+    // reading one obvious "can they order right now" answer.
+    effectiveOpen: isOpen,
   };
 }
 export { computeEffectiveShopStatus };

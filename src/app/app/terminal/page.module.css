@@ -165,6 +165,23 @@
 .statusClosed .statusDot { background: #d42020; }
 .statusClosed .statusLabel { color: #c62828; }
 
+/* ---- Ordering-hours boundary prompt ---- */
+.boundaryTime {
+    margin: 0 0 6px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--text-secondary, #6b7280);
+    font-variant-numeric: tabular-nums;
+}
+
+.boundaryBody {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
 .tabs {
     border-bottom: 1px solid var(--border-color);
     min-height: 0;
