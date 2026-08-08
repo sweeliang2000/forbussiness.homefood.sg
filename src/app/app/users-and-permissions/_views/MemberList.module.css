@@ -1,0 +1,411 @@
+/*
+  Shared presentation for the two people-lists on this page (pending
+  invites and team members).
+
+  These lists hold a handful of rows, so they're built as a plain
+  semantic table rather than a data grid: no pagination furniture, no
+  sort affordances, and no column-header row competing with three rows
+  of content. It matches the table convention already used on the
+  activity log.
+*/
+
+.card {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    width: 100%;
+    background-color: var(--surface-elevated);
+    border: 0.5px solid var(--separator);
+    box-shadow: var(--elevation-1);
+    border-radius: var(--radius-lg);
+    /* Rows run edge to edge, so their hover tint has to be clipped by
+       the card's corners rather than squaring them off. */
+    overflow: hidden;
+}
+
+/*
+  The section label lives *inside* the card it names. As a floating
+  heading above a separate box, the label and its rows read as two
+  unrelated objects.
+*/
+.cardHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-bottom: 0.5px solid var(--separator);
+}
+
+.cardTitle {
+    font-size: var(--text-caption);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--label-secondary);
+    margin: 0;
+}
+
+/* The count answers "how many" without the eye having to tally rows. */
+.count {
+    font-size: var(--text-caption);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--label-secondary);
+    background: var(--fill-quaternary);
+    border-radius: var(--radius-pill);
+    padding: 1px 8px;
+}
+
+/* The actions column has no visible header — the label is there for
+   anyone reading the table through assistive tech. */
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+.tableWrap {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-subhead);
+}
+
+.table th,
+.table td {
+    text-align: left;
+    padding: 10px 16px;
+    border-bottom: 0.5px solid var(--separator);
+    vertical-align: middle;
+}
+
+/* Headers label the column; they aren't data, so they stay quiet. */
+.table th {
+    font-weight: 600;
+    font-size: var(--text-caption);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--label-secondary);
+    white-space: nowrap;
+    background: var(--fill-quaternary);
+}
+
+/* A trailing hairline makes a finished list look truncated. */
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr {
+    transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.table tbody tr:hover {
+    background: var(--fill-quaternary);
+}
+
+/* ── Identity ──────────────────────────────────────────────────── */
+
+.identity {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+}
+
+/*
+  A monogram gives the eye a fixed place to land when scanning a column
+  of addresses that all look alike at a glance.
+*/
+.monogram {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-pill);
+    background: var(--brand-a08);
+    color: var(--brand-700);
+    font-size: var(--text-footnote);
+    font-weight: 700;
+    line-height: 1;
+    user-select: none;
+}
+
+.email {
+    font-weight: 600;
+    color: var(--label-primary);
+    overflow-wrap: anywhere;
+}
+
+/* You, in a list of other people — worth marking so nobody revokes
+   their own access by mistake. */
+.youTag {
+    margin-left: 7px;
+    font-size: var(--text-caption-2);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--label-tertiary);
+}
+
+/* ── Pills ─────────────────────────────────────────────────────── */
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: var(--text-caption-2);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 2px 9px;
+    border-radius: var(--radius-pill);
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+/* Role reads as authority, so Owner carries the brand and the tiers
+   below it step down in weight rather than switching hue at random. */
+.roleOwner {
+    color: var(--brand-800);
+    background: var(--brand-a08);
+    border-color: var(--brand-200);
+}
+
+.roleManager {
+    color: var(--info);
+    background: var(--info-soft);
+    border-color: var(--info-border);
+}
+
+.roleOperator {
+    color: var(--label-secondary);
+    background: var(--fill-quaternary);
+    border-color: var(--separator);
+}
+
+/*
+  Status is paired with a dot *and* a word. Colour on its own can't
+  carry the state — it disappears for anyone who can't separate these
+  hues, and in greyscale.
+*/
+.statusDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: 0 0 auto;
+}
+
+.statusPending {
+    color: var(--warning);
+    background: var(--warning-soft);
+    border-color: var(--warning-border);
+}
+
+.statusAccepted {
+    color: var(--success);
+    background: var(--success-soft);
+    border-color: var(--success-border);
+}
+
+.statusRejected {
+    color: var(--danger);
+    background: var(--danger-soft);
+    border-color: var(--danger-border);
+}
+
+/* ── Actions ───────────────────────────────────────────────────── */
+
+/*
+  Role and status ride the trailing edge next to the menu that changes
+  them. Left-aligned they were stranded ~900px from the person they
+  describe, with the eye crossing an empty gap to connect the two; and
+  because the two lists have different column counts, their headers
+  landed at different x positions when stacked. Anchoring to the right
+  puts the metadata beside its owner's row-actions and gives both cards
+  the same vertical rhythm.
+*/
+/* Scoped under `.table` so they outrank the `.table th, .table td`
+   base rule, which sets text-align and would otherwise win. */
+.table .roleCell,
+.table .statusCell {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+}
+
+.table .actionsCell {
+    width: 56px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.actionButton {
+    color: var(--label-tertiary) !important;
+    /* Feedback on pointer-down, so the press is acknowledged before the
+       menu has finished opening. */
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard) !important;
+}
+
+.actionButton:hover {
+    color: var(--label-primary) !important;
+    background-color: var(--fill-quaternary) !important;
+}
+
+.actionButton:active {
+    transform: scale(0.9);
+}
+
+.destructive {
+    color: var(--danger) !important;
+}
+
+/* ── Empty & loading ───────────────────────────────────────────── */
+
+/*
+  An empty list should say what belongs here and offer the way to add
+  it, rather than showing an empty grid with column headers over
+  nothing.
+*/
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    padding: 40px 24px;
+}
+
+.emptyIcon {
+    font-size: 1.75rem;
+    color: var(--label-quaternary);
+    margin-bottom: 2px;
+}
+
+.emptyTitle {
+    font-size: var(--text-subhead);
+    font-weight: 600;
+    color: var(--label-primary);
+}
+
+.emptyText {
+    font-size: var(--text-footnote);
+    line-height: var(--text-footnote-leading);
+    color: var(--label-secondary);
+    max-width: 42ch;
+}
+
+/*
+  Skeleton rows keep the page's shape while data loads, so nothing
+  jumps when the real rows arrive.
+*/
+.skeletonRow {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 13px 16px;
+    border-bottom: 0.5px solid var(--separator);
+}
+
+.skeletonRow:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 700px) {
+    /*
+      Below this the four columns can't share a line without the email
+      truncating to nothing, so each person becomes a stacked block
+      instead of a horizontally scrolling row.
+    */
+    .table,
+    .table tbody,
+    .table tr,
+    .table td {
+        display: block;
+    }
+
+    .table thead {
+        display: none;
+    }
+
+    .table tbody tr {
+        position: relative;
+        padding: 13px 52px 13px 16px;
+        border-bottom: 0.5px solid var(--separator);
+    }
+
+    .table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .table td {
+        padding: 0;
+        border-bottom: none;
+    }
+
+    /* A long address wraps to two or three lines here, and a monogram
+       centred against that block floats away from the name it belongs
+       to. Pin it to the first line. */
+    .identity {
+        align-items: flex-start;
+    }
+
+    /* Stacked under the name, the pills read left-to-right again. */
+    .table .roleCell,
+    .table .statusCell {
+        display: inline-block;
+        width: auto;
+        text-align: left;
+        margin: 9px 8px 0 41px;
+    }
+
+    /* Pills after the first sit next to it, not indented again. */
+    .table .roleCell + .statusCell {
+        margin-left: 0;
+    }
+
+    .table .actionsCell {
+        position: absolute;
+        top: 8px;
+        right: 6px;
+        width: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .table tbody tr,
+    .actionButton {
+        transition: background-color 120ms linear !important;
+    }
+
+    .actionButton:active {
+        transform: none;
+    }
+}
+
+@media (prefers-contrast: more) {
+    .card {
+        border-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .pill {
+        border-width: 1px;
+    }
+
+    .roleOperator {
+        border-color: rgba(0, 0, 0, 0.35);
+    }
+}

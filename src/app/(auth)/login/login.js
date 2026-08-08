@@ -1,15 +1,19 @@
 'use client';
-import Image from 'next/image';
-import styles from './page.module.css';
-import { FaLevelDownAlt } from 'react-icons/fa';
-import Link from 'next/link';
-import { Alert, TextField, Button } from '@mui/material';
+
 import { useState, Suspense, useEffect } from 'react';
-import apiClient from '@/utility/api';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Alert, TextField, Button } from '@mui/material';
 import Cookies from 'js-cookie';
+
+import apiClient from '@/utility/api';
 import withAuthorization from '@/hoc/withAuthorization';
 import { SIGN_IN } from '@/utility/apiPaths';
+import { errorMessageFrom } from '@/utility/errorMessage';
+import PasswordField from '@/components/PasswordField/PasswordField';
+import AuthShell from '../_components/AuthShell';
+import AuthCardSkeleton from '../_components/AuthCardSkeleton';
+import styles from '../_components/authForm.module.css';
 
 const LoginContent = () => {
     const router = useRouter();
@@ -29,6 +33,17 @@ const LoginContent = () => {
         }
     }, [urlMessage]);
 
+    const isFormVerified = () => {
+        setErrorMessage('');
+
+        if (!email.trim() || !password.trim()) {
+            setErrorMessage('Both email and password are required.');
+            return false;
+        }
+
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMessage('');
@@ -39,201 +54,107 @@ const LoginContent = () => {
             return;
         }
 
-        const payload = {
-            'username': email,
-            'password': password
-        };
+        const payload = { username: email, password };
 
         try {
             const response = await apiClient.post(`${SIGN_IN}`, payload);
-            const data = response.data;
-            const message = data.message
-            console.log(response.data);
-            console.log("message", message);
-            
-            if (message === 'Verification code resent successfully') {
-                console.log("verify to can called");
-                
-                // Check if backend cookie is available, if not set it manually as fallback
-                const authStatusCookie = Cookies.get('authStatus');
-                
-                if (!authStatusCookie) {
-                    console.log("Fallback: Set cookie manually to ensure it's available on frontend domain")
+            const message = response.data?.message;
 
-                    const authStatus = {
-                        status: 'awaiting_verification',
-                        data: {
-                            email: email,
-                            result: email
-                        }
-                    };
-                    
+            if (message === 'Verification code resent successfully') {
+                // Fall back to setting authStatus client-side when the backend
+                // cookie did not reach this domain.
+                if (!Cookies.get('authStatus')) {
                     const isProduction = process.env.NODE_ENV === 'production';
-                    Cookies.set('authStatus', JSON.stringify(authStatus), {
-                        expires: 1,
-                        path: '/',
-                        secure: isProduction,
-                        sameSite: 'Lax',
-                        domain: isProduction ? '.homefood.sg' : undefined,
-                    });
+                    Cookies.set(
+                        'authStatus',
+                        JSON.stringify({
+                            status: 'awaiting_verification',
+                            data: { email, result: email },
+                        }),
+                        {
+                            expires: 1,
+                            path: '/',
+                            secure: isProduction,
+                            sameSite: 'Lax',
+                            domain: isProduction ? '.homefood.sg' : undefined,
+                        }
+                    );
                 }
-                
+
                 setIsSubmissionButtonLoading(false);
-                setTimeout(() => {
-                    router.push('/verify');
-                }, 100);
+                setTimeout(() => router.push('/verify'), 100);
                 return;
             }
 
-            if (redirectPath) {
-                console.log("redirectPath", redirectPath);
-                router.push(redirectPath);
-            } else {
-                console.log("app to can called");
-                router.push('/app'); // default redirect
-            }
+            router.push(redirectPath || '/app');
         } catch (error) {
-            const errorData = error?.response?.data;
-            const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
-            const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
-            setErrorMessage(`${message} (Error code: ${code})`);
+            setErrorMessage(errorMessageFrom(error));
             setIsSubmissionButtonLoading(false);
         }
-
-    };
-
-    const isFormVerified = () => {
-        setErrorMessage('');
-
-        if (!email.trim() || !password.trim()) {
-            setErrorMessage('Both email and password are required.');
-            return false;
-        }
-
-        return true
-    };
-
-    const handleGoogleLogin = () => {
-        // Add your Google sign-up logic here
     };
 
     return (
-        <main className={styles.main}>
-            {/* [LEFT] First Section: Introduction */}
-            <section className={styles.introSection}>
-                <div className={styles.titleDiv}>
-                    <p className={styles.tagline}>
-                        Boost Sales with a Powerful Loyalty System – Manage, Engage, and Grow Your Business in One Platform.
-                    </p>
-                </div>
+        <AuthShell
+            title="Log in"
+            subtitle="Welcome back. Enter your details to continue."
+            footer={
+                <p>
+                    Don&apos;t have an account yet? <Link href="/signup">Sign up</Link>
+                </p>
+            }
+        >
+            <form onSubmit={handleSubmit} className={styles.form} noValidate>
+                {errorMessage ? (
+                    // aria-live so the failure is announced, not just repainted.
+                    <Alert severity="error" className={styles.alert} role="alert" aria-live="polite">
+                        {errorMessage}
+                    </Alert>
+                ) : null}
 
-                {/* <div>
-                    <div className={styles.subTagLineContainer}>
-                        <FaLevelDownAlt className={styles.faLevelDownLeft} />
-                        <p className={styles.subTagLine}>Trusted by leading brands</p>
-                        <FaLevelDownAlt className={styles.faLevelDown} />
-                    </div>
+                <TextField
+                    label="Email"
+                    type="email"
+                    fullWidth
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                    autoFocus
+                    required
+                />
 
-                    <div className={styles.brands}>
-                        <Image
-                            src='/images/auth/brands/generation-coffee.png'
-                            width='80'
-                            height='80'
-                            alt=''
-                        />
-                        <Image
-                            src='/images/auth/brands/keens-bagelry.png'
-                            width='80'
-                            height='80'
-                            alt=''
-                        />
-                    </div>
+                <PasswordField
+                    fullWidth
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    required
+                />
 
-                </div> */}
-            </section>
+                <Link href="/forgot-password" className={styles.subtleLink}>
+                    Forgot password?
+                </Link>
 
-            {/* [RIGHT] Second Section: Sign-up Form */}
-            <section className={styles.rightSection}>
-                <div className={styles.formSection}>
-                    <div className={styles.formTitlesSection}>
-                        <h2>HomeFood For Business</h2>
-                        <h1>Login</h1>
-                        <p>Welcome. Please enter your details.</p>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className={styles.form}>
-                        { errorMessage && <Alert severity='error' className={styles.alert}>{errorMessage}</Alert> }
-                        <TextField
-                            variant='standard'
-                            label='Email'
-                            type='email'
-                            fullWidth
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-
-                        <TextField
-                            variant='standard'
-                            label='Password'
-                            type='password'
-                            fullWidth
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-
-                        <Link
-                            href='/forgot-password'
-                            className={styles.forgotPasswordBuuton}
-                        >
-                            Forget Password?
-                        </Link>
-
-
-                        <Button
-                            type='submit'
-                            variant='contained'
-                            color='primary'
-                            fullWidth
-                            className={styles.loginButton}
-                            loading={isSubmissionButtonLoading}
-                        >
-                            Login
-                        </Button>
-                    </form>
-
-
-                    {/* <div className={styles.orContainer}>
-                        <span className={styles.lineText}>or</span>
-                        <hr className={styles.line} />
-                    </div>
-
-                    <Button
-                        variant='contained'
-                        startIcon={<FcGoogle />}
-                        onClick={handleGoogleLogin}
-                        fullWidth
-                        className={styles.googleButton}
-                    >
-                        Login with Google
-                    </Button> */}
-
-                    <div>
-                        <p className={styles.haveAccountTag}>Don&apos;t have an account yet? <Link href='/signup' className={styles.link}>Sign up</Link></p>
-                    </div>
-                </div>
-            </section>
-        </main>
-    )
-};
-
-const Login = () => {
-    return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <LoginContent />
-        </Suspense>
+                <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    size="large"
+                    loading={isSubmissionButtonLoading}
+                >
+                    Log in
+                </Button>
+            </form>
+        </AuthShell>
     );
 };
+
+const Login = () => (
+    // A card-shaped skeleton rather than an unstyled "Loading..." string, which
+    // flashed as raw text in the top-left corner before hydration.
+    <Suspense fallback={<AuthCardSkeleton />}>
+        <LoginContent />
+    </Suspense>
+);
 
 export default withAuthorization(Login);

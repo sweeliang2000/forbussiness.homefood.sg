@@ -32,12 +32,17 @@ import {
   TransactWriteItemsCommand,
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
+// The SES *client* is built lazily in ../aws, but the command class still has
+// to be imported here like every other AWS command in this file. It wasn't,
+// so all three SendEmail call sites threw ReferenceError before reaching AWS.
+import { SendEmailCommand } from '@aws-sdk/client-ses';
 import { unmarshall, marshall } from '@aws-sdk/util-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
 import { getS3, getDynamo, getSes, getCognito } from '../aws';
-import { ensureUserProvisioned } from '../user-provisioning';
+import { ensureUserProvisioned, lookupUser } from '../user-provisioning';
+import { getAuthoritativeUser } from '../authoritative-user';
 import { getSupabase } from '../supabase';
 import { getStripe, getConnectStripe, getWebhookSecret } from '../stripe';
 import {
@@ -53,8 +58,10 @@ import {
   MENU_BUCKET,
   LIVE_IMAGES_BUCKET,
   CLOUDFRONT_DOMAIN,
+  SES_FROM_EMAIL as APP_SES_FROM_EMAIL,
 } from '../env';
 import { s3PublicUrl, cloudfrontUrl } from '../s3-keys';
+import { inviteEmailParams } from '../emails/invite';
 import { mapWithConcurrency } from '../concurrency';
 import {
   AppError,
@@ -69,7 +76,12 @@ import {
   createExternalServiceError,
   asyncHandler,
 } from '../errors';
-import { recordActivity } from './activityLog';
+import {
+  recordActivity,
+  recordActivityAs,
+  requestOrigin,
+  readSignInHistory,
+} from './activityLog';
 import * as stripeConnectController from './stripeConnect';
 import {
   getStripeID,
@@ -189,6 +201,15 @@ export const signIn = asyncHandler(async (req, res, next) => {
       httpOnly: false,
       maxAge: 3600 * 1000,
     }));
+
+    // The sign-in trail. recordActivityAs rather than recordActivity because
+    // the cookie it would read is only being set on this very response.
+    // Awaited but never allowed to throw — an audit write must not be able to
+    // fail a successful login.
+    await recordActivityAs(
+      { shopId: shop_id, actorId: user_id, actorRole: role },
+      { action: 'user.login', entityType: 'session', entityId: user_id, detail: requestOrigin(req) }
+    );
 
     res.status(200).json(createSuccessResponse("Sign-in successful"));
   } catch (err) {
@@ -535,25 +556,17 @@ export const signOutUser = asyncHandler(async (req, res, next) => {
 
 
 export const globalSignOut = asyncHandler(async (req, res, next) => {
-  // Extract the userDataNonHTTP cookie
-  const userDataNonHTTP = req.cookies.userDataHTTP;
-
-  if (!userDataNonHTTP) {
-    throw createValidationError("Missing required cookie: userDataHTTP");
-  }
-
-  let userId;
-  try {
-    // Parse the cookie data as JSON
-    const parsedData = JSON.parse(userDataNonHTTP);
-    userId = parsedData.user_id; // Access the user_id field
-
-    if (!userId) {
-      throw createValidationError("user_id not found in the userDataHTTP cookie");
-    }
-  } catch (error) {
-    throw createValidationError("Invalid userDataHTTP cookie format");
-  }
+  // Identity comes from the verified Cognito claims, never from userDataHTTP.
+  //
+  // This previously read user_id straight out of that cookie and handed it to
+  // AdminUserGlobalSignOut as the Username. The cookie is unsigned and the
+  // route is declared auth:false, so an unauthenticated caller could sign out
+  // any account in the pool just by naming it in a forged Cookie header.
+  //
+  // getAuthoritativeUser resolves the account from req.identity, which only
+  // exists once withApi has verified the access token — so while the route
+  // stays auth:false this fails closed with a 403 rather than obeying.
+  const { user_id: userId } = await getAuthoritativeUser(req);
 
   const params = {
     UserPoolId: USERPOOL_ID,
@@ -3107,6 +3120,151 @@ export const publishMenuUpdate = asyncHandler(async (req, res) => {
 
 
 const sesClient = { send: (command) => getSes().send(command) };
+
+/**
+ * The shop's customer-facing display name, for addressing invitations by
+ * name rather than "their shop".
+ *
+ * Returns null rather than throwing: a shop that hasn't filled in its
+ * customer-facing details yet is a normal state, and a hiccup reading an
+ * optional label must never be the reason an invitation fails to send. The
+ * template falls back to generic wording.
+ */
+async function getShopDisplayName(shop_id) {
+  if (!shop_id) return null;
+  try {
+    const { Item } = await client.send(new GetItemCommand({
+      TableName: 'CustomerFacingDetails',
+      Key: { shop_id: { S: shop_id } },
+      // Aliased in case `displayName` ever collides with a reserved word.
+      ProjectionExpression: '#dn',
+      ExpressionAttributeNames: { '#dn': 'displayName' }
+    }));
+    const name = Item?.displayName?.S?.trim();
+    return name || null;
+  } catch (error) {
+    console.error('Could not read shop display name for invitation:', error?.message);
+    return null;
+  }
+}
+
+/*
+  ── Team session management ──────────────────────────────────────────────
+
+  Both handlers below act on *another* member of the caller's shop, so the
+  caller is resolved with getAuthoritativeUser (verified Cognito claims)
+  rather than assertRole, which reads the unsigned userDataHTTP cookie. A
+  forged cookie must not be able to reach AdminUserGlobalSignOut.
+*/
+
+const SESSION_ADMIN_ROLES = ['Owner', 'Manager'];
+
+/**
+ * Resolve the caller and the member they're acting on, refusing anything that
+ * crosses a shop boundary or reaches above the caller's own authority.
+ *
+ * Acting on yourself is self-service, not administration, so it needs no role
+ * — every member can see their own sign-ins and end their own sessions.
+ * Reaching another member is what requires Owner or Manager.
+ */
+async function resolveTeamTarget(req, targetEmail) {
+  const actor = await getAuthoritativeUser(req);
+
+  if (!targetEmail) {
+    throw createValidationError('email is required');
+  }
+
+  const target = await lookupUser(toUserId(targetEmail));
+
+  // Same 404 whether the account doesn't exist or belongs to another shop —
+  // otherwise this endpoint reports which addresses have HomeFood accounts.
+  if (!target || target.shop_id !== actor.shop_id) {
+    throw createNotFoundError('No such user in this shop');
+  }
+
+  const isSelf = target.user_id === actor.user_id;
+
+  if (!isSelf) {
+    if (!SESSION_ADMIN_ROLES.includes(actor.role)) {
+      throw createAuthorizationError('Only an Owner or Manager can manage other members\' sessions');
+    }
+    // A Manager outranking the Owner would invert the hierarchy.
+    if (target.role === 'Owner') {
+      throw createAuthorizationError('Only the Owner can manage the Owner\'s sessions');
+    }
+  }
+
+  return { actor, target, isSelf };
+}
+
+/**
+ * GET /api/data/userSignInHistory?email= — recent sign-ins for one member.
+ *
+ * Only what was recorded from the day this shipped; there's no historical
+ * data to backfill, so a member who hasn't signed in since returns [].
+ */
+export const getUserSignInHistory = asyncHandler(async (req, res) => {
+  const { actor, target } = await resolveTeamTarget(req, req.query?.email);
+
+  const rows = await readSignInHistory({
+    shopId: actor.shop_id,
+    actorId: target.user_id,
+    limit: req.query?.limit
+  });
+
+  res.status(200).json(createSuccessResponse('Sign-in history retrieved', {
+    email: target.user_id,
+    role: target.role,
+    signIns: rows.map((row) => ({
+      at: row.created_at,
+      ip: row.detail?.ip ?? null,
+      city: row.detail?.city ?? null,
+      region: row.detail?.region ?? null,
+      country: row.detail?.country ?? null,
+      userAgent: row.detail?.userAgent ?? null
+    }))
+  }));
+});
+
+/**
+ * POST /api/data/signOutTeamMember { email } — revoke every session a member
+ * holds, across all their devices.
+ *
+ * Cognito invalidates refresh tokens immediately; already-issued access
+ * tokens stay valid until they expire, which is an hour here.
+ */
+export const signOutTeamMember = asyncHandler(async (req, res) => {
+  const { target, isSelf } = await resolveTeamTarget(req, req.body?.email);
+
+  // Signing *yourself* out goes through globalSignOut, which also clears this
+  // request's cookies. Doing it here would revoke the refresh token while
+  // leaving the browser holding a session it can no longer renew.
+  if (isSelf) {
+    throw createValidationError('Use the global sign-out endpoint to end your own sessions');
+  }
+
+  try {
+    await cognitoClient.send(new AdminUserGlobalSignOutCommand({
+      UserPoolId: USERPOOL_ID,
+      Username: target.user_id
+    }));
+  } catch (error) {
+    console.error('Admin sign-out failed:', error);
+    throw createExternalServiceError('AWS Cognito', 'sign out team member', error, 'exports.signOutTeamMember');
+  }
+
+  await recordActivity(req, {
+    action: 'user.sessions_revoked',
+    entityType: 'user',
+    entityId: target.user_id,
+    detail: { email: target.user_id, role: target.role }
+  });
+
+  res.status(200).json(createSuccessResponse(
+    `All sessions for ${target.user_id} have been signed out`
+  ));
+});
+
 export const InviteUsers = asyncHandler(async (req, res, next) => {
   const {receiverEmail, location_id, role, location_name} = req.body;
   const cookie = req.cookies.userDataHTTP;
@@ -3235,18 +3393,14 @@ export const InviteUsers = asyncHandler(async (req, res, next) => {
 
   try {
     const exists = await doesUserExist(receiverEmail);
-    const emailContent = !exists ? "Create An Account" : "Account exists";
-    
-    const params = {
-      Source: "sender@example.com", // Must be verified in AWS SES
-      Destination: {
-        ToAddresses: [receiverEmail], // List of recipient emails
-      },
-      Message: {
-        Subject: { Data: emailContent },
-        Body: { Text: { Data: emailContent } },
-      },
-    };
+
+    const params = inviteEmailParams({
+      to: receiverEmail,
+      invitedBy: invitedFromEmail,
+      shopName: await getShopDisplayName(shop_id),
+      role,
+      userExists: exists
+    });
 
     const command = new SendEmailCommand(params);
     const response = await sesClient.send(command);
@@ -3313,6 +3467,9 @@ export const sendInvitedUserAgain = asyncHandler(async (req, res, next) => {
     throw createValidationError("Invalid email format");
   }
 
+  // Hoisted: the resent email needs the role and inviter recorded on the
+  // original invitation, so it reads the same as the first one.
+  let invitation;
   try {
     const checkParams = {
       TableName: "invitedUser",
@@ -3325,6 +3482,7 @@ export const sendInvitedUserAgain = asyncHandler(async (req, res, next) => {
     if (!Item) {
       throw createNotFoundError("User was not invited to this shop");
     }
+    invitation = Item;
   } catch (error) {
     if (error instanceof AppError) {
       throw error;
@@ -3335,18 +3493,15 @@ export const sendInvitedUserAgain = asyncHandler(async (req, res, next) => {
 
   try {
     const exists = await doesUserExist(receiverEmail);
-    const emailContent = !exists ? "Create An Account" : "Account exist";
 
-  const params = {
-      Source: "sender@example.com",
-    Destination: {
-        ToAddresses: [receiverEmail],
-    },
-    Message: {
-      Subject: { Data: emailContent },
-      Body: { Text: { Data: emailContent } },
-    },
-  };
+    const params = inviteEmailParams({
+      to: receiverEmail,
+      invitedBy: invitation.invitedFrom?.S,
+      shopName: await getShopDisplayName(userData.shop_id),
+      role: invitation.role?.S,
+      userExists: exists,
+      isReminder: true
+    });
 
     const command = new SendEmailCommand(params);
     const response = await sesClient.send(command);
@@ -4253,7 +4408,9 @@ export const handleStripeWebhook = async (req, res) => {
     return res.sendStatus(400);
   }
   console.log('[Webhook] Verified event:', event.type, event.id);
-  const SES_FROM_EMAIL = process.env.SES_FROM_EMAIL || 'sender@example.com';
+  // Shadowing a local default here meant the sender could drift from the one
+  // in env.js; take the single source of truth instead.
+  const SES_FROM_EMAIL = APP_SES_FROM_EMAIL;
   const PAYMENT_FAILED_EMAIL_OVERRIDE = process.env.PAYMENT_FAILED_EMAIL_OVERRIDE || '';
   let subscription, status;
   try {
@@ -4934,11 +5091,27 @@ export const rejectInvitation = asyncHandler(async (req, res, next) => {
   }
 
   // Validate email format
-  console.log("Received email:", email);
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    console.log("Email validation failed for:", email);
     throw createValidationError("Invalid email format");
+  }
+
+  // Only the invitee can reject their own invitation — the same check
+  // acceptInvitation already makes. Without it, anyone could reject any
+  // invitation given an {email, shop_id} pair, and invitationStatus hands
+  // that pair out for an arbitrary address.
+  //
+  // This matches accept rather than using getAuthoritativeUser because an
+  // invitee legitimately may not belong to a shop yet, which that helper
+  // treats as a failure. The cookie is httpOnly, so this holds for browser
+  // clients; hardening both handlers properly means requiring auth on the
+  // routes, which is an upstream change.
+  const loggedInUserId = (userData.user_id || "").trim().toLowerCase();
+  const inviteeEmail = String(email).trim().toLowerCase();
+  if (loggedInUserId !== inviteeEmail) {
+    throw createValidationError(
+      "You can only reject an invitation for your own account. Please log in as " + email + " to reject."
+    );
   }
 
   try {
@@ -5077,18 +5250,17 @@ export const deleteInvitedUser = asyncHandler(async (req, res, next) => {
 
 export const updateUserRole = asyncHandler(async (req, res, next) => {
   const { email, role } = req.body;
-  const cookie = req.cookies.userDataHTTP;
-  
-  if (!cookie) {
-    throw createValidationError("Missing userDataHTTP cookie");
-  }
-  
-  let userData;
-  try {
-    userData = JSON.parse(cookie);
-  } catch (error) {
-    throw createValidationError("Invalid cookie data");
-  }
+
+  // Owner check runs against the verified Cognito identity, not userDataHTTP.
+  //
+  // That cookie is unsigned: a client holding any valid access token could send
+  // {role:"Owner", shop_id:"<someone else's shop>"} and pass both this check and
+  // the same-shop check further down, because both read the same forged value.
+  // That made this cross-tenant, not merely a privilege escalation inside a shop.
+  const userData = await getAuthoritativeUser(req, {
+    ownerOnly: true,
+    ownerMessage: 'Only shop owners can change user roles',
+  });
 
   if (!email) {
     throw createValidationError("Email is required");
@@ -5102,11 +5274,6 @@ export const updateUserRole = asyncHandler(async (req, res, next) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     throw createValidationError("Invalid email format");
-  }
-
-  // Check if requester is owner
-  if (userData.role?.toLowerCase() !== "owner") {
-    throw createAuthError("Only shop owners can change user roles");
   }
 
   // Prevent changing own role
@@ -5213,18 +5380,15 @@ export const updateUserRole = asyncHandler(async (req, res, next) => {
 
 export const deleteUserFromShop = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
-  const cookie = req.cookies.userDataHTTP;
-  
-  if (!cookie) {
-    throw createValidationError("Missing userDataHTTP cookie");
-  }
-  
-  let userData;
-  try {
-    userData = JSON.parse(cookie);
-  } catch (error) {
-    throw createValidationError("Invalid cookie data");
-  }
+
+  // Owner check runs against the verified Cognito identity, not userDataHTTP.
+  // See updateUserRole for why the cookie could not be trusted here — this
+  // handler is the more dangerous of the two, since it hard-deletes the Users
+  // row rather than detaching the member from the shop.
+  const userData = await getAuthoritativeUser(req, {
+    ownerOnly: true,
+    ownerMessage: 'Only shop owners can delete users from the shop',
+  });
 
   if (!email) {
     throw createValidationError("Email is required");
@@ -5234,11 +5398,6 @@ export const deleteUserFromShop = asyncHandler(async (req, res, next) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     throw createValidationError("Invalid email format");
-  }
-
-  // Check if requester is owner
-  if (userData.role?.toLowerCase() !== "owner") {
-    throw createAuthError("Only shop owners can delete users from the shop");
   }
 
   // Prevent deleting self
@@ -5330,6 +5489,16 @@ export const deleteUserFromShop = asyncHandler(async (req, res, next) => {
       shop_id: userData.shop_id,
       deleted_role: userRole
     }));
+
+    // Removing a member is more destructive than changing their role, which was
+    // already audited — this hard-deletes the Users row. It should not be the
+    // one team action that leaves no trace.
+    await recordActivity(req, {
+      action: 'user.remove',
+      entityType: 'user',
+      entityId: email,
+      detail: { email, role: userRole },
+    });
   } catch (error) {
     if (error instanceof AppError) {
       throw error;

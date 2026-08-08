@@ -1,17 +1,27 @@
 'use client';
-import Image from 'next/image';
-import styles from './page.module.css';
-import { FaLevelDownAlt } from 'react-icons/fa';
-import Link from 'next/link';
-import { Alert, Button, Dialog, TextField } from '@mui/material';
+
 import { useState } from 'react';
-import { IoMdArrowRoundBack } from 'react-icons/io';
-import apiClient from '@/utility/api';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { VscVerified } from 'react-icons/vsc';
+import { Alert, Button, TextField } from '@mui/material';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+
+import apiClient from '@/utility/api';
 import withAuthorization from '@/hoc/withAuthorization';
 import { CONFIRM_FORGOT_PASSWORD, FORGOT_PASSWORD } from '@/utility/apiPaths';
+import { errorMessageFrom } from '@/utility/errorMessage';
+import { checkPassword, PASSWORD_REQUIREMENTS_MESSAGE } from '@/utility/passwordPolicy';
+import PasswordField from '@/components/PasswordField/PasswordField';
+import AuthShell from '../_components/AuthShell';
+import AuthSuccessDialog from '../_components/AuthSuccessDialog';
+import PasswordRequirements from '../_components/PasswordRequirements';
+import styles from '../_components/authForm.module.css';
 
+/**
+ * Two stages on one route, unchanged: request a 6-digit code by email, then
+ * enter it with a new password. Cognito only ever sends a code, and a
+ * link-based reset was deliberately ruled out.
+ */
 const ForgotPassword = () => {
     const router = useRouter();
     const [email, setEmail] = useState('');
@@ -20,257 +30,216 @@ const ForgotPassword = () => {
     const [verificationCode, setVerificationCode] = useState('');
     const [errorMessage, setErrorMessage] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
-    const [isAtRestPasswordStage, setIsAtRestPasswordStage] = useState(false)
+    const [isAtResetPasswordStage, setIsAtResetPasswordStage] = useState(false);
     const [isSubmissionButtonLoading, setIsSubmissionButtonLoading] = useState(false);
     const [isResetSuccessfully, setIsResetSuccessfully] = useState(false);
 
-    const handleForgetPasswordClick = async (e) => {
-        e.preventDefault();
+    const isSendOTPFormVerified = () => {
+        const errorCode = '202';
 
-        if (!isAtRestPasswordStage) {
-            sendVerificationCode()
-        } else {
-            resetPassword()
-        };
+        if (!email || email.trim() === '') {
+            setErrorMessage(`Email cannot be empty. (Error code: ${errorCode})`);
+            return false;
+        }
 
+        // Previously fell off the end returning undefined, so even a correct
+        // call site would have treated a valid email as a failure.
+        return true;
     };
 
     const sendVerificationCode = async () => {
-        setErrorMessage(null)
+        setErrorMessage(null);
         setIsSubmissionButtonLoading(true);
 
-        if (!isSendOTPFormVerified) {
+        // Was `if (!isSendOTPFormVerified)` — a reference to the function, which
+        // is always truthy, so this guard never ran and an empty email was sent
+        // to the server.
+        if (!isSendOTPFormVerified()) {
             setIsSubmissionButtonLoading(false);
             return;
-        };
-
-        const payload = {
-            'username': email
-        };
+        }
 
         try {
-            await apiClient.post(`${FORGOT_PASSWORD}`, payload);
-            setIsAtRestPasswordStage(true);
-            setSuccessMessage('An OTP values had been sent to your email. Enter your new password and OTP to reset.')
+            await apiClient.post(`${FORGOT_PASSWORD}`, { username: email });
+            setIsAtResetPasswordStage(true);
+            setSuccessMessage(
+                'We sent a 6-digit code to your email. Enter it below with your new password.'
+            );
         } catch (error) {
-            const errorData = error?.response?.data;
-            const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
-            const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
-            setIsSubmissionButtonLoading(false);
-            setErrorMessage(`${message} (Error code: ${code})`);
+            setErrorMessage(errorMessageFrom(error));
         }
 
         setIsSubmissionButtonLoading(false);
     };
 
-    const isSendOTPFormVerified = () => {
-        const errorCode = '202'
-
-        if (!email || email.trim() === '') {
-            setErrorMessage(`Email cannot be empty. (Error code: ${errorCode})`);
-            return false
-        }
-    };
-
-    const resetPassword = async () => {
-        setErrorMessage(null)
-        setIsSubmissionButtonLoading(true);
-
-        if (!isResetFOrmVerified()) {
-            setIsSubmissionButtonLoading(false);
-            return;
-        }
-
-        const payload = {
-            'username': email,
-            'newPassword': password,
-            'confirmationCode': verificationCode
-        };
-
-        try {
-            await apiClient.post(`${CONFIRM_FORGOT_PASSWORD}`, payload)
-            setIsSubmissionButtonLoading(false);
-            setIsResetSuccessfully(true)
-        } catch (error) {
-            const errorData = error?.response?.data;
-            const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
-            const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
-            setIsSubmissionButtonLoading(false);
-            setErrorMessage(`${message} (Error code: ${code})`);
-        }
-    };
-
-    const isResetFOrmVerified = () => {
+    const isResetFormVerified = () => {
         const errorCode = '203';
 
         if (!email || email.trim() === '') {
             setErrorMessage(`Email cannot be empty. (Error code: ${errorCode})`);
-            return false
+            return false;
         }
-
-        if (!password || password.trim() === '') {
-            setErrorMessage(`Password cannot be empty. (Error code: ${errorCode})`);
-            return false
-        }
-
-        if (!confirmPassword || confirmPassword.trim() === '') {
-            setErrorMessage(`Confirm password cannot be empty. (Error code: ${errorCode})`);
-            return false
-        }
-
         if (!verificationCode || verificationCode.trim() === '') {
             setErrorMessage(`Verification code cannot be empty. (Error code: ${errorCode})`);
-            return false
+            return false;
+        }
+        if (!password || password.trim() === '') {
+            setErrorMessage(`Password cannot be empty. (Error code: ${errorCode})`);
+            return false;
+        }
+
+        // The server's confirmForgotPassword does not check strength at all —
+        // the policy regex lives in signUp only — so without this a reset could
+        // set a password that signup would have rejected.
+        if (!checkPassword(password).valid) {
+            setErrorMessage(`${PASSWORD_REQUIREMENTS_MESSAGE} (Error code: ${errorCode})`);
+            return false;
         }
 
         if (password !== confirmPassword) {
             setErrorMessage(`Password and confirm password should be the same. (Error code: ${errorCode})`);
-            return false
+            return false;
         }
 
-        return true
-    }
-
-    const loginNowHandler = (e) => {
-        e.preventDefault();
-        router.replace('/login');
+        return true;
     };
 
+    const resetPassword = async () => {
+        setErrorMessage(null);
+        setIsSubmissionButtonLoading(true);
+
+        if (!isResetFormVerified()) {
+            setIsSubmissionButtonLoading(false);
+            return;
+        }
+
+        try {
+            await apiClient.post(`${CONFIRM_FORGOT_PASSWORD}`, {
+                username: email,
+                newPassword: password,
+                confirmationCode: verificationCode,
+            });
+            setIsSubmissionButtonLoading(false);
+            setIsResetSuccessfully(true);
+        } catch (error) {
+            setIsSubmissionButtonLoading(false);
+            setErrorMessage(errorMessageFrom(error));
+        }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (isAtResetPasswordStage) resetPassword();
+        else sendVerificationCode();
+    };
+
+    const mismatch = confirmPassword.length > 0 && password !== confirmPassword;
+
     return (
-        <main className={styles.main}>
-            <Dialog open={isResetSuccessfully}>
-                <div className={styles.dialogContainer}>
-                    <VscVerified
-                        className={styles.confirmLogo}
+        <>
+            <AuthSuccessDialog
+                open={isResetSuccessfully}
+                title="Password reset"
+                message="You can now log in with your new password."
+                actionLabel="Log in"
+                onAction={() => router.replace('/login')}
+            />
+
+            <AuthShell
+                title="Reset password"
+                subtitle={
+                    isAtResetPasswordStage
+                        ? 'Enter the code we emailed you, along with a new password.'
+                        : "No worries. We'll email you a code to verify it's you."
+                }
+                footer={
+                    <Link href="/login" className={styles.backLink}>
+                        <ArrowBackRoundedIcon fontSize="small" aria-hidden="true" />
+                        Back to log in
+                    </Link>
+                }
+            >
+                <form onSubmit={handleSubmit} className={styles.form} noValidate>
+                    {successMessage ? (
+                        <Alert severity="success" className={styles.alert} aria-live="polite">
+                            {successMessage}
+                        </Alert>
+                    ) : null}
+                    {errorMessage ? (
+                        <Alert severity="error" className={styles.alert} role="alert" aria-live="polite">
+                            {errorMessage}
+                        </Alert>
+                    ) : null}
+
+                    <TextField
+                        disabled={isAtResetPasswordStage}
+                        label="Email"
+                        type="email"
+                        fullWidth
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        autoComplete="email"
+                        autoFocus
+                        required
                     />
-                    <h2>Password Reset!</h2>
-                    <p>You can now login with the new password you had set.</p>
+
+                    {isAtResetPasswordStage ? (
+                        <>
+                            <TextField
+                                label="Verification code"
+                                // Was type="number", which gives spinners and
+                                // changes value on scroll. A code is a string of
+                                // digits, not a quantity.
+                                type="text"
+                                inputMode="numeric"
+                                autoComplete="one-time-code"
+                                fullWidth
+                                value={verificationCode}
+                                onChange={(e) =>
+                                    setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))
+                                }
+                                required
+                            />
+
+                            <PasswordField
+                                label="New password"
+                                fullWidth
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                autoComplete="new-password"
+                                aria-describedby="reset-password-rules"
+                                required
+                            />
+
+                            <PasswordRequirements value={password} id="reset-password-rules" />
+
+                            <PasswordField
+                                label="Confirm new password"
+                                fullWidth
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                autoComplete="new-password"
+                                error={mismatch}
+                                helperText={mismatch ? 'Passwords do not match' : ''}
+                                required
+                            />
+                        </>
+                    ) : null}
 
                     <Button
-                        type='submit'
-                        variant='contained'
-                        color='primary'
+                        type="submit"
+                        variant="contained"
+                        color="primary"
                         fullWidth
-                        onClick={loginNowHandler}
-                        className={styles.loginNowButton}
+                        size="large"
+                        loading={isSubmissionButtonLoading}
                     >
-                        Login Now!
+                        {isAtResetPasswordStage ? 'Reset password' : 'Email me a code'}
                     </Button>
-                </div>
-            </Dialog>
-
-            {/* [LEFT] First Section: Introduction */}
-            <section className={styles.introSection}>
-                <div>
-                    <p className={styles.tagline}>
-                        Boost Sales with a Powerful Loyalty System – Manage, Engage, and Grow Your Business in One Platform.
-                    </p>
-                </div>
-
-                {/* <div>
-                    <div className={styles.subTagLineContainer}>
-                        <p className={styles.subTagLine}>Trusted by leading brands</p>
-                        <FaLevelDownAlt className={styles.faLevelDown} />
-                    </div>
-
-                    <div className={styles.brands}>
-                        <Image
-                            src='/images/auth/brands/generation-coffee.png'
-                            width='80'
-                            height='80'
-                            alt=''
-                        />
-                        <Image
-                            src='/images/auth/brands/keens-bagelry.png'
-                            width='80'
-                            height='80'
-                            alt=''
-                        />
-                    </div>
-
-                </div> */}
-            </section>
-
-            {/* [RIGHT] Second Section: Sign-up Form */}
-            <section className={styles.rightSection}>
-                <div className={styles.formSection}>
-                    <div className={styles.formTitlesSection}>
-                        <h2>HomeFood For Business</h2>
-                        <h1>Reset Password</h1>
-                        <p>No worries, we&apos;ll send you OTP code to verify and reset your password.</p>
-                    </div>
-
-                    <form onSubmit={handleForgetPasswordClick} className={styles.form}>
-                        {successMessage && <Alert severity='success'>{successMessage}</Alert>}
-                        {errorMessage && <Alert severity='error'>{errorMessage}</Alert>}
-
-                        <TextField
-                            disabled={isAtRestPasswordStage}
-                            variant='standard'
-                            label='Email'
-                            type='email'
-                            fullWidth
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-
-                        {isAtRestPasswordStage && <TextField
-                            variant='standard'
-                            label='Password'
-                            type='password'
-                            fullWidth
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />}
-
-                        {isAtRestPasswordStage && <TextField
-                            variant='standard'
-                            label='Confirm Password'
-                            type='password'
-                            fullWidth
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                        />}
-
-                        {isAtRestPasswordStage && <TextField
-                            variant='standard'
-                            label='Verification Code'
-                            type='number'
-                            fullWidth
-                            value={verificationCode}
-                            onChange={(e) => setVerificationCode(e.target.value)}
-                            required
-                        />}
-
-                        <Button
-                            type='submit'
-                            variant='contained'
-                            color='primary'
-                            fullWidth
-                            loading={isSubmissionButtonLoading}
-                            className={styles.resetPwdButton}
-                        >
-                            {isAtRestPasswordStage ? 'Reset Password' : 'Email me'}
-                        </Button>
-                    </form>
-
-
-
-                    <Link
-                        href='/login'
-                        className={styles.backToLogin}
-                    >
-                        <IoMdArrowRoundBack />
-                        Back to Login
-                    </Link>
-
-                </div>
-            </section>
-        </main>
-    )
+                </form>
+            </AuthShell>
+        </>
+    );
 };
 
 export default withAuthorization(ForgotPassword);

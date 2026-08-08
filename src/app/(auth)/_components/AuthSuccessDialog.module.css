@@ -1,0 +1,59 @@
+.container {
+    padding: 36px 32px 28px;
+    max-width: 24rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+/* Class doubled to out-specify MUI's runtime-injected .MuiSvgIcon-root
+   font-size, which is otherwise equal specificity and wins on order. */
+.glyph.glyph {
+    font-size: 56px;
+    /* Was a hardcoded #059212 in one copy of this dialog. */
+    color: var(--success);
+    margin-bottom: 4px;
+    /* Seen once, at the end of a task that just succeeded — the one place in
+       the auth flow where a little overshoot is affordable. */
+    animation: stamp var(--duration-slow) var(--ease-spring) both;
+}
+
+.title {
+    font-size: var(--text-title-3);
+    line-height: var(--text-title-3-leading);
+    letter-spacing: var(--text-title-3-tracking);
+    font-weight: 600;
+    color: var(--label-primary);
+}
+
+.message {
+    font-size: var(--text-subhead);
+    line-height: var(--text-subhead-leading);
+    color: var(--label-secondary);
+    margin-bottom: 14px;
+    text-wrap: pretty;
+}
+
+@keyframes stamp {
+    from {
+        opacity: 0;
+        transform: scale(0.86);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .glyph.glyph {
+        animation: fade var(--duration-fast) ease both;
+    }
+}
+
+@keyframes fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

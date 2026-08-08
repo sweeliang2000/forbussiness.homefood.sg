@@ -4,20 +4,20 @@ import Login from './login';
 export const metadata = {
   title: 'Login | HomeFood for Business',
   description:
-    'Access your HomeFood for Business login to manage your loyalty program, track customer engagement, and grow rewards in Singapore from one platform.',
+    'Log in to HomeFood for Business to manage your menu, take orders and pre-orders, and handle home pickup from one place.',
   keywords: [
     'HomeFood for Business login',
     'business account login',
-    'Singapore loyalty program',
+    'home based food Singapore',
     'merchant dashboard',
-    'rewards management',
-    'customer engagement tools',
-    'loyalty program management',
+    'order management',
+    'pre-order system',
+    'home pickup orders',
   ],
   openGraph: {
     title: 'Login | HomeFood for Business',
     description:
-      'Access your HomeFood for Business login to manage your loyalty program, track customer engagement, and grow rewards in Singapore from one platform.',
+      'Log in to HomeFood for Business to manage your menu, take orders and pre-orders, and handle home pickup from one place.',
     url: 'https://business.homefood.sg/login',
     siteName: 'HomeFood for Business',
     images: [
@@ -35,7 +35,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Login | HomeFood for Business',
     description:
-      'Access your HomeFood for Business login to manage your loyalty program, track customer engagement, and grow rewards in Singapore from one platform.',
+      'Log in to HomeFood for Business to manage your menu, take orders and pre-orders, and handle home pickup from one place.',
     images: ['https://business.homefood.sg/og-image.png'],
   },
   robots: { index: true, follow: true },

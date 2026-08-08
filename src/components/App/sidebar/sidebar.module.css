@@ -389,29 +389,57 @@
 }
 
 /* Scrim for the mobile drawer. Dimming the background is what makes the
-   drawer read as a modal task rather than a parallel panel. */
+   drawer read as a modal task rather than a parallel panel. Desktop has no
+   drawer, so it has no scrim. */
 .overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 98;
-    height: 100%;
-    width: 100%;
-    background-color: var(--scrim);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-    animation: scrimIn var(--duration-fast) var(--ease-standard);
+    display: none;
 }
 
-@keyframes scrimIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
+/*
+  ── Mobile: the sidebar becomes a modal drawer ───────────────────────────
+  This stylesheet is the only one that declares layout for `.sidebar`, so the
+  closed state can't be overridden by a competing module at equal specificity.
+  The drawer stays mounted and slides on `transform`, which keeps it on the
+  compositor and — unlike `display` — lets it animate out along the same path
+  it came in on.
+*/
 @media only screen and (max-width: 820px) {
     .sidebar {
+        position: fixed;
+        top: 56px;
+        left: 0;
+        z-index: 99;
+        width: min(300px, 84vw);
         height: calc(100vh - 56px);
         height: calc(100dvh - 56px);
-        box-shadow: var(--elevation-3);
+        border-right: none;
+        box-shadow: var(--elevation-4);
+        /* Anchored to the edge it's hinged on, so it reads as sliding out
+           from under the menu button rather than appearing. */
+        transform: translate3d(-100%, 0, 0);
+        /* Keeps the closed drawer out of the tab order and the a11y tree,
+           and delays until the slide-out has finished. */
+        visibility: hidden;
+        transition:
+            transform var(--duration-standard) var(--ease-standard),
+            visibility 0s linear var(--duration-standard);
+        will-change: transform;
+        /* The browser owns vertical scrolling of the nav list; horizontal
+           moves come to us as the dismiss gesture. */
+        touch-action: pan-y;
+    }
+
+    .sidebar.drawerOpen {
+        transform: translate3d(0, 0, 0);
+        visibility: visible;
+        transition:
+            transform var(--duration-standard) var(--ease-standard),
+            visibility 0s;
+    }
+
+    /* While a finger owns the drawer, nothing else may move it. */
+    .sidebar.dragging {
+        transition: none;
     }
 
     .sidebar .top {
@@ -423,8 +451,35 @@
         padding-bottom: 16px;
     }
 
+    /* The bar above already carries the lockup. */
     .logoLi {
         display: none !important;
+    }
+
+    .overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 98;
+        background-color: var(--scrim);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+        opacity: 0;
+        visibility: hidden;
+        /* A scrim on its way out must not eat the tap that follows it. */
+        pointer-events: none;
+        transition:
+            opacity var(--duration-standard) var(--ease-standard),
+            visibility 0s linear var(--duration-standard);
+    }
+
+    .overlay.overlayVisible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transition:
+            opacity var(--duration-standard) var(--ease-standard),
+            visibility 0s;
     }
 }
 
@@ -443,8 +498,20 @@
         transform: none;
     }
 
-    .overlay {
-        animation: none;
+}
+
+/* No travel across the viewport: the drawer is simply there or not, hidden by
+   visibility so it still leaves the tab order when closed. */
+@media only screen and (max-width: 820px) and (prefers-reduced-motion: reduce) {
+    .sidebar,
+    .sidebar.drawerOpen {
+        transform: none;
+        transition: visibility 0s;
+        will-change: auto;
+    }
+
+    .sidebar:not(.drawerOpen) {
+        visibility: hidden;
     }
 }
 

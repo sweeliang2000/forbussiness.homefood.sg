@@ -1,0 +1,157 @@
+/*
+  Shared frame for login, signup, forgot-password and verify.
+
+  Replaces three near-identical page modules. Everything here uses the shared
+  token set the rest of the app moved to; the auth pages were the last holdouts
+  on --accent-color / --primary / --on-primary.
+*/
+
+.shell {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* dvh, not vh: on mobile Safari 100vh is taller than the visible area, so
+       the card sat partly under the browser chrome. */
+    min-height: 100dvh;
+    max-width: 100rem;
+    margin: 0 auto;
+}
+
+/* ---------- Brand panel ---------- */
+
+.brandPanel {
+    display: flex;
+    align-items: center;
+    padding: 48px;
+    background: var(--brand-gradient);
+    color: #fff;
+}
+
+.brandInner {
+    max-width: 32rem;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.brandEyebrow {
+    font-family: var(--font-raleway);
+    font-size: var(--text-footnote);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.brandTagline {
+    font-size: clamp(2rem, 3.4vw, 3rem);
+    line-height: 1.08;
+    /* Large display type reads too loose at its natural tracking. */
+    letter-spacing: -0.03em;
+    font-weight: 600;
+    text-wrap: balance;
+}
+
+/* ---------- Form panel ---------- */
+
+.formPanel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 40px;
+    background: var(--surface-grouped);
+}
+
+.card {
+    width: 100%;
+    max-width: 26rem;
+    padding: 40px;
+    /* Signup previously used var(--background) here, which is the same colour
+       as the page — the card was invisible. */
+    background: var(--surface-elevated);
+    border: 0.5px solid var(--separator);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--elevation-1);
+}
+
+.cardHead {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 28px;
+}
+
+.title {
+    font-size: var(--text-title-1);
+    line-height: var(--text-title-1-leading);
+    letter-spacing: var(--text-title-1-tracking);
+    font-weight: 600;
+    color: var(--label-primary);
+}
+
+.subtitle {
+    font-size: var(--text-subhead);
+    line-height: var(--text-subhead-leading);
+    letter-spacing: var(--text-subhead-tracking);
+    color: var(--label-secondary);
+    text-wrap: pretty;
+}
+
+.footer {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--separator);
+    text-align: center;
+    font-size: var(--text-subhead);
+    color: var(--label-secondary);
+}
+
+.footer a {
+    color: var(--link-color);
+    font-weight: 600;
+}
+
+.footer a:hover {
+    color: var(--link-hover-color);
+}
+
+/* ---------- Adaptation ---------- */
+
+@media (max-width: 900px) {
+    .brandPanel {
+        padding: 40px;
+    }
+
+    .formPanel {
+        padding: 40px 24px;
+    }
+}
+
+@media (max-width: 800px) {
+    .shell {
+        grid-template-columns: 1fr;
+    }
+
+    /* The marketing panel is not worth a screenful above the form on a phone. */
+    .brandPanel {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .formPanel {
+        padding: 24px 16px;
+        /* Let the card reach the edges on small screens rather than sitting in
+           a narrow column with wasted gutters. */
+        align-items: flex-start;
+    }
+
+    .card {
+        padding: 28px 20px;
+    }
+}
+
+@media (prefers-contrast: more) {
+    .card {
+        border-color: rgba(0, 0, 0, 0.4);
+    }
+}

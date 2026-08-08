@@ -1,71 +1,30 @@
 .container {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
     padding-top: 20px;
 }
 
-.container .content {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
+/* Pinned so the primary action stays reachable as the lists grow. */
 .header {
     position: -webkit-sticky;
     position: sticky !important;
 }
 
-.description {
-    margin-top: 12px;
-}
-
-/* The theme already gives contained buttons the brand fill and
-   sentence case, so this no longer has to force either. */
-.button {
+/*
+  The page's primary action rides in the sticky header rather than in a
+  card of its own. It used to sit in a full elevated card containing
+  nothing but a heading and this button — a lot of furniture for one
+  control, and it separated the "Users" label from the rows it named.
+*/
+.inviteButton {
     box-shadow: none;
-}
-
-.usersHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
+    text-transform: none;
+    white-space: nowrap;
 }
 
 .invitationBanner {
     max-width: var(--max-width);
     margin: 0 auto;
-    width: 100%;
-}
-
-/*
-  `overflow-x: scroll` showed a permanent scrollbar gutter even when the
-  table fitted. `auto` only scrolls when there's something to scroll to.
-*/
-.tableContainer {
-    overflow-x: auto;
-    background-color: var(--surface-elevated);
-    border: 0.5px solid var(--separator);
-    box-shadow: var(--elevation-1);
-    border-radius: var(--radius-lg);
-    max-width: var(--max-width);
-    margin: 0 auto;
-    width: 100%;
-}
-
-/* Grouped-list header: the label that names a section of rows. */
-.sectionHeaderIos {
-    font-size: var(--text-caption);
-    font-weight: 700;
-    color: var(--label-secondary);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 16px 0 4px 0;
-    margin: 0 auto 4px;
-    background: none;
-    border: none;
-    max-width: var(--max-width);
     width: 100%;
 }

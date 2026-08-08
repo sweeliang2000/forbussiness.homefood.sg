@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     'HomeFood For Business',
     'business account recovery',
     'Singapore merchants',
-    'loyalty program login',
+    'merchant account login',
   ],
   openGraph: {
     title: 'Reset Your Password | HomeFood For Business',

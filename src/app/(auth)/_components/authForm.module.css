@@ -1,0 +1,66 @@
+/*
+  Form internals shared by every auth page. The frame itself is AuthShell;
+  this is just what goes inside the card.
+*/
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.alert {
+    width: 100%;
+    border-radius: var(--radius-sm);
+}
+
+/* "Forgot password?", "I already have a code" — secondary routes out of the
+   form. Right-aligned so it sits under the field it relates to without
+   competing with the submit button. */
+.subtleLink {
+    align-self: flex-end;
+    margin-top: -8px;
+    font-size: var(--text-footnote);
+    letter-spacing: var(--text-footnote-tracking);
+    color: var(--link-color);
+    font-weight: 600;
+}
+
+.subtleLink:hover {
+    color: var(--link-hover-color);
+}
+
+.subtleLink:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+}
+
+/* A plain-language note under a field, e.g. where the code was sent. */
+.hint {
+    font-size: var(--text-footnote);
+    line-height: var(--text-footnote-leading);
+    color: var(--label-secondary);
+    margin-top: -8px;
+    text-wrap: pretty;
+}
+
+.hint strong {
+    color: var(--label-primary);
+    font-weight: 600;
+}
+
+/* Secondary action sitting beneath the primary submit. */
+.secondaryAction {
+    align-self: center;
+    font-size: var(--text-footnote);
+    color: var(--label-secondary);
+}
+
+/* "Back to log in" — a way out of the flow, not a step in it. */
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+}

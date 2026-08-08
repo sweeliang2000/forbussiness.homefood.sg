@@ -7,7 +7,13 @@
  * this file is that it is diffable against the original.
  */
 
-import { createDatabaseError, createValidationError, asyncHandler } from '../errors';
+import {
+  createDatabaseError,
+  createValidationError,
+  createExternalServiceError,
+  createSuccessResponse,
+  asyncHandler,
+} from '../errors';
 import { getSupabase } from '../supabase';
 
 const supabase = new Proxy(
@@ -53,6 +59,81 @@ async function recordActivity(req, { action, entityType = null, entityId = null,
   } catch (e) {
     console.error('recordActivity: unexpected failure:', e.message);
   }
+}
+
+/**
+ * Where a request came from, for the sign-in trail.
+ *
+ * Vercel resolves the geo headers at the edge, so there's no IP database or
+ * third-party lookup involved. They're absent in local dev and on any other
+ * host, which is why every field is optional and the UI has to cope with an
+ * entry that only has a timestamp.
+ */
+export function requestOrigin(req) {
+  const headers = req.headers ?? {};
+  const forwarded = headers['x-forwarded-for'];
+
+  return {
+    // Left-most entry is the client; the rest are proxies.
+    ip: (forwarded ? String(forwarded).split(',')[0] : headers['x-real-ip'])?.trim() || null,
+    city: headers['x-vercel-ip-city'] ? decodeURIComponent(headers['x-vercel-ip-city']) : null,
+    region: headers['x-vercel-ip-country-region'] || null,
+    country: headers['x-vercel-ip-country'] || null,
+    userAgent: headers['user-agent'] ? String(headers['user-agent']).slice(0, 400) : null
+  };
+}
+
+/**
+ * Audit write for an actor the cookie can't identify yet.
+ *
+ * recordActivity reads shop_id and actor from req.cookies.userDataHTTP, which
+ * doesn't exist during sign-in — that request is what sets it. This variant
+ * takes the identity explicitly, from the provisioned user.
+ */
+export async function recordActivityAs({ shopId, actorId, actorRole }, { action, entityType = null, entityId = null, detail = {} }) {
+  if (!supabase || !shopId || !action) return;
+  try {
+    const { error } = await supabase.from('activity_log').insert({
+      shop_id: shopId,
+      actor_id: actorId ?? null,
+      actor_role: actorRole ?? null,
+      action,
+      entity_type: entityType,
+      entity_id: entityId != null ? String(entityId) : null,
+      detail: detail ?? {},
+    });
+    if (error && !(error.code === '42P01' || /activity_log/.test(error.message || ''))) {
+      console.error('recordActivityAs: insert failed:', error.message);
+    }
+  } catch (e) {
+    console.error('recordActivityAs: unexpected failure:', e.message);
+  }
+}
+
+/**
+ * GET /api/data/sign-in-history?email=&limit= — one user's recent sign-ins.
+ *
+ * Scoped to the caller's shop by the controller that owns authorisation; this
+ * only reads rows already filtered by shop_id.
+ */
+export async function readSignInHistory({ shopId, actorId, limit = 20 }) {
+  if (!supabase || !shopId || !actorId) return [];
+  const { data, error } = await supabase
+    .from('activity_log')
+    .select('created_at, detail')
+    .eq('shop_id', shopId)
+    .eq('actor_id', actorId)
+    .eq('action', 'user.login')
+    .order('created_at', { ascending: false })
+    .limit(Math.min(Number(limit) || 20, 100));
+
+  if (error) {
+    // A missing table is the pre-migration state, not a failure worth raising.
+    if (error.code === '42P01') return [];
+    console.error('readSignInHistory: query failed:', error.message);
+    return [];
+  }
+  return data ?? [];
 }
 
 // GET /api/data/activity-log?from&to&actor&action&limit — the shop's audit trail.

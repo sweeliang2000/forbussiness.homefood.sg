@@ -98,7 +98,6 @@ export default function RootLayout({ children }) {
   return (
     <div className={styles.body}>
       <AppNav subscriptionStatus={subscriptionStatus} isLoadingSubscription={isLoadingSubscription}/>
-      <div className={styles.overlay}></div>
       <div className={styles.mainContainer}>
         <BreadcrumsBar />
         <main className={styles.main}>

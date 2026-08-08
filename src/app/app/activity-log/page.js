@@ -37,6 +37,7 @@ const ACTION_LABELS = {
   'rating.reply': 'Replied to review',
   'user.invite': 'Invited user',
   'user.role_change': 'Changed user role',
+  'user.remove': 'Removed user',
 };
 
 const actionLabel = (a) => ACTION_LABELS[a] || a;
@@ -64,6 +65,8 @@ const describe = (e) => {
       return `${d.email || ''}${d.role ? ` as ${d.role}` : ''}`;
     case 'user.role_change':
       return `${d.email || ''}: ${d.from} → ${d.to}`;
+    case 'user.remove':
+      return `${d.email || ''}${d.role ? ` (${d.role})` : ''}`;
     default:
       return '';
   }
