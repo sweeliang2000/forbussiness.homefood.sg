@@ -7,15 +7,22 @@ import apiClient from '@/utility/api';
 import { DELETE_USER_FROM_SHOP } from '@/utility/apiPaths';
 import AlertModal from '@/components/AlertModal/AlertModal';
 import AddUsersDialog from './AddUsersDialog';
+import MemberSessions from './MemberSessions';
 import styles, { Identity, RolePill, ListCard, EmptyState, SkeletonRows } from './MemberList';
+
+// Who may inspect sessions and revoke them. Mirrors the server, which is the
+// real gate — this only decides whether to offer the affordance.
+const SESSION_ADMIN_ROLES = ['Owner', 'Manager'];
 
 const UserTable = ({
     usersRows,
     currentUserEmail,
+    currentUserRole,
     isLoading = false,
     onUserUpdated,
     onUserDeleted,
     onDeleteError,
+    onSessionsRevoked,
     onInvite
 }) => {
     // One menu for the whole table, anchored to whichever button was
@@ -26,6 +33,20 @@ const UserTable = ({
     const [editingUser, setEditingUser] = useState(null);
     const [userToDelete, setUserToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [sessionsUser, setSessionsUser] = useState(null);
+
+    const isSessionAdmin = SESSION_ADMIN_ROLES.includes(currentUserRole);
+
+    const isSelf = (user) =>
+        !!currentUserEmail && user.email?.toLowerCase() === currentUserEmail.toLowerCase();
+
+    // Managers can't reach an Owner's sessions, and nobody revokes their own
+    // from here — Account settings owns that. Both are enforced server-side.
+    const canManageSessions = (user) =>
+        isSessionAdmin &&
+        !!user &&
+        !isSelf(user) &&
+        !(user.role === 'Owner' && currentUserRole !== 'Owner');
 
     const openMenu = (event, user) => {
         setMenuAnchor(event.currentTarget);
@@ -96,15 +117,17 @@ const UserTable = ({
                             </thead>
                             <tbody>
                                 {usersRows.map((user) => (
-                                    <tr key={user.id}>
+                                    <tr
+                                        key={user.id}
+                                        className={canManageSessions(user) ? styles.clickableRow : ''}
+                                        onClick={
+                                            canManageSessions(user)
+                                                ? () => setSessionsUser(user)
+                                                : undefined
+                                        }
+                                    >
                                         <td>
-                                            <Identity
-                                                email={user.email}
-                                                isYou={
-                                                    !!currentUserEmail &&
-                                                    user.email?.toLowerCase() === currentUserEmail.toLowerCase()
-                                                }
-                                            />
+                                            <Identity email={user.email} isYou={isSelf(user)} />
                                         </td>
                                         <td className={styles.roleCell}>
                                             <RolePill role={user.role} />
@@ -113,7 +136,11 @@ const UserTable = ({
                                             <IconButton
                                                 size="small"
                                                 className={styles.actionButton}
-                                                onClick={(event) => openMenu(event, user)}
+                                                onClick={(event) => {
+                                                    // Otherwise this also opens the sessions sheet.
+                                                    event.stopPropagation();
+                                                    openMenu(event, user);
+                                                }}
                                                 aria-label={`Actions for ${user.email}`}
                                             >
                                                 <MoreVertIcon fontSize="small" />
@@ -136,11 +163,29 @@ const UserTable = ({
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
+                {canManageSessions(menuUser) && (
+                    <MenuItem
+                        onClick={() => {
+                            setSessionsUser(menuUser);
+                            closeMenu();
+                        }}
+                    >
+                        Sessions &amp; sign-in history
+                    </MenuItem>
+                )}
                 <MenuItem onClick={handleEdit}>Change role</MenuItem>
                 <MenuItem onClick={handleDeleteClick} className={styles.destructive}>
                     Remove access
                 </MenuItem>
             </Menu>
+
+            <MemberSessions
+                member={sessionsUser}
+                isOpen={Boolean(sessionsUser)}
+                onClose={() => setSessionsUser(null)}
+                onSignedOut={onSessionsRevoked}
+                onError={onDeleteError}
+            />
 
             <AddUsersDialog
                 isOpen={Boolean(editingUser)}

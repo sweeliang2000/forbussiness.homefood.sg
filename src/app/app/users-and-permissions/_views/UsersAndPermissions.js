@@ -43,6 +43,7 @@ const UsersAndPermissions = () => {
     });
     const [invitations, setInvitations] = useState([]);
     const [currentUserEmail, setCurrentUserEmail] = useState('');
+    const [currentUserRole, setCurrentUserRole] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
     const [isLoadingErrorStatus, setIsLoadingErrorStatus] = useState(null);
@@ -85,6 +86,9 @@ const UsersAndPermissions = () => {
                 const userData = getUserDataFromCookie();
                 if (userData?.user_id) {
                     setCurrentUserEmail(userData.user_id);
+                    // Only decides which affordances to render; the server
+                    // re-checks against verified Cognito claims.
+                    setCurrentUserRole(userData.role || '');
                     try {
                         const invitationResponse = await getInvitationStatus(userData.user_id);
                         if (invitationResponse.success && invitationResponse.data.is_invited) {
@@ -238,9 +242,13 @@ const UsersAndPermissions = () => {
                         <UserTable
                             usersRows={usersRows}
                             currentUserEmail={currentUserEmail}
+                            currentUserRole={currentUserRole}
                             isLoading={isLoading}
                             onUserUpdated={handleUserUpdated}
                             onUserDeleted={handleUserDeleted}
+                            onSessionsRevoked={(email) =>
+                                reportSuccess(`${email} has been signed out of all sessions.`)
+                            }
                             onDeleteError={(error) =>
                                 reportError(error, 'Failed to remove the user.')
                             }

@@ -6,4 +6,14 @@ import { globalSignOut } from '@/lib/server/controllers/Authentication';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export const POST = withApi(globalSignOut, { auth: false });
+// HAND-EDITED away from what the generator produces.
+//
+// The generator sets `auth` from where the route sits relative to
+// `router.use(Authentication.verifyToken)` in the Express routes/home.js, and
+// this one predates that guard. But globalSignOut now resolves the account via
+// getAuthoritativeUser, which reads req.identity — populated only when withApi
+// runs verifyToken, i.e. only when auth is true. Left at `auth: false` it
+// failed closed with a 403 for every caller, which is what the comment in the
+// controller describes. Move the route past the guard in the Express source
+// before the generator is next run, or this reverts.
+export const POST = withApi(globalSignOut);

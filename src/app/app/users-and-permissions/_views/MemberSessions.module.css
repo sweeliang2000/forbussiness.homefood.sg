@@ -1,0 +1,254 @@
+/*
+  Sign-in history for one member, shown in a right-hand sheet.
+
+  A sheet rather than a modal: this is reference material you consult while
+  the list stays visible behind it, and it's dismissible from the same edge
+  it arrives at.
+*/
+
+.scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: var(--scrim);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+        opacity var(--duration-standard) var(--ease-standard),
+        visibility 0s linear var(--duration-standard);
+}
+
+.scrim.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+        opacity var(--duration-standard) var(--ease-standard),
+        visibility 0s;
+}
+
+.sheet {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1201;
+    display: flex;
+    flex-direction: column;
+    width: min(420px, 100vw);
+    height: 100vh;
+    height: 100dvh;
+    background: var(--surface-elevated);
+    border-left: 0.5px solid var(--separator);
+    box-shadow: var(--elevation-4);
+    /* Enters from the edge it's anchored to, and leaves the same way. */
+    transform: translate3d(100%, 0, 0);
+    visibility: hidden;
+    transition:
+        transform var(--duration-standard) var(--ease-standard),
+        visibility 0s linear var(--duration-standard);
+    will-change: transform;
+}
+
+.sheet.open {
+    transform: translate3d(0, 0, 0);
+    visibility: visible;
+    transition:
+        transform var(--duration-standard) var(--ease-standard),
+        visibility 0s;
+}
+
+.header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 20px;
+    border-bottom: 0.5px solid var(--separator);
+}
+
+.title {
+    font-size: var(--text-headline);
+    font-weight: 600;
+    letter-spacing: var(--text-headline-tracking);
+    color: var(--label-primary);
+    margin: 0 0 3px 0;
+    overflow-wrap: anywhere;
+}
+
+.subtitle {
+    font-size: var(--text-footnote);
+    letter-spacing: var(--text-footnote-tracking);
+    color: var(--label-secondary);
+    margin: 0;
+}
+
+.close {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin: -4px -6px 0 0;
+    border: 0;
+    background: transparent;
+    color: var(--label-tertiary);
+    border-radius: var(--radius-sm);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition:
+        transform var(--duration-press) var(--ease-standard),
+        background-color var(--duration-fast) var(--ease-standard);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.close:hover {
+    background: var(--fill-quaternary);
+    color: var(--label-primary);
+}
+
+.close:active {
+    transform: scale(0.9);
+}
+
+.body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 4px 0 16px;
+}
+
+.sectionLabel {
+    font-size: var(--text-caption);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--label-secondary);
+    padding: 16px 20px 6px;
+    margin: 0;
+}
+
+.entry {
+    display: flex;
+    gap: 12px;
+    padding: 11px 20px;
+    border-bottom: 0.5px solid var(--separator);
+}
+
+.entry:last-child {
+    border-bottom: none;
+}
+
+.entryIcon {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    font-size: 1rem;
+    color: var(--label-tertiary);
+}
+
+.entryMain {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.entryWhen {
+    font-size: var(--text-subhead);
+    font-weight: 600;
+    color: var(--label-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.entryWhere {
+    font-size: var(--text-footnote);
+    line-height: var(--text-footnote-leading);
+    color: var(--label-secondary);
+    margin-top: 1px;
+}
+
+.entryDevice {
+    font-size: var(--text-caption);
+    color: var(--label-tertiary);
+    margin-top: 3px;
+    overflow-wrap: anywhere;
+}
+
+/* Location is best-effort — say so rather than implying an empty field. */
+.unknown {
+    color: var(--label-tertiary);
+    font-style: italic;
+}
+
+.state {
+    padding: 28px 20px;
+    text-align: center;
+    font-size: var(--text-footnote);
+    line-height: var(--text-footnote-leading);
+    color: var(--label-secondary);
+}
+
+.skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 20px;
+    border-bottom: 0.5px solid var(--separator);
+}
+
+/* The destructive action sits in its own footer, away from the reading
+   material, so it can't be hit while scanning the history. */
+.footer {
+    flex: 0 0 auto;
+    padding: 14px 20px;
+    border-top: 0.5px solid var(--separator);
+    background: var(--surface-elevated);
+}
+
+.footerNote {
+    font-size: var(--text-caption);
+    line-height: var(--text-caption-leading);
+    color: var(--label-secondary);
+    margin: 0 0 10px 0;
+}
+
+.signOutButton {
+    width: 100%;
+    text-transform: none !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 520px) {
+    .sheet {
+        width: 100vw;
+        border-left: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sheet,
+    .sheet.open {
+        transform: none;
+        transition: visibility 0s;
+        will-change: auto;
+    }
+
+    .sheet:not(.open) {
+        visibility: hidden;
+    }
+
+    .close:active {
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .scrim {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+}

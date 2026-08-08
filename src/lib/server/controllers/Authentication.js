@@ -41,7 +41,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
 import { getS3, getDynamo, getSes, getCognito } from '../aws';
-import { ensureUserProvisioned } from '../user-provisioning';
+import { ensureUserProvisioned, lookupUser } from '../user-provisioning';
 import { getAuthoritativeUser } from '../authoritative-user';
 import { getSupabase } from '../supabase';
 import { getStripe, getConnectStripe, getWebhookSecret } from '../stripe';
@@ -76,7 +76,12 @@ import {
   createExternalServiceError,
   asyncHandler,
 } from '../errors';
-import { recordActivity } from './activityLog';
+import {
+  recordActivity,
+  recordActivityAs,
+  requestOrigin,
+  readSignInHistory,
+} from './activityLog';
 import * as stripeConnectController from './stripeConnect';
 import {
   getStripeID,
@@ -196,6 +201,15 @@ export const signIn = asyncHandler(async (req, res, next) => {
       httpOnly: false,
       maxAge: 3600 * 1000,
     }));
+
+    // The sign-in trail. recordActivityAs rather than recordActivity because
+    // the cookie it would read is only being set on this very response.
+    // Awaited but never allowed to throw — an audit write must not be able to
+    // fail a successful login.
+    await recordActivityAs(
+      { shopId: shop_id, actorId: user_id, actorRole: role },
+      { action: 'user.login', entityType: 'session', entityId: user_id, detail: requestOrigin(req) }
+    );
 
     res.status(200).json(createSuccessResponse("Sign-in successful"));
   } catch (err) {
@@ -3133,6 +3147,113 @@ async function getShopDisplayName(shop_id) {
     return null;
   }
 }
+
+/*
+  ── Team session management ──────────────────────────────────────────────
+
+  Both handlers below act on *another* member of the caller's shop, so the
+  caller is resolved with getAuthoritativeUser (verified Cognito claims)
+  rather than assertRole, which reads the unsigned userDataHTTP cookie. A
+  forged cookie must not be able to reach AdminUserGlobalSignOut.
+*/
+
+const SESSION_ADMIN_ROLES = ['Owner', 'Manager'];
+
+/**
+ * Resolve the caller and the member they're acting on, refusing anything that
+ * crosses a shop boundary or reaches above the caller's own authority.
+ */
+async function resolveTeamTarget(req, targetEmail) {
+  const actor = await getAuthoritativeUser(req);
+
+  if (!SESSION_ADMIN_ROLES.includes(actor.role)) {
+    throw createAuthorizationError('Only an Owner or Manager can manage team sessions');
+  }
+  if (!targetEmail) {
+    throw createValidationError('email is required');
+  }
+
+  const target = await lookupUser(toUserId(targetEmail));
+
+  // Same 404 whether the account doesn't exist or belongs to another shop —
+  // otherwise this endpoint reports which addresses have HomeFood accounts.
+  if (!target || target.shop_id !== actor.shop_id) {
+    throw createNotFoundError('No such user in this shop');
+  }
+  // A Manager outranking the Owner would invert the hierarchy.
+  if (target.role === 'Owner' && actor.role !== 'Owner') {
+    throw createAuthorizationError('Only the Owner can manage the Owner\'s sessions');
+  }
+
+  return { actor, target };
+}
+
+/**
+ * GET /api/data/userSignInHistory?email= — recent sign-ins for one member.
+ *
+ * Only what was recorded from the day this shipped; there's no historical
+ * data to backfill, so a member who hasn't signed in since returns [].
+ */
+export const getUserSignInHistory = asyncHandler(async (req, res) => {
+  const { actor, target } = await resolveTeamTarget(req, req.query?.email);
+
+  const rows = await readSignInHistory({
+    shopId: actor.shop_id,
+    actorId: target.user_id,
+    limit: req.query?.limit
+  });
+
+  res.status(200).json(createSuccessResponse('Sign-in history retrieved', {
+    email: target.user_id,
+    role: target.role,
+    signIns: rows.map((row) => ({
+      at: row.created_at,
+      ip: row.detail?.ip ?? null,
+      city: row.detail?.city ?? null,
+      region: row.detail?.region ?? null,
+      country: row.detail?.country ?? null,
+      userAgent: row.detail?.userAgent ?? null
+    }))
+  }));
+});
+
+/**
+ * POST /api/data/signOutTeamMember { email } — revoke every session a member
+ * holds, across all their devices.
+ *
+ * Cognito invalidates refresh tokens immediately; already-issued access
+ * tokens stay valid until they expire, which is an hour here.
+ */
+export const signOutTeamMember = asyncHandler(async (req, res) => {
+  const { actor, target } = await resolveTeamTarget(req, req.body?.email);
+
+  if (target.user_id === actor.user_id) {
+    throw createValidationError(
+      'Use Account settings to sign yourself out of all sessions'
+    );
+  }
+
+  try {
+    await cognitoClient.send(new AdminUserGlobalSignOutCommand({
+      UserPoolId: USERPOOL_ID,
+      Username: target.user_id
+    }));
+  } catch (error) {
+    console.error('Admin sign-out failed:', error);
+    throw createExternalServiceError('AWS Cognito', 'sign out team member', error, 'exports.signOutTeamMember');
+  }
+
+  await recordActivity(req, {
+    action: 'user.sessions_revoked',
+    entityType: 'user',
+    entityId: target.user_id,
+    detail: { email: target.user_id, role: target.role }
+  });
+
+  res.status(200).json(createSuccessResponse(
+    `All sessions for ${target.user_id} have been signed out`
+  ));
+});
 
 export const InviteUsers = asyncHandler(async (req, res, next) => {
   const {receiverEmail, location_id, role, location_name} = req.body;
