@@ -32,6 +32,10 @@ import {
   TransactWriteItemsCommand,
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
+// The SES *client* is built lazily in ../aws, but the command class still has
+// to be imported here like every other AWS command in this file. It wasn't,
+// so all three SendEmail call sites threw ReferenceError before reaching AWS.
+import { SendEmailCommand } from '@aws-sdk/client-ses';
 import { unmarshall, marshall } from '@aws-sdk/util-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
