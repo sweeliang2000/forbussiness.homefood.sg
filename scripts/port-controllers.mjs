@@ -14,6 +14,31 @@
  * That keeps all ~300 `.send(...)` / `.from(...)` / `stripe.x.y(...)` calls
  * byte-identical to the originals, which is the whole point: the risk in a
  * 12,000-line port is in the edits you make, not the ones you don't.
+ *
+ * ---------------------------------------------------------------------------
+ * SECURITY FIXES LIVE IN THE GENERATED FILES — DO NOT --force OVER THEM
+ * ---------------------------------------------------------------------------
+ *
+ * Authentication.js has diverged deliberately. These four fixes exist only in
+ * src/lib/server/controllers/Authentication.js, because they are edits to
+ * handler bodies and the upstream Express source is not available here to write
+ * a tested transform against:
+ *
+ *   globalSignOut        identity now from getAuthoritativeUser(req), not the
+ *                        unsigned userDataHTTP cookie. Previously an
+ *                        unauthenticated caller could sign out any account in
+ *                        the pool by naming it in a forged Cookie header.
+ *   updateUserRole       owner check via getAuthoritativeUser({ownerOnly:true})
+ *   deleteUserFromShop   same, plus a recordActivity('user.remove')
+ *   rejectInvitation     added the invitee check acceptInvitation already had
+ *
+ * The first three were cross-tenant: both the owner check and the same-shop
+ * check read the same forged cookie, so one forged value passed both.
+ *
+ * The divergence guard below will refuse to overwrite these and list them. That
+ * is working as intended — do not reach for --force to silence it. Port these
+ * fixes upstream into the Express source first, or re-apply them by hand after,
+ * and re-verify with the curl checks in the branch's PR description.
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
@@ -95,7 +120,17 @@ ${AWS_SHIMS.dynamo('client')}
     src: 'controllers/activityLog.js',
     dst: 'activityLog.js',
     dropRanges: [[1, 7]],
-    header: `import { createDatabaseError, createValidationError, asyncHandler } from '../errors';
+    // createExternalServiceError and createSuccessResponse are used by the
+    // upstream handler bodies (the migration-needed branch and both success
+    // responses) but were missing here, so every call threw a ReferenceError
+    // and the activity log returned 500 unconditionally.
+    header: `import {
+  createDatabaseError,
+  createValidationError,
+  createExternalServiceError,
+  createSuccessResponse,
+  asyncHandler,
+} from '../errors';
 import { getSupabase } from '../supabase';
 
 ${SUPABASE_SHIM}
@@ -328,6 +363,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
 import { getS3, getDynamo, getSes, getCognito } from '../aws';
+import { getAuthoritativeUser } from '../authoritative-user';
 import { getSupabase } from '../supabase';
 import { getStripe, getConnectStripe, getWebhookSecret } from '../stripe';
 import {

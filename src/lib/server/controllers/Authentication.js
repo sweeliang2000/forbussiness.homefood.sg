@@ -38,6 +38,7 @@ import axios from 'axios';
 
 import { getS3, getDynamo, getSes, getCognito } from '../aws';
 import { ensureUserProvisioned } from '../user-provisioning';
+import { getAuthoritativeUser } from '../authoritative-user';
 import { getSupabase } from '../supabase';
 import { getStripe, getConnectStripe, getWebhookSecret } from '../stripe';
 import {
@@ -535,25 +536,17 @@ export const signOutUser = asyncHandler(async (req, res, next) => {
 
 
 export const globalSignOut = asyncHandler(async (req, res, next) => {
-  // Extract the userDataNonHTTP cookie
-  const userDataNonHTTP = req.cookies.userDataHTTP;
-
-  if (!userDataNonHTTP) {
-    throw createValidationError("Missing required cookie: userDataHTTP");
-  }
-
-  let userId;
-  try {
-    // Parse the cookie data as JSON
-    const parsedData = JSON.parse(userDataNonHTTP);
-    userId = parsedData.user_id; // Access the user_id field
-
-    if (!userId) {
-      throw createValidationError("user_id not found in the userDataHTTP cookie");
-    }
-  } catch (error) {
-    throw createValidationError("Invalid userDataHTTP cookie format");
-  }
+  // Identity comes from the verified Cognito claims, never from userDataHTTP.
+  //
+  // This previously read user_id straight out of that cookie and handed it to
+  // AdminUserGlobalSignOut as the Username. The cookie is unsigned and the
+  // route is declared auth:false, so an unauthenticated caller could sign out
+  // any account in the pool just by naming it in a forged Cookie header.
+  //
+  // getAuthoritativeUser resolves the account from req.identity, which only
+  // exists once withApi has verified the access token — so while the route
+  // stays auth:false this fails closed with a 403 rather than obeying.
+  const { user_id: userId } = await getAuthoritativeUser(req);
 
   const params = {
     UserPoolId: USERPOOL_ID,
@@ -4934,11 +4927,27 @@ export const rejectInvitation = asyncHandler(async (req, res, next) => {
   }
 
   // Validate email format
-  console.log("Received email:", email);
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    console.log("Email validation failed for:", email);
     throw createValidationError("Invalid email format");
+  }
+
+  // Only the invitee can reject their own invitation — the same check
+  // acceptInvitation already makes. Without it, anyone could reject any
+  // invitation given an {email, shop_id} pair, and invitationStatus hands
+  // that pair out for an arbitrary address.
+  //
+  // This matches accept rather than using getAuthoritativeUser because an
+  // invitee legitimately may not belong to a shop yet, which that helper
+  // treats as a failure. The cookie is httpOnly, so this holds for browser
+  // clients; hardening both handlers properly means requiring auth on the
+  // routes, which is an upstream change.
+  const loggedInUserId = (userData.user_id || "").trim().toLowerCase();
+  const inviteeEmail = String(email).trim().toLowerCase();
+  if (loggedInUserId !== inviteeEmail) {
+    throw createValidationError(
+      "You can only reject an invitation for your own account. Please log in as " + email + " to reject."
+    );
   }
 
   try {
@@ -5077,18 +5086,17 @@ export const deleteInvitedUser = asyncHandler(async (req, res, next) => {
 
 export const updateUserRole = asyncHandler(async (req, res, next) => {
   const { email, role } = req.body;
-  const cookie = req.cookies.userDataHTTP;
-  
-  if (!cookie) {
-    throw createValidationError("Missing userDataHTTP cookie");
-  }
-  
-  let userData;
-  try {
-    userData = JSON.parse(cookie);
-  } catch (error) {
-    throw createValidationError("Invalid cookie data");
-  }
+
+  // Owner check runs against the verified Cognito identity, not userDataHTTP.
+  //
+  // That cookie is unsigned: a client holding any valid access token could send
+  // {role:"Owner", shop_id:"<someone else's shop>"} and pass both this check and
+  // the same-shop check further down, because both read the same forged value.
+  // That made this cross-tenant, not merely a privilege escalation inside a shop.
+  const userData = await getAuthoritativeUser(req, {
+    ownerOnly: true,
+    ownerMessage: 'Only shop owners can change user roles',
+  });
 
   if (!email) {
     throw createValidationError("Email is required");
@@ -5102,11 +5110,6 @@ export const updateUserRole = asyncHandler(async (req, res, next) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     throw createValidationError("Invalid email format");
-  }
-
-  // Check if requester is owner
-  if (userData.role?.toLowerCase() !== "owner") {
-    throw createAuthError("Only shop owners can change user roles");
   }
 
   // Prevent changing own role
@@ -5213,18 +5216,15 @@ export const updateUserRole = asyncHandler(async (req, res, next) => {
 
 export const deleteUserFromShop = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
-  const cookie = req.cookies.userDataHTTP;
-  
-  if (!cookie) {
-    throw createValidationError("Missing userDataHTTP cookie");
-  }
-  
-  let userData;
-  try {
-    userData = JSON.parse(cookie);
-  } catch (error) {
-    throw createValidationError("Invalid cookie data");
-  }
+
+  // Owner check runs against the verified Cognito identity, not userDataHTTP.
+  // See updateUserRole for why the cookie could not be trusted here — this
+  // handler is the more dangerous of the two, since it hard-deletes the Users
+  // row rather than detaching the member from the shop.
+  const userData = await getAuthoritativeUser(req, {
+    ownerOnly: true,
+    ownerMessage: 'Only shop owners can delete users from the shop',
+  });
 
   if (!email) {
     throw createValidationError("Email is required");
@@ -5234,11 +5234,6 @@ export const deleteUserFromShop = asyncHandler(async (req, res, next) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     throw createValidationError("Invalid email format");
-  }
-
-  // Check if requester is owner
-  if (userData.role?.toLowerCase() !== "owner") {
-    throw createAuthError("Only shop owners can delete users from the shop");
   }
 
   // Prevent deleting self
@@ -5330,6 +5325,16 @@ export const deleteUserFromShop = asyncHandler(async (req, res, next) => {
       shop_id: userData.shop_id,
       deleted_role: userRole
     }));
+
+    // Removing a member is more destructive than changing their role, which was
+    // already audited — this hard-deletes the Users row. It should not be the
+    // one team action that leaves no trace.
+    await recordActivity(req, {
+      action: 'user.remove',
+      entityType: 'user',
+      entityId: email,
+      detail: { email, role: userRole },
+    });
   } catch (error) {
     if (error instanceof AppError) {
       throw error;
