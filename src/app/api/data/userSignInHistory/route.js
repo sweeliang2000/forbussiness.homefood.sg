@@ -10,6 +10,8 @@ import { getUserSignInHistory } from '@/lib/server/controllers/Authentication';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// The controller re-checks the role against verified Cognito claims; `roles`
-// here is defence in depth, not the authorisation itself.
-export const GET = withApi(getUserSignInHistory, { roles: ['Owner', 'Manager'] });
+// Deliberately not role-gated at the route: any member may read their *own*
+// sign-in history, whatever their role. The controller resolves the caller
+// from verified Cognito claims and only demands Owner or Manager when the
+// target is someone else.
+export const GET = withApi(getUserSignInHistory);

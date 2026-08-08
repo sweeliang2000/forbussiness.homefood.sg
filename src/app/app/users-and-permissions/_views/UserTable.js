@@ -38,15 +38,18 @@ const UserTable = ({
     const isSessionAdmin = SESSION_ADMIN_ROLES.includes(currentUserRole);
 
     const isSelf = (user) =>
-        !!currentUserEmail && user.email?.toLowerCase() === currentUserEmail.toLowerCase();
+        !!currentUserEmail && user?.email?.toLowerCase() === currentUserEmail.toLowerCase();
 
-    // Managers can't reach an Owner's sessions, and nobody revokes their own
-    // from here — Account settings owns that. Both are enforced server-side.
-    const canManageSessions = (user) =>
-        isSessionAdmin &&
+    /*
+      Your own sessions are self-service — any role may look at them and end
+      them. Reaching another member needs Owner or Manager, and a Manager
+      can't reach an Owner. All three rules are enforced server-side; this
+      only decides whether to offer the affordance.
+    */
+    const canViewSessions = (user) =>
         !!user &&
-        !isSelf(user) &&
-        !(user.role === 'Owner' && currentUserRole !== 'Owner');
+        (isSelf(user) ||
+            (isSessionAdmin && !(user.role === 'Owner' && currentUserRole !== 'Owner')));
 
     const openMenu = (event, user) => {
         setMenuAnchor(event.currentTarget);
@@ -119,9 +122,9 @@ const UserTable = ({
                                 {usersRows.map((user) => (
                                     <tr
                                         key={user.id}
-                                        className={canManageSessions(user) ? styles.clickableRow : ''}
+                                        className={canViewSessions(user) ? styles.clickableRow : ''}
                                         onClick={
-                                            canManageSessions(user)
+                                            canViewSessions(user)
                                                 ? () => setSessionsUser(user)
                                                 : undefined
                                         }
@@ -163,7 +166,7 @@ const UserTable = ({
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
-                {canManageSessions(menuUser) && (
+                {canViewSessions(menuUser) && (
                     <MenuItem
                         onClick={() => {
                             setSessionsUser(menuUser);
@@ -174,13 +177,18 @@ const UserTable = ({
                     </MenuItem>
                 )}
                 <MenuItem onClick={handleEdit}>Change role</MenuItem>
-                <MenuItem onClick={handleDeleteClick} className={styles.destructive}>
-                    Remove access
-                </MenuItem>
+                {/* Revoking your own access would lock you out of the shop with
+                    no way back in. Sessions are the self-service action here. */}
+                {!isSelf(menuUser) && (
+                    <MenuItem onClick={handleDeleteClick} className={styles.destructive}>
+                        Remove access
+                    </MenuItem>
+                )}
             </Menu>
 
             <MemberSessions
                 member={sessionsUser}
+                isSelf={isSelf(sessionsUser)}
                 isOpen={Boolean(sessionsUser)}
                 onClose={() => setSessionsUser(null)}
                 onSignedOut={onSessionsRevoked}

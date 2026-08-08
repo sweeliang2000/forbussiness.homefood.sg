@@ -3,8 +3,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@mui/material';
 import { IoCloseSharp } from 'react-icons/io5';
 import { LuMonitor, LuSmartphone } from 'react-icons/lu';
+import { useRouter } from 'next/navigation';
 import apiClient from '@/utility/api';
-import { USER_SIGN_IN_HISTORY, SIGN_OUT_TEAM_MEMBER } from '@/utility/apiPaths';
+import {
+    USER_SIGN_IN_HISTORY,
+    SIGN_OUT_TEAM_MEMBER,
+    GLOBAL_SIGN_OUT
+} from '@/utility/apiPaths';
 import AlertModal from '@/components/AlertModal/AlertModal';
 import Shimmer from '@/components/Shimmer/Shimmer';
 import styles from './MemberSessions.module.css';
@@ -33,7 +38,8 @@ const formatWhere = ({ city, region, country, ip }) => {
     return place || ip || null;
 };
 
-const MemberSessions = ({ member, isOpen, onClose, onSignedOut, onError }) => {
+const MemberSessions = ({ member, isSelf = false, isOpen, onClose, onSignedOut, onError }) => {
+    const router = useRouter();
     const [signIns, setSignIns] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
@@ -84,6 +90,15 @@ const MemberSessions = ({ member, isOpen, onClose, onSignedOut, onError }) => {
         if (isSigningOut || !email) return;
         setIsSigningOut(true);
         try {
+            if (isSelf) {
+                // globalSignOut clears this request's cookies as well as
+                // revoking the refresh token, so the browser isn't left
+                // holding a session it can no longer renew.
+                await apiClient.post(GLOBAL_SIGN_OUT);
+                router.replace('/login');
+                return;
+            }
+
             await apiClient.post(SIGN_OUT_TEAM_MEMBER, { email });
             setConfirmOpen(false);
             onClose();
@@ -94,7 +109,7 @@ const MemberSessions = ({ member, isOpen, onClose, onSignedOut, onError }) => {
         } finally {
             setIsSigningOut(false);
         }
-    }, [email, isSigningOut, onClose, onSignedOut, onError]);
+    }, [email, isSelf, isSigningOut, router, onClose, onSignedOut, onError]);
 
     return (
         <>
@@ -113,7 +128,10 @@ const MemberSessions = ({ member, isOpen, onClose, onSignedOut, onError }) => {
                 <header className={styles.header}>
                     <div>
                         <p className={styles.title}>{email}</p>
-                        <p className={styles.subtitle}>{member?.role || 'Operator'}</p>
+                        <p className={styles.subtitle}>
+                            {member?.role || 'Operator'}
+                            {isSelf ? ' · You' : ''}
+                        </p>
                     </div>
                     <button
                         type="button"
@@ -137,9 +155,9 @@ const MemberSessions = ({ member, isOpen, onClose, onSignedOut, onError }) => {
                         ))
                     ) : signIns.length === 0 ? (
                         <p className={styles.state}>
-                            No sign-ins recorded yet. Sign-in history starts from the
-                            first time someone logs in after this feature was added —
-                            earlier sessions were never recorded.
+                            No sign-ins recorded yet. History starts from the first login
+                            after this feature was added — earlier sessions were never
+                            recorded{isSelf ? ', including the one you’re using now' : ''}.
                         </p>
                     ) : (
                         signIns.map((entry, index) => {
@@ -167,8 +185,9 @@ const MemberSessions = ({ member, isOpen, onClose, onSignedOut, onError }) => {
 
                 <footer className={styles.footer}>
                     <p className={styles.footerNote}>
-                        Signing out ends every session on all their devices. Access tokens
-                        already issued keep working until they expire, usually within an hour.
+                        {isSelf
+                            ? 'Ends every session on all your devices, including this one — you’ll be returned to the login screen. Access tokens already issued keep working until they expire, usually within an hour.'
+                            : 'Ends every session on all their devices. Access tokens already issued keep working until they expire, usually within an hour.'}
                     </p>
                     <Button
                         variant="outlined"
@@ -185,15 +204,25 @@ const MemberSessions = ({ member, isOpen, onClose, onSignedOut, onError }) => {
             <AlertModal
                 open={confirmOpen}
                 onClose={() => !isSigningOut && setConfirmOpen(false)}
-                title="Sign out all sessions"
+                title={isSelf ? 'Sign out everywhere' : 'Sign out all sessions'}
                 description={
-                    <div>
-                        <p style={{ marginBottom: '10px' }}>
-                            <strong>{email}</strong> will be signed out on every device and
-                            will need to log in again.
-                        </p>
-                        <p>Their access and role are unchanged.</p>
-                    </div>
+                    isSelf ? (
+                        <div>
+                            <p style={{ marginBottom: '10px' }}>
+                                You'll be signed out on every device, <strong>including this
+                                one</strong>, and returned to the login screen.
+                            </p>
+                            <p>Your account and role are unchanged.</p>
+                        </div>
+                    ) : (
+                        <div>
+                            <p style={{ marginBottom: '10px' }}>
+                                <strong>{email}</strong> will be signed out on every device and
+                                will need to log in again.
+                            </p>
+                            <p>Their access and role are unchanged.</p>
+                        </div>
+                    )
                 }
                 onAction={handleSignOut}
                 actionButtonText={isSigningOut ? 'Signing out…' : 'Sign out all sessions'}

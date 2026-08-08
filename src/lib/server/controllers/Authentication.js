@@ -3162,13 +3162,14 @@ const SESSION_ADMIN_ROLES = ['Owner', 'Manager'];
 /**
  * Resolve the caller and the member they're acting on, refusing anything that
  * crosses a shop boundary or reaches above the caller's own authority.
+ *
+ * Acting on yourself is self-service, not administration, so it needs no role
+ * — every member can see their own sign-ins and end their own sessions.
+ * Reaching another member is what requires Owner or Manager.
  */
 async function resolveTeamTarget(req, targetEmail) {
   const actor = await getAuthoritativeUser(req);
 
-  if (!SESSION_ADMIN_ROLES.includes(actor.role)) {
-    throw createAuthorizationError('Only an Owner or Manager can manage team sessions');
-  }
   if (!targetEmail) {
     throw createValidationError('email is required');
   }
@@ -3180,12 +3181,20 @@ async function resolveTeamTarget(req, targetEmail) {
   if (!target || target.shop_id !== actor.shop_id) {
     throw createNotFoundError('No such user in this shop');
   }
-  // A Manager outranking the Owner would invert the hierarchy.
-  if (target.role === 'Owner' && actor.role !== 'Owner') {
-    throw createAuthorizationError('Only the Owner can manage the Owner\'s sessions');
+
+  const isSelf = target.user_id === actor.user_id;
+
+  if (!isSelf) {
+    if (!SESSION_ADMIN_ROLES.includes(actor.role)) {
+      throw createAuthorizationError('Only an Owner or Manager can manage other members\' sessions');
+    }
+    // A Manager outranking the Owner would invert the hierarchy.
+    if (target.role === 'Owner') {
+      throw createAuthorizationError('Only the Owner can manage the Owner\'s sessions');
+    }
   }
 
-  return { actor, target };
+  return { actor, target, isSelf };
 }
 
 /**
@@ -3225,12 +3234,13 @@ export const getUserSignInHistory = asyncHandler(async (req, res) => {
  * tokens stay valid until they expire, which is an hour here.
  */
 export const signOutTeamMember = asyncHandler(async (req, res) => {
-  const { actor, target } = await resolveTeamTarget(req, req.body?.email);
+  const { target, isSelf } = await resolveTeamTarget(req, req.body?.email);
 
-  if (target.user_id === actor.user_id) {
-    throw createValidationError(
-      'Use Account settings to sign yourself out of all sessions'
-    );
+  // Signing *yourself* out goes through globalSignOut, which also clears this
+  // request's cookies. Doing it here would revoke the refresh token while
+  // leaving the browser holding a session it can no longer renew.
+  if (isSelf) {
+    throw createValidationError('Use the global sign-out endpoint to end your own sessions');
   }
 
   try {
