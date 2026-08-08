@@ -14,8 +14,9 @@ import { HiOutlineSpeakerphone } from 'react-icons/hi';
 import { MdOutlineSpaceDashboard, MdOutlineNotificationsNone } from 'react-icons/md';
 import { LuStamp } from 'react-icons/lu';
 import { Submenu } from './submenu/submenu';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
+import { useDrawerDrag } from './useDrawerDrag';
 import HomeFoodForBusiness from '../../HomeFoodForBusiness/HomeFoodForBusiness';
 import { findPlanByLookupKey } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
 import Shimmer from '../../Shimmer/Shimmer';
@@ -23,8 +24,13 @@ import apiClient from '@/utility/api';
 import { CREATE_PORTAL_SESSION, SUBSCRIPTION_END_DATE } from '@/utility/apiPaths';
 
 
+// Matches the drawer breakpoint in sidebar.module.css. Below it the sidebar
+// is a modal drawer; above it, a permanent column.
+const DRAWER_QUERY = '(max-width: 820px)';
+
 export default function Sidebar({
-    isClose,
+    id,
+    isOpen,
     onClose,
     className,
     subscriptionStatus,
@@ -48,6 +54,29 @@ export default function Sidebar({
     const [currentSelection, setCurrentSelection] = useState(MENU_ORDERS_TAB);
     const [isLoadingPortal, setIsLoadingPortal] = useState(false);
     const [cancelDate, setCancelDate] = useState(null);
+
+    const drawerRef = useRef(null);
+    const scrimRef = useRef(null);
+    // Starts false so the server and first client render agree; the drawer's
+    // layout is decided by CSS, so this only ever gates the drag gesture.
+    const [isDrawer, setIsDrawer] = useState(false);
+
+    useEffect(() => {
+        const mq = window.matchMedia(DRAWER_QUERY);
+        const sync = () => setIsDrawer(mq.matches);
+        sync();
+        mq.addEventListener('change', sync);
+        return () => mq.removeEventListener('change', sync);
+    }, []);
+
+    useDrawerDrag({
+        drawerRef,
+        scrimRef,
+        isOpen,
+        enabled: isDrawer,
+        onClose,
+        draggingClass: styles.dragging
+    });
 
     useEffect(() => {
         const fetchEndDate = async () => {
@@ -112,7 +141,11 @@ export default function Sidebar({
 
     return (
         <>
-            <aside className={`${styles.sidebar} ${sidebarMinimised ? styles.close : ''} ${className}`}>
+            <aside
+                id={id}
+                ref={drawerRef}
+                className={`${styles.sidebar} ${sidebarMinimised ? styles.close : ''} ${isOpen ? styles.drawerOpen : ''} ${className || ''}`}
+            >
                 <ul className={`${styles.top} ${cancelDate ? styles.topWithBanner : ''}`}>
                     <li className={styles.logoLi}>
                         <Link className={styles.logoLink} href='/'>
@@ -386,7 +419,14 @@ export default function Sidebar({
                     )}
                 </div>
             </aside>
-            {!isClose && <div className={styles.overlay} onClick={onClose} />}
+            {/* Always mounted so the scrim can fade *out* as well as in, and so
+                a drag can dim it continuously. Off-screen on desktop. */}
+            <div
+                ref={scrimRef}
+                className={`${styles.overlay} ${isOpen ? styles.overlayVisible : ''}`}
+                onClick={onClose}
+                aria-hidden="true"
+            />
         </>
     )
 }
