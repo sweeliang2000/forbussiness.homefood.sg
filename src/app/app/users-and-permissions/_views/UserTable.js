@@ -120,15 +120,7 @@ const UserTable = ({
                             </thead>
                             <tbody>
                                 {usersRows.map((user) => (
-                                    <tr
-                                        key={user.id}
-                                        className={canViewSessions(user) ? styles.clickableRow : ''}
-                                        onClick={
-                                            canViewSessions(user)
-                                                ? () => setSessionsUser(user)
-                                                : undefined
-                                        }
-                                    >
+                                    <tr key={user.id}>
                                         <td>
                                             <Identity email={user.email} isYou={isSelf(user)} />
                                         </td>
@@ -139,11 +131,7 @@ const UserTable = ({
                                             <IconButton
                                                 size="small"
                                                 className={styles.actionButton}
-                                                onClick={(event) => {
-                                                    // Otherwise this also opens the sessions sheet.
-                                                    event.stopPropagation();
-                                                    openMenu(event, user);
-                                                }}
+                                                onClick={(event) => openMenu(event, user)}
                                                 aria-label={`Actions for ${user.email}`}
                                             >
                                                 <MoreVertIcon fontSize="small" />

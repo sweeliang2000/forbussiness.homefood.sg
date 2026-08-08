@@ -111,16 +111,6 @@
     background: var(--fill-quaternary);
 }
 
-/* Only rows whose sessions the viewer may actually open are clickable, so
-   the cursor doesn't promise an interaction that won't happen. */
-.table tbody tr.clickableRow {
-    cursor: pointer;
-}
-
-.table tbody tr.clickableRow:active {
-    background: var(--fill-tertiary);
-}
-
 /* ── Identity ──────────────────────────────────────────────────── */
 
 .identity {
