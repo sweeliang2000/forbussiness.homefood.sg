@@ -38,6 +38,7 @@ export const SHOP_SUBSCRIPTION_STATUS = '/api/data/shopSubscriptionStatus';
 export const REDEMPTION_CODE = '/api/data/redemption-code';
 export const GET_LIST_OF_USERS = '/api/data/getListOfUsers';
 export const DELETE_INVITED_USER = '/api/data/invitedUser';
+export const RESEND_INVITATION = '/api/data/sendInvitedUserAgain';
 export const DELETE_USER_FROM_SHOP = '/api/data/userFromShop';
 export const UPDATE_USER_ROLE = '/api/data/userRole';
 export const INVITATION_STATUS = '/api/auth/invitationStatus';

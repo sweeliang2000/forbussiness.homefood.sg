@@ -1,241 +1,180 @@
-import { DataGrid } from '@mui/x-data-grid';
-import { IconButton, Menu, MenuItem, TextField, Alert } from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+'use client';
 import { useState } from 'react';
+import { IconButton, Menu, MenuItem } from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { LuUsers } from 'react-icons/lu';
 import apiClient from '@/utility/api';
 import { DELETE_USER_FROM_SHOP } from '@/utility/apiPaths';
 import AlertModal from '@/components/AlertModal/AlertModal';
 import AddUsersDialog from './AddUsersDialog';
+import styles, { Identity, RolePill, ListCard, EmptyState, SkeletonRows } from './MemberList';
 
-const UserTable = ({ usersRows, onUserUpdated, onDeleteError }) => {
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [selectedRowId, setSelectedRowId] = useState(null);
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+const UserTable = ({
+    usersRows,
+    currentUserEmail,
+    isLoading = false,
+    onUserUpdated,
+    onUserDeleted,
+    onDeleteError,
+    onInvite
+}) => {
+    // One menu for the whole table, anchored to whichever button was
+    // pressed — rendering a Menu per row mounts one popover per person.
+    const [menuAnchor, setMenuAnchor] = useState(null);
+    const [menuUser, setMenuUser] = useState(null);
+
     const [editingUser, setEditingUser] = useState(null);
-    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [confirmationText, setConfirmationText] = useState('');
-    const [confirmationError, setConfirmationError] = useState('');
-    const [userToDeleteId, setUserToDeleteId] = useState(null);
 
-    const handleMenuOpen = (event, rowId) => {
-        setAnchorEl(event.currentTarget);
-        setSelectedRowId(rowId);
+    const openMenu = (event, user) => {
+        setMenuAnchor(event.currentTarget);
+        setMenuUser(user);
     };
 
-    const handleMenuClose = () => {
-        setAnchorEl(null);
-        setSelectedRowId(null);
+    const closeMenu = () => {
+        setMenuAnchor(null);
+        setMenuUser(null);
     };
 
     const handleEdit = () => {
-        const userToEdit = usersRows.find(user => user.id === selectedRowId);
-        if (userToEdit) {
-            setEditingUser(userToEdit);
-            setIsEditDialogOpen(true);
-        }
-        handleMenuClose();
+        setEditingUser(menuUser);
+        closeMenu();
     };
 
     const handleDeleteClick = () => {
-        setUserToDeleteId(selectedRowId);
-        setShowConfirmDialog(true);
-        handleMenuClose();
+        setUserToDelete(menuUser);
+        closeMenu();
     };
 
     const handleConfirmDelete = async () => {
-        if (confirmationText.toLowerCase() !== 'confirm') {
-            setConfirmationError('Please type "confirm" to proceed');
-            return;
-        }
-        
-        if (isDeleting) return;
-        
-        setConfirmationError('');
-        setShowConfirmDialog(false);
+        if (isDeleting || !userToDelete) return;
+
+        const user = userToDelete;
         setIsDeleting(true);
 
         try {
-            // Find the selected user using the preserved ID
-            const selectedUser = usersRows.find(user => user.id === userToDeleteId);
-            if (!selectedUser) {
-                console.error('User not found');
-                setIsDeleting(false);
-                return;
-            }
+            const response = await apiClient.delete(DELETE_USER_FROM_SHOP, {
+                data: { email: user.email }
+            });
 
-            const payload = {
-                email: selectedUser.email
-            };
-
-            console.log('Deleting user from shop:', selectedUser.email);
-            
-            const response = await apiClient.delete(DELETE_USER_FROM_SHOP, { data: payload });
-            
             if (response.data.success) {
-                console.log('User deleted successfully');
-                // Call the parent callback if provided to refresh the list
-                if (onUserUpdated) {
-                    onUserUpdated(selectedUser);
-                }
-            } else {
-                console.error('Failed to delete user:', response.data.message);
+                setUserToDelete(null);
+                if (onUserDeleted) onUserDeleted(user);
+            } else if (onDeleteError) {
+                onDeleteError(new Error(response.data.message || 'Failed to remove user.'));
             }
         } catch (error) {
-            console.error('Error deleting user:', error);
-            const errorData = error?.response?.data;
-            const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
-            const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
-            console.error(`Delete user failed: ${message} (Error code: ${code})`);
-            
-            // Notify parent component about the error
-            if (onDeleteError) {
-                onDeleteError(error);
-            }
+            console.error('Error removing user:', error);
+            if (onDeleteError) onDeleteError(error);
         } finally {
             setIsDeleting(false);
-            setSelectedRowId(null);
-            setUserToDeleteId(null);
-            setConfirmationText('');
         }
     };
-
-    const handleCancelDelete = () => {
-        setShowConfirmDialog(false);
-        setSelectedRowId(null);
-        setUserToDeleteId(null);
-        setConfirmationText('');
-        setConfirmationError('');
-    };
-
-    const handleCloseEditDialog = () => {
-        setIsEditDialogOpen(false);
-        setEditingUser(null);
-    };
-
-    const handleUserUpdated = (updatedUserData) => {
-        console.log('User updated:', updatedUserData);
-        // TODO: Implement API call to update user
-        // For now, just call the parent callback if provided
-        if (onUserUpdated) {
-            onUserUpdated(updatedUserData);
-        }
-        handleCloseEditDialog();
-    };
-
-    const columns = [
-        {
-            field: 'id',
-            headerName: '#',
-            sortable: false,
-            width: 0.5,
-        },
-        {
-            field: 'email',
-            headerName: 'Email',
-            flex: 2,
-        },
-        {
-            field: 'role',
-            headerName: 'Role',
-            flex: 1,
-        },
-        {
-            field: 'actions',
-            headerName: '',
-            width: 50,
-            sortable: false,
-            align: 'right',
-            renderCell: (params) => (
-                <div>
-                    <IconButton onClick={(event) => handleMenuOpen(event, params.row.id)}>
-                        <MoreVertIcon />
-                    </IconButton>
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl) && selectedRowId === params.row.id}
-                        onClose={handleMenuClose}
-                    >
-                        <MenuItem onClick={handleEdit}>Edit</MenuItem>
-                        <MenuItem 
-                            onClick={handleDeleteClick} 
-                            disabled={isDeleting}
-                            sx={{ color: 'error.main' }}
-                        >
-                            Delete
-                        </MenuItem>
-                    </Menu>
-                </div>
-            ),
-        },
-    ];
-
-    const paginationModel = { page: 0, pageSize: 10 };
-
-    const selectedUser = usersRows.find(user => user.id === (userToDeleteId || selectedRowId));
 
     return (
         <>
-            <DataGrid
-                rows={usersRows}
-                columns={columns}
-                initialState={{ pagination: { paginationModel } }}
-                disableColumnFilter
-                disableColumnMenu
-                pageSizeOptions={[10]}
-                disableSelectionOnClick
-                getRowHeight={() => 'auto'}
-                style={{ width: '100%' }}
-                pagination
-            />
-            
+            <ListCard title="Team members" count={isLoading ? undefined : usersRows.length}>
+                {isLoading ? (
+                    <SkeletonRows rows={3} />
+                ) : usersRows.length === 0 ? (
+                    <EmptyState icon={<LuUsers />} title="No one else has access yet">
+                        Invite a teammate to let them manage your menu, take orders and
+                        handle your shop with you.
+                    </EmptyState>
+                ) : (
+                    <div className={styles.tableWrap}>
+                        <table className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Member</th>
+                                    <th scope="col" className={styles.roleCell}>Role</th>
+                                    <th scope="col" className={styles.actionsCell}>
+                                        <span className={styles.srOnly}>Actions</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {usersRows.map((user) => (
+                                    <tr key={user.id}>
+                                        <td>
+                                            <Identity
+                                                email={user.email}
+                                                isYou={
+                                                    !!currentUserEmail &&
+                                                    user.email?.toLowerCase() === currentUserEmail.toLowerCase()
+                                                }
+                                            />
+                                        </td>
+                                        <td className={styles.roleCell}>
+                                            <RolePill role={user.role} />
+                                        </td>
+                                        <td className={styles.actionsCell}>
+                                            <IconButton
+                                                size="small"
+                                                className={styles.actionButton}
+                                                onClick={(event) => openMenu(event, user)}
+                                                aria-label={`Actions for ${user.email}`}
+                                            >
+                                                <MoreVertIcon fontSize="small" />
+                                            </IconButton>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </ListCard>
+
+            <Menu
+                anchorEl={menuAnchor}
+                open={Boolean(menuAnchor)}
+                onClose={closeMenu}
+                // Grow from the button that opened it, so the menu reads as
+                // belonging to that row rather than arriving from nowhere.
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+                <MenuItem onClick={handleEdit}>Change role</MenuItem>
+                <MenuItem onClick={handleDeleteClick} className={styles.destructive}>
+                    Remove access
+                </MenuItem>
+            </Menu>
+
             <AddUsersDialog
-                isOpen={isEditDialogOpen}
-                closeAddUserHandler={handleCloseEditDialog}
-                onUserInvited={handleUserUpdated}
+                isOpen={Boolean(editingUser)}
+                closeAddUserHandler={() => setEditingUser(null)}
+                onUserInvited={(updated) => {
+                    setEditingUser(null);
+                    if (onUserUpdated) onUserUpdated(updated);
+                }}
                 editingUser={editingUser}
                 isEditMode={true}
             />
 
+            {/*
+              Revoking access is reversible — you can invite the person
+              back — so it gets a plain confirmation naming the action,
+              not a type-the-word-to-proceed gate. That friction belongs
+              on things you genuinely can't undo.
+            */}
             <AlertModal
-                open={showConfirmDialog}
-                onClose={handleCancelDelete}
-                title="Delete User"
+                open={Boolean(userToDelete)}
+                onClose={() => !isDeleting && setUserToDelete(null)}
+                title="Remove access"
                 description={
                     <div>
-                        {confirmationError && (
-                            <Alert 
-                                severity="error" 
-                                sx={{ marginBottom: '16px' }}
-                            >
-                                {confirmationError}
-                            </Alert>
-                        )}
-
-                        <p style={{ marginBottom: '16px' }}>
-                            Are you sure you want to delete {selectedUser?.email || 'this user'}?
+                        <p style={{ marginBottom: '10px' }}>
+                            <strong>{userToDelete?.email}</strong> will immediately lose access
+                            to this shop.
                         </p>
-                        <p style={{ marginBottom: '16px', fontWeight: 'bold' }}>
-                            This action cannot be undone.
-                        </p>
-
-                        <TextField
-                            fullWidth
-                            label="Type 'confirm' to proceed"
-                            value={confirmationText}
-                            onChange={(e) => {
-                                setConfirmationText(e.target.value);
-                                setConfirmationError('');
-                            }}
-                            variant="outlined"
-                            size="small"
-                            placeholder="Type 'confirm' here"
-                            error={!!confirmationError}
-                        />
+                        <p>You can invite them again at any time.</p>
                     </div>
                 }
                 onAction={handleConfirmDelete}
-                actionButtonText={isDeleting ? 'Deleting...' : 'Delete'}
+                actionButtonText={isDeleting ? 'Removing…' : 'Remove access'}
+                actionDisabled={isDeleting}
                 type="error"
                 showActionButton={true}
             />
@@ -243,4 +182,4 @@ const UserTable = ({ usersRows, onUserUpdated, onDeleteError }) => {
     );
 };
 
-export default UserTable; 
+export default UserTable;
