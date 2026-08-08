@@ -58,8 +58,10 @@ import {
   MENU_BUCKET,
   LIVE_IMAGES_BUCKET,
   CLOUDFRONT_DOMAIN,
+  SES_FROM_EMAIL as APP_SES_FROM_EMAIL,
 } from '../env';
 import { s3PublicUrl, cloudfrontUrl } from '../s3-keys';
+import { inviteEmailParams } from '../emails/invite';
 import { mapWithConcurrency } from '../concurrency';
 import {
   AppError,
@@ -3232,18 +3234,13 @@ export const InviteUsers = asyncHandler(async (req, res, next) => {
 
   try {
     const exists = await doesUserExist(receiverEmail);
-    const emailContent = !exists ? "Create An Account" : "Account exists";
-    
-    const params = {
-      Source: "sender@example.com", // Must be verified in AWS SES
-      Destination: {
-        ToAddresses: [receiverEmail], // List of recipient emails
-      },
-      Message: {
-        Subject: { Data: emailContent },
-        Body: { Text: { Data: emailContent } },
-      },
-    };
+
+    const params = inviteEmailParams({
+      to: receiverEmail,
+      invitedBy: invitedFromEmail,
+      role,
+      userExists: exists
+    });
 
     const command = new SendEmailCommand(params);
     const response = await sesClient.send(command);
@@ -3310,6 +3307,9 @@ export const sendInvitedUserAgain = asyncHandler(async (req, res, next) => {
     throw createValidationError("Invalid email format");
   }
 
+  // Hoisted: the resent email needs the role and inviter recorded on the
+  // original invitation, so it reads the same as the first one.
+  let invitation;
   try {
     const checkParams = {
       TableName: "invitedUser",
@@ -3322,6 +3322,7 @@ export const sendInvitedUserAgain = asyncHandler(async (req, res, next) => {
     if (!Item) {
       throw createNotFoundError("User was not invited to this shop");
     }
+    invitation = Item;
   } catch (error) {
     if (error instanceof AppError) {
       throw error;
@@ -3332,18 +3333,14 @@ export const sendInvitedUserAgain = asyncHandler(async (req, res, next) => {
 
   try {
     const exists = await doesUserExist(receiverEmail);
-    const emailContent = !exists ? "Create An Account" : "Account exist";
 
-  const params = {
-      Source: "sender@example.com",
-    Destination: {
-        ToAddresses: [receiverEmail],
-    },
-    Message: {
-      Subject: { Data: emailContent },
-      Body: { Text: { Data: emailContent } },
-    },
-  };
+    const params = inviteEmailParams({
+      to: receiverEmail,
+      invitedBy: invitation.invitedFrom?.S,
+      role: invitation.role?.S,
+      userExists: exists,
+      isReminder: true
+    });
 
     const command = new SendEmailCommand(params);
     const response = await sesClient.send(command);
@@ -4250,7 +4247,9 @@ export const handleStripeWebhook = async (req, res) => {
     return res.sendStatus(400);
   }
   console.log('[Webhook] Verified event:', event.type, event.id);
-  const SES_FROM_EMAIL = process.env.SES_FROM_EMAIL || 'sender@example.com';
+  // Shadowing a local default here meant the sender could drift from the one
+  // in env.js; take the single source of truth instead.
+  const SES_FROM_EMAIL = APP_SES_FROM_EMAIL;
   const PAYMENT_FAILED_EMAIL_OVERRIDE = process.env.PAYMENT_FAILED_EMAIL_OVERRIDE || '';
   let subscription, status;
   try {

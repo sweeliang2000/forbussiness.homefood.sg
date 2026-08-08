@@ -63,7 +63,17 @@ export const COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID;
 
 // --- Application config -----------------------------------------------------
 
-export const SES_FROM_EMAIL = process.env.SES_FROM_EMAIL || 'sender@example.com';
+/**
+ * Sender for all outbound mail.
+ *
+ * Must be an address at a domain verified in SES for APP_AWS_REGION. Sending
+ * as a gmail.com address (the old default) meant SPF failed and DKIM signed
+ * with d=amazonses.com, so neither aligned with the From domain and every
+ * message failed DMARC — a reliable trip to the spam folder.
+ */
+export const SES_FROM_EMAIL = process.env.SES_FROM_EMAIL || 'no-reply@homefood.sg';
+/** Display name shown beside the address in the recipient's client. */
+export const SES_FROM_NAME = process.env.SES_FROM_NAME || 'HomeFood for Business';
 export const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || 'https://business.homefood.sg';
 export const CUSTOMER_BASE_URL = process.env.CUSTOMER_BASE_URL || 'https://homefood.sg';
 export const USERS_TABLE = process.env.USERS_TABLE || 'Users';
