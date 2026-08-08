@@ -15,7 +15,7 @@ const LandingFooter = () => {
                 <div>
                     <h4>Product</h4>
                     <ul>
-                        <li><Link href="/#offer">What we offer</Link></li>
+                        <li><Link href="/#features">Features</Link></li>
                         <li><Link href="/#how">How it works</Link></li>
                         <li><Link href="/founding-sellers">Founding Seller programme</Link></li>
                         <li><Link href="/pricing">Pricing</Link></li>

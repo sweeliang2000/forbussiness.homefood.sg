@@ -19,8 +19,8 @@ import { REFRESH_USER_COOKIE } from '@/utility/apiPaths';
 
 const menuItems = [
     { label: 'Why join now', href: '/founding-sellers' },
-    { label: 'What we offer', href: '/#offer' },
     { label: 'How it works', href: '/#how' },
+    { label: 'Features', href: '/#features' },
     { label: 'Payments', href: '/#payments' },
     { label: 'Pricing', href: '/pricing' },
     { label: 'FAQ', href: '/#faq' },
