@@ -1,0 +1,383 @@
+/*
+  FAQ page.
+
+  Search is the primary control, so it responds instantly and never animates
+  its results in — a list that fades on every keystroke reads as lag. The only
+  motion is the disclosure, which is the one place a bridge helps.
+*/
+
+.page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 64px var(--side-spacing) 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+}
+
+/* ---------- Hero + search ---------- */
+
+.hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+}
+
+.heroTitle {
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    color: var(--on-primary);
+    text-wrap: balance;
+}
+
+.heroLead {
+    max-width: 52ch;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--on-primary-light2);
+    text-wrap: pretty;
+}
+
+.searchWrap {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.searchIcon.searchIcon {
+    position: absolute;
+    left: 16px;
+    font-size: 20px;
+    color: var(--label-tertiary);
+    pointer-events: none;
+}
+
+.searchInput {
+    width: 100%;
+    min-height: 52px;
+    padding: 0 48px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-color);
+    background: var(--surface-elevated);
+    color: var(--on-primary);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.searchInput::placeholder {
+    color: var(--label-tertiary);
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Hides the browser's own clear affordance so there is only one. */
+.searchInput::-webkit-search-cancel-button {
+    appearance: none;
+}
+
+.clearButton {
+    position: absolute;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: var(--fill-tertiary);
+    color: var(--label-secondary);
+    cursor: pointer;
+    transition: background-color 160ms ease, transform var(--duration-press) ease-out;
+}
+
+.clearIcon.clearIcon {
+    font-size: 17px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .clearButton:hover {
+        background: var(--fill-secondary);
+    }
+}
+
+.clearButton:active {
+    transform: scale(0.92);
+}
+
+.resultCount {
+    font-size: var(--text-footnote);
+    letter-spacing: var(--text-footnote-tracking);
+    color: var(--label-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Groups ---------- */
+
+.groups {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.groupTitle {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--on-primary-light);
+    font-family: var(--font-raleway);
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+}
+
+.item {
+    border-bottom: 1px solid var(--separator);
+}
+
+.item:first-child {
+    border-top: 1px solid var(--separator);
+}
+
+.question {
+    width: 100%;
+    padding: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.006em;
+    line-height: 1.4;
+    color: var(--on-primary);
+    transition: color 160ms ease;
+}
+
+.question:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .question:hover {
+        color: var(--accent-color);
+    }
+}
+
+/* One glyph rotating into a close mark, rather than two glyphs swapping —
+   the rotation shows the panel opening. */
+.itemIcon.itemIcon {
+    flex-shrink: 0;
+    font-size: 22px;
+    color: var(--accent-color);
+    transition: transform 200ms var(--ease-in-out);
+}
+
+.open .itemIcon.itemIcon {
+    transform: rotate(45deg);
+}
+
+.answer {
+    overflow: hidden;
+}
+
+.answer p {
+    padding-bottom: 20px;
+    max-width: 68ch;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--on-primary-light2);
+    text-wrap: pretty;
+}
+
+/* ---------- No results ---------- */
+
+.noResults {
+    padding: 48px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+}
+
+.noResultsTitle {
+    font-size: 1.375rem;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    color: var(--on-primary);
+    /* The query is user text and can be long; wrap rather than overflow. */
+    overflow-wrap: anywhere;
+}
+
+.noResultsBody {
+    max-width: 48ch;
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--on-primary-light2);
+    text-wrap: pretty;
+}
+
+/* ---------- Still stuck ---------- */
+
+.stillStuck {
+    padding: 36px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    background: var(--surface-sunken);
+    border-radius: var(--radius-xl);
+}
+
+.stillStuckTitle {
+    font-size: 1.25rem;
+    letter-spacing: -0.015em;
+    color: var(--on-primary);
+}
+
+.stillStuckBody {
+    max-width: 46ch;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--on-primary-light2);
+}
+
+/* ---------- Contact actions ---------- */
+
+.contactActions {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.contactBtn {
+    min-height: 48px;
+    padding: 0 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    border-radius: var(--radius-pill);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    transition: background-color 160ms ease, transform 160ms var(--ease-out);
+}
+
+.contactPrimary {
+    background: #25D366;
+    color: #0b3d20;
+}
+
+.contactSecondary {
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-color);
+    color: var(--on-primary);
+}
+
+.contactGlyph.contactGlyph {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .contactPrimary:hover {
+        background: #1fbb59;
+    }
+
+    .contactSecondary:hover {
+        background: var(--fill-quaternary);
+    }
+
+    .contactBtn:hover {
+        transform: translateY(-1px);
+    }
+}
+
+.contactBtn:active {
+    transform: scale(0.98);
+    transition-duration: var(--duration-press);
+}
+
+.contactBtn:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 3px;
+}
+
+/* ---------- Adaptation ---------- */
+
+@media (max-width: 640px) {
+    .page {
+        padding: 40px 1rem 64px;
+        gap: 36px;
+    }
+
+    .noResults,
+    .stillStuck {
+        padding: 32px 20px;
+    }
+
+    .contactActions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .contactBtn {
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .itemIcon.itemIcon,
+    .contactBtn,
+    .clearButton,
+    .searchInput {
+        transition: none;
+    }
+
+    .contactBtn:hover,
+    .contactBtn:active,
+    .clearButton:active {
+        transform: none;
+    }
+}
+
+@media (prefers-contrast: more) {
+    .noResults,
+    .contactSecondary,
+    .searchInput {
+        border-color: rgba(0, 0, 0, 0.4);
+    }
+}

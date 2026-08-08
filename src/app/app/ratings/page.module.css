@@ -57,10 +57,20 @@
 }
 
 .avgStars {
-  font-size: 20px;
-  color: #F5A623;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  color: var(--warning);
   margin-top: 6px;
-  letter-spacing: 0.06em;
+}
+
+/* Shared glyph size for every star on the page; fill state is colour only,
+   so a row never reflows as the score changes. */
+/* Class doubled to out-specify MUI's runtime-injected
+   .MuiSvgIcon-root font-size, which is otherwise equal specificity
+   and wins on document order. */
+.star.star {
+  font-size: 20px;
 }
 
 .avgStarsMuted {
@@ -89,6 +99,9 @@
 }
 
 .distLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   width: 30px;
   font-size: var(--text-footnote);
   color: var(--label-secondary);
@@ -133,10 +146,20 @@
 }
 
 .emptyStars {
-  font-size: 40px;
+  display: flex;
+  justify-content: center;
+  gap: 2px;
   color: var(--fill-primary);
   margin-bottom: 8px;
-  letter-spacing: 0.06em;
+}
+
+.emptyStars .star {
+  font-size: 40px;
+}
+
+.distStar.distStar {
+  font-size: 13px;
+  color: var(--label-tertiary);
 }
 
 .emptyState h3 {

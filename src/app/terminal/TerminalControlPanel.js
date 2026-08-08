@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Button, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { IoAdd, IoRemove, IoBackspace } from 'react-icons/io5';
+import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import apiClient from '@/utility/api';
 import styles from './TerminalControlPanel.module.css';
 
@@ -10,7 +11,7 @@ const MODE_STAMP_INCREMENT = 'stamp';
 const STAMPS_PER_DOLLAR = 5;
 
 const TerminalControlPanel = ({ phoneNumber, shopId, customerUserId, onSuccess, performedBy, performedByName, selectedReward, onRewardRedeemed, isStampEnabled = false }) => {
-    console.log('🔍🔍🔍 TerminalControlPanel rendered with isStampEnabled:', {
+    console.log('TerminalControlPanel rendered with isStampEnabled:', {
         isStampEnabled,
         type: typeof isStampEnabled,
         booleanValue: !!isStampEnabled,
@@ -435,7 +436,7 @@ const TerminalControlPanel = ({ phoneNumber, shopId, customerUserId, onSuccess, 
 
                 {/* Number Display with +/- Controls */}
                 {(() => {
-                    console.log('🔍🔍🔍 Rendering Number Display check:', {
+                    console.log('Rendering Number Display check:', {
                         isStampEnabled,
                         type: typeof isStampEnabled,
                         booleanValue: !!isStampEnabled,
@@ -484,7 +485,7 @@ const TerminalControlPanel = ({ phoneNumber, shopId, customerUserId, onSuccess, 
 
                 {/* Number Pad */}
                 {(() => {
-                    console.log('🔍🔍🔍 Rendering Number Pad check:', {
+                    console.log('Rendering Number Pad check:', {
                         isStampEnabled,
                         type: typeof isStampEnabled,
                         booleanValue: !!isStampEnabled,
@@ -523,7 +524,7 @@ const TerminalControlPanel = ({ phoneNumber, shopId, customerUserId, onSuccess, 
 
                 {/* Display Section */}
                 {(() => {
-                    console.log('🔍🔍🔍 Rendering Display Section check:', {
+                    console.log('Rendering Display Section check:', {
                         isStampEnabled,
                         type: typeof isStampEnabled,
                         booleanValue: !!isStampEnabled,
@@ -568,8 +569,16 @@ const TerminalControlPanel = ({ phoneNumber, shopId, customerUserId, onSuccess, 
                         type="button"
                         className={styles.notesToggle}
                         onClick={() => setShowNotes(!showNotes)}
+                        aria-expanded={showNotes}
                     >
-                        <span>Notes {showNotes ? '▼' : '▶'}</span>
+                        <span>Notes</span>
+                        {/* One chevron that rotates, rather than two glyphs
+                            swapping: the rotation shows the panel opening,
+                            where a swap just reports a new state. */}
+                        <ExpandMoreRoundedIcon
+                            className={`${styles.notesChevron} ${showNotes ? styles.notesChevronOpen : ''}`}
+                            aria-hidden="true"
+                        />
                     </button>
                     {showNotes && (
                         <div className={styles.notesInputContainer}>

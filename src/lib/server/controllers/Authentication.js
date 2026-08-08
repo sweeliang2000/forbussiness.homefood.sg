@@ -1681,7 +1681,7 @@ export const updateBusinessInformation = asyncHandler(async (req, res, next) => 
     throw createValidationError("At least one valid field must be provided for update");
   }
 
-  console.log("📝 Business update fields:", updateFields);
+  console.log("Business update fields:", updateFields);
 
   // First, get the existing record to check all 6 required fields
   let existingRecord;
@@ -2177,8 +2177,8 @@ export const updateStampManagementData = asyncHandler(async (req, res, next) => 
   let defaultStampedIcon = "";
   let defaultUnStampedIcon = "";
 
-  console.log("📁 Files received:", req.files);
-  console.log("📝 Body received:", req.body);
+  console.log("Files received:", req.files);
+  console.log("Body received:", req.body);
 
   try {
     if (req.files) {
@@ -2247,7 +2247,7 @@ export const updateStampManagementData = asyncHandler(async (req, res, next) => 
           Bucket: "collbine-forbusiness-shop-images",
           Key: stampedIconKey
         }));
-        console.log(`🗑️ Deleted defaultStampedIcon from S3: ${stampedIconKey}`);
+        console.log(`Deleted defaultStampedIcon from S3: ${stampedIconKey}`);
       } catch (s3Error) {
         console.error("Error deleting defaultStampedIcon from S3:", s3Error);
         // Continue with database update even if S3 deletion fails
@@ -2273,7 +2273,7 @@ export const updateStampManagementData = asyncHandler(async (req, res, next) => 
           Bucket: "collbine-forbusiness-shop-images",
           Key: unstampedIconKey
         }));
-        console.log(`🗑️ Deleted defaultUnStampedIcon from S3: ${unstampedIconKey}`);
+        console.log(`Deleted defaultUnStampedIcon from S3: ${unstampedIconKey}`);
       } catch (s3Error) {
         console.error("Error deleting defaultUnStampedIcon from S3:", s3Error);
         // Continue with database update even if S3 deletion fails
@@ -2566,9 +2566,9 @@ export const updateCustomerDetails = asyncHandler(async (req, res, next) => {
   let banner = "";
   let thumbnail = "";
 
-  console.log("📁 Files received:", req.files);
-  console.log("📝 Body received:", req.body);
-  console.log("🗑️ Image deletions - Banner:", isBannerDeleted, "Thumbnail:", isThumbnailDeleted);
+  console.log("Files received:", req.files);
+  console.log("Body received:", req.body);
+  console.log("Image deletions - Banner:", isBannerDeleted, "Thumbnail:", isThumbnailDeleted);
 
   try {
     if (req.files) {
@@ -2585,9 +2585,9 @@ export const updateCustomerDetails = asyncHandler(async (req, res, next) => {
           };
 
           await s3.send(new PutObjectCommand(uploadParams));
-          console.log(`✅ Successfully uploaded ${fieldName} to S3:`, fileKey);
+          console.log(`Successfully uploaded ${fieldName} to S3:`, fileKey);
           const fileUrl = s3PublicUrl(SHOP_IMAGES_BUCKET, fileKey);
-          console.log(`📁 S3 URL: ${fileUrl}`);
+          console.log(`S3 URL: ${fileUrl}`);
 
           if (fieldName === 'banner') {
             banner = fileUrl;
@@ -2654,7 +2654,7 @@ export const updateCustomerDetails = asyncHandler(async (req, res, next) => {
           Bucket: "collbine-forbusiness-shop-images",
           Key: bannerKey
         }));
-        console.log(`🗑️ Deleted banner from S3: ${bannerKey}`);
+        console.log(`Deleted banner from S3: ${bannerKey}`);
       } catch (s3Error) {
         console.error("Error deleting banner from S3:", s3Error);
         // Continue with database update even if S3 deletion fails
@@ -2679,7 +2679,7 @@ export const updateCustomerDetails = asyncHandler(async (req, res, next) => {
           Bucket: "collbine-forbusiness-shop-images",
           Key: thumbnailKey
         }));
-        console.log(`🗑️ Deleted thumbnail from S3: ${thumbnailKey}`);
+        console.log(`Deleted thumbnail from S3: ${thumbnailKey}`);
       } catch (s3Error) {
         console.error("Error deleting thumbnail from S3:", s3Error);
         // Continue with database update even if S3 deletion fails
@@ -5826,7 +5826,7 @@ export const updateReward = asyncHandler(async (req, res, next) => {
     throw createValidationError("At least one field must be provided for update");
   }
 
-  console.log("📝 Reward update fields:", updateFields);
+  console.log("Reward update fields:", updateFields);
 
   // 4. Check if reward exists
   let existingReward;
@@ -5934,7 +5934,7 @@ export const updateReward = asyncHandler(async (req, res, next) => {
           Bucket: 'collbine-forbusiness-reward-images',
           Key: existingImageKey
         }));
-        console.log(`🗑️ Deleted reward image from S3: ${existingImageKey}`);
+        console.log(`Deleted reward image from S3: ${existingImageKey}`);
       }
     } catch (s3Error) {
       console.error("Error deleting reward image from S3:", s3Error);
@@ -6080,7 +6080,7 @@ export const updateReward = asyncHandler(async (req, res, next) => {
           };
           
           await client.send(new UpdateItemCommand(updateStampParams));
-          console.log(`✅ Updated cardStepDetails in StampData for reward_id: ${reward_id}`);
+          console.log(`Updated cardStepDetails in StampData for reward_id: ${reward_id}`);
         }
       }
     } catch (stampError) {

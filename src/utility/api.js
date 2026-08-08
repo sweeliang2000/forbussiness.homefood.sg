@@ -37,6 +37,12 @@ apiClient.interceptors.response.use(
       window.location.href = `/login?message=401 Unauthorized&redirect=${encodedPath}`;
     } else if (requestUrl === REFRESH_USER_COOKIE) {
       // Silently handle refreshUserCookie errors - missing cookie is expected for unauthenticated users
+    } else if (
+      requestUrl === SHOP_SUBSCRIPTION_STATUS &&
+      error.response?.status === 404
+    ) {
+      // getShopSubscriptionStatus logs and downgrades this itself; the generic
+      // handler below would only duplicate it in the console.
     } else {
       console.error('API Error:', error);
     }
@@ -65,15 +71,26 @@ export const getShopSubscriptionStatus = async () => {
     
     return subscriptionData;
   } catch (error) {
+    // A 404 is the server answering definitively: this shop has no billing
+    // record. Falling back to cache here would keep showing a stale paid plan
+    // after a downgrade or cancellation, so drop the cache and report free.
+    if (error?.response?.status === 404) {
+      console.warn(
+        'Shop has no subscription record (404) - treating as free plan.'
+      );
+      localStorage.removeItem(SHOP_SUBSCRIPTION_STORAGE_KEY);
+      return { lookup_key: null };
+    }
+
     console.error('Error fetching shop subscription status:', error);
-    
+
     // If API call fails, try to return cached data if available
     const cachedData = localStorage.getItem(SHOP_SUBSCRIPTION_STORAGE_KEY);
-    
+
     if (cachedData) {
       return JSON.parse(cachedData);
     }
-    
+
     // If no cached data and API fails, return null
     return { lookup_key: null };
   }

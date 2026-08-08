@@ -1,17 +1,27 @@
 'use client';
 import { Button } from '@mui/material';
+import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import styles from './ReviewBox.module.css';
 
-const StarRating = ({ count }) => (
-  <span>
-    <span style={{ color: '#000000' }}>
-      {'★'.repeat(count)}
+/**
+ * Five glyphs with the filled ones coloured, rather than two runs of repeated
+ * text: assistive tech reads one label instead of five separate characters,
+ * and the row keeps its width whatever the score.
+ */
+const StarRating = ({ count }) => {
+  const score = Math.max(0, Math.min(5, Number(count) || 0));
+  return (
+    <span className={styles.stars} role="img" aria-label={`${score} out of 5 stars`}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <StarRoundedIcon
+          key={i}
+          className={`${styles.star} ${i < score ? styles.starFilled : styles.starEmpty}`}
+          aria-hidden="true"
+        />
+      ))}
     </span>
-    <span style={{ color: '#CCCCCC' }}>
-      {'★'.repeat(5 - count)}
-    </span>
-  </span>
-);
+  );
+};
 
 
 const ReviewBox = ({ review, onReply }) => {

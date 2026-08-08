@@ -88,3 +88,27 @@
   background: var(--brand-a08) !important;
   text-decoration: underline;
 }
+
+/* Star rating. Filled/empty is carried by colour on a fixed five-glyph row,
+   so the row never reflows as the score changes. */
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  line-height: 1;
+}
+
+/* Class doubled to out-specify MUI's runtime-injected
+   .MuiSvgIcon-root font-size, which is otherwise equal specificity
+   and wins on document order. */
+.star.star {
+  font-size: 18px;
+}
+
+.starFilled {
+  color: var(--warning, #B25000);
+}
+
+.starEmpty {
+  color: var(--fill-primary, rgba(120, 120, 128, 0.2));
+}

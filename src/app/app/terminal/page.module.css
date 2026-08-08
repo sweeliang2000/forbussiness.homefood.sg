@@ -165,6 +165,23 @@
 .statusClosed .statusDot { background: #d42020; }
 .statusClosed .statusLabel { color: #c62828; }
 
+/* ---- Ordering-hours boundary prompt ---- */
+.boundaryTime {
+    margin: 0 0 6px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--text-secondary, #6b7280);
+    font-variant-numeric: tabular-nums;
+}
+
+.boundaryBody {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
 .tabs {
     border-bottom: 1px solid var(--border-color);
     min-height: 0;
@@ -265,6 +282,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Placeholder for a missing item photo; muted so it reads as absence
+       rather than as content. */
+    color: var(--label-quaternary);
+}
+
+/* Class doubled to out-specify MUI's runtime-injected
+   .MuiSvgIcon-root font-size, which is otherwise equal specificity
+   and wins on document order. */
+.itemImgGlyph.itemImgGlyph {
     font-size: 34px;
 }
 

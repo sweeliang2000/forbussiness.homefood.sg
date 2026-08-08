@@ -1,0 +1,288 @@
+/*
+  About page.
+
+  A page most people open once, so it sits in the rare/first-time tier where
+  a little motion is affordable. It stays quiet anyway: the only things that
+  move are the ones the user is pointing at.
+*/
+
+.page {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 64px var(--side-spacing) 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 80px;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+}
+
+.heroTitle {
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+    line-height: 1.06;
+    /* Negative tracking, tightening as the type grows. */
+    letter-spacing: -0.03em;
+    color: var(--on-primary);
+    text-wrap: balance;
+}
+
+.heroLead {
+    font-size: 1.125rem;
+    line-height: 1.65;
+    color: var(--on-primary-light2);
+    text-wrap: pretty;
+}
+
+/* ---------- Sections ---------- */
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.sectionTitle {
+    font-size: clamp(1.5rem, 2.6vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: -0.022em;
+    color: var(--on-primary);
+    text-wrap: balance;
+}
+
+/* ---------- What we do ---------- */
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    list-style: none;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 28px;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+}
+
+.cardIcon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Class doubled to out-specify MUI's runtime-injected .MuiSvgIcon-root
+   font-size, which is otherwise equal specificity and wins on order. */
+.cardGlyph.cardGlyph {
+    font-size: 24px;
+}
+
+.cardTitle {
+    font-size: 1.125rem;
+    letter-spacing: -0.008em;
+    color: var(--on-primary);
+}
+
+.cardBody {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--on-primary-light2);
+}
+
+/* ---------- Prose ---------- */
+
+.prose {
+    max-width: 68ch;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--on-primary-light2);
+    text-wrap: pretty;
+}
+
+/* ---------- Company ---------- */
+
+.companyCard {
+    padding: 28px;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.companyList {
+    display: grid;
+    gap: 14px;
+}
+
+.companyRow {
+    display: grid;
+    grid-template-columns: 190px minmax(0, 1fr);
+    gap: 16px;
+    align-items: baseline;
+}
+
+.companyRow dt {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--on-primary-light);
+    font-family: var(--font-raleway);
+}
+
+.companyRow dd {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--on-primary);
+}
+
+.companyNote {
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--on-primary-light2);
+}
+
+.companyCard a,
+.companyNote a {
+    color: var(--link-color);
+    font-weight: 600;
+}
+
+.companyCard a:hover,
+.companyNote a:hover {
+    color: var(--link-hover-color);
+}
+
+/* ---------- CTA ---------- */
+
+.cta {
+    padding: 48px 32px;
+    border-radius: var(--radius-xl);
+    background: var(--brand-gradient);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+}
+
+.ctaTitle {
+    font-size: clamp(1.5rem, 3vw, 2.125rem);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    color: #fff;
+    text-wrap: balance;
+}
+
+.ctaLead {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.88);
+}
+
+.ctaActions {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.btn {
+    min-height: 48px;
+    padding: 0 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    font-size: 1rem;
+    font-weight: 600;
+    transition: transform 160ms var(--ease-out), background-color 160ms ease;
+}
+
+.btnPrimary {
+    background: #fff;
+    color: var(--brand-700);
+}
+
+.btnOutline {
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    color: #fff;
+}
+
+.btn:active {
+    transform: scale(0.97);
+    transition-duration: var(--duration-press);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .btnPrimary:hover {
+        background: #fff7f2;
+    }
+
+    .btnOutline:hover {
+        background: rgba(255, 255, 255, 0.14);
+    }
+}
+
+/* ---------- Adaptation ---------- */
+
+@media (max-width: 900px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .page {
+        padding: 40px 1rem 64px;
+        gap: 56px;
+    }
+
+    .companyRow {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn {
+        transition: none;
+    }
+
+    .btn:active {
+        transform: none;
+    }
+}
+
+@media (prefers-contrast: more) {
+    .card,
+    .companyCard {
+        border-color: rgba(0, 0, 0, 0.4);
+    }
+}

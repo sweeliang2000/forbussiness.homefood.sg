@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import { FaCheck } from 'react-icons/fa';
+import TimerRoundedIcon from '@mui/icons-material/TimerRounded';
 import styles from './OrderCard.module.css';
 
 // Display meta for the order (fulfilment) status. Stripe sets pending/sent/expired;
@@ -127,7 +128,8 @@ export function OrderCard({ order, busy, queueNumber, onSetStatus, onConfirmPaym
       {eta ? (
         <div className={styles.etaRow}>
           <span className={`${styles.etaTag} ${etaOverdue ? styles.etaTagOverdue : ''}`}>
-            ⏱ Ready ~{eta.format('h:mm A')}{etaOverdue ? ' · overdue' : ''}
+            <TimerRoundedIcon className={styles.etaGlyph} aria-hidden="true" />
+            Ready ~{eta.format('h:mm A')}{etaOverdue ? ' · overdue' : ''}
           </span>
           {active && onEditEta && (
             <button type="button" className={styles.linkBtn} disabled={busy} onClick={() => onEditEta(order)}>

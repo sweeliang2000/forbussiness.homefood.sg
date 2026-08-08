@@ -1,41 +1,12 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import styles from './FAQSection.module.css';
 import Badge from '@/components/Badge';
-
-const faqs = [
-    {
-        question: 'Do I need a commercial kitchen or license?',
-        answer:
-            "HomeFood is built for home-based food (HBF) sellers operating within SFA's HBF guidelines. You don't need a commercial kitchen, but you're responsible for meeting the usual HBF food safety requirements — same as you would on WhatsApp or Instagram today.",
-    },
-    {
-        question: 'How do the payment fees actually work?',
-        answer:
-            "Pro includes Manual PayNow at 0%. For automatic payments on Pro, PayNow / PayLah! is 3%, and Visa / Mastercard is 6% + S$0.50. Manual PayNow is not available on Free; its automatic rates are 6% for PayNow / PayLah! and 8% + S$0.50 for cards. Fees are deducted automatically before payout, except Manual PayNow payments, which sellers verify directly.",
-    },
-    {
-        question: 'When do I actually get paid?',
-        answer:
-            "Your earnings build up in your HomeFood balance as orders complete. You can withdraw once a month to your linked bank account. Every payout comes with an itemised statement showing orders, fees, and any refunds.",
-    },
-    {
-        question: 'What if a customer asks for a refund?',
-        answer:
-            "Route the refund request through us. Our team reviews it, handles any card chargeback admin, and settles it directly — so you're not chasing the customer or your bank. You just see the adjustment on your next payout statement.",
-    },
-    {
-        question: 'Will the platform really stay free?',
-        answer:
-            "Yes. Eligible Founding Sellers are grandfathered into a S$0 monthly platform membership for the lifetime of their HomeFood account. Standard transaction fees still apply. Places are intentionally limited to our founding cohort so we can onboard and support each seller properly.",
-    },
-    {
-        question: 'Do I need a POS or card reader?',
-        answer:
-            'No hardware at all. Customers pay on their own phone when they order. Your "terminal" is just the HomeFood merchant app on any phone or laptop — you see incoming orders, mark them "almost ready" and "ready", and that\'s it.',
-    },
-];
+import { FAQS, FEATURED_FAQS } from '../../_data/faqs';
 
 const FAQSection = () => {
     const [openIndex, setOpenIndex] = useState(null);
@@ -50,7 +21,7 @@ const FAQSection = () => {
                 <h2 className={styles.sectionTitle}>Answers before you ask.</h2>
             </div>
             <div className={styles.faqList}>
-                {faqs.map((faq, i) => (
+                {FEATURED_FAQS.map((faq, i) => (
                     <div key={i} className={`${styles.faqItem} ${openIndex === i ? styles.open : ''}`}>
                         <button
                             className={styles.faqQ}
@@ -59,7 +30,7 @@ const FAQSection = () => {
                             aria-controls={`faq-answer-${i}`}
                         >
                             {faq.question}
-                            <span className={styles.faqIcon} aria-hidden="true">＋</span>
+                            <AddRoundedIcon className={styles.faqIcon} aria-hidden="true" />
                         </button>
                         <AnimatePresence initial={false}>
                             {openIndex === i && (
@@ -80,6 +51,10 @@ const FAQSection = () => {
                     </div>
                 ))}
             </div>
+            <Link href="/faq" className={styles.seeAll}>
+                See all {FAQS.length} questions
+                <ArrowForwardRoundedIcon className={styles.seeAllIcon} aria-hidden="true" />
+            </Link>
         </section>
     );
 };

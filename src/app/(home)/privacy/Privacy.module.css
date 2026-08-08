@@ -1,0 +1,204 @@
+/*
+  Privacy policy.
+
+  Deliberately unanimated. This is dense text a merchant is trying to read and
+  act on, and motion on content someone is reading hinders rather than helps.
+  The work here is typography and wayfinding, not movement.
+*/
+
+.page {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 56px var(--side-spacing) 96px;
+}
+
+.hero {
+    max-width: 1040px;
+    margin: 0 auto 40px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.heroTitle {
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    color: var(--on-primary);
+}
+
+.heroDate {
+    margin-top: 10px;
+    font-size: 0.875rem;
+    color: var(--on-primary-light2);
+}
+
+.layout {
+    max-width: 1040px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 232px minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+}
+
+/* ---------- Table of contents ---------- */
+
+.toc {
+    position: sticky;
+    top: 96px;
+}
+
+.tocTitle {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--on-primary-light);
+    font-family: var(--font-raleway);
+    margin-bottom: 12px;
+}
+
+.tocList {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    list-style: none;
+    counter-reset: none;
+}
+
+.tocList a {
+    display: flex;
+    gap: 10px;
+    padding: 7px 10px;
+    margin-left: -10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--on-primary-light2);
+    transition: background-color 120ms ease, color 120ms ease;
+}
+
+.tocNumber {
+    flex-shrink: 0;
+    width: 1.25em;
+    color: var(--label-quaternary);
+    font-variant-numeric: tabular-nums;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .tocList a:hover {
+        background: var(--fill-quaternary);
+        color: var(--on-primary);
+    }
+}
+
+.tocList a:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 1px;
+}
+
+/* ---------- Article ---------- */
+
+.article {
+    /* Measure capped near 75 characters. Long legal prose at full container
+       width is the single fastest way to make a policy unreadable. */
+    max-width: 68ch;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+}
+
+.intro,
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    /* Offsets the sticky header so an anchored heading is not hidden under it. */
+    scroll-margin-top: 96px;
+}
+
+.h2 {
+    font-size: 1.25rem;
+    line-height: 1.3;
+    letter-spacing: -0.012em;
+    color: var(--on-primary);
+}
+
+.intro p,
+.section p {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--on-primary-light2);
+    text-wrap: pretty;
+}
+
+.intro p strong,
+.section p strong {
+    color: var(--on-primary);
+    font-weight: 700;
+}
+
+.article a {
+    color: var(--link-color);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.article a:hover {
+    color: var(--link-hover-color);
+}
+
+.intro {
+    padding-bottom: 4px;
+}
+
+/* ---------- Adaptation ---------- */
+
+@media (max-width: 900px) {
+    .layout {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .toc {
+        position: static;
+        padding: 18px 20px;
+        background: var(--surface-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+    }
+
+    .tocList {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .page {
+        padding: 36px 1rem 64px;
+    }
+
+    .tocList {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tocList a {
+        transition: none;
+    }
+}
+
+@media (prefers-contrast: more) {
+    .toc {
+        border-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .intro p,
+    .section p {
+        color: var(--on-primary);
+    }
+}

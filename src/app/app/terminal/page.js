@@ -25,6 +25,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
+import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -36,6 +37,7 @@ import { ContentCard } from '@/components/ContentCard/ContentCard';
 import apiClient from '@/utility/api';
 import { getUserDataFromCookie } from '@/utility/cookieUtils';
 import { MENU, WALK_IN_ORDER, MENU_SOLD_OUT, SHOP_OPEN, SHOP_ORDERS } from '@/utility/apiPaths';
+import { nextBoundary, format12h } from '@/utility/orderingSchedule';
 import { OrderCard, STATUS_FILTERS, orderRef, UndoStatusDialog, EditEtaDialog, CancelOrderDialog } from '../order-queue/_views/OrderCard';
 
 const basePrice = (item, orderType) =>
@@ -605,7 +607,9 @@ function NewOrderTab({ shopId, onPlaced }) {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={it.photo.url} alt={it.name} className={styles.itemImg} />
                 ) : (
-                  <div className={styles.itemImgPh}>🍽️</div>
+                  <div className={styles.itemImgPh}>
+                    <RestaurantRoundedIcon className={styles.itemImgGlyph} aria-hidden="true" />
+                  </div>
                 )}
                 <span className={styles.itemNm}>{it.name}</span>
                 <span className={styles.itemPr}>${basePrice(it, orderType).toFixed(2)}</span>
@@ -1027,13 +1031,67 @@ function OrdersTab({ onChanged }) {
   );
 }
 
-const format12h = (hhmm) => {
-  const [hh, mm] = String(hhmm ?? '').split(':').map(Number);
-  if (!Number.isFinite(hh) || !Number.isFinite(mm)) return String(hhmm ?? '');
-  const suffix = hh >= 12 ? 'PM' : 'AM';
-  const h12 = ((hh + 11) % 12) + 1;
-  return `${h12}:${String(mm).padStart(2, '0')} ${suffix}`;
-};
+// ── Ordering-hours boundary prompt ──────────────────────────────────────────
+
+/*
+  Hours don't open or close the shop — the merchant's switch does. What the
+  schedule is for is knowing when to ask. This dialog is that ask, and it only
+  ever offers the one action that reconciles the switch with the schedule.
+
+  When the switch already agrees with the schedule there is nothing to decide,
+  so the dialog just says what happened and gets out of the way.
+*/
+// Past this, a boundary is history rather than news — say nothing.
+const STALE_BOUNDARY_MS = 30 * 60 * 1000;
+
+function HoursBoundaryDialog({ prompt, shopOpen, busy, onDismiss, onSetOpen }) {
+  if (!prompt) return null;
+
+  const opening = prompt.type === 'open';
+  const alreadyReconciled = opening ? shopOpen === true : shopOpen !== true;
+  const at = format12h(prompt.hm);
+
+  return (
+    <Dialog open onClose={busy ? undefined : onDismiss} maxWidth="xs" fullWidth>
+      <DialogTitle sx={{ fontWeight: 900 }}>
+        {opening ? 'Ordering hours have started' : 'Ordering hours have ended'}
+      </DialogTitle>
+      <DialogContent>
+        <p className={styles.boundaryTime}>
+          {opening ? 'Opened at' : 'Closed at'} {at}
+        </p>
+        <p className={styles.boundaryBody}>
+          {alreadyReconciled
+            ? opening
+              ? 'Your shop is already open, so nothing changes — customers can keep ordering.'
+              : 'Your shop is already closed. Customers can still place pre-orders for a later date.'
+            : opening
+              ? 'Your shop is still closed, so customers can only pre-order. Open it to start taking orders now.'
+              : 'Your shop is still open, so customers can keep ordering. Close it when you are done for the day.'}
+        </p>
+      </DialogContent>
+      <DialogActions>
+        {alreadyReconciled ? (
+          <Button variant="contained" onClick={onDismiss}>Got it</Button>
+        ) : (
+          <>
+            <Button onClick={onDismiss} disabled={busy}>
+              {opening ? 'Not yet' : 'Stay open'}
+            </Button>
+            <Button
+              variant="contained"
+              disabled={busy}
+              onClick={() => onSetOpen(opening)}
+              startIcon={busy ? <CircularProgress size={14} color="inherit" /> : null}
+            >
+              {opening ? 'Open shop' : 'Close shop'}
+            </Button>
+          </>
+        )}
+      </DialogActions>
+    </Dialog>
+  );
+}
 
 // ── Pre-orders (forward-looking prep view) ──────────────────────────────────
 const PREORDER_ACTIVE = ['pending', 'sent', 'preparing', 'ready'];
@@ -1174,17 +1232,30 @@ export default function TerminalPage() {
   const [shopStatus, setShopStatus] = useState(null); // composed status incl. hours + calendar
   const [openBusy, setOpenBusy] = useState(false);
   const [todayIncomplete, setTodayIncomplete] = useState(0);
+  const [boundaryPrompt, setBoundaryPrompt] = useState(null);
+
+  const refreshShopStatus = useCallback(async () => {
+    try {
+      const res = await apiClient.get(SHOP_OPEN);
+      const d = res.data?.data ?? {};
+      setShopOpen(d.isOpen === true);
+      setShopStatus(d);
+    } catch {
+      // Unknown is treated as closed: claiming "Open" on a failed lookup would
+      // have the merchant believe orders are coming through when they may not be.
+      setShopOpen(false);
+    }
+  }, []);
 
   useEffect(() => {
     setShopId(getUserDataFromCookie()?.shop_id ?? null);
-    apiClient.get(SHOP_OPEN)
-      .then((res) => {
-        const d = res.data?.data ?? {};
-        setShopOpen(d.isOpen ?? true);
-        setShopStatus(d);
-      })
-      .catch(() => setShopOpen(true));
-  }, []);
+    refreshShopStatus();
+    // The schedule can be edited in Shop Settings while the POS is sitting open
+    // on the counter, so re-read it periodically rather than trusting the copy
+    // fetched at mount.
+    const id = setInterval(refreshShopStatus, 5 * 60 * 1000);
+    return () => clearInterval(id);
+  }, [refreshShopStatus]);
 
   // Today's incomplete orders → the Orders tab badge.
   const fetchTodayCount = useCallback(async () => {
@@ -1212,25 +1283,76 @@ export default function TerminalPage() {
     setShopOpen(next);
     try {
       await apiClient.put(SHOP_OPEN, { isOpen: next });
-      setShopStatus((s) => (s ? { ...s, isOpen: next, effectiveOpen: next && s.withinHours && !s.calendarClosed } : s));
+      setShopStatus((s) => (s ? { ...s, isOpen: next, effectiveOpen: next } : s));
+      return true;
     } catch {
       setShopOpen(prev); // revert
+      return false;
     } finally {
       setOpenBusy(false);
     }
   };
 
-  // Composed status: manual flag ∧ ordering hours ∧ today's calendar override.
-  const effectiveOpen = shopStatus ? shopStatus.effectiveOpen !== false : shopOpen !== false;
+  /*
+    Watch for the schedule crossing a boundary.
+
+    This polls the wall clock instead of arming a setTimeout for the boundary
+    itself. A POS laptop gets its lid closed and a browser throttles background
+    tabs, so a timer set hours ahead fires late or not at all; comparing against
+    the clock every few seconds survives both, and re-arms from wherever we
+    happen to wake up.
+  */
+  const hoursKey = shopStatus?.hours ? JSON.stringify(shopStatus.hours) : '';
+  // Keeps one array identity while the schedule's contents are unchanged, so
+  // the 5-minute status refresh doesn't re-arm the watcher and lose a boundary
+  // that fell in the gap.
+  const scheduleHours = useMemo(() => (hoursKey ? JSON.parse(hoursKey) : null), [hoursKey]);
+  const nextBoundaryRef = useRef(null);
+
+  useEffect(() => {
+    if (!Array.isArray(scheduleHours) || scheduleHours.length < 7) {
+      nextBoundaryRef.current = null;
+      return undefined;
+    }
+    nextBoundaryRef.current = nextBoundary(scheduleHours, Date.now());
+
+    const tick = () => {
+      let due = nextBoundaryRef.current;
+      if (!due || Date.now() < due.at) return;
+
+      // Waking from sleep can leave several boundaries behind us. Catch up in
+      // one pass and announce only the most recent — stepping one per tick
+      // would trickle stale prompts out over minutes.
+      let latest = null;
+      while (due && Date.now() >= due.at) {
+        latest = due;
+        due = nextBoundary(scheduleHours, due.at);
+      }
+      nextBoundaryRef.current = due;
+
+      // A boundary noticed long after it passed means the machine was asleep or
+      // the tab was buried all night. Announcing it now is worse than silence.
+      if (latest && Date.now() - latest.at <= STALE_BOUNDARY_MS) setBoundaryPrompt(latest);
+    };
+
+    const id = setInterval(tick, 15000);
+    return () => clearInterval(id);
+  }, [scheduleHours]);
+
+  // Customers see exactly what the switch says. Hours and the calendar only
+  // qualify it.
+  const effectiveOpen = shopOpen === true;
   let statusLabel = 'Shop Open';
-  if (shopOpen === false) {
-    statusLabel = 'Shop Closed';
+  if (shopOpen === null) {
+    statusLabel = 'Checking…';
+  } else if (!effectiveOpen) {
+    statusLabel = 'Shop Closed — pre-orders only';
   } else if (shopStatus?.calendarClosed) {
-    statusLabel = `Closed today — calendar${shopStatus.calendarReason ? ` (${shopStatus.calendarReason})` : ''}`;
+    statusLabel = `Open — calendar marks today closed${shopStatus.calendarReason ? ` (${shopStatus.calendarReason})` : ''}`;
   } else if (shopStatus && !shopStatus.withinHours) {
     statusLabel = shopStatus.hoursToday?.enabled
-      ? `Outside ordering hours (${format12h(shopStatus.hoursToday.open)}–${format12h(shopStatus.hoursToday.close)})`
-      : 'Closed today — ordering hours';
+      ? `Open — outside ordering hours (${format12h(shopStatus.hoursToday.open)}–${format12h(shopStatus.hoursToday.close)})`
+      : 'Open — no ordering hours set for today';
   }
 
   return (
@@ -1250,12 +1372,22 @@ export default function TerminalPage() {
           <span className={styles.statusLabel}>{statusLabel}</span>
           <Switch
             size="small"
-            checked={shopOpen !== false}
+            checked={shopOpen === true}
             disabled={shopOpen === null || openBusy}
             onChange={(e) => toggleOpen(e.target.checked)}
           />
         </div>
       </header>
+
+      <HoursBoundaryDialog
+        prompt={boundaryPrompt}
+        shopOpen={shopOpen}
+        busy={openBusy}
+        onDismiss={() => setBoundaryPrompt(null)}
+        onSetOpen={async (next) => {
+          if (await toggleOpen(next)) setBoundaryPrompt(null);
+        }}
+      />
 
       <Tabs value={tab} onChange={(_, v) => setTab(v)} className={styles.tabs}>
         <Tab value="new" label="New Order" sx={{ textTransform: 'none', fontWeight: 700 }} />

@@ -52,10 +52,11 @@
     transition: color 160ms var(--ease-out);
 }
 
-.faqIcon {
+/* Class doubled to out-specify MUI's runtime-injected .MuiSvgIcon-root
+   font-size, which is otherwise equal specificity and wins on order. */
+.faqIcon.faqIcon {
     color: var(--accent-color);
     font-size: 22px;
-    font-weight: 400;
     flex-shrink: 0;
     transform: rotate(0deg);
     transition: transform 200ms var(--ease-in-out);
@@ -73,7 +74,7 @@
     padding-bottom: 20px;
 }
 
-.open .faqIcon {
+.open .faqIcon.faqIcon {
     transform: rotate(45deg);
 }
 
@@ -91,4 +92,63 @@
 
 @media (max-width: 640px) {
     .sectionTitle { font-size: 30px; }
+}
+
+/* Link out to the full, searchable list. */
+.seeAll {
+    /* The section is a plain block, so auto margins do the centring. */
+    width: fit-content;
+    margin: 28px auto 0;
+    min-height: 44px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--brand-50);
+    border: 1px solid var(--brand-200);
+    color: var(--brand-700);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    transition: background-color 160ms ease, transform 160ms var(--ease-out);
+}
+
+.seeAllIcon.seeAllIcon {
+    font-size: 17px;
+    transition: transform 200ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .seeAll:hover {
+        background: var(--brand-100);
+        transform: translateY(-1px);
+    }
+
+    /* Nudges toward where the link goes. */
+    .seeAll:hover .seeAllIcon.seeAllIcon {
+        transform: translateX(2px);
+    }
+}
+
+.seeAll:active {
+    transform: scale(0.98);
+    transition-duration: var(--duration-press);
+}
+
+.seeAll:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .seeAll,
+    .seeAllIcon.seeAllIcon {
+        transition: none;
+    }
+
+    .seeAll:hover,
+    .seeAll:active,
+    .seeAll:hover .seeAllIcon.seeAllIcon {
+        transform: none;
+    }
 }

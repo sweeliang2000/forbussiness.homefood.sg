@@ -1,0 +1,199 @@
+/*
+  Team page.
+
+  Motion is limited to the one thing that is actually interactive: the photo,
+  which is a link to LinkedIn. Everything else is static — a page you read
+  once should not perform.
+*/
+
+.page {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 64px var(--side-spacing) 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 64px;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    text-align: center;
+}
+
+.heroTitle {
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    line-height: 1.08;
+    /* Tightens as the type grows. */
+    letter-spacing: -0.03em;
+    color: var(--on-primary);
+    text-wrap: balance;
+}
+
+.heroLead {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--on-primary-light2);
+    text-wrap: pretty;
+}
+
+/* ---------- Members ---------- */
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.sectionTitle {
+    font-size: clamp(1.375rem, 2.4vw, 1.75rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--on-primary);
+}
+
+.memberList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    list-style: none;
+}
+
+.member {
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.memberPhotoWrap {
+    position: relative;
+    display: block;
+    width: 220px;
+    height: 220px;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background: var(--surface-sunken);
+    margin-bottom: 12px;
+    transition:
+        transform 200ms var(--ease-out),
+        box-shadow 200ms var(--ease-out);
+}
+
+.memberPhoto {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.linkedinBadge {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: #0a66c2;
+    backdrop-filter: blur(6px);
+    font-size: 15px;
+    transition: transform 200ms var(--ease-out);
+}
+
+/* Hover-gated: on touch, a tap would otherwise leave the lift stuck on. */
+@media (hover: hover) and (pointer: fine) {
+    .memberPhotoWrap:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--elevation-2);
+    }
+
+    .memberPhotoWrap:hover .linkedinBadge {
+        transform: scale(1.08);
+    }
+}
+
+.memberPhotoWrap:active {
+    transform: scale(0.985);
+    transition-duration: var(--duration-press);
+}
+
+.memberPhotoWrap:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 3px;
+}
+
+.memberName {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--on-primary);
+}
+
+.memberTitle {
+    font-size: 0.875rem;
+    color: var(--on-primary-light2);
+}
+
+/* ---------- Footer note ---------- */
+
+.footerNote {
+    padding-top: 28px;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--on-primary-light2);
+}
+
+.footerNote a {
+    color: var(--link-color);
+    font-weight: 600;
+}
+
+.footerNote a:hover {
+    color: var(--link-hover-color);
+}
+
+/* ---------- Adaptation ---------- */
+
+@media (max-width: 640px) {
+    .page {
+        padding: 40px 1rem 64px;
+        gap: 44px;
+    }
+
+    .memberList {
+        gap: 24px;
+    }
+
+    /* Two per row. The photo fills its column — sizing it to 50% as well
+       would halve an already-halved width. */
+    .member {
+        width: calc(50% - 12px);
+    }
+
+    .memberPhotoWrap {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .memberPhotoWrap,
+    .linkedinBadge {
+        transition: none;
+    }
+
+    .memberPhotoWrap:hover,
+    .memberPhotoWrap:active {
+        transform: none;
+    }
+}

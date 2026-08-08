@@ -15,7 +15,7 @@ const LandingFooter = () => {
                 <div>
                     <h4>Product</h4>
                     <ul>
-                        <li><Link href="/#offer">What we offer</Link></li>
+                        <li><Link href="/#features">Features</Link></li>
                         <li><Link href="/#how">How it works</Link></li>
                         <li><Link href="/founding-sellers">Founding Seller programme</Link></li>
                         <li><Link href="/pricing">Pricing</Link></li>
@@ -24,7 +24,7 @@ const LandingFooter = () => {
                 <div>
                     <h4>Support</h4>
                     <ul>
-                        <li><Link href="/#faq">FAQ</Link></li>
+                        <li><Link href="/faq">FAQ</Link></li>
                         <li>
                             <a
                                 href={WHATSAPP_URL}
@@ -42,7 +42,8 @@ const LandingFooter = () => {
                 <div>
                     <h4>Company</h4>
                     <ul>
-                        <li><a href="#">About</a></li>
+                        <li><Link href="/about">About</Link></li>
+                        <li><Link href="/team">Team</Link></li>
                         <li><Link href="/careers">Careers</Link></li>
                         <li><Link href="/privacy">Privacy</Link></li>
                     </ul>

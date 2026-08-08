@@ -168,8 +168,13 @@
   color: var(--brand-700);
 }
 
-.badgeBolt {
-  margin-left: 6px;
+/* Class doubled to out-specify MUI's runtime-injected
+   .MuiSvgIcon-root font-size, which is otherwise equal specificity
+   and wins on document order. */
+.badgeBolt.badgeBolt {
+  margin-left: 4px;
+  font-size: 13px;
+  vertical-align: -2px;
 }
 
 .reason {
@@ -208,10 +213,53 @@
 .legend {
   margin-top: 12px;
   display: grid;
-  gap: 8px;
+  gap: 10px;
   font-size: var(--text-caption);
   font-weight: 500;
   color: var(--label-secondary);
+}
+
+/*
+  Each row leads with the indicator it explains, rather than a generic
+  coloured circle: the previous legend used the same green dot for both
+  "Open" and "Has pre-orders", which are different signals on the calendar.
+*/
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legendDot.legendDot {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.legendOpen {
+  color: var(--success);
+}
+
+.legendClosed {
+  color: var(--danger);
+}
+
+.legendBolt.legendBolt {
+  font-size: 15px;
+  color: var(--brand-700);
+  flex-shrink: 0;
+}
+
+/* A miniature of the real badge, so the legend and the calendar cell are
+   visibly the same object. */
+.legendPill {
+  flex-shrink: 0;
+  font-size: var(--text-caption-2);
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--success-soft);
+  border: 1px solid var(--success-border);
+  color: #186B2C;
 }
 
 /*
@@ -250,8 +298,17 @@
 }
 
 .popHint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   color: var(--label-secondary);
   font-size: var(--text-caption);
+}
+
+.popHintGlyph.popHintGlyph {
+  font-size: 14px;
+  color: var(--warning);
+  flex-shrink: 0;
 }
 
 .popActions {

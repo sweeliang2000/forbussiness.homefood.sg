@@ -2,7 +2,7 @@
 import styles from './LandingPage.module.css';
 import HeroSection from '../HeroSection/HeroSection';
 import StatementSection from '../StatementSection/StatementSection';
-import OfferSection from '../OfferSection/OfferSection';
+import FeaturesSection from '../FeaturesSection/FeaturesSection';
 import HowItWorksSection from '../HowItWorksSection/HowItWorksSection';
 import PaymentsSection from '../PaymentsSection/PaymentsSection';
 import PricingSection from '../PricingSection/PricingSection';
@@ -18,7 +18,7 @@ const LandingPage = () => {
 
             <StatementSection />
 
-            <OfferSection />
+            <FeaturesSection />
 
             <HowItWorksSection />
 

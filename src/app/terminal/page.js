@@ -143,13 +143,13 @@ const TerminalPage = () => {
         if (isCheckingAuth) return; // Wait for auth check to complete
 
         const checkStampEnabled = async () => {
-            console.log('🚀 Starting checkStampEnabled...');
+            console.log('Starting checkStampEnabled...');
             try {
                 const response = await apiClient.get('/api/mobile/stampDataIsEnabled');
                 const result = response.data;
                 
-                console.log('📦 Full API response:', JSON.stringify(result, null, 2));
-                console.log('📦 Parsed result:', result);
+                console.log('Full API response:', JSON.stringify(result, null, 2));
+                console.log('Parsed result:', result);
                 
                 // Check if data.isEnabled is "true" (it's a string in the response)
                 const checkDetails = {
@@ -163,13 +163,13 @@ const TerminalPage = () => {
                     isEnabledTruthy: !!result.data?.isEnabled,
                     fullCondition: result.success && result.data && result.data.isEnabled === "true"
                 };
-                console.log('🔍 Checking isEnabled - Full details:', checkDetails);
+                console.log('Checking isEnabled - Full details:', checkDetails);
                 
                 // Step by step condition check
                 const step1 = result.success;
                 const step2 = !!result.data;
                 const step3 = result.data?.isEnabled === "true";
-                console.log('🔍 Condition steps:', {
+                console.log('Condition steps:', {
                     step1_success: step1,
                     step2_hasData: step2,
                     step3_isEnabledEqualsTrue: step3,
@@ -177,12 +177,12 @@ const TerminalPage = () => {
                 });
                 
                 if (result.success && result.data && result.data.isEnabled === "true") {
-                    console.log('✅✅✅ ALL CONDITIONS MET - Setting isStampEnabled to TRUE');
-                    console.log('📝 Calling setIsStampEnabled(true)');
+                    console.log('ALL CONDITIONS MET - Setting isStampEnabled to TRUE');
+                    console.log('Calling setIsStampEnabled(true)');
                     setIsStampEnabled(true);
-                    console.log('✅ setIsStampEnabled(true) called');
+                    console.log('setIsStampEnabled(true) called');
                 } else {
-                    console.log('❌❌❌ CONDITIONS NOT MET - Setting isStampEnabled to FALSE', {
+                    console.log('CONDITIONS NOT MET - Setting isStampEnabled to FALSE', {
                         success: result.success,
                         hasData: !!result.data,
                         isEnabled: result.data?.isEnabled,
@@ -191,8 +191,8 @@ const TerminalPage = () => {
                     setIsStampEnabled(false);
                 }
             } catch (err) {
-                console.error('💥 Error checking stamp enabled status:', err);
-                console.error('💥 Error details:', {
+                console.error('Error checking stamp enabled status:', err);
+                console.error('Error details:', {
                     message: err.message,
                     status: err?.response?.status,
                     stack: err.stack
@@ -200,9 +200,9 @@ const TerminalPage = () => {
                 
                 // 404 means stamps are not enabled
                 if (err?.response?.status === 404) {
-                    console.log('❌ Stamp functionality is disabled (404)');
+                    console.log('Stamp functionality is disabled (404)');
                 } else {
-                    console.warn('⚠️ Unexpected error when checking stamp enabled:', err?.response?.status);
+                    console.warn('Unexpected error when checking stamp enabled:', err?.response?.status);
                 }
                 // On error, default to disabled
                 setIsStampEnabled(false);
@@ -214,7 +214,7 @@ const TerminalPage = () => {
 
     // Debug: Log whenever isStampEnabled changes
     useEffect(() => {
-        console.log('🔄🔄🔄 isStampEnabled state changed to:', isStampEnabled, 'type:', typeof isStampEnabled, 'boolean value:', !!isStampEnabled);
+        console.log('isStampEnabled state changed to:', isStampEnabled, 'type:', typeof isStampEnabled, 'boolean value:', !!isStampEnabled);
         console.trace('Stack trace for isStampEnabled change');
     }, [isStampEnabled]);
 
@@ -379,7 +379,7 @@ const TerminalPage = () => {
             {/* Right Side */}
             {phoneNumber ? (
                 <>
-                    {console.log('🔍🔍🔍 Passing isStampEnabled to TerminalControlPanel:', {
+                    {console.log('Passing isStampEnabled to TerminalControlPanel:', {
                         isStampEnabled,
                         type: typeof isStampEnabled,
                         booleanValue: !!isStampEnabled,

@@ -11,6 +11,7 @@ import {
   DialogTitle,
   TextField,
 } from '@mui/material';
+import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import ReviewBox from '../../../components/ReviewBox/ReviewBox';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import apiClient from '@/utility/api';
@@ -103,7 +104,11 @@ export default function RatingsPage() {
         <Alert severity="error" onClose={() => setError('')} sx={{ mt: 2 }}>{error}</Alert>
       ) : summary.count === 0 ? (
         <div className={styles.emptyState}>
-          <div className={styles.emptyStars}>★★★★★</div>
+          <div className={styles.emptyStars} aria-hidden="true">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <StarRoundedIcon key={i} className={styles.star} />
+            ))}
+          </div>
           <h3>No reviews yet</h3>
           <p>When customers review your shop, their ratings will appear here.</p>
         </div>
@@ -112,9 +117,20 @@ export default function RatingsPage() {
           <div className={styles.summaryCard}>
             <div className={styles.summaryScore}>
               <div className={styles.avgNumber}>{summary.average.toFixed(1)}</div>
-              <div className={styles.avgStars}>
-                {'★'.repeat(Math.round(summary.average))}
-                <span className={styles.avgStarsMuted}>{'★'.repeat(5 - Math.round(summary.average))}</span>
+              <div
+                className={styles.avgStars}
+                role="img"
+                aria-label={`${summary.average.toFixed(1)} out of 5 stars`}
+              >
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <StarRoundedIcon
+                    key={i}
+                    aria-hidden="true"
+                    className={`${styles.star} ${
+                      i < Math.round(summary.average) ? '' : styles.avgStarsMuted
+                    }`}
+                  />
+                ))}
               </div>
               <div className={styles.avgCount}>{summary.count} review{summary.count === 1 ? '' : 's'}</div>
             </div>
@@ -123,7 +139,10 @@ export default function RatingsPage() {
                 const n = summary.distribution?.[star] ?? 0;
                 return (
                   <div key={star} className={styles.distRow}>
-                    <span className={styles.distLabel}>{star}★</span>
+                    <span className={styles.distLabel}>
+                      {star}
+                      <StarRoundedIcon className={styles.distStar} aria-hidden="true" />
+                    </span>
                     <div className={styles.distTrack}>
                       <div className={styles.distFill} style={{ width: `${(n / maxBar) * 100}%` }} />
                     </div>

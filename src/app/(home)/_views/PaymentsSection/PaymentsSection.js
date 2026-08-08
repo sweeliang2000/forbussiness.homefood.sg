@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import styles from './PaymentsSection.module.css';
 import Badge from '@/components/Badge';
 
@@ -65,25 +66,33 @@ const PaymentsSection = () => {
                     <h3>We settle everything</h3>
                     <div className={styles.settleList}>
                         <div className={styles.settleItem}>
-                            <div className={styles.check}>✓</div>
+                            <div className={styles.check}>
+                                <CheckRoundedIcon className={styles.checkGlyph} aria-hidden="true" />
+                            </div>
                             <div className={styles.ct}>
                                 <b>Refunds &amp; chargebacks</b> are handled by us. If a customer disputes, we investigate — you don&apos;t.
                             </div>
                         </div>
                         <div className={styles.settleItem}>
-                            <div className={styles.check}>✓</div>
+                            <div className={styles.check}>
+                                <CheckRoundedIcon className={styles.checkGlyph} aria-hidden="true" />
+                            </div>
                             <div className={styles.ct}>
                                 <b>Monthly payout</b> to your bank account. Take it out when you want, see every order itemised.
                             </div>
                         </div>
                         <div className={styles.settleItem}>
-                            <div className={styles.check}>✓</div>
+                            <div className={styles.check}>
+                                <CheckRoundedIcon className={styles.checkGlyph} aria-hidden="true" />
+                            </div>
                             <div className={styles.ct}>
                                 <b>Transparent fees</b> deducted automatically. Nothing to reconcile by hand.
                             </div>
                         </div>
                         <div className={styles.settleItem}>
-                            <div className={styles.check}>✓</div>
+                            <div className={styles.check}>
+                                <CheckRoundedIcon className={styles.checkGlyph} aria-hidden="true" />
+                            </div>
                             <div className={styles.ct}>
                                 <b>No cash register</b>, no card reader, no POS hardware to buy.
                             </div>
