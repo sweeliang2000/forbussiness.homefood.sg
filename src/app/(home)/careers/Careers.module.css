@@ -1,0 +1,183 @@
+/*
+  Careers page, currently with no openings.
+
+  Deliberately unanimated apart from press/hover feedback on the one control.
+  An empty state is a page the visitor wants to read and leave; motion here
+  would only delay the single fact they came for.
+*/
+
+.page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 64px var(--side-spacing) 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+}
+
+.hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    text-align: center;
+}
+
+.heroTitle {
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    color: var(--on-primary);
+    text-wrap: balance;
+}
+
+.heroLead {
+    max-width: 56ch;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--on-primary-light2);
+    text-wrap: pretty;
+}
+
+/* ---------- Empty state ---------- */
+
+.emptyState {
+    padding: 48px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+}
+
+.emptyIcon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    /* Muted rather than branded: this is an absence, not an offer. */
+    background: var(--fill-quaternary);
+    color: var(--label-tertiary);
+    margin-bottom: 4px;
+}
+
+/* Class doubled to out-specify MUI's runtime-injected .MuiSvgIcon-root
+   font-size, which is otherwise equal specificity and wins on order. */
+.emptyGlyph.emptyGlyph {
+    font-size: 30px;
+}
+
+.emptyTitle {
+    font-size: 1.375rem;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    color: var(--on-primary);
+}
+
+.emptyBody {
+    max-width: 52ch;
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--on-primary-light2);
+    text-wrap: pretty;
+}
+
+.emailButton {
+    margin-top: 10px;
+    min-height: 48px;
+    padding: 0 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    border-radius: var(--radius-pill);
+    background: var(--brand-50);
+    border: 1px solid var(--brand-200);
+    color: var(--brand-700);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    transition: background-color 160ms ease, transform 160ms var(--ease-out);
+}
+
+.emailGlyph.emailGlyph {
+    font-size: 18px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .emailButton:hover {
+        background: var(--brand-100);
+        transform: translateY(-1px);
+    }
+}
+
+.emailButton:active {
+    transform: scale(0.98);
+    transition-duration: var(--duration-press);
+}
+
+.emailButton:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 3px;
+}
+
+/* ---------- Notes ---------- */
+
+.notes {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.notesTitle {
+    font-size: 1.25rem;
+    letter-spacing: -0.015em;
+    color: var(--on-primary);
+}
+
+.notesList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-left: 20px;
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--on-primary-light2);
+}
+
+.notesList li::marker {
+    color: var(--label-quaternary);
+}
+
+/* ---------- Adaptation ---------- */
+
+@media (max-width: 640px) {
+    .page {
+        padding: 40px 1rem 64px;
+        gap: 36px;
+    }
+
+    .emptyState {
+        padding: 36px 20px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .emailButton {
+        transition: none;
+    }
+
+    .emailButton:hover,
+    .emailButton:active {
+        transform: none;
+    }
+}
+
+@media (prefers-contrast: more) {
+    .emptyState {
+        border-color: rgba(0, 0, 0, 0.4);
+    }
+}
