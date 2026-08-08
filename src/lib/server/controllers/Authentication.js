@@ -3106,6 +3106,34 @@ export const publishMenuUpdate = asyncHandler(async (req, res) => {
 
 
 const sesClient = { send: (command) => getSes().send(command) };
+
+/**
+ * The shop's customer-facing display name, for addressing invitations by
+ * name rather than "their shop".
+ *
+ * Returns null rather than throwing: a shop that hasn't filled in its
+ * customer-facing details yet is a normal state, and a hiccup reading an
+ * optional label must never be the reason an invitation fails to send. The
+ * template falls back to generic wording.
+ */
+async function getShopDisplayName(shop_id) {
+  if (!shop_id) return null;
+  try {
+    const { Item } = await client.send(new GetItemCommand({
+      TableName: 'CustomerFacingDetails',
+      Key: { shop_id: { S: shop_id } },
+      // Aliased in case `displayName` ever collides with a reserved word.
+      ProjectionExpression: '#dn',
+      ExpressionAttributeNames: { '#dn': 'displayName' }
+    }));
+    const name = Item?.displayName?.S?.trim();
+    return name || null;
+  } catch (error) {
+    console.error('Could not read shop display name for invitation:', error?.message);
+    return null;
+  }
+}
+
 export const InviteUsers = asyncHandler(async (req, res, next) => {
   const {receiverEmail, location_id, role, location_name} = req.body;
   const cookie = req.cookies.userDataHTTP;
@@ -3238,6 +3266,7 @@ export const InviteUsers = asyncHandler(async (req, res, next) => {
     const params = inviteEmailParams({
       to: receiverEmail,
       invitedBy: invitedFromEmail,
+      shopName: await getShopDisplayName(shop_id),
       role,
       userExists: exists
     });
@@ -3337,6 +3366,7 @@ export const sendInvitedUserAgain = asyncHandler(async (req, res, next) => {
     const params = inviteEmailParams({
       to: receiverEmail,
       invitedBy: invitation.invitedFrom?.S,
+      shopName: await getShopDisplayName(userData.shop_id),
       role: invitation.role?.S,
       userExists: exists,
       isReminder: true

@@ -53,26 +53,37 @@ const signupUrl = () => `${FRONTEND_BASE_URL}/signup`;
 /**
  * @param {object} options
  * @param {string} options.invitedBy   who sent the invitation
+ * @param {string} [options.shopName]  the shop's customer-facing display name;
+ *   omitted when the shop hasn't set one, which falls back to generic wording
  * @param {string} options.role        the role being granted
  * @param {boolean} options.userExists whether they already have an account
  * @param {boolean} options.isReminder true for a resend
  */
-export function buildInviteEmail({ invitedBy, role, userExists, isReminder = false }) {
+export function buildInviteEmail({ invitedBy, shopName, role, userExists, isReminder = false }) {
   const roleLabel = role || 'Operator';
   const inviter = invitedBy || 'Someone';
+  const shop = shopName?.trim() || null;
 
   const primaryUrl = userExists ? acceptUrl() : signupUrl();
   const primaryLabel = userExists ? 'Accept invitation' : 'Create your account';
 
+  // Naming the shop is the difference between "someone invited you somewhere"
+  // and a message the recipient can place immediately.
   const subject = isReminder
-    ? 'Reminder: your invitation to HomeFood for Business'
-    : `${inviter} invited you to their shop on HomeFood`;
+    ? shop
+      ? `Reminder: your invitation to ${shop} on HomeFood`
+      : 'Reminder: your invitation to HomeFood for Business'
+    : shop
+      ? `${inviter} invited you to join ${shop} on HomeFood`
+      : `${inviter} invited you to their shop on HomeFood`;
+
+  const where = shop ? shop : 'their shop';
 
   // Inbox preview line. Without one, clients scrape the first visible text,
   // which is the wordmark — every message previews identically.
   const preheader = userExists
-    ? `Sign in to accept and start working in their shop as ${roleLabel}.`
-    : `Create your HomeFood account to accept the invitation as ${roleLabel}.`;
+    ? `Sign in to accept and start working in ${where} as ${roleLabel}.`
+    : `Create your HomeFood account to join ${where} as ${roleLabel}.`;
 
   const steps = userExists
     ? [`Accept the invitation from the banner on your Users &amp; permissions page.`]
@@ -89,8 +100,11 @@ export function buildInviteEmail({ invitedBy, role, userExists, isReminder = fal
       ];
 
   const text = [
-    `${inviter} has invited you to help run their shop on HomeFood for Business.`,
+    shop
+      ? `${inviter} has invited you to help run ${shop} on HomeFood for Business.`
+      : `${inviter} has invited you to help run their shop on HomeFood for Business.`,
     ``,
+    ...(shop ? [`Shop: ${shop}`] : []),
     `Your role: ${roleLabel}`,
     ``,
     ...textSteps,
@@ -148,13 +162,29 @@ export function buildInviteEmail({ invitedBy, role, userExists, isReminder = fal
             <tr><td style="padding:30px 32px 0 32px;">
               <h1 style="margin:0 0 10px 0;font-size:23px;line-height:1.24;letter-spacing:-0.015em;color:${INK};font-weight:700;">You've been invited</h1>
               <p style="margin:0 0 22px 0;font-size:15px;line-height:1.55;color:${MUTED};">
-                <strong style="color:${INK};font-weight:600;">${escapeHtml(inviter)}</strong> has invited you to help run their shop on HomeFood for Business.
+                <strong style="color:${INK};font-weight:600;">${escapeHtml(inviter)}</strong> has invited you to help run ${
+                  shop
+                    ? `<strong style="color:${INK};font-weight:600;">${escapeHtml(shop)}</strong>`
+                    : 'their shop'
+                } on HomeFood for Business.
               </p>
 
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 24px 0;">
                 <tr><td style="background:#f9f9fb;border:1px solid ${HAIRLINE};border-radius:12px;padding:14px 16px;">
-                  <p style="margin:0 0 3px 0;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:${FAINT};">Your role</p>
-                  <p style="margin:0;font-size:16px;font-weight:600;color:${INK};">${escapeHtml(roleLabel)}</p>
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                    ${
+                      shop
+                        ? `<tr><td style="padding:0 0 12px 0;">
+                      <p style="margin:0 0 3px 0;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:${FAINT};">Shop</p>
+                      <p style="margin:0;font-size:16px;font-weight:600;color:${INK};">${escapeHtml(shop)}</p>
+                    </td></tr>`
+                        : ''
+                    }
+                    <tr><td>
+                      <p style="margin:0 0 3px 0;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:${FAINT};">Your role</p>
+                      <p style="margin:0;font-size:16px;font-weight:600;color:${INK};">${escapeHtml(roleLabel)}</p>
+                    </td></tr>
+                  </table>
                 </td></tr>
               </table>
 
