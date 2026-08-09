@@ -12,8 +12,13 @@
     /* dvh, not vh: on mobile Safari 100vh is taller than the visible area, so
        the card sat partly under the browser chrome. */
     min-height: 100dvh;
-    max-width: 100rem;
-    margin: 0 auto;
+    /*
+      Full bleed, deliberately. This was capped at 100rem and centred, which
+      on anything wider than 1600px left a grey band down the left where the
+      gradient stopped — it read as a rendering fault, not a margin. The
+      backgrounds now reach the viewport edge and the *content* inside each
+      panel is what's width-capped.
+    */
 }
 
 /* ---------- Brand panel ---------- */
@@ -21,13 +26,18 @@
 .brandPanel {
     display: flex;
     align-items: center;
+    /* Centred rather than left-aligned now the panel can be 960px wide — at
+       the edge it drifts away from the form it's paired with. */
+    justify-content: center;
     padding: 48px;
     background: var(--brand-gradient);
     color: #fff;
+    overflow: hidden;
 }
 
 .brandInner {
-    max-width: 32rem;
+    width: 100%;
+    max-width: 34rem;
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -114,6 +124,47 @@
     color: var(--link-hover-color);
 }
 
+/* ---------- Entrance ---------- */
+
+/*
+  A short settle on arrival. This is a first-impression surface reached a
+  handful of times a week, not a control someone hammers — the delight budget
+  is allowed here, but only just.
+
+  CSS animation rather than JS: it runs off the main thread, and this page is
+  simultaneously booting the app bundle. `transform` and `opacity` only, so
+  nothing lays out twice.
+
+  The card carries no delay. Someone opening the login page came to type, and
+  making them watch the brand panel first would be a worse page for a nicer
+  demo. The brand copy files in behind it.
+*/
+@keyframes authRise {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 8px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.card,
+.brandEyebrow,
+.brandTagline {
+    animation: authRise var(--duration-standard) var(--ease-out) both;
+}
+
+/* 50ms apart — enough to read as sequence, not as waiting. */
+.brandEyebrow {
+    animation-delay: 40ms;
+}
+
+.brandTagline {
+    animation-delay: 90ms;
+}
+
 /* ---------- Adaptation ---------- */
 
 @media (max-width: 900px) {
@@ -148,6 +199,26 @@
     .card {
         padding: 28px 20px;
     }
+}
+
+/*
+  Gentler, not absent: the fade still signals "this just arrived", but nothing
+  travels. globals.css already collapses animation durations under this query,
+  so this exists to drop the translate specifically and restore a usable fade
+  on top of it.
+*/
+@media (prefers-reduced-motion: reduce) {
+    .card,
+    .brandEyebrow,
+    .brandTagline {
+        animation: authFade 200ms ease both !important;
+        animation-delay: 0ms !important;
+    }
+}
+
+@keyframes authFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @media (prefers-contrast: more) {
