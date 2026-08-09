@@ -52,6 +52,8 @@ npm run dev
 Terminal 2 — forward webhooks (do **not** prefix with `sudo`; it reads a different `~/.config/stripe` and may not be authenticated as you):
 
 ```bash
+stripe listen --forward-to http://localhost:3000/api/subscription/webhook
+
 stripe listen --events checkout.session.completed,checkout.session.expired,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted,invoice.paid,invoice.payment_failed --forward-to http://localhost:3000/api/subscription/webhook
 ```
 
