@@ -16,6 +16,15 @@ export const COOKIE_NAMES = {
   USER_DATA_HTTP: 'userDataHTTP',
   USER_DATA_NON_HTTP: 'userDataNonHTTP',
   AUTH_STATUS: 'authStatus',
+  /**
+   * Identifies this browser's row in the BusinessSessions registry.
+   *
+   * Cognito can neither list a user's sessions nor revoke one of them, so the
+   * app keeps its own registry and this is the handle into it. verifyToken
+   * rejects a request whose session row is missing or revoked, which is what
+   * makes per-device sign-out possible at all.
+   */
+  SESSION_ID: 'sid',
 };
 
 export const ALL_COOKIE_NAMES = Object.values(COOKIE_NAMES);

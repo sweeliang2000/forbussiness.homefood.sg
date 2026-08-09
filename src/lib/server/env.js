@@ -77,6 +77,8 @@ export const SES_FROM_NAME = process.env.SES_FROM_NAME || 'HomeFood for Business
 export const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || 'https://business.homefood.sg';
 export const CUSTOMER_BASE_URL = process.env.CUSTOMER_BASE_URL || 'https://homefood.sg';
 export const USERS_TABLE = process.env.USERS_TABLE || 'Users';
+/** Session registry — see src/lib/server/sessions.js and scripts/add-business-sessions.md. */
+export const SESSIONS_TABLE = process.env.SESSIONS_TABLE || 'BusinessSessions';
 
 /**
  * Test hook that redirects payment-failed mail away from real merchants.

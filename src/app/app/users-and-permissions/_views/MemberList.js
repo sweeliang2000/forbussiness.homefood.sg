@@ -74,6 +74,61 @@ export const EmptyState = ({ icon, title, children }) => (
     </div>
 );
 
+/*
+  A user-agent string is unreadable in a list. Reduced to "browser on OS",
+  which is the only thing anyone is actually scanning for — "was that my
+  laptop, or something I don't recognise?"
+
+  Order matters: Edge and Opera both claim to be Chrome, and Chrome claims to
+  be Safari, so the most specific test has to come first. This is deliberately
+  approximate — a UA parser dependency would be a lot of weight for one label.
+*/
+export const describeDevice = (userAgent) => {
+  if (!userAgent) return 'Unknown device';
+
+  const ua = String(userAgent);
+  const browser =
+    /Edg\//.test(ua) ? 'Edge' :
+    /OPR\/|Opera/.test(ua) ? 'Opera' :
+    /Firefox\//.test(ua) ? 'Firefox' :
+    /Chrome\//.test(ua) ? 'Chrome' :
+    /Safari\//.test(ua) ? 'Safari' :
+    null;
+
+  const os =
+    /iPhone/.test(ua) ? 'iPhone' :
+    /iPad/.test(ua) ? 'iPad' :
+    /Android/.test(ua) ? 'Android' :
+    /Mac OS X|Macintosh/.test(ua) ? 'macOS' :
+    /Windows/.test(ua) ? 'Windows' :
+    /Linux/.test(ua) ? 'Linux' :
+    null;
+
+  if (browser && os) return `${browser} on ${os}`;
+  return browser || os || 'Unknown device';
+};
+
+export const isMobileDevice = (userAgent) =>
+  /iPhone|iPad|Android|Mobile/i.test(userAgent || '');
+
+/** "2 minutes ago" reads faster than a timestamp for recent activity. */
+export const describeLastSeen = (iso) => {
+  const then = iso ? Date.parse(iso) : NaN;
+  if (!Number.isFinite(then)) return 'Unknown';
+
+  const seconds = Math.max(0, Math.round((Date.now() - then) / 1000));
+  if (seconds < 90) return 'Active now';
+
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes} min ago`;
+
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+
+  const days = Math.round(hours / 24);
+  return `${days} day${days === 1 ? '' : 's'} ago`;
+};
+
 export const SkeletonRows = ({ rows = 3 }) => (
     <div aria-hidden="true">
         {Array.from({ length: rows }, (_, index) => (

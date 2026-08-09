@@ -7,6 +7,8 @@ import { verifyAccessToken, verifyIdToken, decodeToken } from './cognito';
 import { getCookieOptions, COOKIE_NAMES } from './cookies';
 import { COGNITO_CLIENT_ID } from './env';
 import { ensureUserProvisioned } from './user-provisioning';
+import { getSession, isLive, touchSession } from './sessions';
+import { requestOrigin } from './request-origin';
 import {
   AppError,
   createAuthError,
@@ -67,9 +69,63 @@ function setUserDataCookies(req, res, { user_id, role, shop_id }) {
  * Express-style middleware: authenticate, refreshing tokens when possible.
  * Attaches the verified JWT payload to `req.user`.
  */
+/**
+ * The session gate.
+ *
+ * A valid Cognito token is no longer sufficient on its own: the browser must
+ * also present a `sid` naming a live row in the registry. That indirection is
+ * the whole point — Cognito can't revoke one device, but this can, because the
+ * next request through here stops being authenticated.
+ *
+ * Fails closed. A missing sid is treated exactly like a revoked one, which is
+ * also what logs out every pre-existing session the first time this ships.
+ */
+async function requireLiveSession(req, res) {
+  const sessionId = req.cookies[COOKIE_NAMES.SESSION_ID];
+  if (!sessionId) {
+    throw createAuthError('Session has ended. Please sign in again.');
+  }
+
+  let session;
+  try {
+    session = await getSession(sessionId);
+  } catch (error) {
+    // A registry that can't be read must not become an open door — so this
+    // fails closed even though that locks everyone out. The two ways it
+    // happens on a fresh environment are worth naming, because the symptom
+    // (nobody can sign in) looks nothing like the cause.
+    if (error?.name === 'ResourceNotFoundException') {
+      console.error(
+        'BusinessSessions table does not exist. See scripts/add-business-sessions.md.'
+      );
+    } else if (error?.name === 'AccessDeniedException') {
+      console.error(
+        'IAM does not allow reading BusinessSessions. See scripts/add-business-sessions.md step 3.'
+      );
+    } else {
+      console.error('Session lookup failed:', error?.message);
+    }
+    throw createAuthError('Could not verify the session. Please sign in again.');
+  }
+
+  if (!isLive(session)) {
+    throw createAuthError('Session has ended. Please sign in again.');
+  }
+
+  req.session_id = sessionId;
+  // Throttled internally to one write per five minutes, and never throws.
+  await touchSession(session, requestOrigin(req));
+
+  return session;
+}
+
 export async function verifyToken(req, res, next) {
   const accessToken = req.cookies[COOKIE_NAMES.ACCESS_TOKEN];
   const refreshToken = req.cookies[COOKIE_NAMES.REFRESH_TOKEN];
+
+  // Before any token work: if the session is dead, nothing else matters, and
+  // refreshing tokens for a revoked device would defeat the revocation.
+  await requireLiveSession(req, res);
 
   try {
     if (accessToken) {

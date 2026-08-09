@@ -6,31 +6,15 @@ import { LuMonitor, LuSmartphone } from 'react-icons/lu';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/utility/api';
 import {
-    USER_SIGN_IN_HISTORY,
+    USER_SESSIONS,
+    REVOKE_SESSION,
     SIGN_OUT_TEAM_MEMBER,
     GLOBAL_SIGN_OUT
 } from '@/utility/apiPaths';
 import AlertModal from '@/components/AlertModal/AlertModal';
 import Shimmer from '@/components/Shimmer/Shimmer';
+import { describeDevice, describeLastSeen, isMobileDevice } from './MemberList';
 import styles from './MemberSessions.module.css';
-
-const dateFormat = new Intl.DateTimeFormat('en-SG', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-});
-
-const formatWhen = (iso) => {
-    const date = new Date(iso);
-    return Number.isNaN(date.getTime()) ? 'Unknown time' : dateFormat.format(date);
-};
-
-// Enough to tell a phone from a laptop, which is the question being asked
-// here. Anything more precise wants a real UA parser.
-const isMobile = (userAgent) => /iphone|ipad|android|mobile/i.test(userAgent || '');
 
 const formatWhere = ({ city, region, country, ip }) => {
     const place = [city, region, country].filter(Boolean).join(', ');
@@ -40,38 +24,35 @@ const formatWhere = ({ city, region, country, ip }) => {
 
 const MemberSessions = ({ member, isSelf = false, isOpen, onClose, onSignedOut, onError }) => {
     const router = useRouter();
-    const [signIns, setSignIns] = useState([]);
+    const [sessions, setSessions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [confirmOpen, setConfirmOpen] = useState(false);
-    const [isSigningOut, setIsSigningOut] = useState(false);
+    const [revokingId, setRevokingId] = useState(null);
+    const [confirmAllOpen, setConfirmAllOpen] = useState(false);
+    const [isSigningOutAll, setIsSigningOutAll] = useState(false);
 
     const email = member?.email;
 
-    useEffect(() => {
-        if (!isOpen || !email) return undefined;
-
-        let cancelled = false;
+    const load = useCallback(async () => {
+        if (!email) return;
         setIsLoading(true);
-        setSignIns([]);
+        try {
+            const response = await apiClient.get(
+                `${USER_SESSIONS}?email=${encodeURIComponent(email)}`
+            );
+            setSessions(response.data?.data?.sessions || []);
+        } catch (error) {
+            if (onError) onError(error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [email, onError]);
 
-        apiClient
-            .get(`${USER_SIGN_IN_HISTORY}?email=${encodeURIComponent(email)}`)
-            .then((response) => {
-                if (!cancelled) setSignIns(response.data?.data?.signIns || []);
-            })
-            .catch((error) => {
-                if (!cancelled && onError) onError(error);
-            })
-            .finally(() => {
-                if (!cancelled) setIsLoading(false);
-            });
+    useEffect(() => {
+        if (!isOpen) return;
+        setSessions([]);
+        load();
+    }, [isOpen, load]);
 
-        return () => {
-            cancelled = true;
-        };
-    }, [isOpen, email, onError]);
-
-    // Escape closes the sheet, and the page behind it holds still while open.
     useEffect(() => {
         if (!isOpen) return undefined;
         const previousOverflow = document.body.style.overflow;
@@ -86,30 +67,44 @@ const MemberSessions = ({ member, isSelf = false, isOpen, onClose, onSignedOut, 
         };
     }, [isOpen, onClose]);
 
-    const handleSignOut = useCallback(async () => {
-        if (isSigningOut || !email) return;
-        setIsSigningOut(true);
+    const handleRevokeOne = useCallback(
+        async (session) => {
+            if (revokingId || !email) return;
+            setRevokingId(session.id);
+            try {
+                await apiClient.post(REVOKE_SESSION, { email, sessionId: session.id });
+                setSessions((current) => current.filter((s) => s.id !== session.id));
+            } catch (error) {
+                if (onError) onError(error);
+            } finally {
+                setRevokingId(null);
+            }
+        },
+        [email, revokingId, onError]
+    );
+
+    const handleSignOutAll = useCallback(async () => {
+        if (isSigningOutAll || !email) return;
+        setIsSigningOutAll(true);
         try {
             if (isSelf) {
-                // globalSignOut clears this request's cookies as well as
-                // revoking the refresh token, so the browser isn't left
-                // holding a session it can no longer renew.
+                // globalSignOut clears this request's cookies too, so the
+                // browser isn't left holding a session it can't renew.
                 await apiClient.post(GLOBAL_SIGN_OUT);
                 router.replace('/login');
                 return;
             }
-
             await apiClient.post(SIGN_OUT_TEAM_MEMBER, { email });
-            setConfirmOpen(false);
+            setConfirmAllOpen(false);
             onClose();
             if (onSignedOut) onSignedOut(email);
         } catch (error) {
-            setConfirmOpen(false);
+            setConfirmAllOpen(false);
             if (onError) onError(error);
         } finally {
-            setIsSigningOut(false);
+            setIsSigningOutAll(false);
         }
-    }, [email, isSelf, isSigningOut, router, onClose, onSignedOut, onError]);
+    }, [email, isSelf, isSigningOutAll, router, onClose, onSignedOut, onError]);
 
     return (
         <>
@@ -144,39 +139,62 @@ const MemberSessions = ({ member, isSelf = false, isOpen, onClose, onSignedOut, 
                 </header>
 
                 <div className={styles.body}>
-                    <p className={styles.sectionLabel}>Recent sign-ins</p>
+                    <p className={styles.sectionLabel}>Signed in on</p>
 
                     {isLoading ? (
-                        [0, 1, 2].map((i) => (
+                        [0, 1].map((i) => (
                             <div key={i} className={styles.skeleton}>
-                                <Shimmer width="150px" height="14px" responsive={false} />
-                                <Shimmer width={`${190 - i * 30}px`} height="12px" responsive={false} />
+                                <Shimmer width="160px" height="14px" responsive={false} />
+                                <Shimmer width={`${200 - i * 40}px`} height="12px" responsive={false} />
                             </div>
                         ))
-                    ) : signIns.length === 0 ? (
+                    ) : sessions.length === 0 ? (
                         <p className={styles.state}>
-                            No sign-ins recorded yet. History starts from the first login
-                            after this feature was added — earlier sessions were never
-                            recorded{isSelf ? ', including the one you’re using now' : ''}.
+                            No active sessions. {isSelf ? 'You' : 'They'} will appear here
+                            after signing in again.
                         </p>
                     ) : (
-                        signIns.map((entry, index) => {
-                            const where = formatWhere(entry);
-                            const Icon = isMobile(entry.userAgent) ? LuSmartphone : LuMonitor;
+                        sessions.map((session) => {
+                            const where = formatWhere(session);
+                            const Icon = isMobileDevice(session.userAgent)
+                                ? LuSmartphone
+                                : LuMonitor;
                             return (
-                                <div key={`${entry.at}-${index}`} className={styles.entry}>
+                                <div key={session.id} className={styles.entry}>
                                     <Icon className={styles.entryIcon} aria-hidden="true" />
                                     <div className={styles.entryMain}>
-                                        <div className={styles.entryWhen}>{formatWhen(entry.at)}</div>
-                                        <div className={styles.entryWhere}>
-                                            {where || (
-                                                <span className={styles.unknown}>Location unavailable</span>
+                                        <div className={styles.entryWhen}>
+                                            {describeDevice(session.userAgent)}
+                                            {session.isCurrent && (
+                                                <span className={styles.currentTag}>
+                                                    This device
+                                                </span>
                                             )}
                                         </div>
-                                        {entry.userAgent && (
-                                            <div className={styles.entryDevice}>{entry.userAgent}</div>
-                                        )}
+                                        <div className={styles.entryWhere}>
+                                            {where || (
+                                                <span className={styles.unknown}>
+                                                    Location unavailable
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className={styles.entryDevice}>
+                                            {describeLastSeen(session.lastSeenAt)}
+                                        </div>
                                     </div>
+                                    {/* Signing out the device you're using is what the
+                                        footer button is for, and it has to clear cookies
+                                        as well — so it isn't offered per-row. */}
+                                    {!session.isCurrent && (
+                                        <button
+                                            type="button"
+                                            className={styles.revokeButton}
+                                            onClick={() => handleRevokeOne(session)}
+                                            disabled={revokingId === session.id}
+                                        >
+                                            {revokingId === session.id ? 'Signing out…' : 'Sign out'}
+                                        </button>
+                                    )}
                                 </div>
                             );
                         })
@@ -186,25 +204,26 @@ const MemberSessions = ({ member, isSelf = false, isOpen, onClose, onSignedOut, 
                 <footer className={styles.footer}>
                     <p className={styles.footerNote}>
                         {isSelf
-                            ? 'Ends every session on all your devices, including this one — you’ll be returned to the login screen. Access tokens already issued keep working until they expire, usually within an hour.'
-                            : 'Ends every session on all their devices. Access tokens already issued keep working until they expire, usually within an hour.'}
+                            ? 'Signing out everywhere ends every session including this one — you’ll be returned to the login screen.'
+                            : 'Signing out everywhere ends every session on all their devices.'}{' '}
+                        A single device stops working within about a minute.
                     </p>
                     <Button
                         variant="outlined"
                         color="error"
                         className={styles.signOutButton}
-                        onClick={() => setConfirmOpen(true)}
-                        disabled={isSigningOut}
+                        onClick={() => setConfirmAllOpen(true)}
+                        disabled={isSigningOutAll}
                     >
-                        {isSigningOut ? 'Signing out…' : 'Sign out all sessions'}
+                        {isSigningOutAll ? 'Signing out…' : 'Sign out everywhere'}
                     </Button>
                 </footer>
             </aside>
 
             <AlertModal
-                open={confirmOpen}
-                onClose={() => !isSigningOut && setConfirmOpen(false)}
-                title={isSelf ? 'Sign out everywhere' : 'Sign out all sessions'}
+                open={confirmAllOpen}
+                onClose={() => !isSigningOutAll && setConfirmAllOpen(false)}
+                title="Sign out everywhere"
                 description={
                     isSelf ? (
                         <div>
@@ -224,9 +243,9 @@ const MemberSessions = ({ member, isSelf = false, isOpen, onClose, onSignedOut, 
                         </div>
                     )
                 }
-                onAction={handleSignOut}
-                actionButtonText={isSigningOut ? 'Signing out…' : 'Sign out all sessions'}
-                actionDisabled={isSigningOut}
+                onAction={handleSignOutAll}
+                actionButtonText={isSigningOutAll ? 'Signing out…' : 'Sign out everywhere'}
+                actionDisabled={isSigningOutAll}
                 type="error"
                 showActionButton={true}
             />

@@ -112,28 +112,6 @@ create table if not exists public.business_activity_log (
   created_at  timestamptz not null default now()
 );
 
--- Request context for auth events. Nullable because it is only available
--- behind Vercel's edge (x-vercel-ip-*) — locally these stay null and the UI
--- renders "Unknown location".
---
--- An IP is personal data under Singapore's PDPA. The privacy policy at
--- /privacy already discloses that technical information including IP address
--- is collected; keep that true if these are ever surfaced more widely.
-alter table public.business_activity_log add column if not exists ip         text;
-alter table public.business_activity_log add column if not exists user_agent text;
-alter table public.business_activity_log add column if not exists city       text;
-alter table public.business_activity_log add column if not exists country    text;
--- Vercel reports region separately from city and country, and the sign-in
--- panel shows all three.
-alter table public.business_activity_log add column if not exists region     text;
-
--- The sign-in panel reads one member's history: same shop, same actor, only
--- user.login, newest first. The (shop_id, actor_id) index above doesn't order,
--- so this keeps that query off a sort.
-create index if not exists business_activity_log_signin_idx
-  on public.business_activity_log (shop_id, actor_id, created_at desc)
-  where action = 'user.login';
-
 -- getActivityLog filters by shop and orders by created_at desc, limit <= 500.
 create index if not exists business_activity_log_shop_created_idx
   on public.business_activity_log (shop_id, created_at desc);
@@ -146,53 +124,6 @@ create index if not exists business_activity_log_shop_actor_idx
 create index if not exists business_activity_log_shop_action_idx
   on public.business_activity_log (shop_id, action);
 
-
--- ===========================================================================
--- Retention of request context
--- ===========================================================================
---
--- Postgres has no TTL, so without this the IP and user-agent of every sign-in
--- are kept forever. Both are personal data under the PDPA, which expects them
--- to be retained only as long as they serve the purpose they were collected
--- for — here, investigating suspicious access.
---
--- This scrubs the context rather than deleting the row: after 90 days you
--- still want to know a sign-in happened, you just no longer need to know from
--- which address. The audit trail survives; the personal data doesn't.
---
--- Safe to run repeatedly, and cheap — the partial index above keeps it from
--- scanning the whole table.
-create or replace function public.scrub_signin_context(older_than interval default '90 days')
-returns integer
-language sql
-security definer
-set search_path = public
-as $$
-  with scrubbed as (
-    update public.business_activity_log
-       set ip = null, user_agent = null, city = null, region = null, country = null
-     where action = 'user.login'
-       and created_at < now() - older_than
-       and (ip is not null or user_agent is not null
-            or city is not null or region is not null or country is not null)
-    returning 1
-  )
-  select count(*)::integer from scrubbed;
-$$;
-
--- Schedule it. pg_cron is available on Supabase but is not enabled by default;
--- enable it under Database → Extensions, or with the statement below.
---
---   create extension if not exists pg_cron;
---
---   select cron.schedule(
---     'scrub-signin-context',
---     '17 3 * * *',                      -- daily, 03:17 UTC
---     $$select public.scrub_signin_context()$$
---   );
---
--- Until that is scheduled, run `select public.scrub_signin_context();` by hand
--- or the retention policy exists only on paper.
 
 
 -- ===========================================================================

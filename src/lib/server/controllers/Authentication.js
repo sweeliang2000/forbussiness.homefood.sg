@@ -46,6 +46,7 @@ import { getAuthoritativeUser } from '../authoritative-user';
 import { getSupabase } from '../supabase';
 import { getStripe, getConnectStripe, getWebhookSecret } from '../stripe';
 import {
+  COOKIE_NAMES,
   getCookieOptions,
   setAwaitingVerificationCookies,
 } from '../cookies';
@@ -76,12 +77,15 @@ import {
   createExternalServiceError,
   asyncHandler,
 } from '../errors';
+import { recordActivity } from './activityLog';
+import { requestOrigin } from '../request-origin';
 import {
-  recordActivity,
-  recordActivityAs,
-  requestOrigin,
-  readSignInHistory,
-} from './activityLog';
+  createSession,
+  listSessionsForUser,
+  getSession,
+  revokeSession,
+  revokeAllSessionsForUser,
+} from '../sessions';
 import * as stripeConnectController from './stripeConnect';
 import {
   getStripeID,
@@ -197,24 +201,31 @@ export const signIn = asyncHandler(async (req, res, next) => {
       maxAge: 3600 * 1000,
     }));
 
-    res.cookie('userDataNonHTTP', JSON.stringify({ user_id, role, shop_id }), getCookieOptions({
-      httpOnly: false,
-      maxAge: 3600 * 1000,
-    }));
-
-    // The sign-in trail. recordActivityAs rather than recordActivity because
-    // the cookie it would read is only being set on this very response.
-    // Awaited but never allowed to throw — an audit write must not be able to
-    // fail a successful login.
-    await recordActivityAs(
-      { shopId: shop_id, actorId: user_id, actorRole: role },
-      {
-        action: 'user.login',
-        entityType: 'session',
-        entityId: user_id,
+    // Register this browser. Unlike the token cookies, this one is what
+    // verifyToken checks against the registry — so if it can't be created the
+    // login must fail rather than hand back a session nobody can revoke.
+    let sessionId;
+    try {
+      sessionId = await createSession({
+        userId: user_id,
+        shopId: shop_id,
         origin: requestOrigin(req)
+      });
+    } catch (sessionError) {
+      // The first-run failure mode: table absent or not in the IAM policy.
+      // Say which, or this reads as "login is broken" with no thread to pull.
+      if (sessionError?.name === 'ResourceNotFoundException') {
+        console.error('BusinessSessions table does not exist. See scripts/add-business-sessions.md.');
+      } else if (sessionError?.name === 'AccessDeniedException') {
+        console.error('IAM does not allow writing BusinessSessions. See scripts/add-business-sessions.md step 3.');
       }
-    );
+      throw createDatabaseError('create session', sessionError, 'exports.signIn');
+    }
+
+    res.cookie(COOKIE_NAMES.SESSION_ID, sessionId, getCookieOptions({
+      httpOnly: true,
+      maxAge: 7 * 24 * 3600 * 1000, // matches the refresh token and the row's TTL
+    }));
 
     res.status(200).json(createSuccessResponse("Sign-in successful"));
   } catch (err) {
@@ -547,6 +558,18 @@ export const confirmForgotPassword = asyncHandler(async (req, res, next) => {
 
 export const signOutUser = asyncHandler(async (req, res, next) => {
   try {
+    // Clearing cookies only ends the session on this browser. If the tokens
+    // were captured they stayed usable, so retire the registry row too.
+    const sessionId = req.cookies[COOKIE_NAMES.SESSION_ID];
+    if (sessionId) {
+      try {
+        await revokeSession(sessionId);
+      } catch (error) {
+        // Signing out must always succeed locally, even if the write doesn't.
+        console.error('Could not revoke session on sign-out:', error?.message);
+      }
+    }
+
     Object.keys(req.cookies).forEach((cookie) => {
       res.clearCookie(cookie, { path: '/' });
     });
@@ -584,6 +607,12 @@ export const globalSignOut = asyncHandler(async (req, res, next) => {
 
     // Send the command using the Cognito client
     const result = await cognitoClient.send(command);
+
+    // Cognito revokes the refresh tokens; the registry is what actually stops
+    // the next request, so both have to happen or a device keeps working for
+    // the remaining life of its access token.
+    await revokeAllSessionsForUser(userId);
+
     Object.keys(req.cookies).forEach((cookie) => {
       res.clearCookie(cookie, { path: '/' });
     });
@@ -3203,34 +3232,68 @@ async function resolveTeamTarget(req, targetEmail) {
 }
 
 /**
- * GET /api/data/userSignInHistory?email= — recent sign-ins for one member.
+ * GET /api/data/userSessions?email= — the devices currently signed in.
  *
- * Only what was recorded from the day this shipped; there's no historical
- * data to backfill, so a member who hasn't signed in since returns [].
+ * Live sessions only; TTL and revocation take care of the rest. The caller's
+ * own session is flagged so the UI can label it instead of offering a button
+ * that would sign them out of the page they're looking at.
  */
-export const getUserSignInHistory = asyncHandler(async (req, res) => {
-  const { actor, target } = await resolveTeamTarget(req, req.query?.email);
+export const getUserSessions = asyncHandler(async (req, res) => {
+  const { target } = await resolveTeamTarget(req, req.query?.email);
+  const currentSessionId = req.cookies[COOKIE_NAMES.SESSION_ID] ?? null;
 
-  const rows = await readSignInHistory({
-    shopId: actor.shop_id,
-    actorId: target.user_id,
-    limit: req.query?.limit
-  });
+  const sessions = await listSessionsForUser(target.user_id);
 
-  res.status(200).json(createSuccessResponse('Sign-in history retrieved', {
+  res.status(200).json(createSuccessResponse('Sessions retrieved', {
     email: target.user_id,
     role: target.role,
-    // readSignInHistory already flattens the columns and falls back to the
-    // pre-migration `detail` shape, so this is a straight rename.
-    signIns: rows.map((row) => ({
-      at: row.created_at,
-      ip: row.ip,
-      city: row.city,
-      region: row.region,
-      country: row.country,
-      userAgent: row.userAgent
+    sessions: sessions.map((session) => ({
+      id: session.sessionId,
+      isCurrent: session.sessionId === currentSessionId,
+      createdAt: session.createdAt,
+      lastSeenAt: session.lastSeenAt,
+      ip: session.ip,
+      city: session.city,
+      region: session.region,
+      country: session.country,
+      userAgent: session.userAgent
     }))
   }));
+});
+
+/**
+ * POST /api/data/revokeSession { email, sessionId } — sign one device out.
+ *
+ * Takes effect within about a minute, which is how long a already-validated
+ * session can stay cached on a warm instance.
+ */
+export const revokeUserSession = asyncHandler(async (req, res) => {
+  const { target } = await resolveTeamTarget(req, req.body?.email);
+  const { sessionId } = req.body ?? {};
+
+  if (!sessionId) {
+    throw createValidationError('sessionId is required');
+  }
+
+  const session = await getSession(sessionId);
+
+  // resolveTeamTarget authorised the *member*, not this id. Without re-checking
+  // ownership, anyone who could manage one member could revoke any session in
+  // the system by guessing an id.
+  if (!session || session.userId !== target.user_id) {
+    throw createNotFoundError('No such session for this user');
+  }
+
+  await revokeSession(sessionId);
+
+  await recordActivity(req, {
+    action: 'user.session_revoked',
+    entityType: 'session',
+    entityId: sessionId,
+    detail: { email: target.user_id }
+  });
+
+  res.status(200).json(createSuccessResponse('Session signed out'));
 });
 
 /**
@@ -3255,6 +3318,8 @@ export const signOutTeamMember = asyncHandler(async (req, res) => {
       UserPoolId: USERPOOL_ID,
       Username: target.user_id
     }));
+    // Cognito stops the refresh; the registry stops the next request.
+    await revokeAllSessionsForUser(target.user_id);
   } catch (error) {
     console.error('Admin sign-out failed:', error);
     throw createExternalServiceError('AWS Cognito', 'sign out team member', error, 'exports.signOutTeamMember');
