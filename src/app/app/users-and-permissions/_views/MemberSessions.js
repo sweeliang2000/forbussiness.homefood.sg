@@ -228,8 +228,8 @@ const MemberSessions = ({ member, isSelf = false, isOpen, onClose, onSignedOut, 
                     isSelf ? (
                         <div>
                             <p style={{ marginBottom: '10px' }}>
-                                You'll be signed out on every device, <strong>including this
-                                one</strong>, and returned to the login screen.
+                                You&rsquo;ll be signed out on every device, <strong>including
+                                this one</strong>, and returned to the login screen.
                             </p>
                             <p>Your account and role are unchanged.</p>
                         </div>

@@ -53,6 +53,12 @@ export function useDrawerDrag({
         const el = drawerRef.current;
         if (!el || !enabled || !isOpen) return undefined;
 
+        // Captured here, not read in the cleanup. By the time cleanup runs the
+        // ref may already point somewhere else — or at null — and the inline
+        // opacity this effect set would then never be cleared, leaving the
+        // scrim stuck at whatever the last drag painted.
+        const scrimAtMount = scrimRef.current;
+
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         let activePointer = null;
@@ -204,7 +210,7 @@ export function useDrawerDrag({
             if (animation) animation.stop();
             el.classList.remove(draggingClass);
             el.style.transform = '';
-            if (scrimRef.current) scrimRef.current.style.opacity = '';
+            if (scrimAtMount) scrimAtMount.style.opacity = '';
         };
     }, [drawerRef, scrimRef, isOpen, enabled, onClose, draggingClass]);
 }
