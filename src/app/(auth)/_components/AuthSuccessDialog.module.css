@@ -1,59 +1,132 @@
+/* The paper only scales — MUI's Fade owns opacity inline, so keyframes that
+   touched it would fight the transition. */
+.paper {
+    animation: paperIn var(--duration-standard) var(--ease-out) both;
+}
+
 .container {
-    padding: 36px 32px 28px;
+    padding: 40px 32px 28px;
     max-width: 24rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
     text-align: center;
+    /* A faint wash under the mark so the top of the card reads as the lit
+       part of the surface rather than a flat white slab. */
+    background:
+        radial-gradient(120% 80% at 50% 0%, var(--success-soft) 0%, transparent 62%);
 }
 
-/* Class doubled to out-specify MUI's runtime-injected .MuiSvgIcon-root
-   font-size, which is otherwise equal specificity and wins on order. */
-.glyph.glyph {
-    font-size: 56px;
-    /* Was a hardcoded #059212 in one copy of this dialog. */
-    color: var(--success);
-    margin-bottom: 4px;
-    /* Seen once, at the end of a task that just succeeded — the one place in
-       the auth flow where a little overshoot is affordable. */
-    animation: stamp var(--duration-slow) var(--ease-spring) both;
+/* --- the mark --------------------------------------------------------- */
+
+.mark {
+    display: block;
+    margin-bottom: 18px;
+    /* SVG children default to the viewport's origin, which sends anything
+       scaled off to the corner. */
+    transform-box: fill-box;
 }
 
+.mark > * {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+}
+
+.disc {
+    fill: var(--success);
+    animation: discIn var(--duration-slow) var(--ease-spring) both;
+}
+
+/* One outward breath, then gone — the visual equivalent of the tick landing. */
+.halo {
+    fill: var(--success);
+    animation: haloOut 640ms var(--ease-out) 90ms both;
+}
+
+.check {
+    stroke: #ffffff;
+    /* Slightly over the path's ~33.2 length so rounded caps clear the ends. */
+    stroke-dasharray: 34;
+    animation: draw 300ms var(--ease-out) 190ms both;
+}
+
+/* --- content ---------------------------------------------------------- */
+
+/* Staggered so the eye lands on the mark, then the headline, then the way
+   out — rather than the whole card arriving as one block. */
 .title {
     font-size: var(--text-title-3);
     line-height: var(--text-title-3-leading);
     letter-spacing: var(--text-title-3-tracking);
     font-weight: 600;
     color: var(--label-primary);
+    margin: 0 0 8px;
+    animation: rise var(--duration-standard) var(--ease-out) 110ms both;
 }
 
 .message {
     font-size: var(--text-subhead);
     line-height: var(--text-subhead-leading);
     color: var(--label-secondary);
-    margin-bottom: 14px;
+    margin: 0 0 24px;
     text-wrap: pretty;
+    animation: rise var(--duration-standard) var(--ease-out) 165ms both;
 }
 
-@keyframes stamp {
-    from {
-        opacity: 0;
-        transform: scale(0.86);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
+.action {
+    animation: rise var(--duration-standard) var(--ease-out) 220ms both;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .glyph.glyph {
-        animation: fade var(--duration-fast) ease both;
-    }
+@keyframes paperIn {
+    from { transform: scale(0.96); }
+    to { transform: scale(1); }
+}
+
+@keyframes discIn {
+    from { transform: scale(0.4); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes haloOut {
+    from { transform: scale(0.92); opacity: 0.3; }
+    to { transform: scale(1.55); opacity: 0; }
+}
+
+@keyframes draw {
+    from { stroke-dashoffset: 34; }
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fade {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+/* Gentler, not absent: the sequence collapses to one short cross-fade, and
+   the tick is simply already drawn. */
+@media (prefers-reduced-motion: reduce) {
+    .paper {
+        animation: none;
+    }
+
+    .disc,
+    .title,
+    .message,
+    .action {
+        animation: fade var(--duration-fast) ease both;
+    }
+
+    .halo {
+        display: none;
+    }
+
+    .check {
+        stroke-dasharray: none;
+        animation: fade var(--duration-fast) ease both;
+    }
 }

@@ -13,7 +13,8 @@
     "migrate:routes": "node scripts/generate-api-routes.mjs",
     "migrate:routes:check": "node scripts/generate-api-routes.mjs --check",
     "verify:routes": "node scripts/verify-route-parity.mjs",
-    "stripe:check": "node scripts/verify-stripe-setup.mjs"
+    "stripe:check": "node scripts/verify-stripe-setup.mjs",
+    "cognito:email-template": "node --env-file=.env scripts/apply-cognito-email-template.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.1101.0",
