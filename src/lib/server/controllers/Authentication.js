@@ -208,7 +208,12 @@ export const signIn = asyncHandler(async (req, res, next) => {
     // fail a successful login.
     await recordActivityAs(
       { shopId: shop_id, actorId: user_id, actorRole: role },
-      { action: 'user.login', entityType: 'session', entityId: user_id, detail: requestOrigin(req) }
+      {
+        action: 'user.login',
+        entityType: 'session',
+        entityId: user_id,
+        origin: requestOrigin(req)
+      }
     );
 
     res.status(200).json(createSuccessResponse("Sign-in successful"));
@@ -3215,13 +3220,15 @@ export const getUserSignInHistory = asyncHandler(async (req, res) => {
   res.status(200).json(createSuccessResponse('Sign-in history retrieved', {
     email: target.user_id,
     role: target.role,
+    // readSignInHistory already flattens the columns and falls back to the
+    // pre-migration `detail` shape, so this is a straight rename.
     signIns: rows.map((row) => ({
       at: row.created_at,
-      ip: row.detail?.ip ?? null,
-      city: row.detail?.city ?? null,
-      region: row.detail?.region ?? null,
-      country: row.detail?.country ?? null,
-      userAgent: row.detail?.userAgent ?? null
+      ip: row.ip,
+      city: row.city,
+      region: row.region,
+      country: row.country,
+      userAgent: row.userAgent
     }))
   }));
 });

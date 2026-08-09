@@ -44,7 +44,7 @@ async function recordActivity(req, { action, entityType = null, entityId = null,
   const { shopId, actorId, actorRole } = actorFromReq(req);
   if (!shopId || !action) return;
   try {
-    const { error } = await supabase.from('activity_log').insert({
+    const { error } = await supabase.from('business_activity_log').insert({
       shop_id: shopId,
       actor_id: actorId,
       actor_role: actorRole,
@@ -53,7 +53,7 @@ async function recordActivity(req, { action, entityType = null, entityId = null,
       entity_id: entityId != null ? String(entityId) : null,
       detail: detail ?? {},
     });
-    if (error && !(error.code === '42P01' || /activity_log/.test(error.message || ''))) {
+    if (error && !(error.code === '42P01' || /business_activity_log/.test(error.message || ''))) {
       console.error('recordActivity: insert failed:', error.message);
     }
   } catch (e) {
@@ -90,10 +90,13 @@ export function requestOrigin(req) {
  * doesn't exist during sign-in — that request is what sets it. This variant
  * takes the identity explicitly, from the provisioned user.
  */
-export async function recordActivityAs({ shopId, actorId, actorRole }, { action, entityType = null, entityId = null, detail = {} }) {
+export async function recordActivityAs(
+  { shopId, actorId, actorRole },
+  { action, entityType = null, entityId = null, detail = {}, origin = null }
+) {
   if (!supabase || !shopId || !action) return;
   try {
-    const { error } = await supabase.from('activity_log').insert({
+    const { error } = await supabase.from('business_activity_log').insert({
       shop_id: shopId,
       actor_id: actorId ?? null,
       actor_role: actorRole ?? null,
@@ -101,8 +104,21 @@ export async function recordActivityAs({ shopId, actorId, actorRole }, { action,
       entity_type: entityType,
       entity_id: entityId != null ? String(entityId) : null,
       detail: detail ?? {},
+      // Request context goes in its own columns, not detail. `ip` is personal
+      // data under the PDPA — answering "what do we hold on this person"
+      // should be a select, not a hunt through jsonb. The retention job also
+      // needs to see these as columns.
+      ...(origin
+        ? {
+            ip: origin.ip ?? null,
+            user_agent: origin.userAgent ?? null,
+            city: origin.city ?? null,
+            region: origin.region ?? null,
+            country: origin.country ?? null,
+          }
+        : {}),
     });
-    if (error && !(error.code === '42P01' || /activity_log/.test(error.message || ''))) {
+    if (error && !(error.code === '42P01' || /business_activity_log/.test(error.message || ''))) {
       console.error('recordActivityAs: insert failed:', error.message);
     }
   } catch (e) {
@@ -119,8 +135,8 @@ export async function recordActivityAs({ shopId, actorId, actorRole }, { action,
 export async function readSignInHistory({ shopId, actorId, limit = 20 }) {
   if (!supabase || !shopId || !actorId) return [];
   const { data, error } = await supabase
-    .from('activity_log')
-    .select('created_at, detail')
+    .from('business_activity_log')
+    .select('created_at, ip, user_agent, city, region, country, detail')
     .eq('shop_id', shopId)
     .eq('actor_id', actorId)
     .eq('action', 'user.login')
@@ -133,7 +149,18 @@ export async function readSignInHistory({ shopId, actorId, limit = 20 }) {
     console.error('readSignInHistory: query failed:', error.message);
     return [];
   }
-  return data ?? [];
+
+  // Rows written before the request-context columns existed kept the same
+  // fields in `detail`. Read through to them so early sign-ins don't all
+  // render as "Location unavailable".
+  return (data ?? []).map((row) => ({
+    created_at: row.created_at,
+    ip: row.ip ?? row.detail?.ip ?? null,
+    userAgent: row.user_agent ?? row.detail?.userAgent ?? null,
+    city: row.city ?? row.detail?.city ?? null,
+    region: row.region ?? row.detail?.region ?? null,
+    country: row.country ?? row.detail?.country ?? null,
+  }));
 }
 
 // GET /api/data/activity-log?from&to&actor&action&limit — the shop's audit trail.
@@ -143,7 +170,7 @@ export const getActivityLog = asyncHandler(async (req, res) => {
   const { from, to, actor, action, limit } = req.query;
 
   let query = supabase
-    .from('activity_log')
+    .from('business_activity_log')
     .select('*')
     .eq('shop_id', shopId)
     .order('created_at', { ascending: false })
@@ -156,7 +183,7 @@ export const getActivityLog = asyncHandler(async (req, res) => {
 
   const { data, error } = await query;
   if (error) {
-    if (error.code === '42P01' || /activity_log/.test(error.message || '')) {
+    if (error.code === '42P01' || /business_activity_log/.test(error.message || '')) {
       // Table not migrated yet — empty log.
       return res.status(200).json(createSuccessResponse('Activity log', { entries: [], actors: [], actions: [], migrationNeeded: true }));
     }
