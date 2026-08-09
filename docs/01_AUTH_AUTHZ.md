@@ -34,16 +34,21 @@ Auth here is **two separate things**, and almost every subtlety in this document
 
 ## Cookies
 
-Six cookies carry the session (`src/lib/server/cookies.js`):
+Seven cookies carry the session (`src/lib/server/cookies.js`):
 
 | Cookie | httpOnly | Lifetime | Holds |
 |---|---|---|---|
 | `accessToken` | yes | 1h | Cognito access JWT — **the** identity |
 | `idToken` | yes | 1h | Cognito ID JWT — carries `email` |
 | `refreshToken` | yes | 7d | Used to mint a new access token |
+| `sid` | yes | 7d | Row id in the `BusinessSessions` registry |
 | `userDataHTTP` | yes | 1h | `{user_id, role, shop_id}` — unsigned |
 | `userDataNonHTTP` | **no** | 1h | Same JSON, readable by client JS for UI |
 | `authStatus` | **no** | 1h | Post-signup "awaiting verification" state |
+
+`sid` is the one that can be taken away. A Cognito token is valid until it
+expires and nothing can shorten that; a session row can be revoked, and
+`verifyToken` checks it on every request. See [Sessions](#sessions).
 
 One gotcha worth knowing about, documented at `cookies.js:41`:
 
@@ -66,7 +71,12 @@ const params = {
 const data = await cognitoClient.send(new InitiateAuthCommand(params));
 ```
 
-On success the handler sets all six cookies. The app never sees or stores the password — Cognito owns credentials entirely.
+On success the handler sets all seven cookies. The app never sees or stores the password — Cognito owns credentials entirely.
+
+**It also opens a session.** `createSession` (`sessions.js`) writes a row to
+`BusinessSessions` and the id becomes the `sid` cookie. If that write fails the
+login fails — handing back a working session nobody can revoke would defeat
+the point of having a registry.
 
 **First sign-in provisions the tenant.** `ensureUserProvisioned` (`user-provisioning.js:44`) creates the `Users` row and its `Shops` row in one transaction, so a half-provisioned account can't exist:
 
@@ -92,11 +102,16 @@ Two notes that catch people out:
 
 `withApi` (`src/lib/server/withApi.js`) wraps all 100 route handlers. It replaces four things Express gave for free — positional `router.use()` guards, middleware that mutates `req`, `asyncHandler`, and `res` itself.
 
+`verifyToken` does two things now, in this order: it requires a **live session
+row** for the `sid` cookie, and only then verifies the Cognito token. A valid
+JWT with no live session is a 401 — that's what makes per-device sign-out
+possible, and what logged everyone out when the registry shipped.
+
 The order is load-bearing:
 
 ```js
 if (auth) {
-  await runMiddleware(verifyToken, req, res);   // 1. identity
+  await runMiddleware(verifyToken, req, res);   // 1. live session, then identity
 }
 if (roles?.length) {
   assertRole(req, roles);                       // 2. role allowlist
