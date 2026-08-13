@@ -9,8 +9,7 @@ const RewardsHeader = ({
     isEdit = true,
     releaseStatus = null,
 }) => {
-    const showApprovedScheduled = !isEdit && releaseStatus === 'approved_scheduled';
-    const showUnderReview = !isEdit && releaseStatus !== 'approved_scheduled';
+    const showUnderReview = !isEdit;
 
     return (
         <div className={styles.wrapper}>

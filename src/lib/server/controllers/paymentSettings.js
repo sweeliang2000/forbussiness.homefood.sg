@@ -91,7 +91,7 @@ export const getPaymentSettings = asyncHandler(async (req, res) => {
 
   if (data.isChanges === undefined) data.isChanges = false;
   if (!data.paynow) data.paynow = { ...DEFAULT_PAYNOW };
-  data.isEdit = !['pending', 'scheduled_released_cancelled', 'approved_scheduled'].includes(req.releaseStatus);
+  data.isEdit = !['pending', 'scheduled_released_cancelled'].includes(req.releaseStatus);
   data.releaseStatus = req.releaseStatus || null;
 
   // Manual PayNow is Pro-only, and that rule is enforced on write below. The

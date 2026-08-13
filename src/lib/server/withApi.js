@@ -84,8 +84,9 @@ export function withApi(handler, options = {}) {
       if (!ctx.sent) {
         // A handler that returned without responding. Express would hang until
         // the client gave up; here it would burn the whole maxDuration and
-        // return a platform 504. cancelScheduledRelease does exactly this on its
-        // error path (Authentication.js:7314-7319).
+        // return a platform 504. (cancelScheduledRelease used to do exactly this
+        // on its error path — it has since been removed with scheduled
+        // releases, but the guard stays: the next one will be an accident.)
         console.error(`Handler returned without sending a response: ${request.method} ${req.path}`);
         ctx.status = 500;
         ctx.body = createErrorResponse(

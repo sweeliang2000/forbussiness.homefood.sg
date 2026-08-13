@@ -96,7 +96,7 @@ const getAccountStatus = async (req, res) => {
       Key: { shop_id: { S: shop_id } },
     }));
 
-    const isEdit = !["pending", "scheduled_released_cancelled", "approved_scheduled"].includes(req.releaseStatus);
+    const isEdit = !["pending", "scheduled_released_cancelled"].includes(req.releaseStatus);
     const releaseStatus = req.releaseStatus || null;
 
     const accountId = Item?.StripeConnectAccountId?.S;

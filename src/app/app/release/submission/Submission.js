@@ -5,23 +5,18 @@ import { InputAdornment } from '@mui/material';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
-import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown';
 import { useState, useEffect } from 'react';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import Checklists from './_views/Checklist';
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import apiClient from '@/utility/api';
-import { CHECKLIST_STATUS, RELEASE_STATUS, RELEASE_CONTACT, SEND_FOR_REVIEW, CANCEL_RELEASE, CANCEL_SCHEDULED_RELEASE } from '@/utility/apiPaths';
+import { CHECKLIST_STATUS, RELEASE_STATUS, RELEASE_CONTACT, SEND_FOR_REVIEW, CANCEL_RELEASE } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import AlertModal from '@/components/AlertModal/AlertModal';
-import DialogPopup from '@/components/DialogPopup/DialogPopup';
 import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
 import { isProLookupKey } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
@@ -41,7 +36,6 @@ const stripSgPrefix = (value) => {
 
 const toFullSgPhone = (value) => value ? `+65 ${value}` : '';
 
-const PUBLISHING_TYPE = 'publishingType';
 const NAME = 'name';
 const ROLE = 'role';
 const EMAIL = 'email';
@@ -50,24 +44,20 @@ const PHONE_NUMBER = 'number';
 dayjs.extend(localizedFormat);
 dayjs.extend(utc);
 dayjs.extend(timezone);
-const defaultStartDate = dayjs().add(2, "day").startOf("day");
 
 const SubmissionView = () => {
     const [isUserSubscribed, setIsUserSubscribed] = useState(false);
     const [isBtnLoading, setIsBtnLoading] = useState(true);
-    const [value, setValue] = useState(defaultStartDate);
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
     const [isLoadingErrorStatus, setIsLoadingErrorStatus] = useState(null);
     const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const [datetimeError, setDatetimeError] = useState(false);
     const [releaseStatus, setReleaseStatus] = useState(null);
     const [sentDateTime, setSentDateTime] = useState(null);
     const [showCancelDialog, setShowCancelDialog] = useState(false);
     const [isCanceling, setIsCanceling] = useState(false);
-    const [cancelConfirmText, setCancelConfirmText] = useState('');
     const [showCancelSuccessPopup, setShowCancelSuccessPopup] = useState(false);
     const [checklistStatus, setChecklistStatus] = useState({
         businessHasAllRequiredField: false,
@@ -79,7 +69,6 @@ const SubmissionView = () => {
     });
 
     const [enteredValues, setEnteredValues] = useState({
-        [PUBLISHING_TYPE]: 'immediate',
         [NAME]: '',
         [ROLE]: '',
         [EMAIL]: '',
@@ -88,7 +77,6 @@ const SubmissionView = () => {
 
     const [textfieldError, setTextfieldError] = useState({
 
-        [PUBLISHING_TYPE]: false,
         [NAME]: false,
         [ROLE]: false,
         [EMAIL]: false,
@@ -96,7 +84,6 @@ const SubmissionView = () => {
     });
 
     const [helperText, setHelperText] = useState({
-        [PUBLISHING_TYPE]: '',
         [NAME]: '',
         [ROLE]: '',
         [EMAIL]: '',
@@ -182,21 +169,6 @@ const SubmissionView = () => {
             }
         }
 
-        // Validate scheduled release datetime
-        if (enteredValues.publishingType === 'schedule') {
-            if (!value || !value.isValid()) {
-                setDatetimeError(true);
-                const datetimeErrorMsg = 'Please select a date and time for scheduled release';
-                validationErrors.push(datetimeErrorMsg);
-                setErrorMessage(datetimeErrorMsg);
-                isValid = false;
-            } else {
-                setDatetimeError(false);
-            }
-        } else {
-            setDatetimeError(false);
-        }
-
         setTextfieldError(newErrors);
         setHelperText(newHelperTexts);
 
@@ -234,9 +206,8 @@ const SubmissionView = () => {
         clearError();
 
         try {
-            // Build payload - use the publishing type selected by the user (immediate or schedule)
+            // Every release is immediate now; the server stamps release_type.
             const payload = {
-                release_type: enteredValues.publishingType || 'immediate',
                 contact_details_name: enteredValues.name.trim(),
                 contact_details_role: enteredValues.role.trim(),
                 contact_details_email: enteredValues.email.trim(),
@@ -245,13 +216,6 @@ const SubmissionView = () => {
             // Add phone number if provided
             if (enteredValues.number && enteredValues.number.trim() !== '') {
                 payload.contact_details_phone_number = toFullSgPhone(enteredValues.number.trim());
-            }
-
-            // Add release_datetime if schedule (in GST +8)
-            if (enteredValues.publishingType === 'schedule' && value && value.isValid()) {
-                // Convert to Asia/Singapore timezone (GST +8) and format as ISO string
-                const gstDateTime = value.tz('Asia/Singapore').format('YYYY-MM-DDTHH:mm:ss[+08:00]');
-                payload.release_datetime = gstDateTime;
             }
 
             await apiClient.post(SEND_FOR_REVIEW, payload);
@@ -306,18 +270,12 @@ const SubmissionView = () => {
 
             if (releaseContactResponse?.data?.data) {
                 const contactData = releaseContactResponse.data.data;
-                let publishingType = contactData.release_datetime ? 'schedule' : (contactData.release_type === 'immediate' ? 'immediate' : 'immediate');
                 setEnteredValues({
-                    [PUBLISHING_TYPE]: publishingType,
                     [NAME]: contactData.contact_details_name || '',
                     [ROLE]: contactData.contact_details_role || '',
                     [EMAIL]: contactData.contact_details_email || '',
                     [PHONE_NUMBER]: stripSgPrefix(contactData.contact_details_phone_number),
                 });
-                if (contactData.release_datetime) {
-                    const parsedDateTime = dayjs(contactData.release_datetime);
-                    if (parsedDateTime.isValid()) setValue(parsedDateTime);
-                }
             }
 
             setIsLoadingErrorMessage(null);
@@ -345,16 +303,10 @@ const SubmissionView = () => {
     };
 
     const handleCancelConfirm = async () => {
-        if (isApprovedScheduled && cancelConfirmText.trim().toLowerCase() !== 'confirm') {
-            return;
-        }
         setIsCanceling(true);
         try {
-            const endpoint = isApprovedScheduled ? CANCEL_SCHEDULED_RELEASE : CANCEL_RELEASE;
-            console.log('endpoint:', endpoint);
-            await apiClient.delete(endpoint);
+            await apiClient.delete(CANCEL_RELEASE);
             setShowCancelDialog(false);
-            setCancelConfirmText('');
             setIsCanceling(false);
             setShowCancelSuccessPopup(true);
         } catch (error) {
@@ -370,26 +322,12 @@ const SubmissionView = () => {
     const handleCancelDialogClose = () => {
         if (!isCanceling) {
             setShowCancelDialog(false);
-            setCancelConfirmText('');
         }
     };
 
     const isPending = releaseStatus === 'pending';
     const isRejected = releaseStatus === 'reject';
     const isReleased = releaseStatus === 'Released';
-    const isApprovedScheduled = releaseStatus === 'approved_scheduled';
-
-    // Generate success message for approved_scheduled status
-    const getApprovedScheduledMessage = () => {
-        if (!isApprovedScheduled) return null;
-        const formattedDate = value?.isValid?.() ? value.format('DD MMM YYYY, hh:mm A') : sentDateTime?.format?.('DD MMM YYYY, hh:mm A');
-        const dateText = formattedDate || 'the scheduled date';
-        return (
-            <>
-                Your release has been approved. It will be released on {dateText}. If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, email support@homefood.sg
-            </>
-        );
-    };
 
     // Generate success message for released status
     const getReleasedSuccessMessage = () => {
@@ -463,16 +401,16 @@ const SubmissionView = () => {
                     </p>
                 }
                 loading={isBtnLoading}
-                isSuccess={isSubmissionSuccess || isApprovedScheduled}
+                isSuccess={isSubmissionSuccess}
                 setShowError={isRejected ? () => {} : setIsError}
                 isError={isRejected ? true : isError}
                 errorMessage={isRejected ? getRejectErrorMessage() : errorMessage}
-                successMessage={getApprovedScheduledMessage() || getReleasedSuccessMessage()}
-                isDisabled={isPending || isApprovedScheduled || !isUserSubscribed}
+                successMessage={getReleasedSuccessMessage()}
+                isDisabled={isPending || !isUserSubscribed}
                 warningMessage={!isUserSubscribed ? <>You need an active subscription to submit a release. <Link href="/app/subscription">Please upgrade your plan.</Link></> : null}
                 infoMessage={getInfoMessage()}
-                showCancelButton={isPending || isApprovedScheduled}
-                cancelButtonText={isApprovedScheduled ? 'Cancel Release' : 'Cancel Review'}
+                showCancelButton={isPending}
+                cancelButtonText='Cancel Review'
                 onCancel={handleCancel}
                 buttonText='Send'
                 successButtonText='Sent'
@@ -512,55 +450,8 @@ const SubmissionView = () => {
             <ContentCard className={styles.content}>
                 <FieldHeader
                     title='Managed publishing'
-                    description='To make your release or update avilable on HomeFood app, you need to send to HomeFood for review. You can automatically release it after it&apos;s been approved by HomeFood Reviewer or you can also manually release it on App Store at a later date.'
+                    description='Send your shop to HomeFood for review. Once a reviewer approves it, your shop goes live on the HomeFood app.'
                 />
-
-                <FullWidthDropdown
-                    options={[
-                        { value: 'immediate', title: 'Automatically release this version. (Once approved, it will be live on HomeFood app immediately)' },
-                        // { value: 'manually', title: 'Manually release this version' },
-                        { value: 'schedule', title: 'Schedule release this version for a later date' }
-                    ]}
-                    labelId='manage_publishing'
-                    id='manage_publishing'
-                    value={enteredValues.publishingType}
-                    disabled={isPending || isApprovedScheduled || isRejected || isBtnLoading}
-                    onChange={(event) => {
-                        inputChangeHandler(PUBLISHING_TYPE, event.target.value);
-                        // Clear datetime error when switching away from scheduled
-                        if (event.target.value !== 'schedule') {
-                            setDatetimeError(false);
-                        }
-                    }}
-                />
-                {
-                    enteredValues.publishingType === 'schedule' &&
-                    <>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DateTimePicker
-                                label="Select Date & Time"
-                                value={value}
-                                onChange={(newValue) => {
-                                    setValue(newValue);
-                                    setDatetimeError(false);
-                                    setErrorMessage('');
-                                }}
-                                format="DD/MM/YYYY hh:mm A"
-                                minDate={defaultStartDate}
-                                disabled={isPending || isApprovedScheduled || isRejected || isBtnLoading}
-                                className={styles.datetimePicker}
-                                slotProps={{
-                                    textField: {
-                                        error: datetimeError,
-                                        helperText: datetimeError ? 'Please select a date and time for scheduled release' : ''
-                                    }
-                                }}
-                            />
-                        </LocalizationProvider>
-                    </>
-
-                }
-
             </ContentCard>
 
             <ContentCard className={styles.content}>
@@ -577,7 +468,7 @@ const SubmissionView = () => {
                         helperText={helperText.name}
                         error={textfieldError.name}
                         value={enteredValues.name}
-                        disabled={isPending || isApprovedScheduled || isRejected || isBtnLoading}
+                        disabled={isPending || isRejected || isBtnLoading}
                         onChange={(event) => { inputChangeHandler(NAME, event.target.value) }}
                     />
                 </div>
@@ -590,7 +481,7 @@ const SubmissionView = () => {
                     helperText={helperText.role}
                     error={textfieldError.role}
                         value={enteredValues.role}
-                        disabled={isPending || isApprovedScheduled || isRejected || isBtnLoading}
+                        disabled={isPending || isRejected || isBtnLoading}
                         onChange={(event) => { inputChangeHandler(ROLE, event.target.value) }}
                 />
 
@@ -603,7 +494,7 @@ const SubmissionView = () => {
                     helperText={helperText.email}
                     error={textfieldError.email}
                         value={enteredValues.email}
-                        disabled={isPending || isApprovedScheduled || isRejected || isBtnLoading}
+                        disabled={isPending || isRejected || isBtnLoading}
                         onChange={(event) => { inputChangeHandler(EMAIL, event.target.value) }}
                 />
 
@@ -616,7 +507,7 @@ const SubmissionView = () => {
                     helperText={helperText.number}
                     error={textfieldError.number}
                         value={enteredValues.number}
-                        disabled={isPending || isApprovedScheduled || isRejected || isBtnLoading}
+                        disabled={isPending || isRejected || isBtnLoading}
                         onChange={(event) => { inputChangeHandler(PHONE_NUMBER, formatSgPhone(event.target.value)) }}
                     slotProps={{
                         input: {
@@ -628,56 +519,6 @@ const SubmissionView = () => {
             </>
             )}
 
-            {isApprovedScheduled ? (
-                <DialogPopup
-                    title="Cancel Release"
-                    isOpen={showCancelDialog && isApprovedScheduled}
-                    setIsOpen={(open) => {
-                        if (open === false) {
-                            setCancelConfirmText('');
-                            setShowCancelDialog(false);
-                        }
-                    }}
-                    onClose={() => !isCanceling}
-                    actionTitle={isCanceling ? 'Canceling...' : 'Cancel Release'}
-                    actionDisabled={isCanceling || cancelConfirmText.trim().toLowerCase() !== 'confirm'}
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleCancelConfirm();
-                    }}
-                    PaperProps={{
-                        sx: {
-                            maxWidth: '480px',
-                            width: '80%',
-                        },
-                    }}
-                >
-                    <div className={styles.cancelReleaseContent}>
-                        <p style={{ marginBottom: '16px' }}>
-                            Are you sure you want to cancel the release?
-                        </p>
-                        <p style={{ marginBottom: '16px' }}>
-                            Canceling will delay your release and you will need to resubmit for review again.
-                        </p>
-                        <p style={{ marginBottom: '8px' }}>
-                            Type <strong>confirm</strong> to cancel the scheduled release.
-                        </p>
-                        <div style={{ marginBottom: '16px' }}>
-                            <FormTextField
-                                placeholder="confirm"
-                                id="cancel_confirm"
-                                name="cancel_confirm"
-                                value={cancelConfirmText}
-                                onChange={(e) => setCancelConfirmText(e.target.value)}
-                            />
-                        </div>
-                        <p style={{ marginBottom: 0, fontWeight: 'bold' }}>
-                            This action cannot be undone.
-                        </p>
-                    </div>
-                </DialogPopup>
-            ) : (
                 <AlertModal
                     open={showCancelDialog}
                     onClose={handleCancelDialogClose}
@@ -700,7 +541,7 @@ const SubmissionView = () => {
                     type="error"
                     showActionButton={true}
                 />
-            )}
+
 
             <AlertModal
                 open={showCancelSuccessPopup}

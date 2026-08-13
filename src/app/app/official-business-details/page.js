@@ -3,12 +3,17 @@ import FormTextField from '@/components/Form Components/FormTextField/FormTextFi
 import styles from './page.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
-import { TextField } from '@mui/material';
+import { Button, TextField } from '@mui/material';
+import { FaCheck } from 'react-icons/fa';
 import Link from 'next/link';
 import { useEffect, useState, useRef } from 'react';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import apiClient from '@/utility/api';
-import { OFFICIAL_BUSINESS_INFORMATION, RELEASE_STATUS } from '@/utility/apiPaths';
+import {
+  OFFICIAL_BUSINESS_INFORMATION,
+  RELEASE_STATUS,
+  PUBLISH_BUSINESS_DETAILS_UPDATE,
+} from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 
@@ -32,6 +37,13 @@ export default function StampSetup() {
   const [isUpdate, setIsUpdate] = useState(false);
   const [isEdit, setIsEdit] = useState(true);
   const [releaseStatus, setReleaseStatus] = useState(null);
+
+  // Saved-but-unpublished changes, mirroring the other publish-enabled pages.
+  // Unlike them, publishing here opens an admin review instead of writing to
+  // the live shop — a shop's legal identity needs a human to sign it off.
+  const [hasPublishableChanges, setHasPublishableChanges] = useState(false);
+  const [isPublishLoading, setIsPublishLoading] = useState(false);
+  const [isPublishSuccess, setIsPublishSuccess] = useState(false);
 
   const [enteredValues, setEnteredValues] = useState({
     [BUSINESS_NAME]: '',
@@ -127,6 +139,9 @@ export default function StampSetup() {
     setIsBtnLoading(true);
     clearError();
 
+    // isBusinessDetailApproved is server-owned now — the admin's approval sets
+    // it, and publishBusinessDetailsUpdate clears it. Sending "False" from here
+    // would mark an unchanged shop as unapproved on every save.
     const payload = {
       [BUSINESS_NAME]: enteredValues[BUSINESS_NAME],
       [UEN]: enteredValues[UEN],
@@ -135,8 +150,7 @@ export default function StampSetup() {
         [BUILDING_NAME]: enteredValues[BUILDING_NAME],
         [STREET_ADDRESS]: enteredValues[STREET_ADDRESS],
         [POSTAL_CODE]: enteredValues[POSTAL_CODE]
-      },
-      "isBusinessDetailsApproved": "False"
+      }
     };
 
     try {
@@ -151,7 +165,12 @@ export default function StampSetup() {
       setIsSubmissionSuccess(true);
       setIsBtnLoading(false);
       clearError();
-      
+
+      // Saving is what arms the Publish button — the server has just set
+      // isChanges on the row.
+      setHasPublishableChanges(true);
+      setIsPublishSuccess(false);
+
       // Update initial values after successful save
       initialValuesRef.current = { ...enteredValues };
     } catch (error) {
@@ -161,6 +180,40 @@ export default function StampSetup() {
       const code = errorData?.error?.statusCode || errorData?.code || error?.code || 'UNKNOWN';
       showError(`An error had occurred. ${message} (Error code: ${code}). Please try to save it again.`);
       setIsBtnLoading(false);
+    }
+  };
+
+  /**
+   * Submits the saved business details for admin review.
+   *
+   * The server answers 200 with "No changes to review" when the values match
+   * what is already approved — a merchant who edited a field and put it back.
+   * That is a success, not an error: the button just retires.
+   */
+  const publishBusinessDetails = async () => {
+    setIsPublishLoading(true);
+    clearError();
+
+    try {
+      const response = await apiClient.post(PUBLISH_BUSINESS_DETAILS_UPDATE);
+      const submitted = response.data?.data?.status === 'pending';
+
+      if (submitted) {
+        // The shop is in the review queue now, which locks editing everywhere.
+        // Reload so every page picks up the new release status at once.
+        window.location.reload();
+        return;
+      }
+
+      // Nothing to review — the values already match the approved ones.
+      setHasPublishableChanges(false);
+      setIsPublishSuccess(true);
+    } catch (error) {
+      const errorData = error?.response?.data;
+      const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
+      showError(`Could not submit your business details for review. ${message}`);
+    } finally {
+      setIsPublishLoading(false);
     }
   };
 
@@ -184,6 +237,9 @@ export default function StampSetup() {
 
           // Set isEdit state
           setIsEdit(isEditValue !== undefined ? isEditValue : true);
+
+          // Saved but not yet sent for review.
+          setHasPublishableChanges(!!data.data.isChanges);
 
           // Check if any of the required fields have values to determine if this is an update
           const hasData = businessName || uen || addressUnitNumber || addressBuildingName || addressStreetAddress || addressPostalCode;
@@ -258,6 +314,7 @@ export default function StampSetup() {
 
     fetchReleaseStatus();
   }, []);
+
 
   // Update button disabled state based on unsaved changes
   useEffect(() => {
@@ -368,6 +425,15 @@ export default function StampSetup() {
     };
   }, [enteredValues, isEdit]);
 
+  // Publishing enqueues the shop into the normal review queue, so "with the
+  // admin team" is simply the pending release status — there is no separate
+  // business-details review to ask about.
+  const isUnderReview = releaseStatus === 'pending';
+
+  // Saved, not yet sent for review, and nothing half-typed on screen.
+  const hasUnpublishedBusinessDetails =
+    releaseStatus === 'Released' && hasPublishableChanges && !hasUnsavedChanges();
+
   return (
     <form
       className={styles.form}
@@ -383,26 +449,52 @@ export default function StampSetup() {
           </p>
         }
         loading={isBtnLoading}
-        isSuccess={isSubmissionSuccess || releaseStatus === 'approved_scheduled'}
+        isSuccess={isSubmissionSuccess}
         setShowError={setIsError}
         isError={isError}
         isDisabled={isBtnDisabled || !isEdit}
         errorMessage={errorMessage}
-        successMessage={
-          !isEdit && releaseStatus === 'approved_scheduled'
-            ? (
-              <>
-                Your release has been approved. It will be released on the date you stated on{' '}
-                <Link href="/app/release/submission">Release Submission Page</Link>.
-                {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@homefood.sg.
-              </>
-            )
-            : null
-        }
         infoMessage={
-          !isEdit && releaseStatus !== 'approved_scheduled'
+          !isEdit
             ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.'
             : null
+        }
+        warningMessage={
+          isUnderReview
+            ? 'Your changes are with our team for review. Your shop stays live on the details we approved previously until then.'
+            : hasUnpublishedBusinessDetails
+              ? 'You have saved changes that are not published yet. Publish them to send them to our team for review.'
+              : null
+        }
+        rightActions={
+          // Only a released shop can have a re-review: before that, business
+          // details go through the first-release review with everything else.
+          releaseStatus === 'Released' ? (
+            <Button
+              // Explicit: this button sits inside the Save form, and a default
+              // of "submit" would save instead of publish.
+              type="button"
+              size="small"
+              variant="outlined"
+              color="primary"
+              loading={isPublishLoading}
+              loadingPosition="start"
+              startIcon={isPublishSuccess ? <FaCheck /> : undefined}
+              // Disabled over unsaved edits: publishing would submit the values
+              // on the server, not the ones on screen.
+              disabled={
+                isUnderReview || isPublishSuccess || !hasPublishableChanges || hasUnsavedChanges()
+              }
+              onClick={publishBusinessDetails}
+              sx={{ textTransform: 'none' }}
+            >
+              {isUnderReview
+                ? 'Under review'
+                : isPublishSuccess
+                  ? 'Sent for review'
+                  : 'Send for review'}
+            </Button>
+          ) : null
         }
       />
 

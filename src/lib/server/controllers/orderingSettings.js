@@ -91,7 +91,7 @@ export const getOrderSettings = asyncHandler(async (req, res) => {
   // Records written before delivery existed have no `delivery` key at all, so
   // normalise on read rather than making every consumer handle the gap.
   data.delivery = normalizeDelivery(data.delivery);
-  data.isEdit = !["pending", "scheduled_released_cancelled", "approved_scheduled"].includes(req.releaseStatus);
+  data.isEdit = !["pending", "scheduled_released_cancelled"].includes(req.releaseStatus);
   data.releaseStatus = req.releaseStatus || null;
   res.status(200).json(createSuccessResponse(
     response.Item ? 'Order settings retrieved' : 'No saved order settings; defaults returned',

@@ -10,6 +10,9 @@ export const GLOBAL_SIGN_OUT = '/api/auth/globalSignOut';
 export const SIGN_OUT = '/api/auth/signoutuser';
 
 export const OFFICIAL_BUSINESS_INFORMATION = '/api/data/official-business-information';
+// Unlike the other publish endpoints, this one does not write to the live shop.
+// It enqueues the shop into the normal release review queue for an admin.
+export const PUBLISH_BUSINESS_DETAILS_UPDATE = '/api/data/publish/official-business-details';
 export const CUSTOMER_FACING_INFORMATION = '/api/data/customerDetails';
 export const STAMP_MANAGEMENT = '/api/data/stampManagement';
 export const CARD_DESIGN_SETTING = '/api/data/cardDesignSetting';
@@ -53,7 +56,6 @@ export const RELEASE_STATUS = '/api/data/releaseStatus';
 export const RELEASE_CONTACT = '/api/data/releaseContact';
 export const SEND_FOR_REVIEW = '/api/data/sendForReview';
 export const CANCEL_RELEASE = '/api/data/cancelRelease';
-export const CANCEL_SCHEDULED_RELEASE = '/api/data/cancelScheduledRelease';
 export const RELEASED_HISTORY = '/api/data/releasedHistory';
 export const PUBLISH_UPDATE = '/api/data/publish/customer-facing-business-details';
 

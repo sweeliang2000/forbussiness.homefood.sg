@@ -422,24 +422,13 @@ const CardDesign = () => {
                         </p>
                     }
                     loading={isBtnLoading}
-                    isSuccess={isSubmissionSuccess || releaseStatus === 'approved_scheduled'}
+                    isSuccess={isSubmissionSuccess}
                     setShowError={setIsError}
                     isError={isError}
                     isDisabled={isBtnDisabled || !isEdit}
                     errorMessage={errorMessage}
-                    successMessage={
-                        !isEdit && releaseStatus === 'approved_scheduled'
-                            ? (
-                                <>
-                                    Your release has been approved. It will be released on the date you stated on{' '}
-                                    <Link href="/app/release/submission">Release Submission Page</Link>.
-                                    {' '}If you wish to change the date, cancel and re-send for approval. For any enquiry or urgent release, please email support@homefood.sg.
-                                </>
-                            )
-                            : null
-                    }
                     infoMessage={
-                        !isEdit && releaseStatus !== 'approved_scheduled'
+                        !isEdit
                             ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.'
                             : null
                     }

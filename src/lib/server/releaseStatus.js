@@ -12,13 +12,19 @@ import { AppError, createValidationError, createDatabaseError } from './errors';
  * (`checkReleaseStatus`).
  *
  * A shop's release state isn't stored in one place — it's derived by probing
- * four DynamoDB tables in priority order:
+ * three DynamoDB tables in priority order:
  *
  *   review_customer_release            -> "pending"
  *   Rejected_Customer_Review           -> "reject"
- *   Scheduled_Accepted_Customer_Review -> "approved_scheduled"
  *   ReleaseHistory (latest row)        -> from its review_status
  *   nothing anywhere                   -> "no records"
+ *
+ * Scheduled releases are gone, so Scheduled_Accepted_Customer_Review is no
+ * longer probed and "approved_scheduled" is never produced. The
+ * "scheduled_released_cancelled" branch below is deliberately kept: it reads
+ * historical ReleaseHistory rows written before the feature was removed, and
+ * dropping it would resolve those shops to "Released" — handing publish buttons
+ * to a shop that never went live.
  *
  * Twelve handlers read the result off `req`, so this keeps mutating `req` rather
  * than returning a value — that's what makes the ported controllers work
@@ -62,20 +68,6 @@ export async function applyReleaseStatus(req) {
         req.rejected_at = rejectionData.rejected_at || null;
         req.sentdatetime = rejectionData.sentdatetime || null;
         req.reason = rejectionData.reason || null;
-        return;
-      }
-
-      const { Item: scheduledItem } = await getDynamo().send(
-        new GetItemCommand({
-          TableName: 'Scheduled_Accepted_Customer_Review',
-          Key: { shop_id: { S: shop_id } },
-        })
-      );
-
-      if (scheduledItem) {
-        const scheduledData = unmarshall(scheduledItem);
-        req.releaseStatus = 'approved_scheduled';
-        req.sentdatetime = scheduledData.sentdatetime || null;
         return;
       }
     }

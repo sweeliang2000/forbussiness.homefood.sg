@@ -62,6 +62,7 @@ import {
   SES_FROM_EMAIL as APP_SES_FROM_EMAIL,
 } from '../env';
 import { s3PublicUrl, cloudfrontUrl } from '../s3-keys';
+import { fingerprintBusinessDetails } from '../businessDetails';
 import { inviteEmailParams } from '../emails/invite';
 import { mapWithConcurrency } from '../concurrency';
 import {
@@ -1293,7 +1294,7 @@ export const GetQRCodeConfiguration = asyncHandler(async (req, res, next) => {
 
     const { Item } = await client.send(new GetItemCommand(params));
 
-    const isEdit = !["pending", "scheduled_released_cancelled", "approved_scheduled"].includes(req.releaseStatus);
+    const isEdit = !["pending", "scheduled_released_cancelled"].includes(req.releaseStatus);
     const releaseStatus = req.releaseStatus || null;
 
     if (!Item) {
@@ -1590,8 +1591,13 @@ for (let key in Item) {
     console.log("DynamoDB response:", cleanedData);
 
     // Add isEdit and releaseStatus as additional information based on release status (set by checkReleaseStatus middleware)
-    cleanedData.isEdit = !["pending", "scheduled_released_cancelled", "approved_scheduled"].includes(req.releaseStatus);
+    cleanedData.isEdit = !["pending", "scheduled_released_cancelled"].includes(req.releaseStatus);
     cleanedData.releaseStatus = req.releaseStatus || null;
+
+    // The cleaner above only unwraps `.S`, so a BOOL attribute would arrive at
+    // the page as the object `{ BOOL: true }` — always truthy, and the Publish
+    // button would never disable. Unwrap it explicitly.
+    cleanedData.isChanges = Item.isChanges?.BOOL ?? false;
 
     // Return the response with the fetched item
     res.status(200).json(createSuccessResponse("Business data retrieved successfully", cleanedData));
@@ -1775,7 +1781,15 @@ export const updateBusinessInformation = asyncHandler(async (req, res, next) => 
   if (setParts.length === 0) {
     throw createValidationError("No valid fields provided for update");
   }
-  
+
+  // Mark the row as having unpublished changes, the same way the
+  // CustomerFacingDetails save does (see updateCustomerFacingDetails below).
+  // This is what enables the Publish button on the Official Business Details
+  // page; publishBusinessDetailsUpdate clears it via the admin's approval.
+  setParts.push('#isChanges = :isChangesVal');
+  expressionAttributeNames['#isChanges'] = 'isChanges';
+  expressionAttributeValues[':isChangesVal'] = { BOOL: true };
+
   updateExpression += setParts.join(", ");
 
   const params = {
@@ -2180,7 +2194,7 @@ export const GetStampManagementData = asyncHandler(async (req, res, next) => {
     }
 
     // Add isEdit and releaseStatus as additional information based on release status (set by checkReleaseStatus middleware)
-    cleanedData.isEdit = !["pending", "scheduled_released_cancelled", "approved_scheduled"].includes(req.releaseStatus);
+    cleanedData.isEdit = !["pending", "scheduled_released_cancelled"].includes(req.releaseStatus);
     cleanedData.releaseStatus = req.releaseStatus || null;
 
     res.status(200).json(createSuccessResponse("Data retrieved and cleaned successfully", cleanedData));
@@ -2565,7 +2579,7 @@ export const GetCustomerDetails = asyncHandler(async (req, res, next) => {
     }
 
     // Add isEdit and releaseStatus as additional information based on release status (set by checkReleaseStatus middleware)
-    cleanedData.isEdit = !["pending", "scheduled_released_cancelled", "approved_scheduled"].includes(req.releaseStatus);
+    cleanedData.isEdit = !["pending", "scheduled_released_cancelled"].includes(req.releaseStatus);
     cleanedData.releaseStatus = req.releaseStatus || null;
     if (cleanedData.isChanges === undefined) cleanedData.isChanges = false;
 
@@ -3028,6 +3042,103 @@ export const publishUpdate = asyncHandler(async (req, res) => {
 });
 
 // ---------- end publishUpdate ----------
+
+// ---------- publishBusinessDetailsUpdate ----------
+//
+// Official Business Details is the one page whose Publish button does not write
+// to Supabase. The shop's legal identity — registered name, UEN, registered
+// address — needs a human to sign it off.
+//
+// It does not have a review queue of its own: it enqueues into
+// review_customer_release, the same table sendForReview writes, so the change
+// shows up in the admin console's normal Release Reviews list and is approved
+// and pushed like any other release. The admin app spots that this submission
+// is a legal-details change by comparing the row's fingerprint against
+// approvedDetailsHash, and shows the before/after.
+//
+// isChanges deliberately stays true until an admin approves. That keeps the
+// Publish button live, so a merchant whose change was rejected can amend and
+// resubmit without having to re-save first.
+
+export const publishBusinessDetailsUpdate = asyncHandler(async (req, res) => {
+  // Pre-release shops carry their business details through the first-release
+  // review with everything else; there is nothing to re-review yet.
+  if (req.releaseStatus !== 'Released') {
+    throw createAuthorizationError('Shop must be Released before publishing business details.');
+  }
+
+  const cookie = req.cookies.userDataHTTP;
+  if (!cookie) throw createValidationError('Missing userDataHTTP cookie');
+
+  let userData;
+  try {
+    userData = JSON.parse(cookie);
+  } catch {
+    throw createValidationError('Invalid cookie data');
+  }
+
+  const shop_id = userData.shop_id;
+
+  const { Item } = await client.send(new GetItemCommand({
+    TableName: 'businessinformations',
+    Key: { shop_id: { S: shop_id } }
+  }));
+
+  if (!Item) throw createNotFoundError('Business information record not found');
+
+  const data = unmarshall(Item);
+
+  if (!data.isChanges) {
+    return res.status(200).json(createSuccessResponse('No unpublished changes', null));
+  }
+
+  // The merchant edited a field and put it back. Nothing for an admin to look
+  // at — clear the flag rather than queueing a review with an empty diff.
+  if (fingerprintBusinessDetails(data) === data.approvedDetailsHash) {
+    await client.send(new UpdateItemCommand({
+      TableName: 'businessinformations',
+      Key: { shop_id: { S: shop_id } },
+      UpdateExpression: 'SET isChanges = :false',
+      ExpressionAttributeValues: { ':false': { BOOL: false } }
+    }));
+    return res.status(200).json(createSuccessResponse('No changes to review', null));
+  }
+
+  const sentDateTime = new Date().toISOString();
+
+  // Keyed on shop_id, so publishing twice replaces the pending row rather than
+  // queueing the same shop for review twice.
+  await client.send(new PutItemCommand({
+    TableName: 'review_customer_release',
+    Item: {
+      shop_id: { S: shop_id },
+      sentdatetime: { S: sentDateTime }
+    }
+  }));
+
+  // Mirrors what sendForReview leaves behind, so the admin console reads one
+  // shape of record whichever route put the shop in the queue.
+  await client.send(new UpdateItemCommand({
+    TableName: 'shop_release_contact',
+    Key: { shop_id: { S: shop_id } },
+    UpdateExpression: 'SET review_status = :pending',
+    ExpressionAttributeValues: { ':pending': { S: 'pending' } }
+  }));
+
+  await client.send(new UpdateItemCommand({
+    TableName: 'businessinformations',
+    Key: { shop_id: { S: shop_id } },
+    UpdateExpression: 'SET isBusinessDetailApproved = :false',
+    ExpressionAttributeValues: { ':false': { S: 'False' } }
+  }));
+
+  res.status(200).json(createSuccessResponse('Business details submitted for review', {
+    status: 'pending',
+    submitted_at: sentDateTime
+  }));
+});
+
+// ---------- end publishBusinessDetailsUpdate ----------
 
 // ---------- publishMenuUpdate helpers ----------
 
@@ -3616,7 +3727,7 @@ const shop_id = req.cookies.userDataHTTP;
 
     const { Item } = await client.send(new GetItemCommand(params));
 
-    const isEdit = !["pending", "scheduled_released_cancelled", "approved_scheduled"].includes(req.releaseStatus);
+    const isEdit = !["pending", "scheduled_released_cancelled"].includes(req.releaseStatus);
     const releaseStatus = req.releaseStatus || null;
 
     if (!Item) {
@@ -6444,7 +6555,7 @@ export const getRewards = asyncHandler(async (req, res, next) => {
       } catch (error) {
         console.error('Error retrieving qr_configuration rewardChances:', error);
       }
-      const isEdit = !["pending", "scheduled_released_cancelled", "approved_scheduled"].includes(req.releaseStatus);
+      const isEdit = !["pending", "scheduled_released_cancelled"].includes(req.releaseStatus);
       const releaseStatus = req.releaseStatus || null;
       res.status(200).json(createSuccessResponse("No rewards found", {
         rewards: [],
@@ -6522,7 +6633,7 @@ export const getRewards = asyncHandler(async (req, res, next) => {
       console.error('Error retrieving qr_configuration rewardChances:', error);
     }
 
-    const isEdit = !["pending", "scheduled_released_cancelled", "approved_scheduled"].includes(req.releaseStatus);
+    const isEdit = !["pending", "scheduled_released_cancelled"].includes(req.releaseStatus);
     const releaseStatus = req.releaseStatus || null;
     res.status(200).json(createSuccessResponse("Rewards retrieved successfully", {
       rewards: cleanedData,
@@ -6903,9 +7014,9 @@ export const sendForReview = asyncHandler(async (req, res, next) => {
     throw createDatabaseError("check subscription status", error, "exports.sendForReview");
   }
 
+  // release_type / release_datetime are gone: scheduled releases were removed
+  // and every submission now releases as soon as an admin pushes it.
   const {
-    release_type,
-    release_datetime,
     contact_details_name,
     contact_details_role,
     contact_details_phone_number,
@@ -6920,10 +7031,6 @@ export const sendForReview = asyncHandler(async (req, res, next) => {
   }
 
   // Validate required fields
-  if (!release_type) {
-    throw createValidationError("release_type is required");
-  }
-
   if (!contact_details_name) {
     throw createValidationError("contact_details_name is required");
   }
@@ -6940,24 +7047,6 @@ export const sendForReview = asyncHandler(async (req, res, next) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(contact_details_email)) {
     throw createValidationError("Invalid contact_details_email format");
-  }
-
-  // Conditional validation: release_datetime required if release_type is "schedule"
-  if (release_type.toLowerCase() === "schedule") {
-    if (!release_datetime) {
-      throw createValidationError("release_datetime is required when release_type is 'schedule'");
-    }
-
-    // Validate datetime format (ISO 8601 or similar)
-    const datetime = new Date(release_datetime);
-    if (isNaN(datetime.getTime())) {
-      throw createValidationError("Invalid release_datetime format. Use ISO 8601 format (e.g., 2025-11-03T10:00:00Z)");
-    }
-
-    // Validate that datetime is in the future
-    if (datetime <= new Date()) {
-      throw createValidationError("release_datetime must be in the future");
-    }
   }
 
   try {
@@ -7059,8 +7148,10 @@ export const sendForReview = asyncHandler(async (req, res, next) => {
       TableName: "shop_release_contact",
       Item: {
         shop_id: { S: userData.shop_id },
-        release_type: { S: release_type },
-        release_datetime: release_datetime ? { S: release_datetime } : { NULL: true },
+        // Written as a constant rather than dropped: the admin app's pushToShops
+        // copies release_type onto the Supabase shops row, and existing rows and
+        // ReleaseHistory entries all carry it.
+        release_type: { S: "immediate" },
         contact_details_name: { S: contact_details_name },
         contact_details_role: { S: contact_details_role },
         contact_details_phone_number: contact_details_phone_number ? { S: contact_details_phone_number } : { NULL: true },
@@ -7084,7 +7175,6 @@ export const sendForReview = asyncHandler(async (req, res, next) => {
 
     res.status(200).json(createSuccessResponse("Review request submitted successfully", {
       shop_id: userData.shop_id,
-      release_type: release_type,
       status: "pending"
     }));
   } catch (error) {
@@ -7132,97 +7222,6 @@ export const cancelRelease = asyncHandler(async (req, res, next) => {
     }
     console.error("Error cancelling release request:", error);
     throw createDatabaseError("cancel release request", error, "exports.cancelRelease");
-  }
-});
-
-export const cancelScheduledRelease = asyncHandler(async (req, res, next) => {
-  const cookie = req.cookies.userDataHTTP;
-
-  if (!cookie) {
-    throw createValidationError("Missing userDataHTTP cookie");
-  }
-
-  let userData;
-  try {
-    userData = JSON.parse(cookie);
-  } catch (error) {
-    throw createValidationError("Invalid cookie data");
-  }
-
-  const shop_id = userData.shop_id;
-  const trimmedShopId = shop_id.trim();
-
-  try {
-    const scheduledDeleteParams = {
-      TableName: "Scheduled_Accepted_Customer_Review",
-      Key: {
-        shop_id: { S: shop_id }
-      }
-    };
-
-    await client.send(new DeleteItemCommand(scheduledDeleteParams));
-
-    // Delete from review_customer_release (composite key: shop_id + sentdatetime)
-    const shopIdVariants = [trimmedShopId, shop_id, trimmedShopId + "\n\n\n"];
-    for (const sid of shopIdVariants) {
-      const reviewQueryParams = {
-        TableName: "review_customer_release",
-        KeyConditionExpression: "shop_id = :sid",
-        ExpressionAttributeValues: { ":sid": { S: sid } }
-      };
-      const reviewQueryResult = await client.send(new QueryCommand(reviewQueryParams));
-      const items = reviewQueryResult.Items || [];
-      if (items.length > 0) {
-        for (const item of items) {
-          const key = { shop_id: item.shop_id, sentdatetime: item.sentdatetime };
-          await client.send(new DeleteItemCommand({ TableName: "review_customer_release", Key: key }));
-        }
-        break;
-      }
-    }
-
-    // Update the newest ReleaseHistory record from pending to cancelled
-    let historyParams = {
-      TableName: "ReleaseHistory",
-      KeyConditionExpression: "shop_id = :shopId",
-      ExpressionAttributeValues: {
-        ":shopId": { S: trimmedShopId }
-      },
-      ScanIndexForward: false,
-      Limit: 1
-    };
-    let historyResult = await client.send(new QueryCommand(historyParams));
-    if (!historyResult.Items || historyResult.Items.length === 0) {
-      historyParams.ExpressionAttributeValues[":shopId"] = { S: trimmedShopId + "\n\n\n" };
-      historyResult = await client.send(new QueryCommand(historyParams));
-    }
-    if (historyResult.Items && historyResult.Items.length > 0) {
-      const latestItem = historyResult.Items[0];
-      const historyData = unmarshall(latestItem);
-      if (historyData.review_status === "pending") {
-        const updateParams = {
-          TableName: "ReleaseHistory",
-          Key: {
-            shop_id: latestItem.shop_id,
-            datetime: latestItem.datetime
-          },
-          UpdateExpression: "SET review_status = :status",
-          ExpressionAttributeValues: {
-            ":status": { S: "cancelled" }
-          }
-        };
-        await client.send(new UpdateItemCommand(updateParams));
-      }
-    }
-
-    res.status(200).json(createSuccessResponse("Scheduled release cancelled successfully", {
-      shop_id: shop_id
-    }));
-  } catch (error) {
-    if (error instanceof AppError) {
-      throw error;
-    }
-    console.error("Error cancelling scheduled release:", error);
   }
 });
 
@@ -7860,7 +7859,7 @@ export const GetMenu = asyncHandler(async (req, res, next) => {
     throw createDatabaseError('get menu', err, 'GetMenu');
   }
 
-  const isEdit = !["pending", "scheduled_released_cancelled", "approved_scheduled"].includes(req.releaseStatus);
+  const isEdit = !["pending", "scheduled_released_cancelled"].includes(req.releaseStatus);
   const releaseStatus = req.releaseStatus || null;
 
   if (!menuItem) {
