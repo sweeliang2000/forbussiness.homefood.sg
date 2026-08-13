@@ -160,6 +160,9 @@ export default function StampSetup() {
       } else {
         console.log('Creating new business information');
         await apiClient.post(`${OFFICIAL_BUSINESS_INFORMATION}`, payload);
+        // Future saves must update this row instead of replacing it with
+        // another PutItem and resetting server-owned approval metadata.
+        setIsUpdate(true);
       }
       // TODO: - Create UI to show successfully saved
       setIsSubmissionSuccess(true);

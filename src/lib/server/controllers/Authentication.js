@@ -641,16 +641,17 @@ export const postDataForBusiness = asyncHandler(async (req, res, next) => {
     throw createValidationError("Invalid cookie data");
   }
 
-    const data = req.body;
-  
-  if (!data.businessName || !data.uen || !data.address) {
-    throw createValidationError("Missing required fields: businessName, uen, and address are required");
+  const data = req.body;
+
+  if (!data.businessName || !data.address || typeof data.address !== "object") {
+    throw createValidationError("Missing required fields: businessName and address are required");
   }
 
-  // Check if all 5 required fields are not empty (building name is optional)
+  // UEN is optional for home-based or unregistered businesses. A complete
+  // record still needs the business name and required address fields;
+  // building name remains optional.
   const requiredFields = [
     data.businessName,
-    data.uen,
     data.address?.unitNumber,
     data.address?.streetAddress,
     data.address?.postalCode
@@ -660,25 +661,27 @@ export const postDataForBusiness = asyncHandler(async (req, res, next) => {
     field !== undefined && field !== null && String(field).trim() !== ""
   );
 
-    const params = {
-      TableName: "businessinformations",
-        Item: {
+  const params = {
+    TableName: "businessinformations",
+    Item: {
       shop_id: {S: userData},
-          businessName: { S: data.businessName },
-          uen: { S: data.uen },
-      addressUnitNumber: { S: data.address.unitNumber },
+      businessName: { S: String(data.businessName) },
+      uen: { S: data.uen != null ? String(data.uen) : "" },
+      addressUnitNumber: { S: data.address.unitNumber != null ? String(data.address.unitNumber) : "" },
       addressBuildingName: { S: data.address?.buildingName != null ? String(data.address.buildingName) : "" },
-      addressStreetAddress: {S: data.address.streetAddress},
-      addressPostalCode: {S: data.address.postalCode},
-      isBusinessDetailApproved: {S: data.isBusinessDetailsApproved},
+      addressStreetAddress: { S: data.address.streetAddress != null ? String(data.address.streetAddress) : "" },
+      addressPostalCode: { S: data.address.postalCode != null ? String(data.address.postalCode) : "" },
+      // Approval is controlled by the admin workflow, never by merchant input.
+      isBusinessDetailApproved: { S: "False" },
+      isChanges: { BOOL: true },
       hasAllRequiredField: { BOOL: hasAllRequiredField }
     },
   };
 
-      try {
-        await client.send(new PutItemCommand(params));
+  try {
+    await client.send(new PutItemCommand(params));
     res.status(200).json(createSuccessResponse("Business information stored successfully"));
-      } catch (error) {
+  } catch (error) {
     if (error instanceof AppError) {
       throw error;
     }
@@ -1810,10 +1813,9 @@ export const updateBusinessInformation = asyncHandler(async (req, res, next) => 
     if (result.Attributes) {
       const businessData = unmarshall(result.Attributes);
       
-      // Check if all 5 required fields are not empty (building name is optional)
+      // UEN and building name are optional.
       const requiredFields = [
         businessData.businessName,
-        businessData.uen,
         businessData.addressUnitNumber,
         businessData.addressStreetAddress,
         businessData.addressPostalCode
@@ -1864,7 +1866,6 @@ export const updateBusinessInformation = asyncHandler(async (req, res, next) => 
         
         const requiredFields = [
           businessData.businessName,
-          businessData.uen,
           businessData.addressUnitNumber,
           businessData.addressStreetAddress,
           businessData.addressPostalCode
