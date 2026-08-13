@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { TextField } from '@mui/material';
+import { FormControlLabel, Switch, TextField } from '@mui/material';
 
 import styles from './LocationSection.module.css';
 import { ContentCard } from '@/components/ContentCard/ContentCard';
@@ -17,6 +17,7 @@ dayjs.extend(timezone);
 const LOCATION_NAME = 'locationName';
 const ADDRESS = 'address';
 const POSTAL_CODE = 'postalCode';
+const SAME_AS_BUSINESS_ADDRESS = 'sameAsBusinessAddress';
 const DAY_CONFIG = [
   { key: 'monday', label: 'Monday' },
   { key: 'tuesday', label: 'Tuesday' },
@@ -42,6 +43,7 @@ const makeDefaultLocation = () => ({
   [LOCATION_NAME]: '',
   [ADDRESS]: '',
   [POSTAL_CODE]: '',
+  [SAME_AS_BUSINESS_ADDRESS]: true,
   operatingHours: makeDefaultHours(),
 });
 
@@ -75,6 +77,7 @@ const normalizeFromLocation = (location) => {
     [LOCATION_NAME]: location.locationName ?? '',
     [ADDRESS]: location.address ?? '',
     [POSTAL_CODE]: location.postalCode ?? '',
+    [SAME_AS_BUSINESS_ADDRESS]: location.sameAsBusinessAddress ?? true,
     operatingHours: normalizedHours,
   };
 };
@@ -94,6 +97,7 @@ const toPayloadLocation = (draftLocation) => {
     locationName: draftLocation.locationName,
     address: draftLocation.address,
     postalCode: draftLocation.postalCode,
+    sameAsBusinessAddress: draftLocation.sameAsBusinessAddress,
     operatingHours,
   };
 };
@@ -102,6 +106,7 @@ const LocationSection = ({
   location,
   setLocation,
   resetSaving,
+  businessAddress,
   isEdit = true,
 }) => {
   const [locationDraft, setLocationDraft] = useState(() => normalizeFromLocation(location));
@@ -142,12 +147,36 @@ const LocationSection = ({
     });
   };
 
+  const updateSameAsBusinessAddress = (isSame) => {
+    syncLocation({
+      ...locationDraft,
+      [SAME_AS_BUSINESS_ADDRESS]: isSame,
+      ...(isSame
+        ? {
+            [ADDRESS]: businessAddress.address,
+            [POSTAL_CODE]: businessAddress.postalCode,
+          }
+        : {}),
+    });
+  };
+
   return (
     <ContentCard className={styles.content}>
       <FieldHeader
-        title='Location'
-        description='This setup supports one location. Update the details directly here.'
+        title='Home-Based Food Location'
+        description='Use your official business address, or turn the option off to enter a different customer-facing location.'
         type='h3'
+      />
+
+      <FormControlLabel
+        control={
+          <Switch
+            checked={locationDraft.sameAsBusinessAddress}
+            onChange={(event) => updateSameAsBusinessAddress(event.target.checked)}
+            disabled={!isEdit}
+          />
+        }
+        label='Same as business address'
       />
 
       <TextField
@@ -167,7 +196,7 @@ const LocationSection = ({
         fullWidth
         value={locationDraft.address}
         onChange={(event) => updateField(ADDRESS, event.target.value)}
-        disabled={!isEdit}
+        disabled={!isEdit || locationDraft.sameAsBusinessAddress}
       />
 
       <TextField
@@ -178,7 +207,7 @@ const LocationSection = ({
         fullWidth
         value={locationDraft.postalCode}
         onChange={(event) => updateField(POSTAL_CODE, event.target.value)}
-        disabled={!isEdit}
+        disabled={!isEdit || locationDraft.sameAsBusinessAddress}
       />
 
       <div>

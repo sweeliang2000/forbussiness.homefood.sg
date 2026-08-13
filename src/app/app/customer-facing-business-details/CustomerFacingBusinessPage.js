@@ -12,7 +12,7 @@ import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import FieldHeader from '@/components/FieldHeader/FieldHeader';
 import FormTextField from '@/components/Form Components/FormTextField/FormTextField';
 import apiClient from '@/utility/api';
-import { CUSTOMER_FACING_INFORMATION, RELEASE_STATUS, STRIPE_CONNECT_ACCOUNT_STATUS, PUBLISH_UPDATE } from '@/utility/apiPaths';
+import { CUSTOMER_FACING_INFORMATION, OFFICIAL_BUSINESS_INFORMATION, RELEASE_STATUS, STRIPE_CONNECT_ACCOUNT_STATUS, PUBLISH_UPDATE } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import { FaCheck } from 'react-icons/fa';
@@ -30,6 +30,44 @@ const HALAL_CERTIFIED = 'halalCertified';
 const KEYWORDS = 'keywords';
 
 const sanitize = (value) => (!value || value === 'undefined') ? '' : value;
+
+const toBusinessAddress = (businessData) => {
+    const address = [
+        businessData?.addressStreetAddress,
+        businessData?.addressBuildingName,
+        businessData?.addressUnitNumber,
+    ]
+        .map((value) => String(sanitize(value)).trim())
+        .filter(Boolean)
+        .join(', ');
+
+    return {
+        address,
+        postalCode: String(sanitize(businessData?.addressPostalCode)).trim(),
+    };
+};
+
+const applyBusinessAddressPreference = (savedLocation, businessAddress) => {
+    const hasSavedLocation = savedLocation && Object.keys(savedLocation).length > 0;
+    const savedPreference = savedLocation?.sameAsBusinessAddress;
+    const matchesBusinessAddress = hasSavedLocation
+        && String(sanitize(savedLocation.address)).trim() === businessAddress.address
+        && String(sanitize(savedLocation.postalCode)).trim() === businessAddress.postalCode;
+    const sameAsBusinessAddress = typeof savedPreference === 'boolean'
+        ? savedPreference
+        : !hasSavedLocation || matchesBusinessAddress;
+
+    return {
+        ...(savedLocation ?? {}),
+        address: sameAsBusinessAddress
+            ? businessAddress.address
+            : sanitize(savedLocation?.address),
+        postalCode: sameAsBusinessAddress
+            ? businessAddress.postalCode
+            : sanitize(savedLocation?.postalCode),
+        sameAsBusinessAddress,
+    };
+};
 
 const formatSgPhone = (value) => {
     const digits = value.replace(/\D/g, '').slice(0, 8);
@@ -73,6 +111,7 @@ const CustomerFacingBusinessPage = () => {
     const [thumbnailImages, setThumbnailImages] = useState([]);
     const [bannerImages, setBannerImages] = useState([]);
     const [location, setLocation] = useState(null);
+    const [businessAddress, setBusinessAddress] = useState({ address: '', postalCode: '' });
     const [isThumbnailDeleted, setIsThumbnailDeleted] = useState(false);
     const [isBannerDeleted, setIsBannerDeleted] = useState(false);
 
@@ -249,6 +288,10 @@ const CustomerFacingBusinessPage = () => {
                 },
             });
 
+            if (!hasExistingData) {
+                setHasExistingData(true);
+            }
+
             console.log('Form submitted successfully');
             setIsSubmissionSuccess(true);
             setIsBtnLoading(false);
@@ -293,8 +336,13 @@ const CustomerFacingBusinessPage = () => {
             setIsBtnLoading(true);
     
             try {
-                const response = await apiClient.get(`${CUSTOMER_FACING_INFORMATION}`);
+                const [response, businessResponse] = await Promise.all([
+                    apiClient.get(`${CUSTOMER_FACING_INFORMATION}`),
+                    apiClient.get(`${OFFICIAL_BUSINESS_INFORMATION}`),
+                ]);
                 const data = response.data.data;
+                const loadedBusinessAddress = toBusinessAddress(businessResponse.data.data);
+                setBusinessAddress(loadedBusinessAddress);
 
                 if (data) {
                     setHasExistingData(true);
@@ -335,11 +383,18 @@ const CustomerFacingBusinessPage = () => {
                     setBannerImages(loadedBanners);
                     initialBannerImagesRef.current = JSON.parse(JSON.stringify(loadedBanners));
                     
-                    const loadedLocation = Array.isArray(data.locations)
+                    const savedLocation = Array.isArray(data.locations)
                         ? (data.locations[0] ?? null)
                         : (data.location ?? data.locations ?? null);
+                    const hasSavedLocation = savedLocation && Object.keys(savedLocation).length > 0;
+                    const loadedLocation = applyBusinessAddressPreference(savedLocation, loadedBusinessAddress);
                     setLocation(loadedLocation);
-                    initialLocationRef.current = JSON.parse(JSON.stringify(loadedLocation));
+                    // A newly supplied default address still needs to be saved.
+                    // Existing custom locations remain untouched and do not
+                    // appear as an edit merely because the toggle was added.
+                    initialLocationRef.current = hasSavedLocation
+                        ? JSON.parse(JSON.stringify(loadedLocation))
+                        : null;
                 } else {
                     setHasExistingData(false);
                     // Initialize with empty values
@@ -358,6 +413,8 @@ const CustomerFacingBusinessPage = () => {
                     };
                     initialThumbnailImagesRef.current = [];
                     initialBannerImagesRef.current = [];
+                    const defaultLocation = applyBusinessAddressPreference(null, loadedBusinessAddress);
+                    setLocation(defaultLocation);
                     initialLocationRef.current = null;
                 }
     
@@ -816,6 +873,7 @@ const CustomerFacingBusinessPage = () => {
                                     location={location}
                                     setLocation={setLocation}
                                     resetSaving={resetSaving}
+                                    businessAddress={businessAddress}
                                     isEdit={isEdit}
                                 />
                             </>
