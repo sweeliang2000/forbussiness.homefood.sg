@@ -48,12 +48,16 @@ const Verify = () => {
         setIsResendButtonDisabled(false);
     }, [countdown]);
 
+    // A cookie's identity is (name, domain, path), so a removal only lands if its
+    // domain matches how the cookie was set. The server sets authStatus host-only
+    // (getCookieOptions never sets a domain), so the old `.homefood.sg` removal
+    // expired a cookie that never existed and left the real one in place — after
+    // which AuthGuard read `awaiting_verification` and bounced /login back to
+    // /verify forever. Host-only first; the domain-scoped pass only exists to
+    // clear copies left in browsers by the builds that set it that way.
     const clearAuthStatusCookie = () => {
-        const isProduction = process.env.NODE_ENV === 'production';
-        Cookies.remove('authStatus', {
-            path: '/',
-            domain: isProduction ? '.homefood.sg' : undefined,
-        });
+        Cookies.remove('authStatus', { path: '/' });
+        Cookies.remove('authStatus', { path: '/', domain: '.homefood.sg' });
     };
 
     const sendOTPToEmail = async () => {

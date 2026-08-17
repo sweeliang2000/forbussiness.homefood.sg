@@ -76,7 +76,9 @@ const LoginContent = () => {
                             path: '/',
                             secure: isProduction,
                             sameSite: 'Lax',
-                            domain: isProduction ? '.homefood.sg' : undefined,
+                            // Host-only, matching the server's own authStatus cookie —
+                            // otherwise the two scopes disagree and Verify's removal
+                            // can't clear whichever one it didn't write.
                         }
                     );
                 }
