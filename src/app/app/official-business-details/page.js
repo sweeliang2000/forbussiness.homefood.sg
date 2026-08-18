@@ -39,7 +39,12 @@ export default function StampSetup() {
   const [isBtnLoading, setIsBtnLoading] = useState(false);
   const [isBtnDisabled, setIsBtnDisabled] = useState(true);
   const [isUpdate, setIsUpdate] = useState(false);
-  const [isEdit, setIsEdit] = useState(true);
+  // Whether the shop is out of the release queue. Every field on this page
+  // reads `isEdit` below, which folds this together with the role check, so
+  // a role that may only read the page gets the same locked form the queue
+  // produces rather than inputs that accept typing and then refuse to save.
+  const [isReleaseEditable, setIsReleaseEditable] = useState(true);
+  const isEdit = isReleaseEditable && can(CAP.BUSINESS_DETAILS_EDIT);
   const [releaseStatus, setReleaseStatus] = useState(null);
 
   // Saved-but-unpublished changes, mirroring the other publish-enabled pages.
@@ -243,7 +248,7 @@ export default function StampSetup() {
           const isEditValue = data.data.isEdit;
 
           // Set isEdit state
-          setIsEdit(isEditValue !== undefined ? isEditValue : true);
+          setIsReleaseEditable(isEditValue !== undefined ? isEditValue : true);
 
           // Saved but not yet sent for review.
           setHasPublishableChanges(!!data.data.isChanges);

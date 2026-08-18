@@ -21,6 +21,7 @@ import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import MDEditor, { commands } from '@uiw/react-md-editor';
 import '@uiw/react-md-editor/markdown-editor.css';
 import { CAP } from '@/lib/permissions';
+import usePermissions from '@/hooks/usePermissions';
 
 // Define custom commands: include bold and bullet points only
 // Exclude: headings (title), link, insert code, codeblock, comment, image, table, and open help
@@ -60,6 +61,7 @@ const DEFAULT_STAMP_STEP = {
 }
 
 export default function StampSetup() {
+  const { can } = usePermissions();
   // For Initial Loading
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
@@ -71,7 +73,12 @@ export default function StampSetup() {
   const [isBtnLoading, setIsBtnLoading] = useState(false);
   const [isBtnDisabled, setIsBtnDisabled] = useState(true);
   const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
-  const [isEdit, setIsEdit] = useState(true);
+  // Whether the shop is out of the release queue. Every field on this page
+  // reads `isEdit` below, which folds this together with the role check, so
+  // a role that may only read the page gets the same locked form the queue
+  // produces rather than inputs that accept typing and then refuse to save.
+  const [isReleaseEditable, setIsReleaseEditable] = useState(true);
+  const isEdit = isReleaseEditable && can(CAP.LOYALTY_CONFIG);
   const [releaseStatus, setReleaseStatus] = useState(null);
 
   // Toggle state
@@ -122,7 +129,7 @@ export default function StampSetup() {
 
           // Extract isEdit from API response
           const isEditValue = data.isEdit;
-          setIsEdit(isEditValue !== undefined ? isEditValue : true);
+          setIsReleaseEditable(isEditValue !== undefined ? isEditValue : true);
 
           // Parse isEnabled (might be string "true"/"false")
           const enabled = data.isEnabled === 'true' || data.isEnabled === true;

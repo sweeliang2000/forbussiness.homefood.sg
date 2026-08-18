@@ -73,7 +73,12 @@ export default function PaymentsSetupPage() {
   // down the page that people didn't realise there was a second option.
   const [expanded, setExpanded] = useState(null);
 
-  const [isEdit, setIsEdit] = useState(true);
+  // Whether the shop is out of the release queue. Every field on this page
+  // reads `isEdit` below, which folds this together with the role check, so
+  // a role that may only read the page gets the same locked form the queue
+  // produces rather than inputs that accept typing and then refuse to save.
+  const [isReleaseEditable, setIsReleaseEditable] = useState(true);
+  const isEdit = isReleaseEditable && can(CAP.PAYMENTS_EDIT);
   const [releaseStatus, setReleaseStatus] = useState(null);
 
   // Menu-builder style state machine
@@ -112,7 +117,7 @@ export default function PaymentsSetupPage() {
 
         setPaynow(form);
         setHasChanges(!!data.isChanges);
-        if (data.isEdit !== undefined) setIsEdit(data.isEdit);
+        if (data.isEdit !== undefined) setIsReleaseEditable(data.isEdit);
         if (data.releaseStatus !== undefined) setReleaseStatus(data.releaseStatus);
       } catch {
         // Resilient: still render the generator so the merchant can test it out.

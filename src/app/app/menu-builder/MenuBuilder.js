@@ -1192,7 +1192,9 @@ export default function MenuBuilder() {
           infoMessage={
             !isEdit
               ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.'
-              : null
+              : !canEditMenu
+                ? 'View only, mostly. You can mark items sold out; only an Owner or Manager can change the menu itself.'
+                : null
           }
           rightActions={
             <>

@@ -9,6 +9,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { IconButton } from '@mui/material';
 import { useState } from 'react';
 
+import { deniedMessage } from '@/lib/permissions';
 import usePermissions from '@/hooks/usePermissions';
 import PermissionGate from '../PermissionGate/PermissionGate';
 
@@ -85,8 +86,18 @@ export const HeaderSection = ({
             </div>
             <div className={styles.description}>{description}</div>
 
-            {(warningMessage || infoMessage || shouldShowSuccess || isError) && (
+            {(!allowed || warningMessage || infoMessage || shouldShowSuccess || isError) && (
                 <div className={styles.alerts} role="status" aria-live="polite">
+                    {/* First, and before anything conditional: a page whose every
+                        field is disabled needs to say why at the top, or it reads
+                        as broken. The disabled controls each carry the same
+                        sentence on hover, but only if you think to hover. */}
+                    {!allowed && (
+                        <Alert className={styles.alert} severity="info">
+                            <strong>View only.</strong> {deniedMessage(capability)}
+                        </Alert>
+                    )}
+
                     {warningMessage && (
                         <Alert className={styles.alert} severity="warning">
                             {warningMessage}

@@ -14,8 +14,10 @@ import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import DigitalStampRewardSystemOnboarding from '@/components/DigitalStampRewardSystemOnboarding/DigitalStampRewardSystemOnboarding';
 import { CAP } from '@/lib/permissions';
+import usePermissions from '@/hooks/usePermissions';
 
 const CardDesign = () => {
+    const { can } = usePermissions();
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
     const [isLoadingErrorStatus, setIsLoadingErrorStatus] = useState(null);
@@ -27,7 +29,12 @@ const CardDesign = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [isBtnLoading, setIsBtnLoading] = useState(false);
     const [isBtnDisabled, setIsBtnDisabled] = useState(true);
-    const [isEdit, setIsEdit] = useState(true);
+    // Whether the shop is out of the release queue. Every field on this page
+    // reads `isEdit` below, which folds this together with the role check, so
+    // a role that may only read the page gets the same locked form the queue
+    // produces rather than inputs that accept typing and then refuse to save.
+    const [isReleaseEditable, setIsReleaseEditable] = useState(true);
+    const isEdit = isReleaseEditable && can(CAP.LOYALTY_CONFIG);
     const [releaseStatus, setReleaseStatus] = useState(null);
 
     const [cardBackground, setCardBackgroundColor] = useState('#ffffff')
@@ -145,7 +152,7 @@ const CardDesign = () => {
 
                 if (cardDesignData && cardDesignData.data) {
                         const isEditValue = cardDesignData.data.isEdit;
-                        setIsEdit(isEditValue !== undefined ? isEditValue : true);
+                        setIsReleaseEditable(isEditValue !== undefined ? isEditValue : true);
                         
                         const loadedBackground = cardDesignData.data.backgroundColor || '#ffffff';
                         const loadedTitleColor = cardDesignData.data.titleColor || '#000000';

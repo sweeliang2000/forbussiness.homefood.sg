@@ -103,7 +103,12 @@ const CustomerFacingBusinessPage = () => {
     const [isBtnDisabled, setIsBtnDisabled] = useState(true);
     const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
     const [hasExistingData, setHasExistingData] = useState(false);
-    const [isEdit, setIsEdit] = useState(true);
+    // Whether the shop is out of the release queue. Every field on this page
+    // reads `isEdit` below, which folds this together with the role check, so
+    // a role that may only read the page gets the same locked form the queue
+    // produces rather than inputs that accept typing and then refuse to save.
+    const [isReleaseEditable, setIsReleaseEditable] = useState(true);
+    const isEdit = isReleaseEditable && can(CAP.CUSTOMER_DETAILS_EDIT);
     const [releaseStatus, setReleaseStatus] = useState(null);
     const [isPublishLoading, setIsPublishLoading] = useState(false);
     const [isPublishSuccess, setIsPublishSuccess] = useState(false);
@@ -351,7 +356,7 @@ const CustomerFacingBusinessPage = () => {
                 if (data) {
                     setHasExistingData(true);
                     const isEditValue = data.isEdit;
-                    setIsEdit(isEditValue !== undefined ? isEditValue : true);
+                    setIsReleaseEditable(isEditValue !== undefined ? isEditValue : true);
                     setHasChanges(data.isChanges ?? false);
                     
                     const loadedValues = {
@@ -455,7 +460,7 @@ const CustomerFacingBusinessPage = () => {
 
                 const accountData = accountRes.data;
                 if (accountData && accountData.isEdit !== undefined) {
-                    setIsEdit(accountData.isEdit);
+                    setIsReleaseEditable(accountData.isEdit);
                 }
             } catch {
                 // Silently ignore errors; not critical for this page

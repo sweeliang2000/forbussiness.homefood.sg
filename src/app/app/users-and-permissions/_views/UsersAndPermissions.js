@@ -184,6 +184,7 @@ const UsersAndPermissions = () => {
                         </p>
                     }
                     showButton={false}
+                    capability={CAP.USERS_INVITE}
                     rightActions={
                         <PermissionGate allowed={can(CAP.USERS_INVITE)} capability={CAP.USERS_INVITE}>
                             <Button

@@ -17,6 +17,7 @@ import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import apiClient from '@/utility/api';
 import { REWARDS, RELEASE_STATUS } from '@/utility/apiPaths';
 import { CAP } from '@/lib/permissions';
+import usePermissions from '@/hooks/usePermissions';
 
 const DEFAULT_REWARD_CHANCE = {
   id: 1,
@@ -26,6 +27,7 @@ const DEFAULT_REWARD_CHANCE = {
 };
 
 export default function ScanToWinPage() {
+  const { can } = usePermissions();
   // For Initial Loading
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
@@ -37,7 +39,12 @@ export default function ScanToWinPage() {
   const [isBtnLoading, setIsBtnLoading] = useState(false);
   const [isBtnDisabled, setIsBtnDisabled] = useState(true);
   const [isSubmissionSuccess, setIsSubmissionSuccess] = useState(false);
-  const [isEdit, setIsEdit] = useState(true);
+  // Whether the shop is out of the release queue. Every field on this page
+  // reads `isEdit` below, which folds this together with the role check, so
+  // a role that may only read the page gets the same locked form the queue
+  // produces rather than inputs that accept typing and then refuse to save.
+  const [isReleaseEditable, setIsReleaseEditable] = useState(true);
+  const isEdit = isReleaseEditable && can(CAP.LOYALTY_CONFIG);
   const [releaseStatus, setReleaseStatus] = useState(null);
 
   // Toggle state
@@ -308,7 +315,7 @@ export default function ScanToWinPage() {
         setHasExistingConfig(true);
 
         const isEditValue = apiData.isEdit;
-        setIsEdit(isEditValue !== undefined ? isEditValue : true);
+        setIsReleaseEditable(isEditValue !== undefined ? isEditValue : true);
 
         const enabled = apiData.isEnabled === 'true' || apiData.isEnabled === true;
         setIsEnabled(enabled);
