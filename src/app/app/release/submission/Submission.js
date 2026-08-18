@@ -21,6 +21,7 @@ import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
 import { isProLookupKey } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
 import { CAP } from '@/lib/permissions';
+import usePermissions from '@/hooks/usePermissions';
 
 
 
@@ -48,6 +49,16 @@ dayjs.extend(timezone);
 
 const SubmissionView = () => {
     const [isUserSubscribed, setIsUserSubscribed] = useState(false);
+
+    /*
+      The subscription prompts are for whoever can act on them. A role that
+      cannot submit a release also cannot buy a plan — billing is Owner-only —
+      so telling them to upgrade is a dead end stacked on top of the view-only
+      banner they already have. Same for Cancel Review.
+    */
+    const { can } = usePermissions();
+    const canSubmitRelease = can(CAP.RELEASE_SUBMIT);
+    const showSubscriptionPrompt = !isUserSubscribed && canSubmitRelease;
     const [isBtnLoading, setIsBtnLoading] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
@@ -409,16 +420,16 @@ const SubmissionView = () => {
                 errorMessage={isRejected ? getRejectErrorMessage() : errorMessage}
                 successMessage={getReleasedSuccessMessage()}
                 isDisabled={isPending || !isUserSubscribed}
-                warningMessage={!isUserSubscribed ? <>You need an active subscription to submit a release. <Link href="/app/subscription">Please upgrade your plan.</Link></> : null}
+                warningMessage={showSubscriptionPrompt ? <>You need an active subscription to submit a release. <Link href="/app/subscription">Please upgrade your plan.</Link></> : null}
                 infoMessage={getInfoMessage()}
-                showCancelButton={isPending}
+                showCancelButton={isPending && canSubmitRelease}
                 cancelButtonText='Cancel Review'
                 onCancel={handleCancel}
                 buttonText='Send'
                 successButtonText='Sent'
             />
 
-            {!isUserSubscribed && (
+            {showSubscriptionPrompt && (
                 <div className={styles.banner}>
                     <div className={styles.bannerContent}>
                         <HiOutlineExclamationCircle className={styles.bannerIcon} />

@@ -626,7 +626,7 @@ export default function ScanToWinPage() {
             isDisabled={isBtnDisabled || !isEdit}
             errorMessage={errorMessage}
             infoMessage={
-              !isEdit
+              !isReleaseEditable
                 ? 'The information has been submitted for release and is currently under review. To make any changes, please cancel it under Release Submission.'
                 : null
             }
