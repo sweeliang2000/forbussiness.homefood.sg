@@ -155,6 +155,16 @@ const CustomerFacingBusinessPage = () => {
     const initialThumbnailImagesRef = useRef([]);
     const initialBannerImagesRef = useRef([]);
     const initialLocationRef = useRef(null);
+    /*
+      A location defaulted from the business address is worth *saving* but is
+      not an edit the merchant made, and those are two different questions.
+      Keeping them in one flag is what made this page claim unsaved changes the
+      moment it loaded: the baseline was left null so the Save button would
+      light up, and the navigation guard read the same comparison and warned
+      about work nobody had done. The baseline now records what was loaded, and
+      this ref carries the "still needs saving" half on its own.
+    */
+    const unsavedDefaultLocationRef = useRef(false);
     
     // Track if we've pushed a history state for back button handling
     const historyStatePushedRef = useRef(false);
@@ -313,6 +323,7 @@ const CustomerFacingBusinessPage = () => {
             initialThumbnailImagesRef.current = JSON.parse(JSON.stringify(thumbnailImages));
             initialBannerImagesRef.current = JSON.parse(JSON.stringify(bannerImages));
             initialLocationRef.current = JSON.parse(JSON.stringify(location));
+            unsavedDefaultLocationRef.current = false;
         } catch (error) {
             const errorData = error?.response?.data;
             const message = errorData?.error?.message || errorData?.message || error?.message || 'An unknown error occurred';
@@ -398,12 +409,13 @@ const CustomerFacingBusinessPage = () => {
                     const hasSavedLocation = savedLocation && Object.keys(savedLocation).length > 0;
                     const loadedLocation = applyBusinessAddressPreference(savedLocation, loadedBusinessAddress);
                     setLocation(loadedLocation);
-                    // A newly supplied default address still needs to be saved.
-                    // Existing custom locations remain untouched and do not
-                    // appear as an edit merely because the toggle was added.
-                    initialLocationRef.current = hasSavedLocation
+                    initialLocationRef.current = loadedLocation
                         ? JSON.parse(JSON.stringify(loadedLocation))
                         : null;
+                    // Existing custom locations remain untouched and do not
+                    // appear as an edit merely because the toggle was added.
+                    unsavedDefaultLocationRef.current = !hasSavedLocation
+                        && !!(loadedLocation?.address || loadedLocation?.postalCode);
                 } else {
                     setHasExistingData(false);
                     // Initialize with empty values
@@ -424,7 +436,11 @@ const CustomerFacingBusinessPage = () => {
                     initialBannerImagesRef.current = [];
                     const defaultLocation = applyBusinessAddressPreference(null, loadedBusinessAddress);
                     setLocation(defaultLocation);
-                    initialLocationRef.current = null;
+                    initialLocationRef.current = defaultLocation
+                        ? JSON.parse(JSON.stringify(defaultLocation))
+                        : null;
+                    unsavedDefaultLocationRef.current =
+                        !!(defaultLocation?.address || defaultLocation?.postalCode);
                 }
     
                 setIsLoading(false);
@@ -520,7 +536,10 @@ const CustomerFacingBusinessPage = () => {
             return;
         }
         
-        const hasChanges = checkUnsavedChanges();
+        // Save stays available for a defaulted address the merchant has not
+        // persisted yet; checkUnsavedChanges deliberately does not count it, so
+        // leaving the page does not warn about it.
+        const hasChanges = checkUnsavedChanges() || unsavedDefaultLocationRef.current;
         setIsBtnDisabled(!hasChanges);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- checkUnsavedChanges derived from deps; omit to avoid re-running every keystroke
     }, [enteredValues, thumbnailImages, bannerImages, location, isEdit]);
