@@ -117,7 +117,7 @@ if (roles?.length) {
   assertRole(req, roles);                       // 2. role allowlist
 }
 if (auth) {
-  assertOperatorMayWrite(req, operatorWrite);   // 3. operator write gate
+  assertCapability(req, capability);            // 3. capability gate
   attachSession(req);
 }
 if (releaseStatus) {
@@ -175,7 +175,7 @@ It does **not** verify a signature. Never branch on authorization using its outp
 
 ## Roles
 
-Three, defined once at `session.js:36`:
+Three, defined once in `src/lib/permissions.js` and re-exported from `session.js`:
 
 ```js
 export const ROLES = { OWNER: 'Owner', MANAGER: 'Manager', OPERATOR: 'Operator' };
@@ -187,31 +187,19 @@ Two enforcement mechanisms:
 
 **`assertRole(req, allowedRoles)`** — declarative, via `withApi({ roles: [...] })`. Only **5 routes** use it, all `['Owner']`: the four Stripe Connect routes and `DELETE /api/data/liveShopDetails`.
 
-**`assertOperatorMayWrite(req, operatorWrite)`** — runs on *every* authenticated route:
+**`assertCapability(req, capability)`** — runs on *every* authenticated route:
 
 ```js
-if (role !== ROLES.OPERATOR) return;   // Managers and Owners unaffected
-if (req.method === 'GET') return;      // Operators may read anything
-if (operatorWriteAllowed) return;      // opt-in per route
-throw createAuthorizationError('Operators can only perform GET requests and POST to Loyalty Terminal …');
+if (req.method === 'GET') return;                   // every role reads everything
+if (rolesFor(capability).includes(role)) return;    // per-route capability
+throw createAuthorizationError(deniedMessage(capability));
 ```
 
-Exactly **2 routes** opt in: `/api/mobile/terminalLogs` and `/api/mobile/processStampTransaction`.
+Writes that declare no capability require Owner or Manager, so a missing annotation fails closed.
 
-### Effective capabilities
+**Who may do what is [02_PERMISSIONS.md](./02_PERMISSIONS.md).** That document owns the role × capability matrix, the reasoning behind capabilities, and how to gate a new route or a new button. This section covers only the mechanism.
 
-| | Owner | Manager | Operator |
-|---|---|---|---|
-| Read anything in the shop | ✅ | ✅ | ✅ |
-| Loyalty terminal writes | ✅ | ✅ | ✅ |
-| Any other write | ✅ | ✅ | ❌ |
-| Invite / revoke an invite | ✅ | ✅ | ❌ |
-| Change a role, remove a member | ✅ | ❌ | ❌ |
-| Billing, Stripe Connect | ✅ | ❌ | ❌ |
-
-Manager is close to Owner. The line is **money and membership**.
-
-> **There is no client-side role gating.** `sidebar.js` links every page unconditionally. The server is the only gate; UI role checks are cosmetic.
+> Roles are read from the unsigned `userDataHTTP` cookie — see [the trust problem](#the-trust-problem-and-getauthoritativeuser). The console disables what the current role cannot do, but that is cosmetic: page routes and sidebar links stay open to every role, and the server is the only gate.
 
 ---
 
@@ -304,6 +292,12 @@ export const dynamic = 'force-dynamic';
 export const POST = withApi(myHandler);
 ```
 
+Restricted to a capability (see [02_PERMISSIONS.md](./02_PERMISSIONS.md)):
+
+```js
+export const POST = withApi(myHandler, { capability: CAP.ORDERS_MANAGE });
+```
+
 Owner-only:
 
 ```js
@@ -349,7 +343,7 @@ IAM already grants exactly `cognito-idp:AdminUserGlobalSignOut` on the pool — 
 
 Documented so nobody rediscovers them the hard way.
 
-**1. `userDataHTTP` is unsigned.** The root issue. `httpOnly` blocks browser JS, not `curl`. Mitigated case-by-case with `getAuthoritativeUser`; the general fix means touching ~107 call sites.
+**1. `userDataHTTP` is unsigned.** The root issue. `httpOnly` blocks browser JS, not `curl`. Mitigated case-by-case with `getAuthoritativeUser`; the general fix means touching ~107 call sites. Every capability check reads this cookie, so authorization inherits the weakness — see [02_PERMISSIONS.md](./02_PERMISSIONS.md#known-gaps).
 
 **2. Revocation has a one-hour blind spot.** No revocation check on verify. The fix is a `sessions_valid_from` timestamp on the `Users` row, compared against the token's **`auth_time`** — not `iat`, because a refresh mints a new `iat` but preserves `auth_time`, so only `auth_time` kills the whole session lineage.
 
@@ -372,7 +366,8 @@ Documented so nobody rediscovers them the hard way.
 | File | Role |
 |---|---|
 | `src/lib/server/withApi.js` | Wraps every route; runs the guards in order |
-| `src/lib/server/session.js` | `verifyToken`, refresh, `ROLES`, `assertRole`, `assertOperatorMayWrite` |
+| `src/lib/server/session.js` | `verifyToken`, refresh, `assertRole`, `assertCapability` |
+| `src/lib/permissions.js` | The role × capability matrix — see [02_PERMISSIONS.md](./02_PERMISSIONS.md) |
 | `src/lib/server/cognito.js` | JWKS verification of access and ID tokens |
 | `src/lib/server/cookies.js` | Cookie names, options, ms→s translation |
 | `src/lib/server/authoritative-user.js` | The hardened identity path |

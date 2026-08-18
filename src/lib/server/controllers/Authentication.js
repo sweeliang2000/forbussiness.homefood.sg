@@ -43,6 +43,7 @@ import axios from 'axios';
 import { getS3, getDynamo, getSes, getCognito } from '../aws';
 import { ensureUserProvisioned, lookupUser } from '../user-provisioning';
 import { getAuthoritativeUser } from '../authoritative-user';
+import { ROLES } from '@/lib/permissions';
 import { getSupabase } from '../supabase';
 import { getStripe, getConnectStripe, getWebhookSecret } from '../stripe';
 import {
@@ -3482,6 +3483,24 @@ export const InviteUsers = asyncHandler(async (req, res, next) => {
   // Validate that user cannot invite themselves
   if (receiverEmail === invitedFromEmail) {
     throw createValidationError("Cannot invite myself");
+  }
+
+  if (!Object.values(ROLES).includes(role)) {
+    throw createValidationError(`role must be one of: ${Object.values(ROLES).join(', ')}`);
+  }
+
+  // Only an Owner may hand out Owner. The route's capability check already
+  // limits invitations to Owners and Managers, but it reads the unsigned
+  // userDataHTTP cookie — fine for "which buttons work", not for the one
+  // invitation that grants the inviter's own privileges away. So this one is
+  // checked against the verified Cognito identity, exactly as updateUserRole
+  // does. Without it a Manager could invite an Owner and, through them, reach
+  // everything Managers are kept out of.
+  if (role === ROLES.OWNER) {
+    await getAuthoritativeUser(req, {
+      ownerOnly: true,
+      ownerMessage: 'Only shop owners can invite another Owner',
+    });
   }
 
   try {

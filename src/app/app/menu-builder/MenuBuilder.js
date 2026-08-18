@@ -18,7 +18,10 @@ import DialogPopup from '@/components/DialogPopup/DialogPopup';
 import DragDropImageUploader from '@/components/Form Components/DragDropImageUploader/DragDropImageUploader';
 import { Alert } from '@mui/material';
 import apiClient from '@/utility/api';
-import { MENU, RELEASE_STATUS, PUBLISH_MENU_UPDATE, ORDERING_SETTINGS } from '@/utility/apiPaths';
+import { MENU, RELEASE_STATUS, PUBLISH_MENU_UPDATE, ORDERING_SETTINGS, MENU_SOLD_OUT } from '@/utility/apiPaths';
+import { CAP } from '@/lib/permissions';
+import usePermissions from '@/hooks/usePermissions';
+import PermissionGate from '@/components/PermissionGate/PermissionGate';
 import { FaCheck } from 'react-icons/fa';
 import Link from 'next/link';
 
@@ -283,6 +286,26 @@ export default function MenuBuilder() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [isEdit, setIsEdit] = useState(true);
+
+  /*
+    Two different permissions live on this page.
+
+    Menu *content* — categories, option groups, items, prices — is
+    Owner/Manager and goes through Save then Publish. Menu *availability* is
+    everyone including Operators, and cannot go through Save, both because an
+    Operator has no Publish and because "we ran out" needs to reach customers
+    now. So the sold-out switch on each row writes straight through the
+    terminal's endpoint, and canEditMenu locks everything else.
+  */
+  const { can } = usePermissions();
+  const canEditMenu = can(CAP.MENU_EDIT);
+  const canToggleAvailability = can(CAP.MENU_AVAILABILITY);
+  const [soldOutSavingId, setSoldOutSavingId] = useState(null);
+
+  // Locked either because the shop is in the release queue, or because this
+  // role does not edit menu content. Availability is deliberately outside it.
+  const canEditContent = isEdit && canEditMenu;
+
   const [releaseStatus, setReleaseStatus] = useState(null);
 
   // Categories are kept in an ordered array for drag-to-reorder.
@@ -841,6 +864,30 @@ export default function MenuBuilder() {
 
   const markMenuChanged = () => { setHasUnsavedEdits(true); setIsSaveSuccess(false); };
 
+  /*
+    Sold out, applied immediately — no Save, no Publish, same endpoint the
+    terminal uses. Deliberately not marked as a menu change: it is already
+    persisted, and flagging it would ask the merchant to publish something that
+    has already reached customers.
+  */
+  const toggleItemSoldOut = async (item) => {
+    const scope = orderMode === 'preorder_only' ? 'preorder' : 'immediate';
+    const field = scope === 'preorder' ? 'soldOutPreorder' : 'soldOut';
+    const next = !item[field];
+
+    setSoldOutSavingId(item.id);
+    setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, [field]: next } : i)));
+    try {
+      await apiClient.put(MENU_SOLD_OUT, { itemId: item.id, soldOut: next, scope });
+      setSaveError(null);
+    } catch (err) {
+      setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, [field]: !next } : i)));
+      setSaveError(err?.response?.data?.message ?? 'Failed to update availability.');
+    } finally {
+      setSoldOutSavingId(null);
+    }
+  };
+
   const handlePublishMenuUpdate = () => setShowPublishConfirm(true);
 
   const handleConfirmPublishMenuUpdate = async () => {
@@ -1149,32 +1196,36 @@ export default function MenuBuilder() {
           }
           rightActions={
             <>
-              <Button
-                size="small"
-                variant="contained"
-                loading={isSaving}
-                loadingPosition="start"
-                startIcon={isSaveSuccess ? <FaCheck /> : undefined}
-                disabled={!isEdit || !hasUnsavedEdits}
-                onClick={() => handlePublishMenu('draft')}
-                sx={{ textTransform: 'none' }}
-              >
-                {isSaveSuccess ? 'Saved' : 'Save Menu'}
-              </Button>
-              {releaseStatus === 'Released' && (
+              <PermissionGate allowed={canEditMenu} capability={CAP.MENU_EDIT}>
                 <Button
                   size="small"
-                  variant="outlined"
-                  color="primary"
-                  loading={isPublishLoading}
+                  variant="contained"
+                  loading={isSaving}
                   loadingPosition="start"
-                  startIcon={isPublishSuccess ? <FaCheck /> : undefined}
-                  disabled={isPublishSuccess || !hasChanges || hasUnsavedEdits}
-                  onClick={handlePublishMenuUpdate}
+                  startIcon={isSaveSuccess ? <FaCheck /> : undefined}
+                  disabled={!canEditContent || !hasUnsavedEdits}
+                  onClick={() => handlePublishMenu('draft')}
                   sx={{ textTransform: 'none' }}
                 >
-                  {isPublishSuccess ? 'Update Published' : 'Publish Update'}
+                  {isSaveSuccess ? 'Saved' : 'Save Menu'}
                 </Button>
+              </PermissionGate>
+              {releaseStatus === 'Released' && (
+                <PermissionGate allowed={canEditMenu} capability={CAP.MENU_EDIT}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    loading={isPublishLoading}
+                    loadingPosition="start"
+                    startIcon={isPublishSuccess ? <FaCheck /> : undefined}
+                    disabled={isPublishSuccess || !hasChanges || hasUnsavedEdits}
+                    onClick={handlePublishMenuUpdate}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    {isPublishSuccess ? 'Update Published' : 'Publish Update'}
+                  </Button>
+                </PermissionGate>
               )}
               <IconButton
                 size="small"
@@ -1209,7 +1260,7 @@ export default function MenuBuilder() {
               label="Buffer time (minutes)"
               size="small"
               value={prepBufferMinutes}
-              disabled={!isEdit}
+              disabled={!canEditContent}
               onChange={(e) => { setPrepBufferMinutes(Math.max(0, normalizeNumber(e.target.value))); markMenuChanged(); }}
               inputProps={{ min: 0, step: 1 }}
               helperText="Default 5 — covers queueing, packing, and hand-off"
@@ -1229,12 +1280,12 @@ export default function MenuBuilder() {
                 onChange={(e) => setNewCategoryName(e.target.value)}
                 placeholder="e.g. Drinks"
                 size="small"
-                disabled={!isEdit}
+                disabled={!canEditContent}
               />
               <Button
                 variant="contained"
                 sx={{ textTransform: 'none' }}
-                disabled={!isEdit}
+                disabled={!canEditContent}
                 onClick={() => {
                   const name = newCategoryName.trim();
                   if (!name) return;
@@ -1272,14 +1323,14 @@ export default function MenuBuilder() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <Switch
                       checked={cat.isVisible}
-                      disabled={!isEdit}
+                      disabled={!canEditContent}
                       onChange={(e) => { setCategories((prev) => prev.map((x) => (x.id === cat.id ? { ...x, isVisible: e.target.checked } : x))); markMenuChanged(); }}
                       size="small"
                     />
                     <IconButton
                       size="small"
                       color="error"
-                      disabled={!isEdit}
+                      disabled={!canEditContent}
                       onClick={() => handleDeleteCategory(cat)}
                     >
                       <DeleteOutlineRoundedIcon fontSize="small" />
@@ -1298,7 +1349,7 @@ export default function MenuBuilder() {
                   type="h3"
                   description="Create a group once (e.g. “Combo”, “Drink”, “Add Ons”) and attach it to multiple items. The reference name is only visible to you — customers only see the group name."
                 />
-                <Button variant="contained" sx={{ textTransform: 'none' }} disabled={!isEdit} onClick={() => openNewGroupEditor(false)}>
+                <Button variant="contained" sx={{ textTransform: 'none' }} disabled={!canEditContent} onClick={() => openNewGroupEditor(false)}>
                   Add Option Group
                 </Button>
               </div>
@@ -1324,13 +1375,13 @@ export default function MenuBuilder() {
                         </Typography>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <IconButton size="small" disabled={!isEdit} onClick={() => openEditGroupEditor(g)} title="Edit group">
+                        <IconButton size="small" disabled={!canEditContent} onClick={() => openEditGroupEditor(g)} title="Edit group">
                           <EditOutlinedIcon fontSize="small" />
                         </IconButton>
                         <IconButton
                           size="small"
                           color="error"
-                          disabled={!isEdit}
+                          disabled={!canEditContent}
                           onClick={() => handleDeleteGroup(g)}
                           title="Delete group"
                         >
@@ -1348,7 +1399,7 @@ export default function MenuBuilder() {
             <div className={styles.sectionHeader}>
               <div className={styles.row} style={{ justifyContent: 'space-between' }}>
                 <FieldHeader title="Items" type="h3" description="Add/edit/delete items with photo, pricing, and avg. make time. Use the arrows to set the order customers see. Manage sold-out in each item's Availability section." />
-                <Button variant="contained" sx={{ textTransform: 'none' }} disabled={!isEdit} onClick={openNewItemEditor}>
+                <Button variant="contained" sx={{ textTransform: 'none' }} disabled={!canEditContent} onClick={openNewItemEditor}>
                   Add Item
                 </Button>
               </div>
@@ -1409,18 +1460,51 @@ export default function MenuBuilder() {
                                   {item.prepTimeMinutes > 0 ? `${item.prepTimeMinutes} min` : '—'}
                                 </Typography>
                               </div>
-                              {(!!item.soldOut || !!item.soldOutPreorder) && (
-                                <span className={styles.soldOutBadge}>Sold out</span>
-                              )}
+                              {(() => {
+                                const scopeField = orderMode === 'preorder_only' ? 'soldOutPreorder' : 'soldOut';
+                                const isSoldOut = !!item[scopeField];
+                                return (
+                                  <PermissionGate
+                                    allowed={canToggleAvailability}
+                                    capability={CAP.MENU_AVAILABILITY}
+                                  >
+                                    <FormControlLabel
+                                      sx={{ margin: 0 }}
+                                      // Held back while the menu has unsaved
+                                      // edits: this writes to the stored menu,
+                                      // so the two copies would disagree until
+                                      // the next Save. A different reason from
+                                      // the permission one, so it says so
+                                      // rather than borrowing that tooltip.
+                                      disabled={hasUnsavedEdits}
+                                      title={hasUnsavedEdits ? 'Save your menu changes first' : undefined}
+                                      label={
+                                        <Typography variant="caption" className={isSoldOut ? styles.soldOutBadge : styles.muted}>
+                                          Sold out
+                                        </Typography>
+                                      }
+                                      control={
+                                        <Switch
+                                          size="small"
+                                          checked={isSoldOut}
+                                          disabled={soldOutSavingId === item.id}
+                                          onChange={() => toggleItemSoldOut(item)}
+                                          inputProps={{ 'aria-label': `Sold out: ${item.name}` }}
+                                        />
+                                      }
+                                    />
+                                  </PermissionGate>
+                                );
+                              })()}
                               <div style={{ display: 'flex', flexDirection: 'column' }} title="Reorder within this category">
-                                <IconButton size="small" disabled={!isEdit || idx === 0} onClick={() => moveItemInCategory(catItems, idx, -1)} aria-label="Move up" style={{ padding: 2 }}>
+                                <IconButton size="small" disabled={!canEditContent || idx === 0} onClick={() => moveItemInCategory(catItems, idx, -1)} aria-label="Move up" style={{ padding: 2 }}>
                                   <KeyboardArrowUpRoundedIcon fontSize="small" />
                                 </IconButton>
-                                <IconButton size="small" disabled={!isEdit || idx === catItems.length - 1} onClick={() => moveItemInCategory(catItems, idx, 1)} aria-label="Move down" style={{ padding: 2 }}>
+                                <IconButton size="small" disabled={!canEditContent || idx === catItems.length - 1} onClick={() => moveItemInCategory(catItems, idx, 1)} aria-label="Move down" style={{ padding: 2 }}>
                                   <KeyboardArrowDownRoundedIcon fontSize="small" />
                                 </IconButton>
                               </div>
-                              <IconButton size="small" disabled={!isEdit} onClick={(e) => openItemMenu(e, item.id)}>
+                              <IconButton size="small" disabled={!canEditContent} onClick={(e) => openItemMenu(e, item.id)}>
                                 <SettingsRoundedIcon fontSize="small" />
                               </IconButton>
                             </div>

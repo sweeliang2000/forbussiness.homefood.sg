@@ -4,11 +4,13 @@ import FullWidthDropdown from '@/components/FullWidthDropdown/FullWidthDropdown'
 import { useEffect, useState } from 'react';
 import apiClient from '@/utility/api';
 import { ADD_USER, LIST_LOCATIONS, UPDATE_USER_ROLE } from '@/utility/apiPaths';
+import { ROLES } from '@/lib/permissions';
+import usePermissions from '@/hooks/usePermissions';
 
 const roles = [
-    { value: 'Owner', title: 'Owner' },
-    { value: 'Manager', title: 'Manager' },
-    { value: 'Operator', title: 'Operator' }
+    { value: ROLES.OWNER, title: 'Owner' },
+    { value: ROLES.MANAGER, title: 'Manager' },
+    { value: ROLES.OPERATOR, title: 'Operator' }
 ];
 
 const defaultLocation = { value: 'all', title: 'All Locations', location_id: 'all' };
@@ -20,6 +22,14 @@ const AddUsersDialog = ({
     editingUser = null,
     isEditMode = false
 }) => {
+    // Only an Owner may hand out Owner — the API refuses it either way
+    // (InviteUsers checks the verified identity), so offering the option to a
+    // Manager would only be a way to fail.
+    const { role: currentUserRole } = usePermissions();
+    const availableRoles = currentUserRole === ROLES.OWNER
+        ? roles
+        : roles.filter((r) => r.value !== ROLES.OWNER);
+
     const [locations, setLocations] = useState([
         { value: 'all', title: 'All Locations' }
     ]);
@@ -247,7 +257,7 @@ const AddUsersDialog = ({
                         <FullWidthDropdown
                             value={selectedRole}
                             onChange={(event) => { onRoleChangeHandler(event) }}
-                            options={roles}
+                            options={availableRoles}
                             name='role'
                         />
                     </div>

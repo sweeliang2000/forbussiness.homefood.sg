@@ -20,6 +20,7 @@ import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import MDEditor, { commands } from '@uiw/react-md-editor';
 import '@uiw/react-md-editor/markdown-editor.css';
+import { CAP } from '@/lib/permissions';
 
 // Define custom commands: include bold and bullet points only
 // Exclude: headings (title), link, insert code, codeblock, comment, image, table, and open help
@@ -787,6 +788,7 @@ export default function StampSetup() {
         {!(isLoading === false && isLoadingErrorMessage === null && !isEnabled) && (
           <HeaderSection
             className={styles.header}
+            capability={CAP.LOYALTY_CONFIG}
             title='Stamp Management'
             description={
               <p>

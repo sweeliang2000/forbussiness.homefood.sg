@@ -150,6 +150,85 @@ export const upsertOrderSettings = asyncHandler(async (req, res) => {
   res.status(200).json(createSuccessResponse('Order settings saved'));
 });
 
+// PUT /api/data/delivery-enabled
+//
+// The on/off switch, split out of the settings blob above.
+//
+// Two reasons it is its own endpoint. First, permissions: an Operator may flip
+// delivery but may not touch ordering hours, and both travel in one payload
+// through upsertOrderSettings, so the only way to grant one without the other
+// is a route that can only do the one. Second, and the reason this applies to
+// every role: upsertOrderSettings writes a *draft* that reaches customers only
+// on publish, and "we've stopped delivering" is not something a shop should
+// have to publish. So this writes through to the storefront immediately, the
+// way shop-open and sold-out already do. Delivery pricing and zones stay on the
+// draft-then-publish path — they are content, this is a switch.
+export const setDeliveryEnabled = asyncHandler(async (req, res) => {
+  const shop_id = JSON.parse(req.cookies.userDataHTTP).shop_id;
+  const { enabled } = req.body || {};
+
+  if (typeof enabled !== 'boolean') {
+    throw createValidationError('enabled must be a boolean');
+  }
+
+  let existing = null;
+  try {
+    const { Item } = await client.send(new GetItemCommand({
+      TableName: ORDER_SETTINGS_TABLE,
+      Key: { shopId: { S: shop_id } },
+    }));
+    existing = Item ? unmarshall(Item) : null;
+  } catch (err) {
+    throw createDatabaseError('get order settings', err, 'setDeliveryEnabled');
+  }
+
+  const delivery = normalizeDelivery({ ...(existing?.delivery ?? DEFAULT_DELIVERY), enabled });
+
+  // Live first: if the storefront update fails there is nothing worth writing
+  // to the draft, and a draft that claims delivery is off while customers can
+  // still order it is the one state this must never leave behind.
+  const { error: liveError } = await supabase
+    .from('shops')
+    .update({ delivery_enabled: delivery.enabled, delivery_settings: delivery })
+    .eq('shop_id', shop_id);
+
+  if (liveError) {
+    throw createDatabaseError('set delivery enabled', liveError, 'setDeliveryEnabled');
+  }
+
+  // Then the draft, so the console shows the new value and — more importantly —
+  // so the next publish of the settings page does not put it back.
+  const next = {
+    ...(existing ?? { ...DEFAULT_ORDER_SETTINGS }),
+    shopId: shop_id,
+    delivery,
+    updatedAt: new Date().toISOString(),
+    // Deliberately carried over rather than set: this endpoint publishes
+    // itself, so it must not light up the "unpublished changes" banner.
+    isChanges: existing?.isChanges ?? false,
+  };
+
+  try {
+    await client.send(new PutItemCommand({
+      TableName: ORDER_SETTINGS_TABLE,
+      Item: marshall(next, { removeUndefinedValues: true }),
+    }));
+  } catch (err) {
+    throw createDatabaseError('save order settings', err, 'setDeliveryEnabled');
+  }
+
+  await recordActivity(req, {
+    action: enabled ? 'delivery.on' : 'delivery.off',
+    entityType: 'shop',
+    detail: { enabled },
+  });
+
+  res.status(200).json(createSuccessResponse(
+    enabled ? 'Delivery turned on' : 'Delivery turned off',
+    { enabled }
+  ));
+});
+
 // GET /api/data/calendarOverrides?year=2026&month=5
 export const getCalendarOverrides = asyncHandler(async (req, res) => {
   const shop_id = JSON.parse(req.cookies.userDataHTTP).shop_id;

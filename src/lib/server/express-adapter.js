@@ -61,7 +61,7 @@ export function makeReq(request, { params = {}, body = null, files = null, file 
     method: request.method,
     // Absolute (/api/...), unlike Express where it was router-relative. The only
     // consumer of req.path was the operator gate, which withApi now expresses
-    // declaratively instead — see the operatorWrite option.
+    // declaratively instead — see the capability option.
     path: url.pathname,
     originalUrl: url.pathname + url.search,
     url: url.pathname + url.search,

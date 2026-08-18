@@ -3,6 +3,7 @@
 // generator reads the Express routes/home.js from the retired backend repo,
 // which is no longer checked out, so new routes are written directly.
 import { withApi } from '@/lib/server/withApi';
+import { CAP } from '@/lib/permissions';
 import { publishBusinessDetailsUpdate } from '@/lib/server/controllers/Authentication';
 
 export const runtime = 'nodejs';
@@ -10,4 +11,4 @@ export const dynamic = 'force-dynamic';
 
 // releaseStatus is required: the handler refuses to open a re-review for a shop
 // that has not been released yet.
-export const POST = withApi(publishBusinessDetailsUpdate, { releaseStatus: true });
+export const POST = withApi(publishBusinessDetailsUpdate, { capability: CAP.BUSINESS_DETAILS_EDIT, releaseStatus: true });

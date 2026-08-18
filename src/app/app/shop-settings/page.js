@@ -31,7 +31,10 @@ import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import FiberManualRecordRoundedIcon from '@mui/icons-material/FiberManualRecordRounded';
 import { HeaderSection } from '@/components/HeaderSection/HeaderSection';
 import apiClient from '@/utility/api';
-import { ORDERING_SETTINGS, CALENDAR_OVERRIDES, CALENDAR_OVERRIDE, RELEASE_STATUS, PUBLISH_SHOP_SETTINGS_UPDATE, PREORDER_COUNTS } from '@/utility/apiPaths';
+import { ORDERING_SETTINGS, CALENDAR_OVERRIDES, CALENDAR_OVERRIDE, RELEASE_STATUS, PUBLISH_SHOP_SETTINGS_UPDATE, PREORDER_COUNTS, DELIVERY_ENABLED } from '@/utility/apiPaths';
+import { CAP } from '@/lib/permissions';
+import usePermissions from '@/hooks/usePermissions';
+import PermissionGate from '@/components/PermissionGate/PermissionGate';
 import Link from 'next/link';
 import DeliverySection from './_views/DeliverySection';
 import { DEFAULT_DELIVERY, normalizeDelivery, validateDelivery } from '@/utility/deliveryZones';
@@ -103,6 +106,18 @@ export default function ShopSettingsPage() {
 
   // Snapshot of last-saved (or loaded) values — used to detect unsaved changes
   const [savedSettings, setSavedSettings] = useState(null);
+
+  // An Operator gets the two switches that a shift actually needs — delivery
+  // on/off and the calendar — and reads the rest.
+  const { can } = usePermissions();
+  const canEditSettings = can(CAP.ORDERING_SETTINGS_EDIT);
+  const canToggleDelivery = can(CAP.DELIVERY_TOGGLE);
+  const canEditCalendar = can(CAP.CALENDAR_OVERRIDE_EDIT);
+
+  // Two reasons a field on this page can be locked: the shop is sitting in the
+  // release queue, or this role does not get to change ordering settings. The
+  // delivery switch and the calendar are deliberately not covered by it.
+  const canEditFields = isEdit && canEditSettings;
 
   const hasChanges = useMemo(() => {
     if (!savedSettings) return false;
@@ -242,6 +257,30 @@ export default function ShopSettingsPage() {
     loadCalendarOverrides(viewMonth);
   }, [viewMonth, loadCalendarOverrides]);
 
+  /*
+    Delivery on/off does not go through Save and Publish.
+
+    Everything else on this page is a draft until it is published, which is
+    right for hours and pricing and wrong for "we've stopped delivering
+    tonight" — and impossible for an Operator, who can flip the switch but not
+    publish. So the switch writes straight through to the storefront and the
+    saved baseline moves with it, leaving the Save button to mean what it says:
+    the settings that are still pending.
+  */
+  const handleDeliveryEnabledChange = async (enabled) => {
+    const previous = delivery;
+    const next = { ...delivery, enabled };
+    setDelivery(next);
+    try {
+      await apiClient.put(DELIVERY_ENABLED, { enabled });
+      setSavedSettings((prev) => (prev ? { ...prev, delivery: next } : prev));
+      showToast(enabled ? 'Delivery is on' : 'Delivery is off');
+    } catch (err) {
+      setDelivery(previous);
+      showToast(err?.response?.data?.message ?? 'Failed to update delivery', 'error');
+    }
+  };
+
   const handleSaveSettings = async () => {
     if (deliveryErrors.length) {
       showToast(deliveryErrors[0], 'error');
@@ -340,7 +379,7 @@ export default function ShopSettingsPage() {
   })();
 
   const openDayPopover = (d, anchorEl) => {
-    if (!isEdit) return;
+    if (!isEdit || !canEditCalendar) return;
     const derived = getDayDerived(d);
     const isPast = startOfDay(d).getTime() < today.getTime();
     if (isPast) return;
@@ -431,32 +470,36 @@ export default function ShopSettingsPage() {
           }
           rightActions={
             <>
-              <Button
-                size="small"
-                variant="contained"
-                loading={isSaving}
-                loadingPosition="start"
-                startIcon={isSaveSuccess ? <FaCheck /> : undefined}
-                disabled={isSaving || !hasChanges || !isEdit || isSaveSuccess || deliveryErrors.length > 0}
-                onClick={handleSaveSettings}
-                sx={{ textTransform: 'none' }}
-              >
-                {isSaveSuccess ? 'Saved' : 'Save Settings'}
-              </Button>
-              {releaseStatus === 'Released' && (
+              <PermissionGate allowed={canEditSettings} capability={CAP.ORDERING_SETTINGS_EDIT}>
                 <Button
                   size="small"
-                  variant="outlined"
-                  color="primary"
-                  loading={isPublishLoading}
+                  variant="contained"
+                  loading={isSaving}
                   loadingPosition="start"
-                  startIcon={isPublishSuccess ? <FaCheck /> : undefined}
-                  disabled={isPublishSuccess || !hasPublishableChanges || hasChanges}
-                  onClick={handlePublishSettingsUpdate}
+                  startIcon={isSaveSuccess ? <FaCheck /> : undefined}
+                  disabled={isSaving || !hasChanges || !isEdit || isSaveSuccess || deliveryErrors.length > 0}
+                  onClick={handleSaveSettings}
                   sx={{ textTransform: 'none' }}
                 >
-                  {isPublishSuccess ? 'Update Published' : 'Publish Update'}
+                  {isSaveSuccess ? 'Saved' : 'Save Settings'}
                 </Button>
+              </PermissionGate>
+              {releaseStatus === 'Released' && (
+                <PermissionGate allowed={canEditSettings} capability={CAP.ORDERING_SETTINGS_EDIT}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    loading={isPublishLoading}
+                    loadingPosition="start"
+                    startIcon={isPublishSuccess ? <FaCheck /> : undefined}
+                    disabled={isPublishSuccess || !hasPublishableChanges || hasChanges}
+                    onClick={handlePublishSettingsUpdate}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    {isPublishSuccess ? 'Update Published' : 'Publish Update'}
+                  </Button>
+                </PermissionGate>
               )}
             </>
           }
@@ -478,7 +521,7 @@ export default function ShopSettingsPage() {
             <div className={styles.tableWrap}>
               <div className={styles.hoursTable}>
                 {hours.map((h, idx) => {
-                  const disabled = !h.enabled || !isEdit;
+                  const disabled = !h.enabled || !canEditFields;
                   return (
                     <div key={idx} className={styles.hoursRow}>
                       <Typography className={styles.dayCell}>{dayNameByIndex[idx]}</Typography>
@@ -487,7 +530,7 @@ export default function ShopSettingsPage() {
                           control={
                             <Checkbox
                               checked={h.enabled}
-                              disabled={!isEdit}
+                              disabled={!canEditFields}
                               onChange={(e) => {
                                 const nextEnabled = e.target.checked;
                                 setHours((prev) => {
@@ -561,15 +604,15 @@ export default function ShopSettingsPage() {
                 <RadioGroup value={orderMode} onChange={(e) => setOrderMode(e.target.value)}>
                   <FormControlLabel
                     value="today_only"
-                    control={<Radio size="small" disabled={!isEdit} />}
+                    control={<Radio size="small" disabled={!canEditFields} />}
                     label="Order Today"
                   />
                   <FormControlLabel
                     value="today_and_preorder"
-                    control={<Radio size="small" disabled={!isEdit} />}
+                    control={<Radio size="small" disabled={!canEditFields} />}
                     label="Order Today + Pre-order"
                   />
-                  <FormControlLabel value="preorder_only" control={<Radio size="small" disabled={!isEdit} />} label="Pre-order only" />
+                  <FormControlLabel value="preorder_only" control={<Radio size="small" disabled={!canEditFields} />} label="Pre-order only" />
                 </RadioGroup>
                 <br />
               </div>
@@ -579,7 +622,7 @@ export default function ShopSettingsPage() {
                 type="number"
                 inputProps={{ min: 1 }}
                 value={defaultDailyQuota}
-                disabled={!isEdit}
+                disabled={!canEditFields}
                 onChange={(e) => setDefaultDailyQuota(Math.max(1, Number(e.target.value)))}
                 helperText="Applied to all calendar days unless overridden"
                 size="small"
@@ -589,7 +632,7 @@ export default function ShopSettingsPage() {
                 type="number"
                 inputProps={{ min: 1, max: 90 }}
                 value={bookingDaysAhead}
-                disabled={!isEdit || orderMode === 'today_only'}
+                disabled={!canEditFields || orderMode === 'today_only'}
                 onChange={(e) => setBookingDaysAhead(Math.max(1, Math.min(90, Number(e.target.value))))}
                 helperText={
                   orderMode === 'today_only'
@@ -605,7 +648,7 @@ export default function ShopSettingsPage() {
                 type="number"
                 inputProps={{ min: 0.5, step: 0.5 }}
                 value={minNoticeHours}
-                disabled={!isEdit}
+                disabled={!canEditFields}
                 onChange={(e) => setMinNoticeHours(Math.max(0.5, Number(e.target.value)))}
                 helperText="Set in 0.5-hour steps (default: 0.5 hour)"
                 size="small"
@@ -622,7 +665,9 @@ export default function ShopSettingsPage() {
           <DeliverySection
             delivery={delivery}
             setDelivery={setDelivery}
-            disabled={!isEdit}
+            onEnabledChange={handleDeliveryEnabledChange}
+            disabled={!canEditFields}
+            switchDisabled={!canToggleDelivery}
             expanded={deliveryExpanded}
             onToggleExpand={() => setDeliveryExpanded((v) => !v)}
           />
@@ -836,14 +881,16 @@ export default function ShopSettingsPage() {
                 <Button variant="outlined" sx={{ textTransform: 'none' }} onClick={closeDayPopover}>
                   Cancel
                 </Button>
-                <Button
-                  variant="contained"
-                  sx={{ textTransform: 'none' }}
-                  onClick={applyOverrideForDay}
-                  disabled={isSavingOverride}
-                >
-                  {isSavingOverride ? 'Saving…' : 'Save'}
-                </Button>
+                <PermissionGate allowed={canEditCalendar} capability={CAP.CALENDAR_OVERRIDE_EDIT}>
+                  <Button
+                    variant="contained"
+                    sx={{ textTransform: 'none' }}
+                    onClick={applyOverrideForDay}
+                    disabled={isSavingOverride}
+                  >
+                    {isSavingOverride ? 'Saving…' : 'Save'}
+                  </Button>
+                </PermissionGate>
               </div>
             </>
           ) : null}

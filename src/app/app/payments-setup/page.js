@@ -23,6 +23,9 @@ import { PAYMENT_SETTINGS, PUBLISH_PAYMENT_SETTINGS_UPDATE, OFFICIAL_BUSINESS_IN
 import { normalizeMobile } from '@/utility/paynow';
 import ManualPayNowSection from './_views/ManualPayNowSection';
 import AutomaticPaymentsSection from './_views/AutomaticPaymentsSection';
+import { CAP } from '@/lib/permissions';
+import usePermissions from '@/hooks/usePermissions';
+import PermissionGate from '@/components/PermissionGate/PermissionGate';
 
 // Only the persistent PayNow identity is saved. Amount / reference / expiry are
 // test-only values entered in the section and are never persisted.
@@ -53,6 +56,8 @@ const toStored = (form) => ({
 });
 
 export default function PaymentsSetupPage() {
+  const { can } = usePermissions();
+  const canEditPayments = can(CAP.PAYMENTS_EDIT);
   const [isLoading, setIsLoading] = useState(true);
 
   const [paymentMethod, setPaymentMethod] = useState(null);
@@ -195,6 +200,7 @@ export default function PaymentsSetupPage() {
       <div>
         <HeaderSection
           className={styles.header}
+          capability={CAP.PAYMENTS_EDIT}
           title="Payments Setup"
           description={
             <p>
@@ -211,30 +217,34 @@ export default function PaymentsSetupPage() {
           }
           rightActions={
             <>
-              <Button
-                size="small"
-                variant="contained"
-                loading={isSaving}
-                loadingPosition="start"
-                startIcon={isSaveSuccess ? <FaCheck /> : undefined}
-                disabled={!isEdit || !hasUnsavedEdits}
-                onClick={handleSave}
-              >
-                {isSaveSuccess ? 'Saved' : 'Save'}
-              </Button>
-              {releaseStatus === 'Released' && (
+              <PermissionGate allowed={canEditPayments} capability={CAP.PAYMENTS_EDIT}>
                 <Button
                   size="small"
-                  variant="outlined"
-                  color="primary"
-                  loading={isPublishLoading}
+                  variant="contained"
+                  loading={isSaving}
                   loadingPosition="start"
-                  startIcon={isPublishSuccess ? <FaCheck /> : undefined}
-                  disabled={isPublishSuccess || !hasChanges || hasUnsavedEdits}
-                  onClick={() => { setAckPaynow(false); setShowPublishConfirm(true); }}
+                  startIcon={isSaveSuccess ? <FaCheck /> : undefined}
+                  disabled={!isEdit || !hasUnsavedEdits}
+                  onClick={handleSave}
                 >
-                  {isPublishSuccess ? 'Update Published' : 'Publish Update'}
+                  {isSaveSuccess ? 'Saved' : 'Save'}
                 </Button>
+              </PermissionGate>
+              {releaseStatus === 'Released' && (
+                <PermissionGate allowed={canEditPayments} capability={CAP.PAYMENTS_EDIT}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    loading={isPublishLoading}
+                    loadingPosition="start"
+                    startIcon={isPublishSuccess ? <FaCheck /> : undefined}
+                    disabled={isPublishSuccess || !hasChanges || hasUnsavedEdits}
+                    onClick={() => { setAckPaynow(false); setShowPublishConfirm(true); }}
+                  >
+                    {isPublishSuccess ? 'Update Published' : 'Publish Update'}
+                  </Button>
+                </PermissionGate>
               )}
             </>
           }

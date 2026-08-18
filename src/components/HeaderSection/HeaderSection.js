@@ -9,6 +9,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import { IconButton } from '@mui/material';
 import { useState } from 'react';
 
+import usePermissions from '@/hooks/usePermissions';
+import PermissionGate from '../PermissionGate/PermissionGate';
+
 export const HeaderSection = ({
     title,
     description,
@@ -30,9 +33,15 @@ export const HeaderSection = ({
     warningMessage = '',
     noMaxWidth = false,
     rightActions = null,
+    // A CAP.* value. Every settings page in the console saves through this
+    // header, so naming the capability here is what greys the page out for a
+    // role that may read it but not change it.
+    capability = null,
     ...props
 }) => {
     const [showSuccessAlert, setShowSuccessAlert] = useState(true);
+    const { can } = usePermissions();
+    const allowed = !capability || can(capability);
 
     // Use the prop setShowSuccess if provided, otherwise use local state
     const handleSetShowSuccess = setShowSuccess || setShowSuccessAlert;
@@ -56,18 +65,20 @@ export const HeaderSection = ({
                         </Button>
                     )}
                     {showButton && (
-                        <Button
-                            type='submit'
-                            size='small'
-                            loadingPosition='start'
-                            variant='contained'
-                            className={`${styles.loadingButton} ${isSuccess ? styles.successfull : null}`}
-                            disabled={isSuccess || isDisabled}
-                            {...props}
-                        >
-                            {isSuccess ? <FaCheck className={styles.checked} /> : null}
-                            {isSuccess ? successButtonText : buttonText}
-                        </Button>
+                        <PermissionGate allowed={allowed} capability={capability}>
+                            <Button
+                                type='submit'
+                                size='small'
+                                loadingPosition='start'
+                                variant='contained'
+                                className={`${styles.loadingButton} ${isSuccess ? styles.successfull : null}`}
+                                disabled={isSuccess || isDisabled}
+                                {...props}
+                            >
+                                {isSuccess ? <FaCheck className={styles.checked} /> : null}
+                                {isSuccess ? successButtonText : buttonText}
+                            </Button>
+                        </PermissionGate>
                     )}
                     {rightActions}
                 </div>

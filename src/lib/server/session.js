@@ -9,6 +9,7 @@ import { COGNITO_CLIENT_ID } from './env';
 import { ensureUserProvisioned } from './user-provisioning';
 import { getSession, isLive, touchSession } from './sessions';
 import { requestOrigin } from './request-origin';
+import { ROLES, rolesFor, deniedMessage } from '../permissions';
 import {
   AppError,
   createAuthError,
@@ -35,7 +36,11 @@ import {
  *      changing it means touching ~107 call sites and belongs in its own change.
  */
 
-export const ROLES = { OWNER: 'Owner', MANAGER: 'Manager', OPERATOR: 'Operator' };
+// Re-exported so the server-side importers of ROLES don't have to learn where
+// the matrix moved to. src/lib/permissions.js owns it now, because the
+// console's client components need the same names and cannot import
+// `server-only` modules.
+export { ROLES };
 
 const ONE_HOUR_MS = 3600 * 1000;
 const SEVEN_DAYS_MS = 7 * 24 * 3600 * 1000;
@@ -339,25 +344,30 @@ export function assertRole(req, allowedRoles) {
 }
 
 /**
- * Operators may read anything but may only write to the loyalty terminal.
+ * Capability check, applied to every authenticated route by withApi.
  *
- * The original matched `req.path` against a hardcoded allowlist
- * (Authentication.js:894-915). Those paths were router-relative
- * ('/mobile/terminalLogs'); in Next they're absolute ('/api/mobile/terminalLogs'),
- * so a literal port would have silently 403'd every Operator write. The rule is
- * per-route anyway, so routes declare `operatorWrite: true` instead — exactly two
- * do. The third entry in the original allowlist, '/data/refreshUserCookie', was
- * already dead: it's registered as a GET.
+ * History: the original matched `req.path` against a hardcoded allowlist
+ * (Authentication.js:894-915) that granted Operators exactly two writes; the
+ * port turned that into an `operatorWrite` boolean per route. A boolean can
+ * only say "Operator or not", which could not express the actual policy —
+ * Operators run the counter, so they need the order queue, the till and the
+ * availability toggles, while Managers need everything except handing out
+ * Owner. So routes now name a capability and src/lib/permissions.js holds the
+ * matrix.
+ *
+ * Reads stay open to every role: the console shows an Operator the settings
+ * they cannot change, greyed out, rather than an empty page.
+ *
+ * Fails closed. A write route that declares no capability requires
+ * Owner or Manager, so forgetting the annotation locks Operators out rather
+ * than letting them through.
  */
-export function assertOperatorMayWrite(req, operatorWriteAllowed) {
+export function assertCapability(req, capability) {
   const role = getRoleFromRequest(req);
   req.role = role;
 
-  if (role !== ROLES.OPERATOR) return;
   if (req.method === 'GET') return;
-  if (operatorWriteAllowed) return;
+  if (rolesFor(capability).includes(role)) return;
 
-  throw createAuthorizationError(
-    'Operators can only perform GET requests and POST to Loyalty Terminal (terminalLogs, processStampTransaction)'
-  );
+  throw createAuthorizationError(deniedMessage(capability));
 }

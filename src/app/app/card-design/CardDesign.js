@@ -13,6 +13,7 @@ import apiClient from '@/utility/api';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import DigitalStampRewardSystemOnboarding from '@/components/DigitalStampRewardSystemOnboarding/DigitalStampRewardSystemOnboarding';
+import { CAP } from '@/lib/permissions';
 
 const CardDesign = () => {
     const [isLoading, setIsLoading] = useState(true);
@@ -414,6 +415,7 @@ const CardDesign = () => {
             {!showOnboarding && (
                 <HeaderSection
                     className={styles.header}
+                    capability={CAP.LOYALTY_CONFIG}
                     title='Card Preview'
                     description={
                         <p>

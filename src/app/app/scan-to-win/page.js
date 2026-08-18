@@ -16,6 +16,7 @@ import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import apiClient from '@/utility/api';
 import { REWARDS, RELEASE_STATUS } from '@/utility/apiPaths';
+import { CAP } from '@/lib/permissions';
 
 const DEFAULT_REWARD_CHANCE = {
   id: 1,
@@ -604,6 +605,7 @@ export default function ScanToWinPage() {
         {isEnabled && (
           <HeaderSection
             className={styles.header}
+            capability={CAP.LOYALTY_CONFIG}
             title='Scan to Win'
             description={
               <p>

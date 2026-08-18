@@ -16,6 +16,9 @@ import { CUSTOMER_FACING_INFORMATION, OFFICIAL_BUSINESS_INFORMATION, RELEASE_STA
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import { FaCheck } from 'react-icons/fa';
+import { CAP } from '@/lib/permissions';
+import usePermissions from '@/hooks/usePermissions';
+import PermissionGate from '@/components/PermissionGate/PermissionGate';
 
 const DISPLAY_NAME = 'displayName';
 const SHOP_DESCRIPTION = 'description';
@@ -87,6 +90,7 @@ const toFullSgPhone = (value) => {
 };
 
 const CustomerFacingBusinessPage = () => {
+    const { can } = usePermissions();
     // For initial Loading Status
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
@@ -605,6 +609,7 @@ const CustomerFacingBusinessPage = () => {
             >
                 <HeaderSection
                     className={styles.header}
+                    capability={CAP.CUSTOMER_DETAILS_EDIT}
                     title='Your Business'
                     description={
                         <p>
@@ -624,19 +629,21 @@ const CustomerFacingBusinessPage = () => {
                     }
                     rightActions={
                         releaseStatus === 'Released' ? (
-                            <Button
-                                size='small'
-                                variant='outlined'
-                                color='primary'
-                                loading={isPublishLoading}
-                                loadingPosition='start'
-                                onClick={handlePublishUpdate}
-                                disabled={isPublishSuccess || !hasChanges || hasUnsavedEdits}
-                                startIcon={isPublishSuccess ? <FaCheck /> : undefined}
-                                style={{ textTransform: 'none' }}
-                            >
-                                {isPublishSuccess ? 'Update Published' : 'Publish Update'}
-                            </Button>
+                            <PermissionGate allowed={can(CAP.CUSTOMER_DETAILS_EDIT)} capability={CAP.CUSTOMER_DETAILS_EDIT}>
+                                <Button
+                                    size='small'
+                                    variant='outlined'
+                                    color='primary'
+                                    loading={isPublishLoading}
+                                    loadingPosition='start'
+                                    onClick={handlePublishUpdate}
+                                    disabled={isPublishSuccess || !hasChanges || hasUnsavedEdits}
+                                    startIcon={isPublishSuccess ? <FaCheck /> : undefined}
+                                    style={{ textTransform: 'none' }}
+                                >
+                                    {isPublishSuccess ? 'Update Published' : 'Publish Update'}
+                                </Button>
+                            </PermissionGate>
                         ) : null
                     }
                 />

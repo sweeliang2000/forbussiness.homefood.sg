@@ -53,7 +53,17 @@ const clampEta = (raw) => {
   return String(Math.min(Math.round(n), MAX_ETA_MINUTES));
 };
 
-export default function DeliverySection({ delivery, setDelivery, disabled, expanded, onToggleExpand }) {
+export default function DeliverySection({
+  delivery,
+  setDelivery,
+  onEnabledChange,
+  disabled,
+  // The switch is permissioned separately from the pricing below it: an
+  // Operator may turn delivery off mid-shift but may not reprice a zone.
+  switchDisabled = false,
+  expanded,
+  onToggleExpand,
+}) {
   const [testOpen, setTestOpen] = useState(false);
   const [testInput, setTestInput] = useState('');
   const [showTerms, setShowTerms] = useState(false);
@@ -80,12 +90,12 @@ export default function DeliverySection({ delivery, setDelivery, disabled, expan
       setShowTerms(true);
       return;
     }
-    setField('enabled', false);
+    onEnabledChange(false);
   };
 
   const acceptTerms = () => {
     setShowTerms(false);
-    setDelivery({ ...delivery, enabled: true });
+    onEnabledChange(true);
     // Open the section on the way in — the merchant has just committed to
     // delivery and the next thing they need is the pricing, so landing on a
     // collapsed row would make them hunt for it.
@@ -144,7 +154,7 @@ export default function DeliverySection({ delivery, setDelivery, disabled, expan
         summary={summary}
         checked={delivery.enabled}
         onToggle={handleToggleDelivery}
-        switchDisabled={disabled}
+        switchDisabled={switchDisabled}
         switchAriaLabel="Offer delivery"
         expanded={expanded}
         onToggleExpand={onToggleExpand}

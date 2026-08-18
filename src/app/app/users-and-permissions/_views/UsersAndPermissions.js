@@ -11,6 +11,9 @@ import { GET_LIST_OF_USERS, INVITATION_STATUS } from '@/utility/apiPaths';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
 import InvitationBanner from '@/components/InvitationBanner/InvitationBanner';
 import { getUserDataFromCookie } from '@/utility/cookieUtils';
+import usePermissions from '@/hooks/usePermissions';
+import PermissionGate from '@/components/PermissionGate/PermissionGate';
+import { CAP } from '@/lib/permissions';
 
 const getListOfUsers = async () => {
     const response = await apiClient.get(GET_LIST_OF_USERS);
@@ -33,6 +36,7 @@ const readErrorMessage = (error, fallback) =>
     fallback;
 
 const UsersAndPermissions = () => {
+    const { can } = usePermissions();
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
@@ -181,14 +185,16 @@ const UsersAndPermissions = () => {
                     }
                     showButton={false}
                     rightActions={
-                        <Button
-                            size="small"
-                            variant="contained"
-                            className={styles.inviteButton}
-                            onClick={() => setIsAddUserOpen(true)}
-                        >
-                            Invite user
-                        </Button>
+                        <PermissionGate allowed={can(CAP.USERS_INVITE)} capability={CAP.USERS_INVITE}>
+                            <Button
+                                size="small"
+                                variant="contained"
+                                className={styles.inviteButton}
+                                onClick={() => setIsAddUserOpen(true)}
+                            >
+                                Invite user
+                            </Button>
+                        </PermissionGate>
                     }
                     successMessage={successMessage}
                     setShowSuccess={() => setSuccessMessage('')}

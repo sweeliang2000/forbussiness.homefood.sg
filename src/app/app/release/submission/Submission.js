@@ -20,6 +20,7 @@ import AlertModal from '@/components/AlertModal/AlertModal';
 import { getSubscriptionLookupKey } from '@/utility/subscriptionStorage';
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
 import { isProLookupKey } from '@/app/app/subscription/data/SUBSCRIPTION_DATA';
+import { CAP } from '@/lib/permissions';
 
 
 
@@ -392,6 +393,7 @@ const SubmissionView = () => {
         >
             <HeaderSection
                 className={styles.header}
+                capability={CAP.RELEASE_SUBMIT}
                 title='Release Submission'
                 description={
                     <p>

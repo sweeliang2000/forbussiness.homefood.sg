@@ -16,6 +16,9 @@ import {
 } from '@/utility/apiPaths';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import ErrorPage from '@/components/ErrorPage/ErrorPage';
+import { CAP } from '@/lib/permissions';
+import usePermissions from '@/hooks/usePermissions';
+import PermissionGate from '@/components/PermissionGate/PermissionGate';
 
 const BUSINESS_NAME = 'businessName';
 const UEN = 'uen';
@@ -25,6 +28,7 @@ const STREET_ADDRESS = 'streetAddress';
 const POSTAL_CODE = 'postalCode';
 
 export default function StampSetup() {
+  const { can } = usePermissions();
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingErrorMessage, setIsLoadingErrorMessage] = useState(null);
   const [isLoadingErrorStatus, setIsLoadingErrorStatus] = useState(null);
@@ -444,6 +448,7 @@ export default function StampSetup() {
     >
       <HeaderSection
         className={styles.header}
+        capability={CAP.BUSINESS_DETAILS_EDIT}
         title='Your Business'
         description={
           <p>
@@ -473,30 +478,32 @@ export default function StampSetup() {
           // Only a released shop can have a re-review: before that, business
           // details go through the first-release review with everything else.
           releaseStatus === 'Released' ? (
-            <Button
-              // Explicit: this button sits inside the Save form, and a default
-              // of "submit" would save instead of publish.
-              type="button"
-              size="small"
-              variant="outlined"
-              color="primary"
-              loading={isPublishLoading}
-              loadingPosition="start"
-              startIcon={isPublishSuccess ? <FaCheck /> : undefined}
-              // Disabled over unsaved edits: publishing would submit the values
-              // on the server, not the ones on screen.
-              disabled={
-                isUnderReview || isPublishSuccess || !hasPublishableChanges || hasUnsavedChanges()
-              }
-              onClick={publishBusinessDetails}
-              sx={{ textTransform: 'none' }}
-            >
-              {isUnderReview
-                ? 'Under review'
-                : isPublishSuccess
-                  ? 'Sent for review'
-                  : 'Send for review'}
-            </Button>
+            <PermissionGate allowed={can(CAP.RELEASE_SUBMIT)} capability={CAP.RELEASE_SUBMIT}>
+              <Button
+                // Explicit: this button sits inside the Save form, and a default
+                // of "submit" would save instead of publish.
+                type="button"
+                size="small"
+                variant="outlined"
+                color="primary"
+                loading={isPublishLoading}
+                loadingPosition="start"
+                startIcon={isPublishSuccess ? <FaCheck /> : undefined}
+                // Disabled over unsaved edits: publishing would submit the values
+                // on the server, not the ones on screen.
+                disabled={
+                  isUnderReview || isPublishSuccess || !hasPublishableChanges || hasUnsavedChanges()
+                }
+                onClick={publishBusinessDetails}
+                sx={{ textTransform: 'none' }}
+              >
+                {isUnderReview
+                  ? 'Under review'
+                  : isPublishSuccess
+                    ? 'Sent for review'
+                    : 'Send for review'}
+              </Button>
+            </PermissionGate>
           ) : null
         }
       />

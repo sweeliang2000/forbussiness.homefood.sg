@@ -69,6 +69,9 @@ export const PUBLISH_MENU_UPDATE = '/api/data/publish/menu';
 
 export const ORDERING_SETTINGS = '/api/data/orderingSettings';
 export const PUBLISH_SHOP_SETTINGS_UPDATE = '/api/data/publish/shop-settings';
+// Delivery on/off is live the moment it is set, unlike the rest of
+// ORDERING_SETTINGS, which is a draft until PUBLISH_SHOP_SETTINGS_UPDATE.
+export const DELIVERY_ENABLED = '/api/data/delivery-enabled';
 export const CALENDAR_OVERRIDES = '/api/data/calendarOverrides';
 export const CALENDAR_OVERRIDE = '/api/data/calendarOverride';
 

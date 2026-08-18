@@ -8,7 +8,7 @@ import {
   toNextResponse,
   runMiddleware,
 } from './express-adapter';
-import { verifyToken, assertRole, assertOperatorMayWrite } from './session';
+import { verifyToken, assertRole, assertCapability } from './session';
 import { applyReleaseStatus } from './releaseStatus';
 import { COOKIE_NAMES } from './cookies';
 import { AppError, ERROR_TYPES, createErrorResponse } from './errors';
@@ -32,7 +32,8 @@ import { DEBUG_ERRORS } from './env';
  * @param {object}  options
  * @param {boolean} options.auth           require a valid session (default true)
  * @param {string[]} options.roles         restrict to these roles
- * @param {boolean} options.operatorWrite  let an Operator write to this route
+ * @param {string} options.capability      a CAP.* value from src/lib/permissions.js;
+ *   writes without one require Owner or Manager
  * @param {boolean} options.releaseStatus  resolve release state onto req first
  * @param {'json'|'form'|'raw'|'none'} options.body
  */
@@ -40,7 +41,7 @@ export function withApi(handler, options = {}) {
   const {
     auth = true,
     roles = null,
-    operatorWrite = false,
+    capability = null,
     releaseStatus = false,
     body = 'json',
   } = options;
@@ -68,10 +69,11 @@ export function withApi(handler, options = {}) {
         assertRole(req, roles);
       }
 
-      // Operator gate runs on every authenticated route, matching the original
-      // router-level middleware.
+      // The capability gate runs on every authenticated route, matching the
+      // original router-level middleware. Reads pass for every role; writes are
+      // Owner/Manager unless the route names a capability that says otherwise.
       if (auth) {
-        assertOperatorMayWrite(req, operatorWrite);
+        assertCapability(req, capability);
         attachSession(req);
       }
 
