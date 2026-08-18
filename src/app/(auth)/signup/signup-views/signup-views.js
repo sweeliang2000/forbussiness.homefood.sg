@@ -96,7 +96,9 @@ const SignupViews = () => {
                 );
             }
 
-            router.push('/verify');
+            // Tagged so /verify's back link returns here rather than to a login
+            // the account cannot pass until it is verified.
+            router.push('/verify?from=signup');
         } catch (error) {
             setIsSubmissionButtonLoading(false);
             setErrorMessage(errorMessageFrom(error));

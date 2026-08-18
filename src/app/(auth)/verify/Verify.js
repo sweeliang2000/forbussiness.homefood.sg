@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Alert, Button, TextField } from '@mui/material';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import Cookies from 'js-cookie';
@@ -11,13 +11,21 @@ import withAuthorization from '@/hoc/withAuthorization';
 import { EMAIL_VERIFICATION, RESEND_VERIFICATION_CODE } from '@/utility/apiPaths';
 import { errorMessageFrom } from '@/utility/errorMessage';
 import AuthShell from '../_components/AuthShell';
+import AuthCardSkeleton from '../_components/AuthCardSkeleton';
 import AuthSuccessDialog from '../_components/AuthSuccessDialog';
 import styles from '../_components/authForm.module.css';
 
 const RESEND_SECONDS = 60;
 
-const Verify = () => {
+const VerifyContent = () => {
     const router = useRouter();
+    // Signup pushes `?from=signup`; login's resend branch pushes a bare
+    // /verify. The escape hatch below has to point back at whichever form the
+    // email was typed into, because a typo in that email is the main reason
+    // anyone leaves this page.
+    const searchParams = useSearchParams();
+    const cameFromSignup = searchParams.get('from') === 'signup';
+    const exitPath = cameFromSignup ? '/signup' : '/login';
 
     const [email, setEmailAddress] = useState('');
     const [otp, setOtp] = useState('');
@@ -93,9 +101,12 @@ const Verify = () => {
         setIsSubmissionButtonLoading(false);
     };
 
-    const logoutHandler = () => {
+    // Clearing the cookie is not optional: AuthGuard bounces any path back to
+    // /verify while authStatus is still `awaiting_verification`, so a plain
+    // <Link> here would land straight back on this page.
+    const exitHandler = () => {
         clearAuthStatusCookie();
-        router.replace('/login');
+        router.replace(exitPath);
     };
 
     // Zero-padded: the old template rendered "00:9" for the last nine seconds.
@@ -119,9 +130,9 @@ const Verify = () => {
                         : 'Enter the six-digit code we sent to your email.'
                 }
                 footer={
-                    <Button variant="text" color="primary" onClick={logoutHandler} size="small">
+                    <Button variant="text" color="primary" onClick={exitHandler} size="small">
                         <ArrowBackRoundedIcon fontSize="small" aria-hidden="true" />
-                        &nbsp;Back to log in
+                        &nbsp;{cameFromSignup ? 'Back to sign up' : 'Back to log in'}
                     </Button>
                 }
             >
@@ -183,5 +194,12 @@ const Verify = () => {
         </>
     );
 };
+
+const Verify = () => (
+    // useSearchParams needs a boundary above it, same as the login page.
+    <Suspense fallback={<AuthCardSkeleton />}>
+        <VerifyContent />
+    </Suspense>
+);
 
 export default withAuthorization(Verify);
