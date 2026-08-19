@@ -318,8 +318,8 @@ export default function MenuBuilder() {
   const [optionGroupsLibrary, setOptionGroupsLibrary] = useState([]);
 
   // Base minutes added on top of item make times when estimating an order's
-  // completion time (POS/terminal). Default 5.
-  const [prepBufferMinutes, setPrepBufferMinutes] = useState(5);
+  // completion time (POS/terminal). Default 15.
+  const [prepBufferMinutes, setPrepBufferMinutes] = useState(15);
 
   // Category creation.
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -1265,7 +1265,7 @@ export default function MenuBuilder() {
               disabled={!canEditContent}
               onChange={(e) => { setPrepBufferMinutes(Math.max(0, normalizeNumber(e.target.value))); markMenuChanged(); }}
               inputProps={{ min: 0, step: 1 }}
-              helperText="Default 5 — covers queueing, packing, and hand-off"
+              helperText="Default 15 — covers queueing, packing, and hand-off"
               style={{ width: 220 }}
             />
           </ContentCard>

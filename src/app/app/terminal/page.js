@@ -335,7 +335,7 @@ function NewOrderTab({ shopId, onPlaced }) {
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
   const [optionGroupsLibrary, setOptionGroupsLibrary] = useState([]);
-  const [prepBufferMinutes, setPrepBufferMinutes] = useState(5);
+  const [prepBufferMinutes, setPrepBufferMinutes] = useState(15);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [orderType, setOrderType] = useState('takeaway');
@@ -375,7 +375,7 @@ function NewOrderTab({ shopId, onPlaced }) {
       setItems(Array.isArray(data.items) ? data.items : []);
       setOptionGroupsLibrary(Array.isArray(data.optionGroupsLibrary) ? data.optionGroupsLibrary : []);
       const rawBuffer = Number(data.prepBufferMinutes);
-      setPrepBufferMinutes(Number.isFinite(rawBuffer) && rawBuffer >= 0 ? rawBuffer : 5);
+      setPrepBufferMinutes(Number.isFinite(rawBuffer) && rawBuffer >= 0 ? rawBuffer : 15);
     } catch {
       setLoadError('Failed to load your menu.');
     } finally {
