@@ -378,6 +378,11 @@ const theme = createTheme({
         input: {
           fontSize: '1rem',
           '&::placeholder': { color: label.tertiary, opacity: 1 },
+          /* A disabled field is reporting what's stored, not inviting
+             input. An example like "Fresh Market Cafe" sitting in a
+             greyed-out box reads as a real value the user isn't allowed
+             to touch, so a field they can't edit shows nothing at all. */
+          '&.Mui-disabled::placeholder': { opacity: 0 },
         },
       },
     },
