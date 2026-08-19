@@ -2254,7 +2254,7 @@ export default function MenuBuilder() {
           <FieldHeader
             title="Option Groups"
             type="h4"
-            description="Add choices to this item (e.g. size, add-ons). Create a new group, or add one you've already made — groups can be reused across items."
+            description="Add choices to this item (e.g. size, add-ons). Create a new group, or add one you've already made — groups can be reused across items. Customers see them in the order below."
           />
 
           {(() => {
@@ -2263,6 +2263,15 @@ export default function MenuBuilder() {
             const available = optionGroupsLibrary.filter((g) => !attachedIds.includes(g.id));
             const attach = (gid) => setItemEditorField({ optionGroupIds: [...attachedIds, gid] });
             const detach = (gid) => setItemEditorField({ optionGroupIds: attachedIds.filter((x) => x !== gid) });
+            // Customers meet the groups in this order — resolveItemGroups walks
+            // optionGroupIds — so "size before add-ons" is set here, by id rather
+            // than by row so a stale id in the list can't shift the wrong one.
+            const moveAttached = (gid, dir) => {
+              const from = attachedIds.indexOf(gid);
+              const to = from + dir;
+              if (from < 0 || to < 0 || to >= attachedIds.length) return;
+              setItemEditorField({ optionGroupIds: arrayMove(attachedIds, from, to) });
+            };
             const groupSummary = (g) => {
               const n = (g.options ?? []).length;
               const soldOutCount = (g.options ?? []).filter((o) => o.soldOut).length;
@@ -2281,8 +2290,28 @@ export default function MenuBuilder() {
                   <Typography variant="body2" className={styles.muted}>No option groups added to this item yet.</Typography>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {attached.map((g) => (
+                    {attached.map((g, idx) => (
                       <div key={g.id} style={{ border: '1px solid rgba(0,0,0,0.1)', borderRadius: 10, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, background: '#fafafa' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <IconButton
+                            size="small"
+                            disabled={idx === 0}
+                            onClick={() => moveAttached(g.id, -1)}
+                            aria-label="Move group up"
+                            style={{ padding: 0 }}
+                          >
+                            <KeyboardArrowUpRoundedIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            disabled={idx === attached.length - 1}
+                            onClick={() => moveAttached(g.id, 1)}
+                            aria-label="Move group down"
+                            style={{ padding: 0 }}
+                          >
+                            <KeyboardArrowDownRoundedIcon fontSize="small" />
+                          </IconButton>
+                        </div>
                         <div
                           role="button"
                           tabIndex={0}
