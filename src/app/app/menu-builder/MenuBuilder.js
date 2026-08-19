@@ -1654,7 +1654,10 @@ export default function MenuBuilder() {
                                   <div className={styles.thumb} />
                                 )}
                                 <div>
-                                  <Typography style={{ fontWeight: 900, lineHeight: 1.2 }}>{item.name}</Typography>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                    <Typography style={{ fontWeight: 900, lineHeight: 1.2 }}>{item.name}</Typography>
+                                    {item.featured ? <span className={styles.recommendedBadge}>Recommended</span> : null}
+                                  </div>
                                   <Typography variant="caption" className={styles.muted}>
                                     {customerMode === 'takeaway' ? (
                                       isAvailableTakeaway ? <>Takeaway: {formatMoney(displayedTotal)}</> : null
@@ -1666,7 +1669,6 @@ export default function MenuBuilder() {
                                 </div>
                               </div>
                               <div className={styles.row} style={{ gap: 10 }}>
-                                {item.featured ? <span className={styles.recommendedBadge}>Recommended</span> : null}
                                 {item.soldOut ? <span className={styles.soldOutBadge}>Sold out</span> : null}
                                 {(previewCartQtyByItemId[item.id] ?? 0) > 0 ? (
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -1805,7 +1807,10 @@ export default function MenuBuilder() {
                                     <div className={styles.thumb} />
                                   )}
                                   <div>
-                                    <Typography style={{ fontWeight: 900, lineHeight: 1.2 }}>{item.name}</Typography>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                      <Typography style={{ fontWeight: 900, lineHeight: 1.2 }}>{item.name}</Typography>
+                                      {item.featured ? <span className={styles.recommendedBadge}>Recommended</span> : null}
+                                    </div>
                                     <Typography variant="caption" className={styles.muted}>
                                       {customerMode === 'takeaway' ? (
                                         isAvailableTakeaway ? <>Takeaway: {formatMoney(displayedTotal)}</> : null
@@ -1816,7 +1821,6 @@ export default function MenuBuilder() {
                                   </div>
                                 </div>
                                 <div className={styles.row} style={{ gap: 10 }}>
-                                  {item.featured ? <span className={styles.recommendedBadge}>Recommended</span> : null}
                                   {item.soldOut ? <span className={styles.soldOutBadge}>Sold out</span> : null}
                                   {(previewCartQtyByItemId[item.id] ?? 0) > 0 ? (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

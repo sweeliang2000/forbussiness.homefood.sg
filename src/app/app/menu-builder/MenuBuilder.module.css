@@ -186,6 +186,7 @@
 .soldOutBadge,
 .recommendedBadge {
   padding: 3px 9px;
+  white-space: nowrap;
   border-radius: var(--radius-pill);
   font-weight: 600;
   font-size: var(--text-caption);
