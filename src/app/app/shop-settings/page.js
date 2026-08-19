@@ -98,7 +98,7 @@ export default function ShopSettingsPage() {
   const [orderMode, setOrderMode] = useState('today_and_preorder');
   const [defaultDailyQuota, setDefaultDailyQuota] = useState(50);
   const [bookingDaysAhead, setBookingDaysAhead] = useState(90);
-  const [minNoticeHours, setMinNoticeHours] = useState(0.5);
+  const [minNoticeHours, setMinNoticeHours] = useState(24);
 
   // SECTION 2b — Delivery
   const [delivery, setDelivery] = useState(DEFAULT_DELIVERY);
@@ -118,6 +118,9 @@ export default function ShopSettingsPage() {
   // release queue, or this role does not get to change ordering settings. The
   // delivery switch and the calendar are deliberately not covered by it.
   const canEditFields = isEdit && canEditSettings;
+
+  // Pre-order settings are inert in Order Today mode.
+  const preorderEnabled = orderMode !== 'today_only';
 
   const hasChanges = useMemo(() => {
     if (!savedSettings) return false;
@@ -194,7 +197,7 @@ export default function ShopSettingsPage() {
           orderMode: data?.orderMode ?? 'today_and_preorder',
           defaultDailyQuota: data?.defaultDailyQuota ?? 50,
           bookingDaysAhead: data?.bookingDaysAhead ?? 90,
-          minNoticeHours: data?.minNoticeHours ?? 0.5,
+          minNoticeHours: data?.minNoticeHours ?? 24,
           delivery: normalizeDelivery(data?.delivery),
         };
         setHours(loaded.hours);
@@ -215,7 +218,7 @@ export default function ShopSettingsPage() {
             orderMode: 'today_and_preorder',
             defaultDailyQuota: 50,
             bookingDaysAhead: 90,
-            minNoticeHours: 0.5,
+            minNoticeHours: 24,
             delivery: DEFAULT_DELIVERY,
           });
         } else {
@@ -595,7 +598,7 @@ export default function ShopSettingsPage() {
             <div>
               <Typography sx={{ fontWeight: 900 }}>Order Settings</Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.25 }}>
-                Choose whether to allow immediate orders today, plus how many days ahead customers can pre-order.
+                Choose whether to take orders for today, pre-orders, or both — and how many items a day you can handle.
               </Typography>
             </div>
           </AccordionSummary>
@@ -626,35 +629,49 @@ export default function ShopSettingsPage() {
                 value={defaultDailyQuota}
                 disabled={!canEditFields}
                 onChange={(e) => setDefaultDailyQuota(Math.max(1, Number(e.target.value)))}
-                helperText="Applied to all calendar days unless overridden"
+                helperText="Counts same-day orders and pre-orders together, on every calendar day unless a date is overridden"
                 size="small"
               />
-              <TextField
-                label="Allow pre-orders up to X days ahead"
-                type="number"
-                inputProps={{ min: 1, max: 90 }}
-                value={bookingDaysAhead}
-                disabled={!canEditFields || orderMode === 'today_only'}
-                onChange={(e) => setBookingDaysAhead(Math.max(1, Math.min(90, Number(e.target.value))))}
-                helperText={
-                  orderMode === 'today_only'
-                    ? 'Not applicable — pre-orders are disabled in Order Today mode'
-                    : orderMode === 'preorder_only'
+            </div>
+
+            {/* Days ahead and notice period only ever gate a pre-order — the
+                same-day path never looks at either — so they are grouped
+                rather than sitting next to the daily cap, which applies to
+                both. Kept on screen in Order Today mode, disabled, so the
+                shop's pre-order settings don't vanish when the mode changes. */}
+            <div className={styles.subSection}>
+              <Typography className={styles.subSectionTitle}>Pre-orders only</Typography>
+              <Typography className={styles.subSectionHint}>
+                {preorderEnabled
+                  ? 'These two apply to pre-orders. Same-day orders are not affected by either.'
+                  : 'Not in use while the shop is set to Order Today. Switch on pre-orders above to change these.'}
+              </Typography>
+              <div className={styles.grid2}>
+                <TextField
+                  label="Allow pre-orders up to X days ahead"
+                  type="number"
+                  inputProps={{ min: 1, max: 90 }}
+                  value={bookingDaysAhead}
+                  disabled={!canEditFields || !preorderEnabled}
+                  onChange={(e) => setBookingDaysAhead(Math.max(1, Math.min(90, Number(e.target.value))))}
+                  helperText={
+                    orderMode === 'preorder_only'
                       ? 'Customers can only pre-order within this range'
                       : 'Default is 90 days (3 months)'
-                }
-                size="small"
-              />
-              <TextField
-                label="Minimum hours notice"
-                type="number"
-                inputProps={{ min: 0.5, step: 0.5 }}
-                value={minNoticeHours}
-                disabled={!canEditFields}
-                onChange={(e) => setMinNoticeHours(Math.max(0.5, Number(e.target.value)))}
-                helperText="Set in 0.5-hour steps (default: 0.5 hour)"
-                size="small"
-              />
+                  }
+                  size="small"
+                />
+                <TextField
+                  label="Minimum hours notice"
+                  type="number"
+                  inputProps={{ min: 0.5, step: 0.5 }}
+                  value={minNoticeHours}
+                  disabled={!canEditFields || !preorderEnabled}
+                  onChange={(e) => setMinNoticeHours(Math.max(0.5, Number(e.target.value)))}
+                  helperText="How far in advance a pre-order has to be placed (default: 24 hours)"
+                  size="small"
+                />
+              </div>
             </div>
           </AccordionDetails>
         </Accordion>

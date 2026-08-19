@@ -31,6 +31,37 @@
   gap: 12px;
 }
 
+/*
+  A titled block inside a section, for settings that only apply to part of what
+  the section covers — the pre-order fields sit under Order Settings but do
+  nothing for a shop that only takes same-day orders, and grouping them says so
+  before anyone reads a helper line.
+*/
+.subSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--separator);
+}
+
+.subSectionTitle {
+  font-size: var(--text-subhead) !important;
+  font-weight: 600 !important;
+  letter-spacing: var(--text-subhead-tracking) !important;
+  color: var(--label-primary) !important;
+}
+
+.subSectionHint {
+  font-size: var(--text-footnote) !important;
+  letter-spacing: var(--text-footnote-tracking) !important;
+  line-height: var(--text-footnote-leading) !important;
+  color: var(--label-secondary) !important;
+  max-width: 66ch;
+  margin-bottom: 4px !important;
+}
+
 .tableWrap {
   width: 100%;
 }

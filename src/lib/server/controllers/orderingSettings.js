@@ -63,7 +63,9 @@ const DEFAULT_ORDER_SETTINGS = {
   orderMode: 'today_and_preorder',
   defaultDailyQuota: 50,
   bookingDaysAhead: 90,
-  minNoticeHours: 0.5,
+  // A day's notice: enough for a home kitchen to shop and prep for a
+  // pre-order. Shops that turn work around faster can lower it to 0.5.
+  minNoticeHours: 24,
   delivery: { ...DEFAULT_DELIVERY },
   isChanges: false,
 };
