@@ -606,18 +606,24 @@ export default function ShopSettingsPage() {
             <div className={styles.grid2}>
               <div style={{ gridColumn: '1 / -1' }}>
                 <Typography sx={{ fontWeight: 800, fontSize: 14, marginBottom: 1 }}>Order mode</Typography>
+                {/* Most shops want both, so it leads — and it is the default a
+                    new shop starts on. The two narrower modes follow. */}
                 <RadioGroup value={orderMode} onChange={(e) => setOrderMode(e.target.value)}>
+                  <FormControlLabel
+                    value="today_and_preorder"
+                    control={<Radio size="small" disabled={!canEditFields} />}
+                    label="Order Today + Pre-order"
+                  />
                   <FormControlLabel
                     value="today_only"
                     control={<Radio size="small" disabled={!canEditFields} />}
                     label="Order Today"
                   />
                   <FormControlLabel
-                    value="today_and_preorder"
+                    value="preorder_only"
                     control={<Radio size="small" disabled={!canEditFields} />}
-                    label="Order Today + Pre-order"
+                    label="Pre-order only"
                   />
-                  <FormControlLabel value="preorder_only" control={<Radio size="small" disabled={!canEditFields} />} label="Pre-order only" />
                 </RadioGroup>
                 <br />
               </div>

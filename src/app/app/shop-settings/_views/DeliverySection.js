@@ -91,6 +91,10 @@ export default function DeliverySection({
       return;
     }
     onEnabledChange(false);
+    // And close it on the way out, for the same reason it opens on the way in:
+    // with delivery off, the fees and zones below price nothing. Leaving the
+    // form open invites edits to a section the storefront is ignoring.
+    if (expanded) onToggleExpand();
   };
 
   const acceptTerms = () => {
