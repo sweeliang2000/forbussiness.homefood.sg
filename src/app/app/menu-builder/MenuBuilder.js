@@ -102,6 +102,11 @@ const getDefaultGroup = () => ({
   options: [],
 });
 
+// What a group is called in the merchant's own lists. The internal reference
+// is optional, so a group without one is listed under the name customers see —
+// never as a blank row.
+const groupLabel = (g) => ((g?.referenceName ?? '').trim() || (g?.name ?? '').trim());
+
 // Signature of the customer-affecting parts of a group — used to detect whether a
 // group edit actually changes anything items would see. referenceName is excluded
 // on purpose: renaming the internal label shouldn't trigger the shared-edit warning.
@@ -559,6 +564,17 @@ export default function MenuBuilder() {
     markMenuChanged();
   };
 
+  // Reorder the shop's group library. Purely how the list reads to the
+  // merchant — items hold group ids, so nothing customers see moves with it.
+  const moveOptionGroup = (fromPos, dir) => {
+    setOptionGroupsLibrary((prev) => {
+      const toPos = fromPos + dir;
+      if (toPos < 0 || toPos >= prev.length) return prev;
+      return arrayMove(prev, fromPos, toPos);
+    });
+    markMenuChanged();
+  };
+
   // Item editor modal.
   const [isItemEditorOpen, setIsItemEditorOpen] = useState(false);
   const [itemEditor, setItemEditor] = useState(getDefaultItem(categories?.[0]?.id));
@@ -614,7 +630,7 @@ export default function MenuBuilder() {
 
     const referenceName = (groupEditor.referenceName ?? '').trim();
     const displayName = (groupEditor.name ?? '').trim();
-    if (!referenceName || !displayName) return;
+    if (!displayName) return;
 
     const normalizedGroup = {
       id: groupEditor.id ?? makeId(),
@@ -652,7 +668,7 @@ export default function MenuBuilder() {
   const handleDeleteGroup = (group) => {
     const usedBy = items.filter((i) => (i.optionGroupIds ?? []).includes(group.id)).length;
     if (usedBy > 0) {
-      setBlockedDeleteGroup({ referenceName: group.referenceName, usedBy });
+      setBlockedDeleteGroup({ referenceName: groupLabel(group), usedBy });
       return;
     }
     setOptionGroupsLibrary((prev) => prev.filter((g) => g.id !== group.id));
@@ -712,7 +728,10 @@ export default function MenuBuilder() {
     const normalizedItem = {
       ...itemEditor,
       takeawayBasePrice: normalizeNumber(itemEditor.takeawayBasePrice),
-      dineInPrice: normalizeNumber(itemEditor.dineInPrice),
+      // Same figure: there is one price field, so an item saved from this
+      // editor must not keep a divergent dine-in price the merchant can no
+      // longer see or change.
+      dineInPrice: normalizeNumber(itemEditor.takeawayBasePrice),
       prepTimeMinutes: Math.max(0, normalizeNumber(itemEditor.prepTimeMinutes)),
       pricingOverrideCustomPercent: normalizeNumber(itemEditor.pricingOverrideCustomPercent),
       pricingOverrideFixedPrice: normalizeNumber(itemEditor.pricingOverrideFixedPrice),
@@ -1363,13 +1382,13 @@ export default function MenuBuilder() {
               </Typography>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {optionGroupsLibrary.map((g) => {
+                {optionGroupsLibrary.map((g, idx) => {
                   const usedBy = groupUsageCountById[g.id] ?? 0;
                   const soldOutCount = (g.options ?? []).filter((o) => o.soldOut).length;
                   return (
                     <div key={g.id} className={styles.categoryRow}>
                       <div style={{ minWidth: 0 }}>
-                        <Typography variant="subtitle1" style={{ fontWeight: 800 }}>{g.referenceName}</Typography>
+                        <Typography variant="subtitle1" style={{ fontWeight: 800 }}>{groupLabel(g)}</Typography>
                         <Typography variant="caption" className={styles.muted}>
                           Customers see: &ldquo;{g.name}&rdquo; · {(g.options ?? []).length} option{(g.options ?? []).length === 1 ? '' : 's'}
                           {soldOutCount > 0 ? ` (${soldOutCount} sold out)` : ''}
@@ -1377,6 +1396,26 @@ export default function MenuBuilder() {
                         </Typography>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <IconButton
+                            size="small"
+                            disabled={!canEditContent || idx === 0}
+                            onClick={() => moveOptionGroup(idx, -1)}
+                            aria-label="Move group up"
+                            style={{ padding: 2 }}
+                          >
+                            <KeyboardArrowUpRoundedIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            disabled={!canEditContent || idx === optionGroupsLibrary.length - 1}
+                            onClick={() => moveOptionGroup(idx, 1)}
+                            aria-label="Move group down"
+                            style={{ padding: 2 }}
+                          >
+                            <KeyboardArrowDownRoundedIcon fontSize="small" />
+                          </IconButton>
+                        </div>
                         <IconButton size="small" disabled={!canEditContent} onClick={() => openEditGroupEditor(g)} title="Edit group">
                           <EditOutlinedIcon fontSize="small" />
                         </IconButton>
@@ -2166,28 +2205,23 @@ export default function MenuBuilder() {
           />
 
           <div className={styles.row} style={{ gap: 16 }}>
-            {shopAcceptance !== 'dine-in' && (
-              <TextField
-                type="number"
-                label="Takeaway Price (SGD $)"
-                fullWidth
-                size="small"
-                value={itemEditor.takeawayBasePrice}
-                onChange={(e) => setItemEditorField({ takeawayBasePrice: normalizeNumber(e.target.value) })}
-                inputProps={{ min: 0, step: 0.01 }}
-              />
-            )}
-            {shopAcceptance !== 'takeaway' && (
-              <TextField
-                type="number"
-                label="Price (SGD $)"
-                fullWidth
-                size="small"
-                value={itemEditor.dineInPrice}
-                onChange={(e) => setItemEditorField({ dineInPrice: normalizeNumber(e.target.value) })}
-                inputProps={{ min: 0, step: 0.01 }}
-              />
-            )}
+            {/* One price per item, whatever the shop accepts. The stored menu
+                still carries a takeaway and a dine-in figure — the preview, the
+                POS and the storefront each read one of them depending on
+                fulfilment — so this field writes both and saving keeps them in
+                step, rather than unpicking that model everywhere. */}
+            <TextField
+              type="number"
+              label="Price (SGD $)"
+              fullWidth
+              size="small"
+              value={itemEditor.takeawayBasePrice}
+              onChange={(e) => {
+                const price = normalizeNumber(e.target.value);
+                setItemEditorField({ takeawayBasePrice: price, dineInPrice: price });
+              }}
+              inputProps={{ min: 0, step: 0.01 }}
+            />
             <TextField
               type="number"
               label="Avg. make time (minutes)"
@@ -2257,7 +2291,7 @@ export default function MenuBuilder() {
                           onClick={() => openEditGroupEditor(g)}
                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openEditGroupEditor(g); } }}
                         >
-                          <span style={{ fontWeight: 800 }}>{g.referenceName}</span>
+                          <span style={{ fontWeight: 800 }}>{groupLabel(g)}</span>
                           <Typography variant="caption" className={styles.muted} component="span" style={{ display: 'block' }}>{groupSummary(g)}</Typography>
                         </div>
                         <IconButton size="small" onClick={() => openEditGroupEditor(g)} title="Edit group">
@@ -2304,7 +2338,7 @@ export default function MenuBuilder() {
                       onClick={() => { attach(g.id); setAddGroupMenuAnchor(null); }}
                       style={{ display: 'block', whiteSpace: 'normal' }}
                     >
-                      <div style={{ fontWeight: 700 }}>{g.referenceName}</div>
+                      <div style={{ fontWeight: 700 }}>{groupLabel(g)}</div>
                       <Typography variant="caption" className={styles.muted}>{groupSummary(g)}</Typography>
                     </MenuItem>
                   ))}
@@ -2388,7 +2422,7 @@ export default function MenuBuilder() {
         isOpen={isGroupEditorOpen}
         setIsOpen={setIsGroupEditorOpen}
         actionTitle="Save"
-        actionDisabled={!groupEditor?.referenceName?.trim() || !groupEditor?.name?.trim()}
+        actionDisabled={!groupEditor?.name?.trim()}
         onSubmit={handleGroupEditorSubmit}
         maxWidth="md"
       >
@@ -2416,13 +2450,13 @@ export default function MenuBuilder() {
               helperText="Shown to customers"
             />
             <TextField
-              label="Internal reference"
+              label="Internal reference (optional)"
               fullWidth
               size="small"
               value={groupEditor.referenceName ?? ''}
               onChange={(e) => setGroupEditorField({ referenceName: e.target.value })}
               placeholder="e.g. Size (drinks)"
-              helperText="Only you see this — used to find & reuse the group"
+              helperText="Only you see this — a nickname for finding the group. Leave it blank to list the group under its name."
             />
           </div>
 
@@ -2593,7 +2627,7 @@ export default function MenuBuilder() {
         <DialogTitle>Update shared option group?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            <strong>&ldquo;{pendingGroupSave?.referenceName}&rdquo;</strong> is used by{' '}
+            <strong>&ldquo;{groupLabel(pendingGroupSave)}&rdquo;</strong> is used by{' '}
             {pendingGroupSave ? (groupUsageCountById[pendingGroupSave.id] ?? 0) : 0} item
             {pendingGroupSave && (groupUsageCountById[pendingGroupSave.id] ?? 0) === 1 ? '' : 's'}.
             Saving these changes will update <strong>every item</strong> that uses this group.
